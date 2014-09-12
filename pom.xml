@@ -7,16 +7,16 @@
 
     <name>FundacioBit Plugins</name>
 
-    <modules>	
-	   <module>plugins-api</module>
-	   <module>plugins-utils</module>
-	   <module>plugins-certificate</module>
-	   <module>plugins-userinformation</module>
-	   <module>plugins-documentconverter</module>
-	   <module>plugins-barcode</module>
+    <modules>    
+       <module>plugins-api</module>
+       <module>plugins-utils</module>
+       <module>plugins-certificate</module>
+       <module>plugins-userinformation</module>
+       <module>plugins-documentconverter</module>
+       <module>plugins-barcode</module>
        <module>plugins-documentcustody</module>
-	   <module>plugins-exportdata</module>
-	   <module>loginmodule-jboss</module>
+       <module>plugins-exportdata</module>
+       <module>loginmodule-jboss</module>
     </modules>
 
     <repositories>
@@ -40,13 +40,13 @@
 
     <dependencies>
 
-	    <dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.8.2</version>
-			<scope>test</scope>
+            <scope>test</scope>
         </dependency>
-	
+    
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
@@ -94,39 +94,39 @@
 
             </plugins>
         </pluginManagement>
-		
-		<extensions>
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ssh</artifactId>
-				<version>2.4</version>
-			</extension>
-		</extensions>
+
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>2.4</version>
+            </extension>
+        </extensions>
 
     </build>
-	
-	<distributionManagement>
-		<site>
-			<id>org.fundaciobit.plugins</id>
-			<url>scp://shell.sourceforge.net/home/project-web/pluginsib/htdocs/maven</url>
-		</site>
-		<repository>
-			<id>org.fundaciobit.plugins</id>
-			<name>PluginsIB Maven Repository</name>
-			<url>scp://shell.sourceforge.net/home/project-web/pluginsib/htdocs/maven</url>
-		</repository>
-		
-		<!--   COM UTILITZAR: AFEGIR AQUEST CODI AL pom.xml    -->
-		<!--
-		<repositories>
+
+    <distributionManagement>
+        <site>
+            <id>org.fundaciobit.plugins</id>
+            <url>scp://shell.sourceforge.net/home/project-web/pluginsib/htdocs/maven</url>
+        </site>
+        <repository>
+            <id>org.fundaciobit.plugins</id>
+            <name>PluginsIB Maven Repository</name>
+            <url>scp://shell.sourceforge.net/home/project-web/pluginsib/htdocs/maven</url>
+        </repository>
+        
+        <!--   COM UTILITZAR: AFEGIR AQUEST CODI AL pom.xml    -->
+        <!--
+        <repositories>
            <repository>
              <id>org.fundaciobit.plugins</id>
              <name>PluginsIB Maven Repository</name>
              <url>http://pluginsib.sourceforge.net/maven/</url>
            </repository>
-		<repositories>
-		-->
+        <repositories>
+        -->
 
-	</distributionManagement>
+    </distributionManagement>
 
 </project>
