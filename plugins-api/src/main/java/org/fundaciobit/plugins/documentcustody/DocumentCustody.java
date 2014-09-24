@@ -15,7 +15,7 @@ public class DocumentCustody extends AnnexCustody {
 
   public static final String DOCUMENT_ONLY = "none";
   
-  public static final String OTHER_DOCUMENT = "other";
+  public static final String OTHER_DOCUMENT_WITH_SIGNATURE = "other";
 
   String documentType;
 
@@ -27,9 +27,9 @@ public class DocumentCustody extends AnnexCustody {
    * @param mimeType
    * @param data
    * @param signatureType
-   *          Available values are PADES_SIGNATURE, OOXML_SIGNATURE, ODF_SIGNATURE,
+   *          Available values are PDF_WITH_SIGNATURE, OOXML_WITH_SIGNATURE, ODT_WITH_SIGNATURE,
    *          
-   *          NONE_SIGNATURE if is a plain document without attached signature
+   *          DOCUMENT_ONLY if is a plain document without attached signature
    *          sign
    */
   public DocumentCustody(String name, byte[] data, String documentType) {
@@ -40,10 +40,7 @@ public class DocumentCustody extends AnnexCustody {
   }
 
   /**
-   * @param name
-   * @param mimeType
-   * @param data
-   * @param attachedSignature
+   * 
    */
   public DocumentCustody(DocumentCustody dc) {
     super(dc);

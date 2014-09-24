@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.fundaciobit.plugins</groupId>
 	<artifactId>plugin-documentconverter-openoffice</artifactId>
-	<version>1.0</version>
+	<version>1.0.0</version>
 	<name>FundacioBit Plugins - DocumentConverter - OpenOffice</name>
 
     <parent>
 	  <groupId>org.fundaciobit.plugins</groupId>
-	  <version>1.0</version>
+	  <version>1.0.0</version>
 	  <artifactId>plugins-documentconverter</artifactId>
     </parent>
 	
@@ -34,7 +34,7 @@
 		<dependency>
 		  <groupId>org.fundaciobit.plugins</groupId>
 		  <artifactId>plugins-api</artifactId>
-		  <version>1.0</version>
+		  <version>1.0.0</version>
 		  <scope>provided</scope>
 		</dependency>
 	

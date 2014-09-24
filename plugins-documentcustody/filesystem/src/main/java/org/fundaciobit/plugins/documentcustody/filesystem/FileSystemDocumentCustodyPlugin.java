@@ -153,7 +153,7 @@ public class FileSystemDocumentCustodyPlugin extends AbstractPluginProperties
   public String[] getSupportedDocumentTypes() {
     return new String[] { DocumentCustody.PDF_WITH_SIGNATURE,
         DocumentCustody.OOXML_WITH_SIGNATURE, DocumentCustody.ODT_WITH_SIGNATURE,
-        DocumentCustody.DOCUMENT_ONLY, DocumentCustody.OTHER_DOCUMENT };
+        DocumentCustody.DOCUMENT_ONLY, DocumentCustody.OTHER_DOCUMENT_WITH_SIGNATURE };
   }
 
   @Override

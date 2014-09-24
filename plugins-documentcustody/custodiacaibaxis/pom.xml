@@ -4,13 +4,13 @@
   <groupId>org.fundaciobit.plugins</groupId>
   <artifactId>plugin-documentcustody-custodiacaibaxis</artifactId>
   <packaging>jar</packaging>
-  <version>1.0</version>
+  <version>1.0.0</version>
 
   <name>FundacioBit Plugins - Document Custody - CustodiaCaibAxis</name>
 
   <parent>
 	<groupId>org.fundaciobit.plugins</groupId>
-	<version>1.0</version>
+	<version>1.0.0</version>
 	<artifactId>plugins-documentcustody</artifactId>
   </parent>
 
@@ -21,7 +21,7 @@
 	<dependency>
         <groupId>org.fundaciobit.plugins</groupId>
         <artifactId>plugins-api</artifactId>
-        <version>1.0</version>
+        <version>1.0.0</version>
         <scope>provided</scope>
 	</dependency>
     

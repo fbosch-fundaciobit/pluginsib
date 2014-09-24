@@ -2,25 +2,34 @@ package org.fundaciobit.plugins.userinformation.ldap;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Arrays;
 import java.util.Properties;
 
 import org.fundaciobit.plugins.userinformation.UserInfo;
 import org.fundaciobit.plugins.userinformation.ldap.LdapUserInformationPlugin;
 import org.fundaciobit.plugins.utils.ldap.LDAPConstants;
-import org.fundaciobit.plugins.utils.ldap.LDAPUserManager;
 
 /**
  * 
  * @author anadal
  *
  */
-public class TestPlugin {
+public class TestUserInfoLdapPlugin {
 
   
   public static void main(String[] args) {
     try {
 
       String username, password;
+      
+      /**  =======  connection.properties =============== */
+//         ldap.host_url=ldap://ldap.ibit.org:389
+//         ldap.security_principal=<<query_username>>
+//         ldap.security_credentials=<<query_password>>
+//          
+//         test.username=<username>
+//         test.password=<password
+     
 
       File f = new File("connection.properties");
 
@@ -121,23 +130,34 @@ public class TestPlugin {
       }
       
       
+      String[] roles = new String[] { "PFI_ADMIN", "PFI_USER" };
+
+      for (int i = 0; i < roles.length; i++) {
+        System.out.println();
+        System.out.println( " ------- Users with role " + roles[i] + ") ------- ");
+        String[] users = ldap.getUsernamesByRol(roles[i]);
+        System.out.println(Arrays.toString(users));        
+      }
       
       
       
-      LDAPUserManager um = ldap.getLDAPUserManager();
+      
+      
+      //LDAPUserManager um = ldap.getLDAPUserManager();
 
       // 1.- Mètode per autenticar amb usuari contrasenya
-      System.out.println("Authenticate: " + um.authenticateUser(username, password));
-      System.out.println("Authenticate amb contrasenya erronia: " + um.authenticateUser(username, password + "22"));
+      System.out.println();
+      System.out.println("------------- Authenticate: " + ldap.authenticate(username, password));
+      System.out.println();
+      System.out.println("------------- Authenticate amb contrasenya erronia: " + ldap.authenticate(username, password + "22"));
 
-/*
+
       // 2.- LLista de Tots els Usuaris
-      LDAPUser[] all = um.getUserArray();
-      int i = 0;
-      System.out.println(" ALL USERS (" + all.length + ")");
-      for (LDAPUser u : all) {
-        System.out.println((i++) + ".- " + u.getUserName() + " -> " + u.getNom() + " "
-            + u.getLlinatges() + "  [" + u.getEmail() + "]");
+      String[] all = ldap.getAllUsernames();
+      System.out.println();
+      System.out.println(" ------------------ ALL USERNAMES (" + all.length + ")");
+      for (int i = 0; i < all.length ; i++) {
+        System.out.println((i++) + ".- " + all[i]);
         if (i > 10) {
           System.out.println("...");
           break;
@@ -149,39 +169,27 @@ public class TestPlugin {
       // 3.- Obtenir Usuari
 
       // 3.1.- Obtenir usuari per Nom
-
-      LDAPUser u = um.getUserByUsername(username);
-      System.out.println("NIF de l'usuari [" + username + "] és: " + u.getNif());
-      String[] members = u.getMemberOf();
-      for (int j = 0; j < members.length; j++) {
-        System.out.println("     + member: " + members[j]);
-      }
+      System.out.println();
+      System.out.println(" ------------------ getUserInfoByUserName -----------");
+      UserInfo u = ldap.getUserInfoByUserName(username);
+      System.out.println("    - Info usuari [ username = " + username + "]: ");
+      System.out.println("          + Nom: " + u.getName() + " " + u.getSurname1() + " " + u.getSurname2());
+      System.out.println("          + Nom Complet : " + u.getFullName());
+      System.out.println("          + NIF: " + u.getAdministrationID());
+      System.out.println("          + Email: " + u.getEmail());
+      
       
 
       // 3.2.- Obtenir usuari per NIF
-      LDAPUser u2 = um.getUserByNIF(u.getNif());
-      System.out.println("El nom de l'usuari amb NIF [" + u.getNif() + "] és " + u2.getNom()
-          + " " + u2.getLlinatges());
-
-      // 4.- Existeix usuari?
-      boolean existeix = um.userExists(username);
-      System.out.println("L'usuari " + username + " existeix ? " + (existeix ? "SI" : "NO"));
-
-      // 5.- Llista només de usernames
-      List<String> usernames = um.getAllUserNames();
-      System.out.println(" ALL USERNAMES (" + usernames.size() + ")");
-      i = 0;
-      for (String un : usernames) {
-        System.out.println((i++) + ".- " + un);
-        if (i > 10) {
-          System.out.println("...");
-          break;
-        }
-      }
-
-      // 6.- Cerca LDAP per filtre
-      // NamingEnumeration<SearchResult> h = um.searchLDAP(customFilter);
-      */ 
+      String nif = u.getAdministrationID();
+      u = ldap.getUserInfoByAdministrationID(nif);
+      System.out.println();
+      System.out.println(" ------------------ getUserInfoByAdministrationID -----------");
+      System.out.println("    - Info usuari [ nif ="  + nif + "]: ");
+      System.out.println("          + Nom: " + u.getName() + " " + u.getSurname1() + " " + u.getSurname2());
+      System.out.println("          + Nom Complet : " + u.getFullName());
+      System.out.println("          + NIF: " + u.getAdministrationID());
+      System.out.println("          + Email: " + u.getEmail());
        
 
     } catch (Exception e) {

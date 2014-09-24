@@ -4,13 +4,13 @@
   <groupId>org.fundaciobit.plugins</groupId>
   <artifactId>loginmodule-jboss-ldap</artifactId>
   <packaging>jar</packaging>
-  <version>1.0</version>
+  <version>1.0.0</version>
 
   <name>FundacioBit LoginModule-Jboss - LDAP</name>
 
   <parent>
     <groupId>org.fundaciobit.plugins</groupId>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <artifactId>loginmodule-jboss</artifactId>
   </parent>
 
@@ -19,7 +19,7 @@
     <dependency>
 	  <groupId>org.fundaciobit.plugins</groupId>
       <artifactId>plugins-utils-ldap</artifactId>
-      <version>1.0</version>
+      <version>1.0.0</version>
     </dependency>
 	
 

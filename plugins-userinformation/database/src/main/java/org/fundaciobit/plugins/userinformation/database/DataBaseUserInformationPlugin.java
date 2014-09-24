@@ -20,8 +20,7 @@ import org.fundaciobit.plugins.userinformation.RolesInfo;
 import org.fundaciobit.plugins.userinformation.UserInfo;
 import org.fundaciobit.plugins.userinformation.UserInfo.Gender;
 import org.fundaciobit.plugins.utils.AbstractPluginProperties;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import org.fundaciobit.plugins.utils.CertificateUtils;
 
 /**
  * 
@@ -59,11 +58,11 @@ public class DataBaseUserInformationPlugin extends AbstractPluginProperties
   
   public static final String USERS_GENDER_COLUMN=DB_BASE_PROPERTIES + "gender_column";
 
-  public static final String ROLES_TABLE=DB_BASE_PROPERTIES + "roles_table";
+  public static final String USERROLES_TABLE=DB_BASE_PROPERTIES + "userroles_table";
 
-  public static final String ROLES_ROLENAME_COLUMN=DB_BASE_PROPERTIES + "rolename_column";
+  public static final String USERROLES_ROLENAME_COLUMN=DB_BASE_PROPERTIES + "userroles_rolename_column";
 
-  public static final String ROLES_USERNAME_COLUMN=DB_BASE_PROPERTIES + "username_column_in_roles_table";
+  public static final String USERROLES_USERNAME_COLUMN=DB_BASE_PROPERTIES + "userroles_username_column";
 
   
   public static final String[] USERS_OPTIONAL_COLUMNS = {
@@ -104,9 +103,9 @@ public class DataBaseUserInformationPlugin extends AbstractPluginProperties
       throw new NullPointerException("Parameter UserName is NULL");
     }
 
-    String rolename = getPropertyRequired(ROLES_ROLENAME_COLUMN);
-    String roletable = getPropertyRequired(ROLES_TABLE);
-    String usercolumn = getPropertyRequired(ROLES_USERNAME_COLUMN);
+    String rolename = getPropertyRequired(USERROLES_ROLENAME_COLUMN);
+    String roletable = getPropertyRequired(USERROLES_TABLE);
+    String usercolumn = getPropertyRequired(USERROLES_USERNAME_COLUMN);
     String jndi = getPropertyRequired(DATABASE_JNDI);
 
     final String query = "select " + rolename + " from " + roletable 
@@ -197,7 +196,7 @@ public class DataBaseUserInformationPlugin extends AbstractPluginProperties
     
     String where;
     if (paramIsNif) {
-      where = "(" + nifcolumn + " = ?) OR (" + nifcolumn + " = ? )";
+      where = "(" + nifcolumn + " = ?) OR (" + nifcolumn + " = ? ) OR (" + nifcolumn + " = ? )";
     } else {
       where = usernamecolumn + " = ?";
     }
@@ -216,15 +215,13 @@ public class DataBaseUserInformationPlugin extends AbstractPluginProperties
       PreparedStatement ps = c.prepareStatement(query);
       try {
 
-        
         if (paramIsNif) {
-          ps.setString(1, param.toLowerCase());
+          ps.setString(1, param);
           ps.setString(2, param.toUpperCase());
+          ps.setString(3, param.toLowerCase());
         } else {
           ps.setString(1, param);
         }
-        
-        
 
         ResultSet rs = ps.executeQuery();
         try {
@@ -327,33 +324,238 @@ public class DataBaseUserInformationPlugin extends AbstractPluginProperties
 
   private static DataSource datasource;
 
-  private Connection getConnection(String jndi) throws NamingException, SQLException {
+  protected Connection getConnection(String jndi) throws NamingException, SQLException {
 
-    if (datasource == null) {
-      Context ctx = new InitialContext();
-      datasource = (DataSource) ctx.lookup(jndi);
-    }
-    
-    Connection c = datasource.getConnection();
-    return c;
+      if (datasource == null) {
+        Context ctx = new InitialContext();
+        datasource = (DataSource) ctx.lookup(jndi);
+      }
+      
+      Connection c = datasource.getConnection();
+      return c;
+
   }
 
 
   @Override
   public boolean authenticate(String username, String password) throws Exception {
-    throw new NotImplementedException();
+    
+    if (username == null || password == null) {
+      return false;
+    }
+    
+    String passwordColumn = getPropertyRequired(USERS_PASSWORD_COLUMN);
+    
+    String usersTable = getPropertyRequired(USERS_TABLE);
+    
+    String userColumn = getPropertyRequired(USERS_USERNAME_COLUMN);
+    
+    
+    String where = userColumn + " = ? AND " + passwordColumn + " = ? ";
+
+    final String query = "select " + userColumn + " from "+ usersTable + " where " + where;
+
+   
+
+    String jndi = getPropertyRequired(DATABASE_JNDI);
+
+    Connection c = getConnection(jndi);
+   
+    try {
+      PreparedStatement ps = c.prepareStatement(query);
+      try {        
+        ps.setString(1, username);
+        ps.setString(2, password);
+
+        ResultSet rs = ps.executeQuery();
+        try {
+          if (rs.next()) {
+            return true;
+          } else {
+            return false;
+          }
+        } finally {
+          try {
+            rs.close();
+          } catch (Exception e) {
+          }
+        }
+      } finally {
+        try {
+          ps.close();
+        } catch (Exception e) {
+        }
+      }
+
+    } finally {
+      try {
+        c.close();
+      } catch (Exception e) {
+      }
+    }
+    
+    
   }
 
 
   @Override
   public boolean authenticate(X509Certificate certificate) throws Exception {
-    throw new NotImplementedException();
+    
+    if (certificate == null) {
+      return false;
+    }
+    
+    String nif = CertificateUtils.getDNI(certificate);
+    if (nif == null) {
+      throw new Exception("No puc extreure el NIF del Certificat " + certificate.toString());
+    }
+  
+    String usersTable = getPropertyRequired(USERS_TABLE);
+    String nifColumn = getPropertyRequired(USERS_ADMINISTRATIONID_COLUMN);
+
+    String where = nifColumn + " = ? OR " + nifColumn + " = ? OR " + nifColumn + " = ?";
+    final String query = "select " + nifColumn + " from "+ usersTable + " where " + where;
+
+    String jndi = getPropertyRequired(DATABASE_JNDI);
+
+    Connection c = getConnection(jndi);
+   
+    try {
+      PreparedStatement ps = c.prepareStatement(query);
+      try {
+        ps.setString(1, nif);
+        ps.setString(2, nif.toUpperCase());
+        ps.setString(3, nif.toLowerCase());
+ 
+        ResultSet rs = ps.executeQuery();
+        try {
+          if (rs.next()) {
+            return true;
+          } else {
+            return false;
+          }
+        } finally {
+          try {
+            rs.close();
+          } catch (Exception e) {
+          }
+        }
+      } finally {
+        try {
+          ps.close();
+        } catch (Exception e) {
+        }
+      }
+
+    } finally {
+      try {
+        c.close();
+      } catch (Exception e) {
+      }
+    }
+    
+    
+    
+    
   }
 
 
   @Override
   public String[] getAllUsernames() throws Exception {
-    throw new NotImplementedException();
+    
+    String usersTable = getPropertyRequired(USERS_TABLE);
+    String userColumn = getPropertyRequired(USERS_USERNAME_COLUMN);
+    final String query = "select " + userColumn + " from "+ usersTable;
+
+    String jndi = getPropertyRequired(DATABASE_JNDI);
+
+    Connection c = getConnection(jndi);
+    List<String> usuaris = new ArrayList<String>();
+    
+    try {
+      PreparedStatement ps = c.prepareStatement(query);
+      try {
+        ResultSet rs = ps.executeQuery();
+        try {
+          while (rs.next()) {
+             usuaris.add(rs.getString(1));
+          }
+        } finally {
+          try {
+            rs.close();
+          } catch (Exception e) {
+          }
+        }
+      } finally {
+        try {
+          ps.close();
+        } catch (Exception e) {
+        }
+      }
+
+    } finally {
+      try {
+        c.close();
+      } catch (Exception e) {
+      }
+    }
+    return usuaris.toArray(new String[usuaris.size()]);
+    
+   
+
+  }
+
+  @Override
+  public String[] getUsernamesByRol(String rol) throws Exception {
+    
+    if (rol == null) {
+      return new String[] {};
+    }
+
+    
+    String userRolesTable = getPropertyRequired(USERROLES_TABLE);
+    String rolename = getPropertyRequired(USERROLES_ROLENAME_COLUMN);
+    
+    String usercolumn = getPropertyRequired(USERROLES_USERNAME_COLUMN);
+    
+    final String where = rolename + " = ? ";
+    final String query = "select " + usercolumn + " from "+ userRolesTable + " where " + where;
+
+    String jndi = getPropertyRequired(DATABASE_JNDI);
+
+    Connection c = getConnection(jndi);
+    List<String> usuaris = new ArrayList<String>();
+    
+    try {
+      PreparedStatement ps = c.prepareStatement(query);
+      try {        
+        ps.setString(1, rol);
+        ResultSet rs = ps.executeQuery();
+        try {
+          while (rs.next()) {
+             usuaris.add(rs.getString(1));
+          }
+        } finally {
+          try {
+            rs.close();
+          } catch (Exception e) {
+          }
+        }
+      } finally {
+        try {
+          ps.close();
+        } catch (Exception e) {
+        }
+      }
+
+    } finally {
+      try {
+        c.close();
+      } catch (Exception e) {
+      }
+    }
+    return usuaris.toArray(new String[usuaris.size()]);
+    
   }
 
 }

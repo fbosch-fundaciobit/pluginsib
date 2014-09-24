@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.fundaciobit.plugins</groupId>
 	<artifactId>plugin-exportdata-excel</artifactId>
-	<version>1.0</version>
+	<version>1.0.0</version>
 	<name>FundacioBit Plugins - ExportData - Excel</name>
 
     <parent>
 	  <groupId>org.fundaciobit.plugins</groupId>
-	  <version>1.0</version>
+	  <version>1.0.0</version>
 	  <artifactId>plugins-exportdata</artifactId>
     </parent>
 
@@ -34,7 +34,7 @@
 		<dependency>
 		  <groupId>org.fundaciobit.plugins</groupId>
 		  <artifactId>plugins-api</artifactId>
-		  <version>1.0</version>
+		  <version>1.0.0</version>
 		  <scope>provided</scope>
 		</dependency>
 		

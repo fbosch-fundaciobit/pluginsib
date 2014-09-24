@@ -4,13 +4,13 @@
   <groupId>org.fundaciobit.plugins</groupId>
   <artifactId>plugins-utils-ldap</artifactId>
   <packaging>jar</packaging>
-  <version>1.0</version>
+  <version>1.0.0</version>
 
   <name>FundacioBit Plugins - Utils - LDAP</name>
 
   <parent>
     <groupId>org.fundaciobit.plugins</groupId>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <artifactId>plugins-utils</artifactId>
   </parent>
 

@@ -1,6 +1,7 @@
 package org.fundaciobit.plugins.userinformation.ldap;
 
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -10,11 +11,10 @@ import org.fundaciobit.plugins.userinformation.IUserInformationPlugin;
 import org.fundaciobit.plugins.userinformation.RolesInfo;
 import org.fundaciobit.plugins.userinformation.UserInfo;
 import org.fundaciobit.plugins.utils.AbstractPluginProperties;
+import org.fundaciobit.plugins.utils.CertificateUtils;
 import org.fundaciobit.plugins.utils.ldap.LDAPConstants;
 import org.fundaciobit.plugins.utils.ldap.LDAPUser;
 import org.fundaciobit.plugins.utils.ldap.LDAPUserManager;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * 
@@ -128,20 +128,51 @@ public class LdapUserInformationPlugin extends AbstractPluginProperties
 
   @Override
   public boolean authenticate(String username, String password) throws Exception {
-    throw new NotImplementedException();
+    
+    LDAPUserManager ldapManager = getLDAPUserManager();
+    
+    return ldapManager.authenticateUser(username, password);
+
   }
 
 
   @Override
   public boolean authenticate(X509Certificate certificate) throws Exception {
-    throw new NotImplementedException();
+    
+    if (certificate == null) {
+      return false;
+    }
+    
+    String nif = CertificateUtils.getDNI(certificate);
+    if (nif == null) {
+      throw new Exception("No puc extreure el NIF del Certificat " + certificate.toString());
+    }
+
+    return (getUserInfoByAdministrationID(nif) == null)? false : true;
+    
   }
 
 
   @Override
   public String[] getAllUsernames() throws Exception {
-    throw new NotImplementedException();
+    LDAPUserManager ldapManager = getLDAPUserManager();
+    List<String> usernames = ldapManager.getAllUserNames();
+    return usernames.toArray(new String[usernames.size()]);
   }
-  
+
+  @Override
+  public String[] getUsernamesByRol(String rol) throws Exception {
+    LDAPUserManager ldapManager = getLDAPUserManager();
+    List<String> allUsernames = ldapManager.getAllUserNames();
+    
+    List<String> usernames = new ArrayList<String>();
+    for (String un : allUsernames) {
+      List<String> roles = ldapManager.getRolesOfUser(un);
+      if (roles.contains(rol)) {
+        usernames.add(un);
+      }
+    }
+    return usernames.toArray(new String[usernames.size()]);
+  }
 
 }
