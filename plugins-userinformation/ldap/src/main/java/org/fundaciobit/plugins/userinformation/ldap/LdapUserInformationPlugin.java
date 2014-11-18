@@ -60,7 +60,12 @@ public class LdapUserInformationPlugin extends AbstractPluginProperties
       Properties ldapProperties = new Properties();
 
       for (String attrib :  LDAPConstants.LDAP_PROPERTIES) {
-        ldapProperties.setProperty(attrib, getProperty(LDAP_BASE_PROPERTIES + attrib));
+	    String value = getProperty(LDAP_BASE_PROPERTIES + attrib);
+		if (value == null) {
+		    System.err.println("Property[" + LDAP_BASE_PROPERTIES + attrib + " is NULL");
+		} else {
+          ldapProperties.setProperty(attrib, value);
+		}
       }
 
       ldapUserManager = new LDAPUserManager(ldapProperties);
