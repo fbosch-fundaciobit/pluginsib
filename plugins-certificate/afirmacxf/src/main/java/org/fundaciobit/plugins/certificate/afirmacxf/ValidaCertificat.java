@@ -254,7 +254,7 @@ public class ValidaCertificat {
   private String cridarValidarCertificado(String certificatBase64,
       boolean obtenirDadesCertificat, int modeValidacio) throws Exception {
 
-    ValidacionService service = new ValidacionService();
+    ValidacionService service = new ValidacionService(new java.net.URL(getEndPoint() + "?wsdl"));
     Validacion api = service.getValidarCertificado();
 
     Map<String, Object> reqContext = ((BindingProvider) api).getRequestContext();
