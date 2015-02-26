@@ -7,12 +7,16 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
+
 /**
  * 
  * @author anadal
  * 
  */
 public class CertificateUtils {
+  
+  private final static Logger log = Logger.getLogger(CertificateUtils.class);
 
   /**
    * Codifica la informacion almacenada en un objeto X509Certificate
@@ -145,10 +149,26 @@ public class CertificateUtils {
 
       HashMap<String, String> map = new HashMap<String, String>();
       // TODO fer split emprant "(?<!\\),"
-      String[] split = certificate.getSubjectDN().getName().trim().split(",");
+      
+      final boolean debug = log.isDebugEnabled();
+      
+      String value =  certificate.getSubjectDN().getName().trim();
+      if (debug) {
+        log.debug("========================================");
+        log.debug("VALUES = ]" + value + "[");
+      }
+      
+      String[] split =value.split(",");
       for (int i = 0; i < split.length; i++) {
-        String[] split2 = split[i].split("=");
-        map.put(split2[0], split2[1]);
+        if (debug) {
+          log.debug("SPLIT[" + i + "] = ]" + split[i] + "[");
+        }
+        if (split[i].indexOf('=') != -1) {
+          String[] split2 = split[i].split("=");
+          if (split2.length == 2) {
+            map.put(split2[0].trim(), split2[1].trim());
+          }
+        }
       }
       nif = map.get("SERIALNUMBER");
       if (nif == null) {
