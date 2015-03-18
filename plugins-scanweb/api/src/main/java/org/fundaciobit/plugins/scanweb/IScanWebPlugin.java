@@ -16,6 +16,11 @@ public interface IScanWebPlugin extends IPlugin {
   public static final String SCANWEB_BASE_PROPERTY = IPLUGIN_BASE_PROPERTIES  + "scanweb.";
 
   public String getName(Locale locale) throws Exception;
+  
+  public void controllerGET(HttpServletRequest request) throws Exception;
+  
+  public void controllerPOST(HttpServletRequest request) throws Exception;
+ 
 
   public String getHeaderJSP(HttpServletRequest request) throws Exception;
 

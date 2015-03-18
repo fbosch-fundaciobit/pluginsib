@@ -50,20 +50,35 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
     super(propertyKeyBase);
   }
 
+  @Override
   public String getName(Locale locale) throws Exception {
     return "DynamicWebTwain";
   }
+  
+  @Override
+  public void controllerGET(HttpServletRequest request) throws Exception {
+    // TODO
+  }
+  
+  @Override
+  public void controllerPOST(HttpServletRequest request) throws Exception {
+    // TODO
+  }
+  
 
+  @Override
   public String getHeaderJSP(HttpServletRequest request) throws Exception {
     // TODO
     return ""; 
   }
 
+  @Override
   public String getCoreJSP(HttpServletRequest request) throws Exception {
     // TODO
     return "";
   }
 
+  @Override
   public ScanWebResource getResource(HttpServletRequest request, String resourcename)
       throws Exception {
     // TODO
