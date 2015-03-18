@@ -16,6 +16,7 @@
        <module>plugins-barcode</module>
        <module>plugins-documentcustody</module>
        <module>plugins-exportdata</module>
+	   <module>plugins-scanweb</module>
        <module>loginmodule-jboss</module>
     </modules>
 
