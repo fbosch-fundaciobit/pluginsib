@@ -137,7 +137,7 @@
 
       FileInputStream input;
 
-      //response.setContentType(contentType);
+      response.setContentType(contentType);
       response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
       response.setContentLength((int) toDownload.length());
 
