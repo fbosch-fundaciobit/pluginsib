@@ -2,6 +2,7 @@
 %><%@page import="java.io.OutputStream"
 %><%@page import="java.io.FileInputStream"
 %><%@page import="java.io.File"
+%><%@page import="java.util.Properties"
 %><%@page language="java" 
 %><%!
 
@@ -34,6 +35,8 @@
     private static final String CUSTODY_SIGNATURE_INFO_PREFIX(String custodyID) {
       return CUSTODY_PREFIX() + "INFOSIGN_" + custodyID;
     }
+	
+	private final String CUSTODY_HASHES_FILE =  CUSTODY_PREFIX() + "__HASH__FILE.properties";
     
     private static final String PROPERTY_BASE = "plugins.documentcustody.filesystem.";
 
@@ -80,24 +83,46 @@
     
     
 %><%
-
-
-    String custodyID = request.getParameter("custodyID");
-    
-    //System.out.println("   ---------------------------------------- ");
-    //System.out.println("CustodyID : " + custodyID);
-    
-    File getBaseDir = new java.io.File(application.getRealPath("/"));
-    
-    System.out.println("BASE DIR INDEX:JSP : " + getBaseDir);
-    
-    File toDownload;
-    String fileInfo;
-    
-	String type;
+    String custodyID = null;
     try {
+		final File baseDir = new java.io.File(application.getRealPath("/"));
+		
+		System.out.println("BASE DIR INDEX:JSP : " + baseDir);
+
+		
+		String hash = request.getParameter("hash");
+		
+		if (hash != null) {
+		  
+		  File hashes = new File(baseDir, CUSTODY_HASHES_FILE);
+		  if (hashes.exists()) {
+			Properties props = new Properties();
+		    FileInputStream fis = new FileInputStream(hashes);
+		    props.load(fis);
+		    fis.close();
+			custodyID = props.getProperty(hash);
+			if (custodyID == null) {
+				throw new Exception(" No existeix custodyId pel valor de hash " + hash); 
+			}
+		  } else {
+			 throw new Exception("No existeix fitxer " + hashes.getAbsolutePath());
+		  }
+		} else {
+		  custodyID = request.getParameter("custodyID");
+		}
+		
+		//System.out.println("   ---------------------------------------- ");
+		//System.out.println("CustodyID : " + custodyID);
+		
+		
+		
+		File toDownload;
+		String fileInfo;
+		
+		String type;
+    
       
-        File doc = new File(getBaseDir,CUSTODY_DOCUMENT_PREFIX(custodyID));
+        File doc = new File(baseDir,CUSTODY_DOCUMENT_PREFIX(custodyID));
 		
         //System.out.println(" Cercant document: " + doc.getAbsolutePath());
         if (doc.exists()) {
@@ -105,7 +130,7 @@
 			fileInfo = CUSTODY_DOCUMENT_INFO_PREFIX(custodyID);  
 			type = "documentType";
         } else {
-			File sign = new File(getBaseDir, CUSTODY_SIGNATURE_PREFIX(custodyID));
+			File sign = new File(baseDir, CUSTODY_SIGNATURE_PREFIX(custodyID));
 			//System.out.println(" Cercant signatura: " + sign.getAbsolutePath());
 			if (sign.exists()) {
 				toDownload = sign;
@@ -119,7 +144,7 @@
       }
 	  
 	  
-	  String info = new String(readFile(new File(getBaseDir,fileInfo)));
+	  String info = new String(readFile(new File(baseDir,fileInfo)));
 	  String filename = get("name", info);
 	  String signatureType = get(type, info);
 	  String contentType;
@@ -154,7 +179,7 @@
  
       
     } catch (Exception e) {
-      System.err.println("Error retornant document amd ID=" + custodyID);
+      System.err.println("Error retornant document amd ID=" + custodyID + ": " + e.getMessage());
       e.printStackTrace(System.err);
       response.sendError(response.SC_NOT_FOUND);
       return;

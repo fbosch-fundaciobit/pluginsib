@@ -14,7 +14,6 @@ import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-
 import org.fundaciobit.plugins.documentcustody.AnnexCustody;
 import org.fundaciobit.plugins.documentcustody.DocumentCustody;
 import org.fundaciobit.plugins.documentcustody.CustodyException;
@@ -76,6 +75,8 @@ public class FileSystemDocumentCustodyPlugin extends AbstractPluginProperties
   private final String CUSTODY_SIGNATURE_INFO_PREFIX(String custodyID) {
     return CUSTODY_PREFIX() + "INFOSIGN_" + custodyID;
   }
+  
+  private final String CUSTODY_HASHES_FILE =  CUSTODY_PREFIX() + "__HASH__FILE.properties";
 
   private static final String PROPERTY_BASE = DOCUMENTCUSTODY_BASE_PROPERTY + "filesystem.";
 
@@ -90,9 +91,52 @@ public class FileSystemDocumentCustodyPlugin extends AbstractPluginProperties
   private String getURLBase() {
     return getProperty(PROPERTY_BASE + "baseurl");
   }
+  
+  private String getHashPassword() {
+    return getProperty(PROPERTY_BASE + "hash.password","");
+  }
+  
+  /**
+   * Valid values       MD2, MD5, SHA,SHA-256,SHA-384,SHA-512
+   * @return
+   */
+  private String getHashAlgorithm() {
+    return getProperty(PROPERTY_BASE + "hash.algorithm","MD5");
+  }
+  
 
   @Override
-  public String reserveCustodyID(String proposedID, String parameters) throws CustodyException {
+  public synchronized String reserveCustodyID(String proposedID, String parameters) throws CustodyException {
+    if (proposedID == null || proposedID.trim().length() == 0) {
+      throw new CustodyException("Null or empty values into proposedID value is not possible");
+    }
+    
+    //System.out.println(" XYZ ---------------");
+    //System.out.println(" XYZ Passa per reserveCustodyID(" + proposedID + ");");
+    
+    String baseUrl = getURLBase();
+    if (baseUrl != null && baseUrl.indexOf("{2}") != -1) {
+       String hash = generateHash(proposedID, getHashAlgorithm(), getHashPassword());
+       
+       try {
+         Properties props = new Properties();
+         File hashes = new File(getBaseDir(), CUSTODY_HASHES_FILE);
+         if (hashes.exists()) {
+           FileInputStream fis = new FileInputStream(hashes);
+           props.load(fis);
+           fis.close();
+         }
+         props.setProperty(hash, proposedID);
+         //System.out.println(" XYZ Guardant fitxer(" + hashes.getAbsolutePath() + ");");
+         FileOutputStream fileOut = new FileOutputStream(hashes);
+         props.store(fileOut, "Hash Properties");
+         fileOut.close();
+       } catch(Exception e) {
+         throw new CustodyException("Error adding hash value to properties file.", e);
+       }
+
+    }
+    
     return proposedID;
   }
 
@@ -304,6 +348,11 @@ public class FileSystemDocumentCustodyPlugin extends AbstractPluginProperties
    * Si existeix el document de Signatura llavors el retornam, ja que és el que
    * es necessita per validar el document. En cas contrari o no té firmes o el
    * propi document ja duu adjunta la firma, per lo que retornam el document.
+   * 
+   * Valors de substitució:
+   *     // {0} => custodyID
+   *     // {1} => URLEncode(custodyID)
+   *     // {2} => Hash(custodyID)
    */
   @SuppressWarnings("deprecation")
   @Override
@@ -313,10 +362,39 @@ public class FileSystemDocumentCustodyPlugin extends AbstractPluginProperties
     if (baseUrl == null) {
       return null;
     }
+    // {0} => custodyID
+    // {1} => URLEncode(custodyID)
+    final String urlEncoded = URLEncoder.encode(custodyID);
+    
+    // {2} => Hash(custodyID)
+    final String hash;
+    if (baseUrl.indexOf("{2}") == -1) {
+      hash = "";
+    } else {
+      hash = generateHash(custodyID, getHashAlgorithm(), getHashPassword());
+    }
 
-    return MessageFormat.format(baseUrl, custodyID, URLEncoder.encode(custodyID));
+    return MessageFormat.format(baseUrl, custodyID,urlEncoded, hash);
 
   }
+  
+  
+  public static String generateHash(String data, String algorithm, String salt) {
+    try {
+      
+      java.security.MessageDigest md = java.security.MessageDigest.getInstance(algorithm);
+      byte[] array = md.digest((data + salt).getBytes());
+      StringBuffer sb = new StringBuffer();
+      for (int i = 0; i < array.length; ++i) {
+        sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
+     }
+      return sb.toString();
+  } catch (java.security.NoSuchAlgorithmException e) {
+  }
+  return null;
+}
+
+  
 
   @Override
   public String getSpecialValue(String custodyID) throws CustodyException {

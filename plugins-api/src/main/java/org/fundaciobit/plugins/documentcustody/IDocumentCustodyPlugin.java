@@ -17,7 +17,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
   /**
    * 
    * @param proposedID Identificador proposat per la reserva
-   * @param custodyParameters Parametres addicionsl requerits per a la realització de la Custodia. 
+   * @param custodyParameters Parametres addicionals requerits per a la realització de la Custodia. 
    * @return 
    * @throws Exception
    */
