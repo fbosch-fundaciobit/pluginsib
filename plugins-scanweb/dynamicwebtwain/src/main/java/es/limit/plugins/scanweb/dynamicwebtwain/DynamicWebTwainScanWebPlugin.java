@@ -173,8 +173,14 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 	  bufferOutput.append(	"\n");
 	  bufferOutput.append(	"	function UploadScan() {\n");
 	  bufferOutput.append(	"		if (DWObject) {\n" );
-	  bufferOutput.append(	"			if (DWObject.HowManyImagesInBuffer == 0)\n"); 
-	  bufferOutput.append(	"				return;\n");
+	  bufferOutput.append(	"			if (DWObject.HowManyImagesInBuffer == 0) {\n");
+//	  bufferOutput.append(	"				if ($('#archivo').val() == \"\"){\n");
+//	  bufferOutput.append(	"					alert('No ha adjuntat cap fitxer ni escanejat cap document.')\n");
+//	  bufferOutput.append(	"					return false;\n");
+//	  bufferOutput.append(	"				} else {\n");
+	  bufferOutput.append(	"				return true;\n");
+//	  bufferOutput.append(	"				}\n");
+	  bufferOutput.append(	"			}\n");
 	  bufferOutput.append(	"			var strHTTPServer = location.hostname;\n" ); 
 	  bufferOutput.append(	"			var CurrentPathName = unescape(location.pathname);\n" );
 	  bufferOutput.append(	"			var path = CurrentPathName.substring(0, CurrentPathName.lastIndexOf('/'));\n" );
