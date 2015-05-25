@@ -6,6 +6,21 @@
 %><%@page language="java" 
 %><%!
 
+  /**
+   *  Modficar aquest valor per la propietat base del plugin. Per exemple:
+   *       es.caib.portafib.plugins.documentcustody.filesystem.
+   *       es.caib.regweb.plugins.documentcustody.alfresco.
+   */
+  //private static final String PROPERTY_BASE = << MODIFICA AQUEST VALOR !!!! >>;
+  private static final String PROPERTY_BASE = "es.caib.portafib.plugins.documentcustody.filesystem.";
+
+  /** Modificar aquest valor segons si accedim as fitxer:
+    *  custodyID (per exemple http://localhost:8080/custodia/index.jsp?custodyID={1}) ha de valer false
+    *  hash  (per exemple http://localhost:8080/custodia/index.jsp?hash={2}) ha de valer true
+	* Si volem suportar els dos sistemes llavors ha de valer false.
+	*/
+  private static final boolean onlyHash = true;
+
   public static final String PADES_SIGNATURE = "pdf";
 
   public static final String CADES_SIGNATURE = "cades";
@@ -20,29 +35,44 @@
 
   public static final String NONE_SIGNATURE = "none";
 
-    private static final String CUSTODY_DOCUMENT_PREFIX(String custodyID) {
-      return CUSTODY_PREFIX() + "DOC_" + custodyID;
-    }
+  private final String getCustodyDocumentName(String custodyID) {
+    return CUSTODY_PREFIX() + custodyID + ".DOC";
+  }
+  
+  private final String getCustodyDocumentInfoName(String custodyID) {
+    return CUSTODY_PREFIX() + custodyID + ".DOCINFO";
+  }
 
-    private static final String CUSTODY_SIGNATURE_PREFIX(String custodyID) {
-      return CUSTODY_PREFIX() + "SIGN_" + custodyID;
-    }
+  private final String getCustodySignatureName(String custodyID) {
+    return CUSTODY_PREFIX() + custodyID + ".SIGN";
+  }
 
-    private static final String CUSTODY_DOCUMENT_INFO_PREFIX(String custodyID) {
-      return CUSTODY_PREFIX() + "INFODOC_" + custodyID;
-    }
-	
-    private static final String CUSTODY_SIGNATURE_INFO_PREFIX(String custodyID) {
-      return CUSTODY_PREFIX() + "INFOSIGN_" + custodyID;
-    }
-	
-	private final String CUSTODY_HASHES_FILE =  CUSTODY_PREFIX() + "__HASH__FILE.properties";
+  private final String getCustodySignatureInfoName(String custodyID) {
+    return CUSTODY_PREFIX() +  custodyID + ".SIGNINFO";
+  }
+  
+  private final String getCustodyHashesFile() {
+    return CUSTODY_PREFIX() + "HASH__FILE.properties";
+  }
     
-    private static final String PROPERTY_BASE = "plugins.documentcustody.filesystem.";
+	private static String prefix = null;
 
-    private static final String CUSTODY_PREFIX() {
-      return System.getProperty(PROPERTY_BASE + "prefix", "CUST_");
-    }
+    protected String CUSTODY_PREFIX() {
+		if (prefix == null) {
+		  String pfix = System.getProperty(PROPERTY_BASE + "prefix");
+		  if (pfix == null || pfix.trim().length() == 0) {
+			pfix = "";
+		  } else {
+			pfix = pfix.trim();
+			if (!pfix.endsWith("_")) {
+			  pfix = pfix + "_";
+			}
+		  }
+		  prefix = pfix;  
+		}
+		return prefix; 
+	}
+
 
     
     public byte[] readFile(File info) throws Exception {
@@ -94,7 +124,7 @@
 		
 		if (hash != null) {
 		  
-		  File hashes = new File(baseDir, CUSTODY_HASHES_FILE);
+		  File hashes = new File(baseDir, getCustodyHashesFile());
 		  if (hashes.exists()) {
 			Properties props = new Properties();
 		    FileInputStream fis = new FileInputStream(hashes);
@@ -108,6 +138,9 @@
 			 throw new Exception("No existeix fitxer " + hashes.getAbsolutePath());
 		  }
 		} else {
+		  if (onlyHash) {
+			  throw new Exception("Només es suporta HASH per obtenir el fitxer. No es permet la descarrega enprant directament l'identificador");
+		  }
 		  custodyID = request.getParameter("custodyID");
 		}
 		
@@ -122,19 +155,19 @@
 		String type;
     
       
-        File doc = new File(baseDir,CUSTODY_DOCUMENT_PREFIX(custodyID));
+        File doc = new File(baseDir,getCustodyDocumentName(custodyID));
 		
         //System.out.println(" Cercant document: " + doc.getAbsolutePath());
         if (doc.exists()) {
 			toDownload = doc;
-			fileInfo = CUSTODY_DOCUMENT_INFO_PREFIX(custodyID);  
+			fileInfo = getCustodyDocumentInfoName(custodyID);  
 			type = "documentType";
         } else {
-			File sign = new File(baseDir, CUSTODY_SIGNATURE_PREFIX(custodyID));
+			File sign = new File(baseDir, getCustodySignatureName(custodyID));
 			//System.out.println(" Cercant signatura: " + sign.getAbsolutePath());
 			if (sign.exists()) {
 				toDownload = sign;
-				fileInfo = CUSTODY_SIGNATURE_INFO_PREFIX(custodyID);
+				fileInfo = getCustodySignatureInfoName(custodyID);
 				type = "signatureType";
 			} else {
 				System.out.println("ERROR: No s'ha trobat ni signatura ni document per ID " + custodyID);
@@ -181,7 +214,7 @@
     } catch (Exception e) {
       System.err.println("Error retornant document amd ID=" + custodyID + ": " + e.getMessage());
       e.printStackTrace(System.err);
-      response.sendError(response.SC_NOT_FOUND);
+      response.sendError(response.SC_NOT_FOUND, e.getMessage());
       return;
     }
 

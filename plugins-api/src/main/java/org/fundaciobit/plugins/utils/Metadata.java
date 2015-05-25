@@ -1,5 +1,6 @@
 package org.fundaciobit.plugins.utils;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -8,7 +9,7 @@ import java.math.BigInteger;
  * @author anadal
  * 
  */
-public class Metadata {
+public class Metadata implements Serializable {
 
   protected MetadataType metadataType;
 
@@ -80,6 +81,11 @@ public class Metadata {
     switch (type) {
 
     case INTEGER: // java.lang.BigInteger
+      for (int i = 0; i < value.length(); i++) {
+        if (!Character.isDigit(value.charAt(i)) && '-' != value.charAt(i)) {
+          throw new MetadataFormatException("Character at position " + i + " is not valid");
+        }
+      }
       try {
         new BigInteger(value);
       } catch (NumberFormatException nfe) {
@@ -87,6 +93,11 @@ public class Metadata {
       }
       break;
     case DECIMAL: // java.lang.BigDecimal
+      for (int i = 0; i < value.length(); i++) {
+        if (!Character.isDigit(value.charAt(i)) && '-' != value.charAt(i) && '.' != value.charAt(i)) {
+          throw new MetadataFormatException("Character at position " + i + " is not valid");
+        }
+      }
       try {
         new BigDecimal(value);
       } catch (NumberFormatException nfe) {
@@ -118,7 +129,13 @@ public class Metadata {
       // OK
 
     }
-
+    
   }
+  
+  @Override
+  public int hashCode() {
+    return (this.key + "_" + this.value).hashCode();
+  }
+  
 
 }

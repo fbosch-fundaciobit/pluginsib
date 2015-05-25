@@ -38,6 +38,13 @@ public class DocumentCustody extends AnnexCustody {
     this.data = data;
     this.documentType = documentType;
   }
+  
+  public DocumentCustody(String name, String mime, byte[] data, String documentType) {
+    super();
+    this.name = name;
+    this.data = data;
+    this.documentType = documentType;
+  }
 
   /**
    * 

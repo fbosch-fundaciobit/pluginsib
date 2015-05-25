@@ -1,7 +1,11 @@
 package org.fundaciobit.plugins.documentcustody;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.fundaciobit.plugins.IPlugin;
 import org.fundaciobit.plugins.utils.Metadata;
+import org.fundaciobit.plugins.utils.MetadataFormatException;
 
 /**
  * 
@@ -21,7 +25,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @return 
    * @throws Exception
    */
-  String reserveCustodyID(String proposedID, String custodyParameters) throws CustodyException;
+  String reserveCustodyID(String custodyParameters) throws CustodyException;
 
   
   /**
@@ -32,6 +36,16 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    */
   void saveDocument(String custodyID, String custodyParameters,
       DocumentCustody document) throws CustodyException, NotSupportedCustodyException;
+  
+  /**
+   * 
+   * @param custodyID
+   * @param custodyParameters
+   * @param document
+   * @throws CustodyException
+   * @throws NotSupportedCustodyException
+   */
+  void deleteDocument(String custodyID) throws CustodyException, NotSupportedCustodyException;
   
   /**
    * @param custodyID
@@ -53,6 +67,9 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @return A list of suported document types defined in DocumentCustody class 
    */
   String[] getSupportedDocumentTypes();
+  
+  
+  boolean supportsDeleteDocument();
   
 
 
@@ -86,6 +103,11 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @throws Exception
    */
   SignatureCustody getSignatureInfo(String custodyID) throws CustodyException;
+  
+  
+  void deleteSignature(String custodyID) throws CustodyException, NotSupportedCustodyException;
+  
+  boolean supportsDeleteSignature();
 
   
   /** 
@@ -95,11 +117,11 @@ public interface IDocumentCustodyPlugin extends IPlugin {
 
 
   /** 
-   * @return true if system automaically refresh signature o document with signature 
-   *  to not loss validate of signature.
+   * @return true if system automaically refresh signature or document with signature 
+   *  to not loss validate of signature. false Otherwise. Null if unknown.
    */
-  boolean refreshSignature();
-  
+  Boolean supportsAutomaticRefreshSignature();
+
   /**
    * 
    * @param custodyID
@@ -107,7 +129,28 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @return AnnexID
    * @throws CustodyException
    */
-  String addAnnex(String custodyID, AnnexCustody annex) throws CustodyException,  NotSupportedCustodyException;;
+  String addAnnex(String custodyID, AnnexCustody annex) throws CustodyException,  NotSupportedCustodyException;
+  
+  /**
+   * 
+   * @param custodyID
+   * @param annexID
+   * @throws CustodyException
+   * @throws NotSupportedCustodyException
+   */
+  void deleteAnnex(String custodyID, String annexID) throws CustodyException, NotSupportedCustodyException;
+  
+  
+  /**
+   * 
+   * @param custodyID
+   * @param annexID
+   * @throws CustodyException
+   * @throws NotSupportedCustodyException
+   */
+  void deleteAllAnnexes(String custodyID) throws CustodyException, NotSupportedCustodyException;
+  
+  
   
   /**
    * 
@@ -115,7 +158,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @param annexID
    * @return null if annex not found
    */
-  byte[] getAnnex(String custodyID, String annexID);
+  byte[] getAnnex(String custodyID, String annexID) throws CustodyException ;
   
   /**
    * 
@@ -123,21 +166,90 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @param annexID
    * @return null if annex not found
    */
-  AnnexCustody getAnnexInfo(String custodyID, String annexID);
+  AnnexCustody getAnnexInfo(String custodyID, String annexID) throws CustodyException ;
   
-  boolean supportAnnexs();
-  
-  
-  
+  /**
+   * 
+   * @param custodyID
+   * @return
+   * @throws CustodyException
+   */
+  ArrayList<String> getAllAnnexes(String custodyID) throws CustodyException;
 
   
-  void addMetadata(Metadata metadata) throws CustodyException,  NotSupportedCustodyException;
+  boolean supportsAnnexes();
+  
+  boolean supportsDeleteAnnex();
+  
+
+  /**
+   * 
+   * @param custodyID
+   * @param metadata
+   * @throws CustodyException
+   * @throws NotSupportedCustodyException
+   */ 
+  void addMetadata(String custodyID, Metadata metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
+
+  /**
+   * 
+   * @param custodyID
+   * @param metadata
+   * @throws CustodyException
+   * @throws NotSupportedCustodyException
+   */
+  void addMetadata(String custodyID, Metadata[] metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
+  
+  /**
+   * 
+   * @param custodyID
+   * @return
+   * @throws NotSupportedCustodyException
+   */
+  HashMap<String, ArrayList<Metadata>> getAllMetadata(String custodyID) throws  CustodyException,NotSupportedCustodyException;
+  
+  /**
+   * 
+   * @param custodyID
+   * @return
+   * @throws NotSupportedCustodyException
+   */
+  ArrayList<Metadata> getMetadata(String custodyID, String key) throws CustodyException, NotSupportedCustodyException;
+  
+  /**
+   * 
+   * @param custodyID
+   * @param key
+   * @return
+   * @throws CustodyException
+   * @throws NotSupportedCustodyException
+   */
+  Metadata getOnlyOneMetadata(String custodyID, String key) throws CustodyException, NotSupportedCustodyException;
+
+  /**
+   * 
+   * @return
+   */
+  boolean supportsMetadata();
+
+  /**
+   * 
+   * @param custodyID
+   * @throws CustodyException
+   */
+  void deleteAllMetadata(String custodyID) throws CustodyException;
+
+  /**
+   * 
+   * @param custodyID
+   * @param key
+   * @return
+   * @throws CustodyException
+   */
+  ArrayList<Metadata> deleteMetadata(String custodyID, String key) throws CustodyException;
   
   
-  Metadata[] getMetadatas();
-  
-  
-  boolean supportMetadata();
+  boolean supportsDeleteMetadata();
   
   /**
    * 
@@ -147,7 +259,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
   void deleteCustody(String custodyID) throws CustodyException,  NotSupportedCustodyException;
 
 
-  boolean supportDelete();
+  boolean supportsDeleteCustody();
   
   /**
    *

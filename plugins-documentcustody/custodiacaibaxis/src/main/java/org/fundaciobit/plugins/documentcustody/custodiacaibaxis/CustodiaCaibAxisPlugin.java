@@ -3,6 +3,8 @@ package org.fundaciobit.plugins.documentcustody.custodiacaibaxis;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -20,6 +22,7 @@ import org.fundaciobit.plugins.documentcustody.NotSupportedCustodyException;
 import org.fundaciobit.plugins.documentcustody.SignatureCustody;
 import org.fundaciobit.plugins.utils.AbstractPluginProperties;
 import org.fundaciobit.plugins.utils.Metadata;
+import org.fundaciobit.plugins.utils.MetadataFormatException;
 
 import es.caib.signatura.api.AnyType;
 import es.caib.signatura.api.ConsultaResponse;
@@ -120,8 +123,10 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
   }
 
   @Override
-  public String reserveCustodyID(String proposedID, String custodyParameters)
+  public String reserveCustodyID(String custodyParameters)
       throws CustodyException {
+    
+    final String proposedID = String.valueOf(System.nanoTime()); 
 
     log.info(" ============= RESERVA ================");
     log.info(" proposedID = " + proposedID);
@@ -374,10 +379,7 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
 
   }
 
-  @Override
-  public boolean supportDelete() {
-    return true;
-  }
+
 
   @Override
   public void deleteCustody(String custodyID) throws CustodyException {
@@ -503,14 +505,7 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
 
   
 
-  /**
-   * @return true if system automaically refresh signature o document with
-   *         signature to not loss validate of signature.
-   */
-  @Override
-  public boolean refreshSignature() {
-    return false;
-  }
+
 
   /**
    * 
@@ -547,25 +542,162 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
     return null;
   }
 
+
+
   @Override
-  public boolean supportAnnexs() {
+  public void deleteDocument(String custodyID) throws CustodyException,
+      NotSupportedCustodyException {
+    
+    
+  }
+
+
+
+  @Override
+  public boolean supportsDeleteDocument() {
+    
     return false;
   }
 
+
+
   @Override
-  public void addMetadata(Metadata metadata) throws CustodyException,
+  public void deleteSignature(String custodyID) throws CustodyException,
+      NotSupportedCustodyException {
+    
+    
+  }
+
+
+
+  @Override
+  public boolean supportsDeleteSignature() {
+    
+    return false;
+  }
+
+
+
+  @Override
+  public Boolean supportsAutomaticRefreshSignature() {
+    return false;
+  }
+
+
+
+  @Override
+  public void deleteAnnex(String custodyID, String annexID) throws CustodyException,
+      NotSupportedCustodyException {
+        throw new NotSupportedCustodyException();
+  }
+
+
+
+  @Override
+  public void deleteAllAnnexes(String custodyID) throws CustodyException,
+      NotSupportedCustodyException {
+    throw new NotSupportedCustodyException();
+    
+  }
+
+
+
+  @Override
+  public ArrayList<String> getAllAnnexes(String custodyID) throws CustodyException {
+    return null; 
+  }
+
+
+
+  @Override
+  public boolean supportsAnnexes() {
+    return false;
+  }
+
+
+
+  @Override
+  public boolean supportsDeleteAnnex() {
+    return false;
+  }
+
+
+
+  @Override
+  public void addMetadata(String custodyID, Metadata metadata) throws CustodyException,
+      NotSupportedCustodyException, MetadataFormatException {
+    throw new NotSupportedCustodyException();
+    
+  }
+
+
+
+  @Override
+  public void addMetadata(String custodyID, Metadata[] metadata) throws CustodyException,
+      NotSupportedCustodyException, MetadataFormatException {
+    throw new NotSupportedCustodyException();
+    
+  }
+
+
+
+  @Override
+  public HashMap<String, ArrayList<Metadata>> getAllMetadata(String custodyID)
+      throws CustodyException, NotSupportedCustodyException {
+    throw new NotSupportedCustodyException();
+  }
+
+
+
+  @Override
+  public ArrayList<Metadata> getMetadata(String custodyID, String key)
+      throws CustodyException, NotSupportedCustodyException {
+    throw new NotSupportedCustodyException();
+  }
+
+
+
+  @Override
+  public Metadata getOnlyOneMetadata(String custodyID, String key) throws CustodyException,
       NotSupportedCustodyException {
     throw new NotSupportedCustodyException();
   }
 
+
+
   @Override
-  public Metadata[] getMetadatas() {
+  public boolean supportsMetadata() {
+    return false;
+  }
+
+
+
+  @Override
+  public void deleteAllMetadata(String custodyID) throws CustodyException {
+  }
+
+
+
+  @Override
+  public ArrayList<Metadata> deleteMetadata(String custodyID, String key)
+      throws CustodyException {
     return null;
   }
 
+
+
   @Override
-  public boolean supportMetadata() {
+  public boolean supportsDeleteMetadata() {
     return false;
   }
+
+
+
+  @Override
+  public boolean supportsDeleteCustody() {
+    return true;
+  }
+
+
 
 }

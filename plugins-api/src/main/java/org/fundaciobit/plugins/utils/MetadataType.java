@@ -1,11 +1,13 @@
 package org.fundaciobit.plugins.utils;
 
+import java.io.Serializable;
+
 /**
  * 
  * @author anadal
  *
  */
-public enum MetadataType {
+public enum MetadataType implements Serializable {
 
   STRING,
   INTEGER, // java.lang.BigInteger

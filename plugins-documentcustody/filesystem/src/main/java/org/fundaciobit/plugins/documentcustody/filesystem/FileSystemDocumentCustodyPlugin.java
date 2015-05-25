@@ -1,30 +1,13 @@
-/**
- * 
- */
 package org.fundaciobit.plugins.documentcustody.filesystem;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.net.URLEncoder;
-import java.text.MessageFormat;
 import java.util.Properties;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.fundaciobit.plugins.documentcustody.AnnexCustody;
-import org.fundaciobit.plugins.documentcustody.DocumentCustody;
-import org.fundaciobit.plugins.documentcustody.CustodyException;
-import org.fundaciobit.plugins.documentcustody.IDocumentCustodyPlugin;
-import org.fundaciobit.plugins.documentcustody.NotSupportedCustodyException;
-import org.fundaciobit.plugins.documentcustody.SignatureCustody;
-import org.fundaciobit.plugins.utils.AbstractPluginProperties;
-import org.fundaciobit.plugins.utils.Metadata;
+import org.fundaciobit.plugins.documentcustody.AbstractDocumentCustodyPlugin;
 
-import java.beans.XMLEncoder;
-import java.beans.XMLDecoder;
 
 /**
  * Implementació del plugin de custodia documental que guarda les signatures en
@@ -33,10 +16,9 @@ import java.beans.XMLDecoder;
  * 
  * @author anadal
  */
-public class FileSystemDocumentCustodyPlugin extends AbstractPluginProperties
-  implements IDocumentCustodyPlugin {
+public class FileSystemDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin {
 
-  protected final Logger log = Logger.getLogger(getClass());
+  public static final String FILESYSTEM_PROPERTY_BASE = DOCUMENTCUSTODY_BASE_PROPERTY + "filesystem.";
 
   /**
    * 
@@ -60,384 +42,66 @@ public class FileSystemDocumentCustodyPlugin extends AbstractPluginProperties
     super(propertyKeyBase);
   }
 
-  private final String CUSTODY_DOCUMENT_PREFIX(String custodyID) {
-    return CUSTODY_PREFIX() + "DOC_" + custodyID;
+
+  @Override
+  protected String getPropertyBase() {
+    return FILESYSTEM_PROPERTY_BASE;
   }
 
-  private final String CUSTODY_SIGNATURE_PREFIX(String custodyID) {
-    return CUSTODY_PREFIX() + "SIGN_" + custodyID;
-  }
-
-  private final String CUSTODY_DOCUMENT_INFO_PREFIX(String custodyID) {
-    return CUSTODY_PREFIX() + "INFODOC_" + custodyID;
-  }
-
-  private final String CUSTODY_SIGNATURE_INFO_PREFIX(String custodyID) {
-    return CUSTODY_PREFIX() + "INFOSIGN_" + custodyID;
-  }
   
-  private final String CUSTODY_HASHES_FILE =  CUSTODY_PREFIX() + "__HASH__FILE.properties";
-
-  private static final String PROPERTY_BASE = DOCUMENTCUSTODY_BASE_PROPERTY + "filesystem.";
-
-  private final String CUSTODY_PREFIX() {
-    return getProperty(PROPERTY_BASE + "prefix", "CUST_");
-  }
-
   private String getBaseDir() {
-    return getProperty(PROPERTY_BASE + "basedir");
+    return getProperty(FILESYSTEM_PROPERTY_BASE + "basedir");
   }
 
-  private String getURLBase() {
-    return getProperty(PROPERTY_BASE + "baseurl");
-  }
-  
-  private String getHashPassword() {
-    return getProperty(PROPERTY_BASE + "hash.password","");
-  }
-  
-  /**
-   * Valid values       MD2, MD5, SHA,SHA-256,SHA-384,SHA-512
-   * @return
-   */
-  private String getHashAlgorithm() {
-    return getProperty(PROPERTY_BASE + "hash.algorithm","MD5");
-  }
-  
 
   @Override
-  public synchronized String reserveCustodyID(String proposedID, String parameters) throws CustodyException {
-    if (proposedID == null || proposedID.trim().length() == 0) {
-      throw new CustodyException("Null or empty values into proposedID value is not possible");
-    }
+  protected boolean existsFile(String custodyID, String relativePath) {
+    File f = new File(getBaseDir(), relativePath);
+    return f.exists();
     
-    //System.out.println(" XYZ ---------------");
-    //System.out.println(" XYZ Passa per reserveCustodyID(" + proposedID + ");");
-    
-    String baseUrl = getURLBase();
-    if (baseUrl != null && baseUrl.indexOf("{2}") != -1) {
-       String hash = generateHash(proposedID, getHashAlgorithm(), getHashPassword());
-       
-       try {
-         Properties props = new Properties();
-         File hashes = new File(getBaseDir(), CUSTODY_HASHES_FILE);
-         if (hashes.exists()) {
-           FileInputStream fis = new FileInputStream(hashes);
-           props.load(fis);
-           fis.close();
-         }
-         props.setProperty(hash, proposedID);
-         //System.out.println(" XYZ Guardant fitxer(" + hashes.getAbsolutePath() + ");");
-         FileOutputStream fileOut = new FileOutputStream(hashes);
-         props.store(fileOut, "Hash Properties");
-         fileOut.close();
-       } catch(Exception e) {
-         throw new CustodyException("Error adding hash value to properties file.", e);
-       }
+  }
 
+
+  @Override
+  protected void deleteFile(String custodyID, String... relativePaths) {
+    for (String path : relativePaths) {
+      deleteFile(path);
     }
-    
-    return proposedID;
-  }
-
-  @Override
-  public void saveDocument(String custodyID, String custodyParameters, DocumentCustody document)
-      throws CustodyException, NotSupportedCustodyException {
-
-    String infoPath;
-    String docPath;
-
-    infoPath = CUSTODY_DOCUMENT_INFO_PREFIX(custodyID);
-    docPath = CUSTODY_DOCUMENT_PREFIX(custodyID);
-
-    try {
-      File f = new File(getBaseDir(), docPath);
-      if (f.exists()) {
-        f.delete();
-      }
-      FileOutputStream fos = new FileOutputStream(f);
-      fos.write(document.getData());
-      fos.close();
-
-      File info = new File(getBaseDir(), infoPath);
-      DocumentCustody clone = new DocumentCustody(document);
-      clone.setData(null);
-      write(clone, info);
-
-    } catch (Exception ex) {
-      final String msg = "No s'ha pogut custodiar el document";
-      log.error(msg, ex);
-      throw new CustodyException(msg, ex);
-    }
-
-  }
-
-  @Override
-  public DocumentCustody getDocumentInfo(String custodyID) throws CustodyException {
-
-    if (custodyID == null) {
-      return null;
-    }
-
-    String docPath = CUSTODY_DOCUMENT_PREFIX(custodyID);
-    String infoPath = CUSTODY_DOCUMENT_INFO_PREFIX(custodyID);
-    return (DocumentCustody) getDocOrSign(custodyID, docPath, infoPath);
-  }
-
-  @Override
-  public byte[] getDocument(String custodyID) throws CustodyException {
-    DocumentCustody info = getDocumentInfo(custodyID);
-    return info.getData();
-  }
-
-  /**
-   * @return A list of suported document types defined in DocumentCustody class
-   */
-  @Override
-  public String[] getSupportedDocumentTypes() {
-    return new String[] { DocumentCustody.PDF_WITH_SIGNATURE,
-        DocumentCustody.OOXML_WITH_SIGNATURE, DocumentCustody.ODT_WITH_SIGNATURE,
-        DocumentCustody.DOCUMENT_ONLY, DocumentCustody.OTHER_DOCUMENT_WITH_SIGNATURE };
-  }
-
-  @Override
-  public void saveSignature(String custodyID, String custodyParameters,
-      SignatureCustody document) throws CustodyException {
-
-    String infoPath;
-    String docPath;
-
-    infoPath = CUSTODY_SIGNATURE_INFO_PREFIX(custodyID);
-    docPath = CUSTODY_SIGNATURE_PREFIX(custodyID);
-
-    try {
-      File f = new File(getBaseDir(), docPath);
-      if (f.exists()) {
-        f.delete();
-      }
-      FileOutputStream fos = new FileOutputStream(f);
-      fos.write(document.getData());
-      fos.close();
-
-      File info = new File(getBaseDir(), infoPath);
-      SignatureCustody clone = new SignatureCustody(document);
-      clone.setData(null);
-      write(clone, info);
-
-    } catch (Exception ex) {
-      final String msg = "No s'ha pogut custodiar el document";
-      log.error(msg, ex);
-      throw new CustodyException(msg, ex);
-    }
-
-  }
-
-  @Override
-  public SignatureCustody getSignatureInfo(String custodyID) throws CustodyException {
-
-    if (custodyID == null) {
-      return null;
-    }
-
-    String docPath = CUSTODY_SIGNATURE_PREFIX(custodyID);
-    String infoPath = CUSTODY_SIGNATURE_INFO_PREFIX(custodyID);
-    return (SignatureCustody) getDocOrSign(custodyID, docPath, infoPath);
-  }
-
-  @Override
-  public byte[] getSignature(String custodyID) throws CustodyException {
-    SignatureCustody info = getSignatureInfo(custodyID);
-    return info.getData();
-  }
-
-  @Override
-  public String[] getSupportedSignatureTypes() {
-    return new String[] { SignatureCustody.CADES_SIGNATURE, SignatureCustody.XADES_SIGNATURE,
-        SignatureCustody.SMIME_SIGNATURE, SignatureCustody.OTHER_SIGNATURE };
-  }
-
-  /**
-   * @return true if system automaically refresh signature o document with
-   *         signature to not loss validate of signature.
-   */
-  @Override
-  public boolean refreshSignature() {
-    return false;
-  }
-
-  /**
-   * 
-   * @param custodyID
-   * @param annex
-   * @return AnnexID
-   * @throws CustodyException
-   */
-  @Override
-  public String addAnnex(String custodyID, AnnexCustody annex) throws CustodyException,
-      NotSupportedCustodyException {
-    throw new NotSupportedCustodyException();
-  }
-
-  /**
-   * 
-   * @param custodyID
-   * @param annexID
-   * @return null if annex not found
-   */
-  @Override
-  public byte[] getAnnex(String custodyID, String annexID) {
-    return null;
-  }
-
-  /**
-   * 
-   * @param custodyID
-   * @param annexID
-   * @return null if annex not found
-   */
-  @Override
-  public AnnexCustody getAnnexInfo(String custodyID, String annexID) {
-    return null;
-  }
-
-  @Override
-  public boolean supportAnnexs() {
-    return false;
-  }
-
-  @Override
-  public void addMetadata(Metadata metadata) throws CustodyException,
-      NotSupportedCustodyException {
-    throw new NotSupportedCustodyException();
-  }
-
-  @Override
-  public Metadata[] getMetadatas() {
-    return null;
-  }
-
-  @Override
-  public boolean supportMetadata() {
-    return false;
   }
   
-  @Override
-  public boolean supportDelete() {
-    return true;
-  }
+  
 
-  @Override
-  public void deleteCustody(String custodyID) throws CustodyException {
-
-    String[] prefixes = new String[] { CUSTODY_DOCUMENT_PREFIX(custodyID),
-        CUSTODY_SIGNATURE_PREFIX(custodyID), CUSTODY_DOCUMENT_INFO_PREFIX(custodyID),
-        CUSTODY_SIGNATURE_INFO_PREFIX(custodyID) };
-
-    for (String file : prefixes) {
-      File f = new File(getBaseDir(), file);
-      if (f.exists()) {
-        if (!f.delete()) {
-          f.deleteOnExit();
-        }
+  private void deleteFile(String relativePath) {
+    File f = new File(getBaseDir(), relativePath);
+    if (f.exists()) {
+      if (!f.delete()) {
+        f.deleteOnExit();
       }
     }
-
   }
-
-  /**
-   * Si existeix el document de Signatura llavors el retornam, ja que és el que
-   * es necessita per validar el document. En cas contrari o no té firmes o el
-   * propi document ja duu adjunta la firma, per lo que retornam el document.
-   * 
-   * Valors de substitució:
-   *     // {0} => custodyID
-   *     // {1} => URLEncode(custodyID)
-   *     // {2} => Hash(custodyID)
-   */
-  @SuppressWarnings("deprecation")
-  @Override
-  public String getValidationUrl(String custodyID) throws CustodyException {
-
-    String baseUrl = getURLBase();
-    if (baseUrl == null) {
-      return null;
-    }
-    // {0} => custodyID
-    // {1} => URLEncode(custodyID)
-    final String urlEncoded = URLEncoder.encode(custodyID);
-    
-    // {2} => Hash(custodyID)
-    final String hash;
-    if (baseUrl.indexOf("{2}") == -1) {
-      hash = "";
-    } else {
-      hash = generateHash(custodyID, getHashAlgorithm(), getHashPassword());
-    }
-
-    return MessageFormat.format(baseUrl, custodyID,urlEncoded, hash);
-
-  }
-  
-  
-  public static String generateHash(String data, String algorithm, String salt) {
-    try {
-      
-      java.security.MessageDigest md = java.security.MessageDigest.getInstance(algorithm);
-      byte[] array = md.digest((data + salt).getBytes());
-      StringBuffer sb = new StringBuffer();
-      for (int i = 0; i < array.length; ++i) {
-        sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
-     }
-      return sb.toString();
-  } catch (java.security.NoSuchAlgorithmException e) {
-  }
-  return null;
-}
-
   
 
   @Override
-  public String getSpecialValue(String custodyID) throws CustodyException {
-    return custodyID;
+  protected void writeFile(String custodyID, String relativePath, byte[] data)
+      throws Exception {
+    FileOutputStream fos = new FileOutputStream(new File(getBaseDir(), relativePath));
+    fos.write(data);
+    fos.close();
   }
-
-  protected AnnexCustody getDocOrSign(String custodyID, String docPath, String infoPath)
-      throws CustodyException {
-    try {
-
-      File f = new File(getBaseDir(), docPath);
-      if (!f.exists()) {
-        return null;
-      }
-      FileInputStream fis = new FileInputStream(f);
-      byte[] data = IOUtils.toByteArray(fis);
-      fis.close();
-
-      File info = new File(getBaseDir(), infoPath);
-      AnnexCustody dc = (AnnexCustody) read(info);
-      dc.setData(data);
-
-      return dc;
-
-    } catch (Exception ex) {
-      final String msg = "Error intentant obtenir el document custodia amb ID = " + custodyID;
-      log.error(msg, ex);
-      throw new CustodyException(msg, ex);
+  
+  @Override
+  protected byte[] readFile(String custodyID, String relativePath) throws Exception {
+    FileInputStream fis = new FileInputStream(new File(getBaseDir(), relativePath));
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final byte[] buffer = new byte[10 * 1024]; // 10Kb
+    int total;
+    while((total = fis.read(buffer)) != -1) {
+      baos.write(buffer, 0, total);
     }
+    fis.close();
+    return baos.toByteArray();
   }
 
-  public static void write(Object f, File filename) throws Exception {
-    XMLEncoder encoder = new XMLEncoder(new BufferedOutputStream(
-        new FileOutputStream(filename)));
-    encoder.writeObject(f);
-    encoder.close();
-  }
 
-  public static Object read(File filename) throws Exception {
-    XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(filename)));
-    Object o = (Object) decoder.readObject();
-    decoder.close();
-    return o;
-  }
 
 }

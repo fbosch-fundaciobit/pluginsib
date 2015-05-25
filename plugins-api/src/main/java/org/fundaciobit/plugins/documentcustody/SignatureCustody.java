@@ -51,6 +51,15 @@ public class SignatureCustody extends AnnexCustody {
     this.signatureType = signatureType;
     this.attachedDocument = attachedDocument;
   }
+  
+  
+  public SignatureCustody(String name, String mime, byte[] data, String signatureType,
+      Boolean attachedDocument) {
+    super(name, mime, data);
+    this.signatureType = signatureType;
+    this.attachedDocument = attachedDocument;
+  }
+  
 
   /**
    * @param name

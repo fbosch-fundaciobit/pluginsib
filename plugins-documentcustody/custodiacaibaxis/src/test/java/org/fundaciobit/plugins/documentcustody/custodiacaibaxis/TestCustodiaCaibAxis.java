@@ -103,9 +103,9 @@ public class TestCustodiaCaibAxis {
           byte[] data = IOUtils.toByteArray(is);
           
         
-          String proposedID= String.valueOf(System.currentTimeMillis());
+          //String proposedID= String.valueOf(System.currentTimeMillis());
           
-          String custodyID = plugin.reserveCustodyID(proposedID, custodyParameters);
+          String custodyID = plugin.reserveCustodyID(custodyParameters);
           System.out.println("Código Externo = " + custodyID);
 
           DocumentCustody document = new DocumentCustody();
