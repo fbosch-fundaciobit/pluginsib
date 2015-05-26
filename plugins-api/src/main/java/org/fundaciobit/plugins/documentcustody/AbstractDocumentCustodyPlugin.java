@@ -168,7 +168,7 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
            props.load(new ByteArrayInputStream(data));
          }
          props.setProperty(hash, custodyID);
-         //System.out.println(" XYZ Guardant fitxer(" + hashes.getAbsolutePath() + ");");
+         //System.out.println(" Guardant fitxer(" + hashes.getAbsolutePath() + ");");
          ByteArrayOutputStream baos = new ByteArrayOutputStream();
          props.store(baos, "Hash Properties");
          

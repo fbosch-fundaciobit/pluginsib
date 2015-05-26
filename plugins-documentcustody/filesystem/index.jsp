@@ -139,7 +139,7 @@
 		  }
 		} else {
 		  if (onlyHash) {
-			  throw new Exception("Només es suporta HASH per obtenir el fitxer. No es permet la descarrega enprant directament l'identificador");
+			  throw new Exception("Nom&eacute;s es suporta HASH per obtenir el fitxer. No es permet la descarrega emprant directament l'identificador");
 		  }
 		  custodyID = request.getParameter("custodyID");
 		}
