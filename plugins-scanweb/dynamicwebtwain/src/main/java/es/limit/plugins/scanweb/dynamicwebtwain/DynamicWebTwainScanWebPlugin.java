@@ -163,7 +163,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"			DWObject.IfAutoDiscardBlankpages = true;\n");
 		bufferOutput.append(	"			DWObject.Resolution = parseInt(document.getElementById('scanResolution').value);\n" ); 
 		bufferOutput.append(	"			DWObject.AcquireImage();\n"); 
-		bufferOutput.append(	"			Dynamsoft_OnReady();\n");
+//		bufferOutput.append(	"			Dynamsoft_OnReady();\n");
 		bufferOutput.append(	"		}\n"); 
 		bufferOutput.append(	"	}\n");
 		bufferOutput.append(	"\n");
