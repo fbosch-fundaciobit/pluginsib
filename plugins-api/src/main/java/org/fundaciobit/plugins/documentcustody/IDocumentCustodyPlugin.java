@@ -63,6 +63,15 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    */
   DocumentCustody getDocumentInfo(String custodyID) throws CustodyException;
   
+  
+  /**
+   * @param custodyID
+   * @return Return info without content of file
+   * @throws Exception
+   */
+  DocumentCustody getDocumentInfoOnly(String custodyID) throws CustodyException;
+  
+  
   /** 
    * @return A list of suported document types defined in DocumentCustody class 
    */
@@ -103,6 +112,14 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @throws Exception
    */
   SignatureCustody getSignatureInfo(String custodyID) throws CustodyException;
+  
+  
+  /**
+   * @param custodyID
+   * @return Return info without content of file
+   * @throws Exception
+   */
+  SignatureCustody getSignatureInfoOnly(String custodyID) throws CustodyException;
   
   
   void deleteSignature(String custodyID) throws CustodyException, NotSupportedCustodyException;
@@ -167,6 +184,15 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @return null if annex not found
    */
   AnnexCustody getAnnexInfo(String custodyID, String annexID) throws CustodyException ;
+  
+  
+  /**
+   * 
+   * @param custodyID
+   * @param annexID
+   * @return null if annex not found
+   */
+  AnnexCustody getAnnexInfoOnly(String custodyID, String annexID) throws CustodyException ;
   
   /**
    * 

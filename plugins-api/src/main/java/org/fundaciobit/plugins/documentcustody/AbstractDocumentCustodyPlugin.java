@@ -342,6 +342,19 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
     String infoPath = getCustodyDocumentInfoName(custodyID);
     return (DocumentCustody) getDocOrSign(custodyID, docPath, infoPath);
   }
+  
+  
+
+  @Override
+  public DocumentCustody getDocumentInfoOnly(String custodyID) throws CustodyException {
+    if (custodyID == null) {
+      return null;
+    }
+
+    String infoPath = getCustodyDocumentInfoName(custodyID);
+    return (DocumentCustody) getDocOrSignOnlyInfo(custodyID, infoPath);
+  }
+
 
   @Override
   public byte[] getDocument(String custodyID) throws CustodyException {
@@ -424,6 +437,17 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
     String infoPath = getCustodySignatureInfoName(custodyID);
     return (SignatureCustody) getDocOrSign(custodyID, docPath, infoPath);
   }
+  
+  
+  @Override
+  public SignatureCustody getSignatureInfoOnly(String custodyID) throws CustodyException {
+    if (custodyID == null) {
+      return null;
+    }
+    String infoPath = getCustodySignatureInfoName(custodyID);
+    return (SignatureCustody) getDocOrSignOnlyInfo(custodyID, infoPath);
+  }
+
 
   @Override
   public byte[] getSignature(String custodyID) throws CustodyException {
@@ -599,6 +623,24 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       return (AnnexCustody) getDocOrSign(custodyID, docPath, infoPath);
 
   }
+  
+  
+  @Override
+  public AnnexCustody getAnnexInfoOnly(String custodyID, String annexID)
+      throws CustodyException {
+    if (custodyID == null || annexID == null) {
+      return null;
+    }
+
+    String infoPath = getCustodyAnnexInfoName(annexID);
+    return (AnnexCustody) getDocOrSignOnlyInfo(custodyID, infoPath);
+  }
+  
+  
+
+  
+  
+  
 
   @Override
   public boolean supportsAnnexes() {
@@ -744,11 +786,12 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
         return null;
       }
       
+      AnnexCustody dc = getDocOrSignOnlyInfo(custodyID, infoPath);
       
-      byte[] data = readFile(custodyID, docPath);
-
-      AnnexCustody dc = (AnnexCustody) readObject(custodyID, infoPath);
-      dc.setData(data);
+      if (dc != null ) {
+        byte[] data = readFile(custodyID, docPath);
+        dc.setData(data);
+      }
 
       return dc;
 
@@ -760,6 +803,15 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
     }
   }
 
+  
+  protected AnnexCustody getDocOrSignOnlyInfo(String custodyID, String infoPath)
+      throws CustodyException {
+    
+    AnnexCustody dc = (AnnexCustody) readObject(custodyID, infoPath);
+    
+    return dc;
+    
+  }
   
   
   

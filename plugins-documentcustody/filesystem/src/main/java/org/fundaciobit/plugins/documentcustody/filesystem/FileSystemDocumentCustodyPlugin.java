@@ -7,6 +7,10 @@ import java.io.FileOutputStream;
 import java.util.Properties;
 
 import org.fundaciobit.plugins.documentcustody.AbstractDocumentCustodyPlugin;
+import org.fundaciobit.plugins.documentcustody.AnnexCustody;
+import org.fundaciobit.plugins.documentcustody.CustodyException;
+import org.fundaciobit.plugins.documentcustody.DocumentCustody;
+import org.fundaciobit.plugins.documentcustody.SignatureCustody;
 
 
 /**
@@ -101,7 +105,6 @@ public class FileSystemDocumentCustodyPlugin extends AbstractDocumentCustodyPlug
     fis.close();
     return baos.toByteArray();
   }
-
 
 
 }

@@ -451,6 +451,21 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
   }
   
   
+
+  @Override
+  public DocumentCustody getDocumentInfoOnly(String custodyID) throws CustodyException {
+    
+    // TODO Optimitzar per a que nomes obtengui la info i no el contingut del fitxer
+    DocumentCustody dc = getDocumentInfo(custodyID);
+    
+    if (dc != null) {
+      dc.setData(null);
+    }
+    
+    return dc;
+  }
+
+  
   @Override
   public byte[] getSignature(String custodyID) throws CustodyException {
     return getDocument(custodyID);
@@ -482,6 +497,21 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
   }
   
   
+  @Override
+  public SignatureCustody getSignatureInfoOnly(String custodyID) throws CustodyException {
+    // TODO Optimitzar per a que nomes obtengui la info i no el contingut del fitxer
+    
+    SignatureCustody sc = getSignatureInfo(custodyID);
+    
+    if (sc != null) {
+      sc.setData(null);
+    }
+    
+    return sc;
+  }
+
+
+
 
   private Documento getInfoDocumentoCustodiaCAIB(String custodyID) throws CustodyException {
     byte[] response;
@@ -539,6 +569,15 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
    */
   @Override
   public AnnexCustody getAnnexInfo(String custodyID, String annexID) {
+    return null;
+  }
+  
+  
+
+  @Override
+  public AnnexCustody getAnnexInfoOnly(String custodyID, String annexID)
+      throws CustodyException {
+    // TODO Optimitzar per a que nomes obtengui la info i no el contingut del fitxer
     return null;
   }
 
@@ -697,6 +736,8 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
   public boolean supportsDeleteCustody() {
     return true;
   }
+
+
 
 
 
