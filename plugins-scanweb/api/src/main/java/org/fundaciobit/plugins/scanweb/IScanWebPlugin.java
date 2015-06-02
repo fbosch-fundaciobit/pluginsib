@@ -17,16 +17,18 @@ public interface IScanWebPlugin extends IPlugin {
 
   public String getName(Locale locale) throws Exception;
   
-  public void controllerGET(HttpServletRequest request) throws Exception;
+  public void controllerGET(HttpServletRequest request, String docID) throws Exception;
   
-  public void controllerPOST(HttpServletRequest request) throws Exception;
+  public void controllerPOST(HttpServletRequest request, String docID) throws Exception;
  
 
-  public String getHeaderJSP(HttpServletRequest request) throws Exception;
+  public String getHeaderJSP(HttpServletRequest request, String docID) throws Exception;
 
-  public String getCoreJSP(HttpServletRequest request) throws Exception;
+  public String getCoreJSP(HttpServletRequest request, String docID) throws Exception;
 
-  public ScanWebResource getResource(HttpServletRequest request, String resourcename)
+  public ScanWebResource getResource(HttpServletRequest request, String resourcename, String docID)
       throws Exception;
+  
+  public int getMinHeight(HttpServletRequest request, String docID) throws Exception;
 
 }

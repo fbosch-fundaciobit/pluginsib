@@ -832,6 +832,9 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   protected Object readObject(String custodyID, String relativePath) throws CustodyException {
     try {
       byte[] data = readFile(custodyID, relativePath);
+      if (data == null) {
+        return null;
+      }
       XMLDecoder decoder = new XMLDecoder(new ByteArrayInputStream(data));
       Object o = (Object) decoder.readObject();
       decoder.close();

@@ -95,7 +95,13 @@ public class FileSystemDocumentCustodyPlugin extends AbstractDocumentCustodyPlug
   
   @Override
   protected byte[] readFile(String custodyID, String relativePath) throws Exception {
-    FileInputStream fis = new FileInputStream(new File(getBaseDir(), relativePath));
+    
+    File file = new File(getBaseDir(), relativePath);
+    if (!file.exists()) {
+      return null;
+    }
+    
+    FileInputStream fis = new FileInputStream(file);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final byte[] buffer = new byte[10 * 1024]; // 10Kb
     int total;
