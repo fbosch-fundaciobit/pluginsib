@@ -62,25 +62,25 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 	}
 
 	@Override
-	public void controllerGET(HttpServletRequest request, String docID) throws Exception {
+	public void controllerGET(HttpServletRequest request, long docID) throws Exception {
 		// TODO
 	}
 
 	@Override
-	public void controllerPOST(HttpServletRequest request, String docID) throws Exception {
+	public void controllerPOST(HttpServletRequest request, long docID) throws Exception {
 		// TODO
 	}
 
 
 	@Override
-	public String getHeaderJSP(HttpServletRequest request, String docID) throws Exception {
+	public String getHeaderJSP(HttpServletRequest request, long docID) throws Exception {
 		String applicationPath = getProperty("applicationPath", "regweb");
 		return 	"<script type=\"text/javascript\" src=\"/" + applicationPath + "/anexo/scanwebresource/dynamsoft.webtwain.initiate.js\"> </script> \n" +
 		"<script type=\"text/javascript\" src=\"/" + applicationPath + "/anexo/scanwebresource/dynamsoft.webtwain.config.js\"> </script>";
 	}
 
 	@Override
-	public String getCoreJSP(HttpServletRequest request, String docID) throws Exception {
+	public String getCoreJSP(HttpServletRequest request, long docID) throws Exception {
 		
 		// Carregam els texts en català per si hi ha algun problema al 
 		// carregar els fitxers de missatges multiidioma
@@ -297,7 +297,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 	}
 
 	@Override
-	public ScanWebResource getResource(HttpServletRequest request, String resourcename, String docID) throws Exception {
+	public ScanWebResource getResource(HttpServletRequest request, String resourcename, long docID) throws Exception {
 		ScanWebResource resource = null;
 		byte[] contingut = null;
 		String mime = getMimeType(resourcename);
@@ -391,7 +391,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 
 
   @Override
-  public int getMinHeight(HttpServletRequest request, String docID) throws Exception {
+  public int getMinHeight(HttpServletRequest request, long docID) throws Exception {
     return 485;
   }
 }
