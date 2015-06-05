@@ -3,6 +3,7 @@ package org.fundaciobit.plugins.utils;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Date;
 
 /**
  * 
@@ -17,6 +18,43 @@ public class Metadata implements Serializable {
 
   protected String value;
 
+  
+  public Metadata(String key, boolean value) {
+    this(key, String.valueOf(value), MetadataType.BOOLEAN);
+  }
+  
+  public Metadata(String key, String value) {
+    this(key, value, MetadataType.STRING);
+  }
+  
+  public Metadata(String key, long value) {
+    this(key, String.valueOf(value), MetadataType.INTEGER);
+  }
+  
+  public Metadata(String key, BigInteger value) {
+    this(key, value == null? null : value.toString(), MetadataType.INTEGER);
+  }
+  
+  
+  public Metadata(String key, double value) {
+    this(key, String.valueOf(value), MetadataType.DECIMAL);
+  }
+  
+  public Metadata(String key, BigDecimal value) {
+    this(key, value == null? null : value.toString(), MetadataType.DECIMAL);
+  }
+  
+  
+  public Metadata(String key, byte[] value) {
+    this(key, value == null? null : Base64.encode(value) , MetadataType.BASE64);
+  }
+  
+  
+  public Metadata(String key, Date value) {
+    this(key, value == null? null : ISO8601.dateToISO8601(value) , MetadataType.DATE);
+  }
+  
+  
   /**
    * @param key
    * @param value
@@ -135,6 +173,18 @@ public class Metadata implements Serializable {
   @Override
   public int hashCode() {
     return (this.key + "_" + this.value).hashCode();
+  }
+  
+  
+  
+  public static void main(String[] args) {
+    
+    BigInteger bi = new BigInteger("-3245435.56");
+    
+    System.out.println(" HOLA " + bi.toString());
+    
+    
+    
   }
   
 
