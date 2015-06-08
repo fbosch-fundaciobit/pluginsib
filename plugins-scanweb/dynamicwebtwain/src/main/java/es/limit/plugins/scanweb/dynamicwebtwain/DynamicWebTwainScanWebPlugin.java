@@ -199,9 +199,9 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"			var strHTTPServer = location.hostname;\n" ); 
 		bufferOutput.append(	"			var CurrentPathName = unescape(location.pathname);\n" );
 		bufferOutput.append(	"			var path = CurrentPathName.substring(0, CurrentPathName.lastIndexOf('/'));\n" );
-		bufferOutput.append(	"			var idAnex = path.substring(path.lastIndexOf('/') + 1);\n" );
-		bufferOutput.append(	"			var CurrentPath = '/" + getProperty("applicationPath", "regweb") + "';\n" ); //CurrentPathName.substring(0, CurrentPathName.lastIndexOf('/') + 1);\n");
-		bufferOutput.append(	"			var strActionPage = CurrentPath + '/anexo/guardarScan/' + idAnex;\n" ); 
+//		bufferOutput.append(	"			var idAnex = path.substring(path.lastIndexOf('/') + 1);\n" );
+		bufferOutput.append(	"			var CurrentPath = '/" + getProperty("applicationPath", "regweb") + "';\n" );
+		bufferOutput.append(	"			var strActionPage = CurrentPath + '/' + " + getProperty("guardarScanPath", "guardarScan") + " + '/'" + docID + ";\n" ); 
 		bufferOutput.append(	"			DWObject.IfSSL = false; // Set whether SSL is used\n" );
 		bufferOutput.append(	"			DWObject.HTTPPort = location.port == '' ? 80 : location.port;\n" );
 		bufferOutput.append(	"			var Digital = new Date();\n");
@@ -227,8 +227,8 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"	});\n");
 		bufferOutput.append(	"</script>");
 		bufferOutput.append(	"\n");
-		bufferOutput.append(	"<div class=\"col-xs-6\">\n");
-		bufferOutput.append(	"	<div class=\"form-group col-xs-12\">\n");
+		bufferOutput.append(	"<div id=\"scanParams\" class=\"col-xs-6\">\n");
+		bufferOutput.append(	"	<div id=\"scanSourceGroup\" class=\"form-group col-xs-12\">\n");
 		bufferOutput.append(	"		<div class=\"col-xs-4 pull-left etiqueta_regweb control-label\">\n");
 		bufferOutput.append(	"			<label for=\"scanSource\"><span class=\"text-danger\">*</span> " + disp + "</label>\n");
 		bufferOutput.append(	"	  	</div>\n");
@@ -238,7 +238,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"		</div>\n");
 		bufferOutput.append(	"	</div>\n");
 		bufferOutput.append(	"\n");
-		bufferOutput.append(	"	<div class=\"form-group col-xs-12\">\n");
+		bufferOutput.append(	"	<div id=\"scanColorGroup\" class=\"form-group col-xs-12\">\n");
 		bufferOutput.append(	"		<div class=\"col-xs-4 pull-left etiqueta_regweb control-label\">\n");
 		bufferOutput.append(	"			<label for=\"scanColor\"><span class=\"text-danger\">*</span> " + color + "</label>\n");
 		bufferOutput.append(	"	  	</div>\n");
@@ -251,7 +251,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"		</div>\n");
 		bufferOutput.append(	"	</div>\n");
 		bufferOutput.append(	"\n");
-		bufferOutput.append(	"	<div class=\"form-group col-xs-12\">\n");
+		bufferOutput.append(	"	<div id=\"scanResolutionGroup\" class=\"form-group col-xs-12\">\n");
 		bufferOutput.append(	"		<div class=\"col-xs-4 pull-left etiqueta_regweb control-label\">\n");
 		bufferOutput.append(	"			<label for=\"scanResolution\"><span class=\"text-danger\">*</span> " + res + "</label>\n");
 		bufferOutput.append(	"	  	</div>\n");
@@ -265,7 +265,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"		</div>\n");
 		bufferOutput.append(	"	</div>\n");
 		bufferOutput.append(	"\n");
-		bufferOutput.append(	"	<div class=\"form-group col-xs-12\">\n");
+		bufferOutput.append(	"	<div id=\"scanDuplexGroup\" class=\"form-group col-xs-12\">\n");
 		bufferOutput.append(	"		<div class=\"col-xs-4 pull-left etiqueta_regweb control-label\">\n");
 		bufferOutput.append(	"			<label for=\"scanDuplex\"><span class=\"text-danger\">*</span> " + duplex + "</label>\n");
 		bufferOutput.append(	"	  	</div>\n");
@@ -277,7 +277,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"		</div>\n");
 		bufferOutput.append(	"	</div>\n");
 		bufferOutput.append(	"\n");
-		bufferOutput.append(	"	<div class=\"form-group col-xs-12\">\n");
+		bufferOutput.append(	"	<div id=\"scanButtonsGroup\" class=\"form-group col-xs-12\">\n");
 		bufferOutput.append(	"		<div class=\"col-xs-4 pull-left etiqueta_regweb control-label\"></div>\n");
 		bufferOutput.append(	"	  	<div class=\"col-xs-8\">\n");
 		bufferOutput.append(	"			<button class=\"btn btn-sm\" value='Scan' onclick='AcquireImage();' >Scan</button>");
@@ -288,7 +288,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"\n");
 		bufferOutput.append(	"</div>");
 		bufferOutput.append(	"\n");
-		bufferOutput.append(	"<div class=\"col-xs-6\">\n");
+		bufferOutput.append(	"<div id=\"scanContainerGroup\" class=\"col-xs-6\">\n");
 		bufferOutput.append(	"	<div id='dwtcontrolContainer'></div>");
 		bufferOutput.append(	"</div>");
 
