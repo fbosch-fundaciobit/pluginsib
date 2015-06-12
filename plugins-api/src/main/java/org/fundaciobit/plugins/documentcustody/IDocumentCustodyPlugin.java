@@ -16,6 +16,11 @@ public interface IDocumentCustodyPlugin extends IPlugin {
   
   public static final String DOCUMENTCUSTODY_BASE_PROPERTY = IPLUGIN_BASE_PROPERTIES + "documentcustody.";
 
+  /**
+   * =========================================================================
+   * ================ M E T O  D E S    G E N E  R A L S =====================
+   * =========================================================================
+   */
 
   
   /**
@@ -26,7 +31,44 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @throws Exception
    */
   String reserveCustodyID(String custodyParameters) throws CustodyException;
+  
+  /**
+  *
+  * @param custodyID
+  * @return
+  * @throws Exception
+  */
+ String getValidationUrl(String custodyID) throws CustodyException;
+ 
+ /**
+  * Retorna un valor a partir de l'identificador de reserva que es pot
+  * substituir quan calgui. Per defecte retornar custodyID 
+  * @param custodyID
+  * @return
+  * @throws Exception
+  */
+  String getSpecialValue(String custodyID) throws CustodyException;
+  
+  /**
+   * 
+   * @param custodyID
+   * @throws Exception
+   */
+  void deleteCustody(String custodyID) throws CustodyException,  NotSupportedCustodyException;
 
+
+  /**
+   * Indica si podem eliminar una Custodia completa
+   * @return
+   */
+  boolean supportsDeleteCustody();
+  
+
+  /**
+   * =========================================================================
+   * ========================= D O C U M E  N T  =============================
+   * =========================================================================
+   */
   
   /**
    * Custodia un document
@@ -81,6 +123,11 @@ public interface IDocumentCustodyPlugin extends IPlugin {
   boolean supportsDeleteDocument();
   
 
+  /**
+   * =========================================================================
+   * ========================= S I G  N A T U R A  ===========================
+   * =========================================================================
+   */
 
 
   /**
@@ -138,6 +185,13 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    *  to not loss validate of signature. false Otherwise. Null if unknown.
    */
   Boolean supportsAutomaticRefreshSignature();
+  
+
+  /**
+   * =========================================================================
+   * ============================= A N N E X E S =============================
+   * =========================================================================
+   */
 
   /**
    * 
@@ -207,6 +261,12 @@ public interface IDocumentCustodyPlugin extends IPlugin {
   
   boolean supportsDeleteAnnex();
   
+  /**
+   * =========================================================================
+   * =========================== M E T A D A D E S ===========================
+   * =========================================================================
+   */
+  
 
   /**
    * 
@@ -218,13 +278,39 @@ public interface IDocumentCustodyPlugin extends IPlugin {
   void addMetadata(String custodyID, Metadata metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
 
   /**
-   * 
+   * Afegeix noves Metadades al sistema. Si les claus d'aquestes ja exeisteixen llavors s'afegeix un nou valor a la clau. 
    * @param custodyID
    * @param metadata
    * @throws CustodyException
    * @throws NotSupportedCustodyException
    */
   void addMetadata(String custodyID, Metadata[] metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
+  
+  /**
+   * Afegeix o actualitza una Metadada al sistema. Si no existeix l'afegeix.
+   * Si existeix i nomes hi ha una instància llavors sobreescriu el valor. 
+   * 
+   * En resum si existeix la metadada (tengui o no tengui varis valors) l'esborra 
+   * i afegeix les metadades
+   * 
+   * @param custodyID
+   * @param metadata
+   * @throws CustodyException
+   * @throws NotSupportedCustodyException
+   */
+  void updateMetadata(String custodyID, Metadata metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
+  
+  /**
+   * Afegeix o actualitza noves Metadades al sistema. Si no existeixen les afegeix.
+   * Si existeixen (tengui la metadada un valor o tengui varis valors) les esborra 
+   * i afegeix les metadades
+   * 
+   * @param custodyID
+   * @param metadata
+   * @throws CustodyException
+   * @throws NotSupportedCustodyException
+   */
+  void updateMetadata(String custodyID, Metadata[] metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
   
   /**
    * 
@@ -275,33 +361,16 @@ public interface IDocumentCustodyPlugin extends IPlugin {
   ArrayList<Metadata> deleteMetadata(String custodyID, String key) throws CustodyException;
   
   
-  boolean supportsDeleteMetadata();
-  
   /**
    * 
    * @param custodyID
-   * @throws Exception
-   */
-  void deleteCustody(String custodyID) throws CustodyException,  NotSupportedCustodyException;
-
-
-  boolean supportsDeleteCustody();
-  
-  /**
-   *
-   * @param custodyID
+   * @param keys
    * @return
-   * @throws Exception
+   * @throws CustodyException
    */
-  String getValidationUrl(String custodyID) throws CustodyException;
+  ArrayList<Metadata> deleteMetadata(String custodyID, String[] keys) throws CustodyException;
   
-  /**
-   * Retorna un valor a partir de l'identificador de reserva que es pot
-   * substituir quan calgui. Per defecte retornar custodyID 
-   * @param custodyID
-   * @return
-   * @throws Exception
-   */
-  String getSpecialValue(String custodyID) throws CustodyException;
+  
+  boolean supportsDeleteMetadata();
 
 }

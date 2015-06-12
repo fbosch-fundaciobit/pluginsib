@@ -677,6 +677,32 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
     throw new NotSupportedCustodyException();
     
   }
+  
+  
+  @Override
+  public void updateMetadata(String custodyID, Metadata metadata) throws CustodyException,
+      NotSupportedCustodyException, MetadataFormatException {
+    throw new NotSupportedCustodyException();
+    
+  }
+
+
+
+  @Override
+  public void updateMetadata(String custodyID, Metadata[] metadata) throws CustodyException,
+      NotSupportedCustodyException, MetadataFormatException {
+    throw new NotSupportedCustodyException();
+    
+  }
+
+
+
+  @Override
+  public ArrayList<Metadata> deleteMetadata(String custodyID, String[] keys)
+      throws CustodyException {
+    return null;
+  }
+
 
 
 
@@ -736,6 +762,9 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
   public boolean supportsDeleteCustody() {
     return true;
   }
+
+
+
 
 
 

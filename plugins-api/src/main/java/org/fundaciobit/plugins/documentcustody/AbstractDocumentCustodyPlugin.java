@@ -699,6 +699,39 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
     }
   }
   
+  
+
+  @Override
+  public void updateMetadata(String custodyID, Metadata metadata) throws CustodyException,
+      NotSupportedCustodyException, MetadataFormatException {
+    
+    if (metadata != null && metadata.getKey() != null) {
+      deleteMetadata(custodyID, metadata.getKey() );
+    }
+    addMetadata(custodyID, metadata);
+  }
+
+  @Override
+  public void updateMetadata(String custodyID, Metadata[] metadata) throws CustodyException,
+      NotSupportedCustodyException, MetadataFormatException {
+    if (metadata != null) {
+      for (Metadata m : metadata) {
+        updateMetadata(custodyID, m);
+      } 
+    }
+  }
+
+  @Override
+  public ArrayList<Metadata> deleteMetadata(String custodyID, String[] keys)
+      throws CustodyException {
+    ArrayList<Metadata> borrades = new ArrayList<Metadata>();
+    if (keys == null) {
+      
+    }
+    return borrades;
+  }
+
+  
   @Override  
   public HashMap<String, ArrayList<Metadata>> getAllMetadata(String custodyID) throws NotSupportedCustodyException, CustodyException {
 
