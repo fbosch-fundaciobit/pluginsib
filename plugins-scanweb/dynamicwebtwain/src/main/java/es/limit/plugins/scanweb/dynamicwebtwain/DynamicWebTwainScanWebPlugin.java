@@ -39,6 +39,10 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 	private String getDynamicWebTwainProperty(String name) {
 		return getProperty(PROPERTY_BASE + name);
 	}
+	
+	private String getDynamicWebTwainProperty(String name, String defaultValue) {
+		return getProperty(PROPERTY_BASE + name, defaultValue);
+	}
 
 
 	/**
@@ -74,7 +78,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 
 	@Override
 	public String getHeaderJSP(HttpServletRequest request, long docID) throws Exception {
-		String applicationPath = getProperty("applicationPath", "regweb");
+		String applicationPath = getDynamicWebTwainProperty("applicationPath", "regweb");
 		return 	"<script type=\"text/javascript\" src=\"/" + applicationPath + "/anexo/scanwebresource/dynamsoft.webtwain.initiate.js\"> </script> \n" +
 		"<script type=\"text/javascript\" src=\"/" + applicationPath + "/anexo/scanwebresource/dynamsoft.webtwain.config.js\"> </script>";
 	}
@@ -90,6 +94,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		String duplex = "Duplex";
 		String clean = "Borra actual";
 		String cleanAll = "Borra tot";
+		String msgErrorValidacio = "Hi ha errors en el camp del formulari.";
 		String upError = "S\\'ha produït un error, i no s\\'ha pogut pujar el document escanejat.";
 
 //		String idAnex = request.getParameter("anexo.id");
@@ -116,6 +121,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 				clean = prop.getProperty("dwt.borra.actual");
 				cleanAll = prop.getProperty("dwt.borra.tot");
 				upError = prop.getProperty("dwt.error.upload");
+				msgErrorValidacio = prop.getProperty("dwt.error.validacio");
 			}
 		}
 
@@ -141,7 +147,8 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"		console.log(errorString);\n");
 		bufferOutput.append(	"	}\n");
 		bufferOutput.append(	"\n");
-		bufferOutput.append(	"	function AcquireImage() {\n"); 
+		bufferOutput.append(	"	function AcquireImage() {\n");
+//		bufferOutput.append(	"		debugger;\n");
 		bufferOutput.append(	"		if (DWObject) {\n"); 
 		bufferOutput.append(	"			DWObject.SelectSourceByIndex(document.getElementById('scanSource').selectedIndex);\n"); 
 		bufferOutput.append(	"			DWObject.OpenSource();\n"); 
@@ -164,7 +171,8 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"			DWObject.Resolution = parseInt(document.getElementById('scanResolution').value);\n" ); 
 		bufferOutput.append(	"			DWObject.AcquireImage();\n"); 
 //		bufferOutput.append(	"			Dynamsoft_OnReady();\n");
-		bufferOutput.append(	"		}\n"); 
+//		bufferOutput.append(	"			alert('Ha sortit de AcquireImage interna.');\n");
+		bufferOutput.append(	"		}\n");
 		bufferOutput.append(	"	}\n");
 		bufferOutput.append(	"\n");
 		bufferOutput.append(	"	function btnRemoveSelectedImage_onclick() {\n");
@@ -200,8 +208,8 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"			var CurrentPathName = unescape(location.pathname);\n" );
 		bufferOutput.append(	"			var path = CurrentPathName.substring(0, CurrentPathName.lastIndexOf('/'));\n" );
 //		bufferOutput.append(	"			var idAnex = path.substring(path.lastIndexOf('/') + 1);\n" );
-		bufferOutput.append(	"			var CurrentPath = '/" + getProperty("applicationPath", "regweb") + "';\n" );
-		bufferOutput.append(	"			var strActionPage = CurrentPath + '/' + " + getProperty("guardarScanPath", "guardarScan") + " + '/'" + docID + ";\n" ); 
+		bufferOutput.append(	"			var CurrentPath = '/" + getDynamicWebTwainProperty("applicationPath", "regweb") + "';\n" );
+		bufferOutput.append(	"			var strActionPage = CurrentPath + '/" + getDynamicWebTwainProperty("guardarScanPath", "anexo/guardarScan") + "/" + docID + "';\n" ); 
 		bufferOutput.append(	"			DWObject.IfSSL = false; // Set whether SSL is used\n" );
 		bufferOutput.append(	"			DWObject.HTTPPort = location.port == '' ? 80 : location.port;\n" );
 		bufferOutput.append(	"			var Digital = new Date();\n");
@@ -215,15 +223,26 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"		return true;\n");
 		bufferOutput.append(	"	}\n");
 		bufferOutput.append(	"	$( document ).ready(function() {\n");
-		bufferOutput.append(	"		$('#desaAnnex')[0].onclick = null;\n");
-		bufferOutput.append(	"		$('#desaAnnex').click(function() {  \n");
-		bufferOutput.append(	"			if (UploadScan()) {\n");
-		bufferOutput.append(	"				procesarAnexo('" + request.getLocale() + "');\n");
-		bufferOutput.append(	"			}\n");
+//		bufferOutput.append(	"		debugger;\n");
+		bufferOutput.append(	"		$('#"+getDynamicWebTwainProperty("idBotoDesaAnnex", "desaAnnex")+"')[0].onclick = null;\n");
+		bufferOutput.append(	"		$('#"+getDynamicWebTwainProperty("idBotoDesaAnnex", "desaAnnex")+"').click(function() {  \n");
+		if (getDynamicWebTwainProperty("scriptValidacioJS") != null) {
+			bufferOutput.append(	"		if (DWObject) {\n" );
+			bufferOutput.append(	"			if (DWObject.HowManyImagesInBuffer > 0) {\n");			
+			bufferOutput.append(	"				if("+getDynamicWebTwainProperty("scriptValidacioJS")+") {\n");
+			bufferOutput.append(	"					UploadScan();\n");
+			bufferOutput.append(	"				}else{\n");
+			bufferOutput.append(	"					alert('"+msgErrorValidacio+"');\n");
+			bufferOutput.append(	"					return false;\n");
+			bufferOutput.append(	"				}\n");
+			bufferOutput.append(	"			}\n");
+			bufferOutput.append(	"		}\n");
+		}else{
+			bufferOutput.append(	"			UploadScan();\n");
+		}
+//		bufferOutput.append(	"				procesarAnexo('" + request.getLocale() + "');\n");
+//		bufferOutput.append(	"			}\n");
 		bufferOutput.append(	"		});\n");
-		bufferOutput.append(	"		$('#modalNuevoAnexo').on('hidden.bs.modal', function () {\n");
-		bufferOutput.append(	"			ResetScan();\n");
-		bufferOutput.append(	" 		})\n");
 		bufferOutput.append(	"	});\n");
 		bufferOutput.append(	"</script>");
 		bufferOutput.append(	"\n");
@@ -280,15 +299,15 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 		bufferOutput.append(	"	<div id=\"scanButtonsGroup\" class=\"form-group col-xs-12\">\n");
 		bufferOutput.append(	"		<div class=\"col-xs-4 pull-left etiqueta_regweb control-label\"></div>\n");
 		bufferOutput.append(	"	  	<div class=\"col-xs-8\">\n");
-		bufferOutput.append(	"			<button class=\"btn btn-sm\" value='Scan' onclick='AcquireImage();' >Scan</button>");
-		bufferOutput.append(	"			<button class=\"btn btn-sm\" value='Scan' onclick='btnRemoveAllImages_onclick();' >" + cleanAll + "</button>");
-		bufferOutput.append(	"			<button class=\"btn btn-sm\" value='Scan' onclick='btnRemoveSelectedImage_onclick();' >" + clean +"</button>");
+		bufferOutput.append(	"			<button class=\"btn btn-sm\" type=\"button\" value='Scan' onclick='AcquireImage();return false;' >Scan</button>");
+		bufferOutput.append(	"			<button class=\"btn btn-sm\" type=\"button\" value='" + cleanAll + "' onclick='btnRemoveAllImages_onclick();' >" + cleanAll + "</button>");
+		bufferOutput.append(	"			<button class=\"btn btn-sm\" type=\"button\" value='" + clean + "' onclick='btnRemoveSelectedImage_onclick();' >" + clean +"</button>");
 		bufferOutput.append(	"		</div>\n");
 		bufferOutput.append(	"	</div>\n");
 		bufferOutput.append(	"\n");
 		bufferOutput.append(	"</div>");
 		bufferOutput.append(	"\n");
-		bufferOutput.append(	"<div id=\"scanContainerGroup\" class=\"col-xs-6\">\n");
+		bufferOutput.append(	"<div id=\"scanContainerGroup\" class=\"col-xs-6\" style=\"margin-bottom: 5px;\">\n");
 		bufferOutput.append(	"	<div id='dwtcontrolContainer'></div>");
 		bufferOutput.append(	"</div>");
 
@@ -319,7 +338,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractPluginProperties imple
 				contingut = IOUtils.toByteArray(input);
 				if( "dynamsoft.webtwain.config.js".equalsIgnoreCase(resourcename)){
 					String outputResource = new String(contingut, "UTF-8");
-					outputResource = outputResource.replaceAll("regweb", getProperty("applicationPath", "regweb"));
+					outputResource = outputResource.replaceAll("regweb", getDynamicWebTwainProperty("applicationPath", "regweb"));
 					contingut = outputResource.getBytes("UTF-8");
 				}
 				resource = new ScanWebResource(name, mime, contingut);
