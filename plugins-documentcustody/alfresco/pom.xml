@@ -15,6 +15,14 @@
   </parent>
 
   <url>http://maven.apache.org</url>
+  
+  <repositories>
+    <repository>
+         <id>maven.alfresco.com</id>
+         <name>Alfresco Maven Repository</name>
+         <url>http://maven.alfresco.com/nexus/content/groups/public/</url>
+    </repository>
+  </repositories>
 
   <dependencies>
   
@@ -24,8 +32,7 @@
         <version>1.0.0</version>
         <scope>provided</scope>
 	</dependency>
-    
-    
+
     <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
@@ -33,6 +40,72 @@
         <scope>provided</scope>
     </dependency>
 
+	<dependency>
+	    <groupId>org.apache.chemistry.opencmis</groupId>
+	    <artifactId>chemistry-opencmis-client-impl</artifactId>
+	    <version>0.9.0</version>
+  		<exclusions>
+  			<exclusion>
+			  <groupId>com.sun.xml.ws</groupId>
+			  <artifactId>jaxws-rt</artifactId>
+  			</exclusion>
+  		</exclusions>	    
+	 </dependency>
+	 
+	<dependency>
+		<groupId>org.apache.chemistry.opencmis</groupId>
+		<artifactId>chemistry-opencmis-client-bindings</artifactId>
+		<version>0.9.0</version>
+	</dependency>
+	
+	<dependency>
+		<groupId>org.alfresco.cmis.client</groupId>
+		<artifactId>alfresco-opencmis-extension</artifactId>
+		<version>1.0</version>
+	</dependency>
+
+  	<dependency>
+  		<groupId>com.google.oauth-client</groupId>
+  		<artifactId>google-oauth-client</artifactId>
+  		<version>1.16.0-rc</version>
+  		<exclusions>
+  			<exclusion>
+  				<artifactId>xpp3</artifactId>
+  				<groupId>xpp3</groupId>
+  			</exclusion>
+  		</exclusions>
+  	</dependency>
+
+    <dependency>
+		<groupId>com.google.http-client</groupId>
+		<artifactId>google-http-client-jackson</artifactId>
+		<version>1.16.0-rc</version>
+	</dependency>
+	
+	<dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-log4j12</artifactId>
+		<version>1.7.12</version>
+	</dependency>
+	
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-beans</artifactId>
+		<version>4.1.6.RELEASE</version>
+	</dependency>
+	
+	<!-- dependency>
+		<groupId>org.apache.axis2</groupId>
+		<artifactId>axis2-jaxws</artifactId>
+		<version>1.6.2</version>
+	</dependency -->
+	
+	<!-- dependency>
+		<groupId>org.apache.cxf</groupId>
+		<artifactId>cxf-rt-frontend-jaxws</artifactId>
+		<version>3.0.0-milestone2</version>
+	</dependency -->
+ 
   </dependencies>
   
   
