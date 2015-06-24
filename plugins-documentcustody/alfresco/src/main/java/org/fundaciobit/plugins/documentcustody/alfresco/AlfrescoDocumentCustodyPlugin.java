@@ -60,7 +60,7 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
 
   
   public String getAlfrescoUrl() {
-    return getProperty(ALFRESCO_PROPERTY_BASE + "alfresco.url");
+    return getProperty(ALFRESCO_PROPERTY_BASE + "url");
   }
   
   public String getRepositoryID() {
@@ -406,8 +406,5 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
     }
     return requestFactory;
   }
-  
-  
-  
 
 }
