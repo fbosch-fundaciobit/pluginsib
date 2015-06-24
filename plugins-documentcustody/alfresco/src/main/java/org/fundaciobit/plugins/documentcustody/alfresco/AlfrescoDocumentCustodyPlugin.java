@@ -1,16 +1,20 @@
 package org.fundaciobit.plugins.documentcustody.alfresco;
 
-import java.beans.XMLDecoder;
-import java.io.ByteArrayInputStream;
-import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.chemistry.opencmis.client.api.Document;
+import org.apache.chemistry.opencmis.client.api.Repository;
+import org.apache.chemistry.opencmis.client.api.Session;
+import org.apache.chemistry.opencmis.client.api.SessionFactory;
+import org.apache.chemistry.opencmis.client.bindings.spi.webservices.CXFPortProvider;
+import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
+import org.apache.chemistry.opencmis.commons.SessionParameter;
+import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.fundaciobit.plugins.documentcustody.AbstractDocumentCustodyPlugin;
 import org.fundaciobit.plugins.documentcustody.CustodyException;
 import org.fundaciobit.plugins.documentcustody.DocumentCustody;
@@ -18,6 +22,14 @@ import org.fundaciobit.plugins.documentcustody.NotSupportedCustodyException;
 import org.fundaciobit.plugins.documentcustody.SignatureCustody;
 import org.fundaciobit.plugins.documentcustody.alfresco.cmis.OpenCmisAlfrescoHelper;
 import org.fundaciobit.plugins.documentcustody.alfresco.util.AlfrescoUtils;
+
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonObjectParser;
+import com.google.api.client.json.jackson.JacksonFactory;
 
 /**
  * Implementació del plugin de custodia documental que guarda dins Alfresco.
@@ -27,8 +39,6 @@ import org.fundaciobit.plugins.documentcustody.alfresco.util.AlfrescoUtils;
  * @author anadal
  */
 public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin {
-
-
 
   /**
    * 
@@ -47,21 +57,35 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
 
 
   public static final String ALFRESCO_PROPERTY_BASE = DOCUMENTCUSTODY_BASE_PROPERTY + "alfresco.";
+
   
-  
-  private String getUrlAlfresco() {
-    return getProperty(ALFRESCO_PROPERTY_BASE + "url");
+  public String getAlfrescoUrl() {
+    return getProperty(ALFRESCO_PROPERTY_BASE + "alfresco.url");
   }
   
-  
-  private String getUsernameAlfresco() {
-    return getProperty(ALFRESCO_PROPERTY_BASE + "username");
+  public String getRepositoryID() {
+    return getProperty(ALFRESCO_PROPERTY_BASE + "repository");
   }
   
-  
-  private String getPasswordAlfresco() {
-    return getProperty(ALFRESCO_PROPERTY_BASE + "password");
+  public String getSite() {
+    return getProperty(ALFRESCO_PROPERTY_BASE + "site");
   }
+
+  public String getUsername() {
+    return getProperty(ALFRESCO_PROPERTY_BASE + "access.user"); 
+  }
+
+  public String getPassword() {
+    return getProperty(ALFRESCO_PROPERTY_BASE + "access.pass");     
+  }
+  
+  public String getAccessMethod() {
+    return getProperty(ALFRESCO_PROPERTY_BASE + "access.method", "WS");
+  }
+  
+
+  
+
   
 
 
@@ -93,7 +117,7 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
 			
 			String docPath = AlfrescoUtils.getPathFromRegistreObject(custodyParameters);
 	    	
-	    	OpenCmisAlfrescoHelper.crearDocument(document, fileFinalame, docPath, properties);
+	    	OpenCmisAlfrescoHelper.crearDocument(getCmisSession(), getSite(), document, fileFinalame, docPath, properties);
 
 	    	log.debug("Pujat Document a Alfresco: "+docPath+"/"+fileFinalame);
 
@@ -106,7 +130,7 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   @Override
   public DocumentCustody getDocumentInfo(String custodyID) throws CustodyException {
 	  
-	  List<Document> docs = OpenCmisAlfrescoHelper.getDocumentById(custodyID+"D");
+	  List<Document> docs = OpenCmisAlfrescoHelper.getDocumentById(getCmisSession(), custodyID+"D");
 	  
 	  if (docs!=null) {
 		  
@@ -145,7 +169,7 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   @Override
   public void deleteDocument(String custodyID) throws CustodyException, NotSupportedCustodyException {
 	  
-	  List<Document> docs = OpenCmisAlfrescoHelper.getDocumentById(custodyID+"D");
+	  List<Document> docs = OpenCmisAlfrescoHelper.getDocumentById(getCmisSession(), custodyID+"D");
 	  
 	  if (docs!=null) {
 		  
@@ -187,7 +211,7 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
 
 			String docPath = AlfrescoUtils.getPathFromRegistreObject(custodyParameters);
 			
-	    	OpenCmisAlfrescoHelper.crearDocument(document, fileFinalame, docPath, properties);
+	    	OpenCmisAlfrescoHelper.crearDocument(getCmisSession(), getSite(), document, fileFinalame, docPath, properties);
 	    	
 	    	log.debug("Pujada firma a Alfresco: "+docPath+"/"+fileFinalame);
 	    	
@@ -200,7 +224,7 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   @Override
   public SignatureCustody getSignatureInfo(String custodyID) throws CustodyException {
 
-	  List<Document> docs = OpenCmisAlfrescoHelper.getDocumentById(custodyID+"S");
+	  List<Document> docs = OpenCmisAlfrescoHelper.getDocumentById(getCmisSession(), custodyID+"S");
 
 	  if (docs!=null) {
 
@@ -238,7 +262,7 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   @Override
   public void deleteSignature(String custodyID) throws CustodyException, NotSupportedCustodyException {
 
-	  List<Document> docs = OpenCmisAlfrescoHelper.getDocumentById(custodyID+"S");
+	  List<Document> docs = OpenCmisAlfrescoHelper.getDocumentById(getCmisSession(), custodyID+"S");
 
 	  if (docs!=null) {
 
@@ -285,7 +309,7 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   protected void writeFile(String custodyID, String relativePath, byte[] data) throws Exception {
 	    try {
 
-	    	OpenCmisAlfrescoHelper.getDocumentById(custodyID);
+	    	OpenCmisAlfrescoHelper.getDocumentById(getCmisSession(), custodyID);
 
 	    } catch (Exception ex) {
 			final String msg = "No s'ha pogut guardar el document amb id="+custodyID;
@@ -303,5 +327,87 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   protected String getPropertyBase() {
     return ALFRESCO_PROPERTY_BASE;
   }
+  
+  
+  
+  // =================================================
+  
+  private Session cmisSession;
+  
+
+  public Session getCmisSession() {
+    
+    if (cmisSession == null) {
+
+      SessionFactory factory = SessionFactoryImpl.newInstance();
+      Map<String, String> parameter = new HashMap<String, String>();
+      String methodAccess = getAccessMethod();
+
+      if ("ATOM".equals(methodAccess)) {
+        
+        parameter.put(SessionParameter.ATOMPUB_URL, getAlfrescoUrl());
+        parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+        parameter.put(SessionParameter.AUTH_HTTP_BASIC, "true");
+        parameter.put(SessionParameter.USER, getUsername());
+        parameter.put(SessionParameter.PASSWORD, getPassword());
+        parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
+
+        List<Repository> repositories = factory.getRepositories(parameter);
+        cmisSession = repositories.get(0).createSession();
+        
+      }else if ("WS".equals(methodAccess)) {
+        
+        parameter.put(SessionParameter.USER, getUsername());
+        parameter.put(SessionParameter.PASSWORD, getPassword());
+        parameter.put(SessionParameter.BINDING_TYPE, BindingType.WEBSERVICES.value());
+        parameter.put(SessionParameter.REPOSITORY_ID, getRepositoryID());
+        parameter.put(SessionParameter.WEBSERVICES_PORT_PROVIDER_CLASS, CXFPortProvider.class.getName());
+        parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
+        //parameter.put(SessionParameter.WEBSERVICES_JAXWS_IMPL, "sunjre");
+        parameter.put(SessionParameter.WEBSERVICES_ACL_SERVICE, getAlfrescoUrl()+"/ACLService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_DISCOVERY_SERVICE, getAlfrescoUrl()+"/DiscoveryService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_MULTIFILING_SERVICE, getAlfrescoUrl()+"/MultiFilingService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_NAVIGATION_SERVICE, getAlfrescoUrl()+"/NavigationService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_OBJECT_SERVICE, getAlfrescoUrl()+"/ObjectService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_POLICY_SERVICE, getAlfrescoUrl()+"/PolicyService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_RELATIONSHIP_SERVICE, getAlfrescoUrl()+"/RelationshipService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_REPOSITORY_SERVICE, getAlfrescoUrl()+"/RepositoryService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_VERSIONING_SERVICE, getAlfrescoUrl()+"/VersioningService?WSDL");
+        parameter.put(SessionParameter.LOCALE_ISO3166_COUNTRY, "ES");
+        parameter.put(SessionParameter.LOCALE_ISO639_LANGUAGE, "es");
+        parameter.put(SessionParameter.LOCALE_VARIANT, "");
+        
+        /*List<Repository> repositories = factory.getRepositories(parameter);
+        for (Repository r : repositories) {
+            System.out.println("Found repository: " + r.getName());
+        }*/
+        
+        cmisSession = factory.createSession(parameter);
+      }
+
+    }
+
+    return cmisSession;
+  }
+  
+  
+  public static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+  
+  private HttpRequestFactory requestFactory;
+
+  public HttpRequestFactory getRequestFactory() {
+    if (requestFactory == null) {
+        requestFactory = HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
+          public void initialize(HttpRequest request) throws IOException {
+            request.setParser(new JsonObjectParser(new JacksonFactory()));
+            request.getHeaders().setBasicAuthentication(getUsername(), getPassword());
+          }
+        });
+    }
+    return requestFactory;
+  }
+  
+  
+  
 
 }

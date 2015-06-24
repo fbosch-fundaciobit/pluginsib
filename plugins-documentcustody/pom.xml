@@ -16,8 +16,8 @@
     <modules>	
        <module>filesystem</module>
 	   <module>custodiacaibaxis</module>
-	   <!--
 	   <module>alfresco</module>
+	   <!--
 	   <module>custodiacaibrest</module>
 	   -->
     </modules>

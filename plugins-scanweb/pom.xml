@@ -5,7 +5,7 @@
     <artifactId>plugins-scanweb</artifactId>
     <packaging>pom</packaging>
  
-    <name>FundacioBit Plugins - Scan Web</name>
+    <name>FundacioBit Plugins - Scan Web Plugins</name>
 	
 	<parent>
 		<groupId>org.fundaciobit.plugins</groupId>
