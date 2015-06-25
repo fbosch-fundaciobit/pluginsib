@@ -2,6 +2,7 @@ package org.fundaciobit.plugins.documentcustody.alfresco.cmis;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -16,21 +17,36 @@ import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
+import org.apache.chemistry.opencmis.client.api.Repository;
 import org.apache.chemistry.opencmis.client.api.Session;
+import org.apache.chemistry.opencmis.client.api.SessionFactory;
+import org.apache.chemistry.opencmis.client.bindings.spi.webservices.CXFPortProvider;
+import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
+import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.data.CmisExtensionElement;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
+import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.enums.ExtensionLevel;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConstraintException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.CmisExtensionElementImpl;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.fundaciobit.plugins.documentcustody.AnnexCustody;
+import org.fundaciobit.plugins.documentcustody.alfresco.AlfrescoDocumentCustodyPlugin;
 
-import com.google.api.client.json.JsonFactory;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson.JacksonFactory;
+
 
 /**
  * Limit Tecnologies
@@ -39,19 +55,31 @@ import com.google.api.client.json.jackson.JacksonFactory;
  */
 public class OpenCmisAlfrescoHelper {
 
-	
-	public static final JsonFactory JSON_FACTORY = new JacksonFactory();
 
 	public static final String CMIS_DOCUMENT_TYPE = "cmis:document";
 	public static final String CMIS_FOLDER_TYPE = "cmis:folder";
+	
+	 protected final Logger log = Logger.getLogger(getClass());
+	
+	
+	protected final AlfrescoDocumentCustodyPlugin alfresco;
+	
+	/**
+	 * 
+	 * @param alfresco
+	 */
+	public OpenCmisAlfrescoHelper(AlfrescoDocumentCustodyPlugin alfresco) {
+	  this.alfresco = alfresco;	  
+	}
+	
 	
 	/**
 	 * Retorna la carpeta pincipal de a on penjen els documents. 
 	 * Ja que la carpeta root que et torna la classe CmisSession no es la carpeta arrel que esperam.
 	 * Una cridada a la funció printRootFolderItems() mostraría l´estructura de carpetes desde la root de sistema.
 	 */
-	public static String getPathCarpetaDocs(String site) {
-		return "/Sites/"+ site +"/documentLibrary";
+	public  String getPathCarpetaDocs(String custodyId) {
+		return "/Sites/"+ alfresco.getSite() +"/documentLibrary" + alfresco.getBasePath() + "/" + custodyId;
 	}
 	
 	/**
@@ -60,12 +88,12 @@ public class OpenCmisAlfrescoHelper {
 	 * @param folderName Nom de la carpeta, no ha de contenir barres.
 	 * @return Carpeta que s´acaba de crear
 	 */
-	public static Folder crearCarpeta(Session cmisSession, String site, String folderName) {
+	public  Folder crearCarpeta(String folderName, String custodyId) {
 		
-		return crearCarpeta(cmisSession, site, folderName, null);
+		return crearCarpeta(folderName, null, custodyId);
 	}
 	
-	public static Folder crearCarpeta(Session cmisSession, String site, String folderName, Folder parent) {
+	public  Folder crearCarpeta(String folderName, Folder parent, String custodyId) {
 		
 		Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
@@ -74,7 +102,7 @@ public class OpenCmisAlfrescoHelper {
 		if (parent!=null) {
 			return parent.createFolder(properties);
 		} else {
-			return crearCarpeta(cmisSession, site, properties);
+			return crearCarpeta(properties, custodyId);
 		}
 	}
 	
@@ -84,7 +112,7 @@ public class OpenCmisAlfrescoHelper {
 	 * per això esta el métode createFoldersPath(path)
 	 * Retorna la carpeta creada.
 	 */
-	public static Folder crearCarpeta(Session cmisSession, String site, Map<String, Object> props) {
+	public  Folder crearCarpeta(Map<String, Object> props, String custodyId) {
 		
 		Folder carpCreada = null;
 		
@@ -94,8 +122,8 @@ public class OpenCmisAlfrescoHelper {
 			
 			if (!folderName.startsWith("/")) { folderName = "/" + folderName; }
 
-			//Session cmisSession = getCmisSession();
-	        Folder rootFolder = (Folder)getRegistreDocsFolder(cmisSession, site);
+			Session cmisSession = getCmisSession();
+	        Folder rootFolder = (Folder)getBaseDocsFolder(custodyId);
 	        try {
 	        	carpCreada = (Folder) cmisSession.getObjectByPath(rootFolder.getPath() + folderName);
 	        	System.out.println("La carpeta "+folderName+ " ja existeix dins "+rootFolder.getPath()+ ".");
@@ -112,7 +140,7 @@ public class OpenCmisAlfrescoHelper {
 	 * @param parentFolderPath Carpeta pare, si no se li passa valor, no es creará la carpeta.
 	 * @return La carpeta que s´acaba de crear.
 	 */
-	public static Folder crearCarpeta(Session cmisSession, String site, Map<String, Object> props, String parentFolderPath) {
+	public  Folder crearCarpeta(Map<String, Object> props, String parentFolderPath, String custodyId) {
 			
 		//Session cmisSession = getCmisSession();
 		Folder carpetaCreada = null;
@@ -122,7 +150,7 @@ public class OpenCmisAlfrescoHelper {
 			try {
 				
 				if (!parentFolderPath.startsWith("/")) { parentFolderPath = "/" + parentFolderPath; }
-		        Folder carpetaPadre = (Folder)cmisSession.getObjectByPath(getPathCarpetaDocs(site) + parentFolderPath);	
+		        Folder carpetaPadre = (Folder)getCmisSession().getObjectByPath(getPathCarpetaDocs(custodyId) + parentFolderPath);	
 		        carpetaCreada = carpetaPadre.createFolder(props);
 			     
 			} catch (CmisObjectNotFoundException onfe) {
@@ -143,24 +171,24 @@ public class OpenCmisAlfrescoHelper {
 	 * Les carpetes creades serán del tipus cmis:folder
 	 * Retorna la ultima carpeta creada.
 	 */
-	public static Folder crearRutaDeCarpetes(Session cmisSession, String site, String path) {
+	public  Folder crearRutaDeCarpetes(String path, String custodyId) {
 		
 		if (path!=null && path!="") {
 			
 			if (path.indexOf("/")!=-1 && path.startsWith("/")) {
 				
-				//Session cmisSession = getCmisSession();
+				Session cmisSession = getCmisSession();
 				// ** Partim de la carpeta principal de documentació del site ** //
-		        Folder folderActual = (Folder)getRegistreDocsFolder(cmisSession, site);
+		    Folder folderActual = (Folder)getBaseDocsFolder(custodyId);
 				String[] carpetesAcrear = path.split("/");
-				String rutaCarpActual = getPathCarpetaDocs(site);
+				String rutaCarpActual = getPathCarpetaDocs(custodyId);
 				
 				for (int numCarp = 1; numCarp<carpetesAcrear.length; numCarp++) {
-
+          
 					try {
 						folderActual = (Folder) cmisSession.getObjectByPath(rutaCarpActual + "/" + carpetesAcrear[numCarp]);
 			        } catch (CmisObjectNotFoundException onfe) {						
-			            folderActual = crearCarpeta(cmisSession, site, carpetesAcrear[numCarp], folderActual);
+			            folderActual = crearCarpeta(carpetesAcrear[numCarp], folderActual, custodyId);
 					}
 
 					rutaCarpActual = rutaCarpActual + "/" + carpetesAcrear[numCarp];
@@ -181,7 +209,7 @@ public class OpenCmisAlfrescoHelper {
 	 * @param rutaCarpeta Path de la carpeta que es vol eliminar.
 	 * @param recursiu Si false, s´intentará borrar la carpeta, si té fills, no es borrarà. Si true, es borrará la carpeta i tot el que contengui.
 	 */
-	public static void borrarCarpeta(Session cmisSession, String site, String rutaCarpeta, boolean recursiu) {
+	public  void borrarCarpeta(String rutaCarpeta, boolean recursiu, String custodyId) {
 		
 		try {
 			//Session cmisSession = getCmisSession();
@@ -189,7 +217,9 @@ public class OpenCmisAlfrescoHelper {
 			if (!rutaCarpeta.startsWith("/")) { rutaCarpeta = "/" + rutaCarpeta; }
 			if ("/".equals(rutaCarpeta)) { rutaCarpeta = ""; }
 			
-			String rutaCompleta = OpenCmisAlfrescoHelper.getPathCarpetaDocs(site)+rutaCarpeta;
+			Session cmisSession = getCmisSession();
+			
+			String rutaCompleta = getPathCarpetaDocs(custodyId)+rutaCarpeta;
 			Folder folderAborrar = (Folder) cmisSession.getObjectByPath(rutaCompleta);
 			
 			if (!recursiu) {
@@ -225,8 +255,8 @@ public class OpenCmisAlfrescoHelper {
 		System.out.println("Document borrat: "+carpeta.getName());
 	}
 	
-	public static void borrarCarpeta(Session cmisSession,  String site, String rutaCarpeta) {
-		borrarCarpeta(cmisSession, site, rutaCarpeta, true);
+	public  void borrarCarpeta(String rutaCarpeta, String custodyId) {
+		borrarCarpeta(rutaCarpeta, true, custodyId);
 	}
 	
 	/**
@@ -234,9 +264,9 @@ public class OpenCmisAlfrescoHelper {
 	 * que penjen de la carpeta root que retorna el metode cmisSession.getRootFolrder()
 	 * Els documents que es pujen a Alfresco via Web es guarden dins /Sites/{nom-del-site}/documentLibrary
 	 */
-	public static void printRootFolderItems(Session cmisSession) {
+	public  void printRootFolderItems() {
 
-		Folder folder = (Folder) cmisSession.getRootFolder();
+		Folder folder = (Folder) getCmisSession().getRootFolder();
 		ItemIterable<CmisObject> children = folder.getChildren();
 	
 		for(CmisObject chind: children) {
@@ -281,10 +311,11 @@ public class OpenCmisAlfrescoHelper {
 	}
 
 	/**
-	 * Recupera l´objecte Folder corresponent a la carpeta pare de on penja tots els documents i resta de carpetes.
+	 * Recupera l´objecte Folder corresponent a la carpeta pare de on penja tots els 
+	 * documents i resta de carpetes.
 	 */
-	public static Folder getRegistreDocsFolder(Session cmisSession, String site) {
-		return (Folder)cmisSession.getObjectByPath(getPathCarpetaDocs(site));
+	public  Folder getBaseDocsFolder(String custodyId) {
+		return (Folder)getCmisSession().getObjectByPath(getPathCarpetaDocs(custodyId));
 	}
 	
 	/**
@@ -295,7 +326,8 @@ public class OpenCmisAlfrescoHelper {
 	 * @param properties Metadades del document
 	 * @return El document creat o null si no s´ha pogut crear.
 	 */
-	public static String crearDocument(Session cmisSession, String site, AnnexCustody document, String fileName, String path, Map<String, Object> properties) {
+	public  String crearDocument( AnnexCustody document, String fileName, 
+	    String path, Map<String, Object> properties, String custodyId) {
 		
 		//Session cmisSession = getCmisSession();
 		Folder parentFolder = null;
@@ -309,17 +341,23 @@ public class OpenCmisAlfrescoHelper {
 			}else{
 				path = "";
 			}
-			parentFolder = (Folder) cmisSession.getObjectByPath(getPathCarpetaDocs(site)+path);
+			parentFolder = (Folder) getCmisSession().getObjectByPath(getPathCarpetaDocs(custodyId)+path);
 		}catch (CmisObjectNotFoundException onfEx) {
 			//Si la carpeta proposada no existeix, es creará la ruta necessaria
-			parentFolder = crearRutaDeCarpetes(cmisSession, site, path);
+			parentFolder = crearRutaDeCarpetes(path, custodyId);
 		}
 
 		if (parentFolder!=null) {	
 			// contingut
+		  String mime = document.getMime();
+		  if (mime == null) {
+		    mime = "application/octet-stream";
+		  }
+		  
+		  
 			byte[] content = document.getData();
 			InputStream stream = new ByteArrayInputStream(content);
-			ContentStream contentStream = new ContentStreamImpl(fileName, BigInteger.valueOf(content.length), document.getMime(), stream);
+			ContentStream contentStream = new ContentStreamImpl(fileName, BigInteger.valueOf(content.length), mime, stream);
 			
 			// versionat
 			documentCreat = parentFolder.createDocument(properties, contentStream, VersioningState.MAJOR);
@@ -331,24 +369,24 @@ public class OpenCmisAlfrescoHelper {
 		return documentCreat.getId();
 	}
 	
-	public static String crearDocument(Session cmisSession, String site, AnnexCustody document,
-	    String fileName, String path) throws FileNotFoundException {
+	public  String crearDocument(AnnexCustody document,
+	    String fileName, String path,String custodyId) throws FileNotFoundException {
 
     	Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put(PropertyIds.OBJECT_TYPE_ID, CMIS_DOCUMENT_TYPE);
 		properties.put(PropertyIds.NAME, fileName);
 		
-		return crearDocument(cmisSession, site, document, fileName, path, properties);
+		return crearDocument(document, fileName, path, properties, custodyId);
 	}
 
-	public static String crearDocument(Session cmisSession, String site, AnnexCustody document, String fileName,
-	    Map<String, Object> properties) throws FileNotFoundException {
+	public  String crearDocument(AnnexCustody document, String fileName,
+	    Map<String, Object> properties, String custodyId) throws FileNotFoundException {
 		
-		return crearDocument(cmisSession, site, document, fileName, "", properties);
+		return crearDocument(document, fileName, "", properties, custodyId);
 	}
 	
-	public static String crearDocument(Session cmisSession, String site, AnnexCustody document,
-	    String fileName) throws FileNotFoundException {
+	public  String crearDocument(AnnexCustody document,
+	    String fileName, String custodyId) throws FileNotFoundException {
 
     	//Map<String, Object> properties = new HashMap<String, Object>();
 		//properties.put(PropertyIds.OBJECT_TYPE_ID, CMIS_DOCUMENT_TYPE);
@@ -361,23 +399,31 @@ public class OpenCmisAlfrescoHelper {
 		properties.put(PropertyIds.NAME, fileName);
 		properties.put("APBRegistro:dr_obsAlfresco", "HOLA");
 		
-		return crearDocument(cmisSession, site, document, fileName, "", properties);
+		return crearDocument(document, fileName, "", properties, custodyId);
 	}
 	
-	public static void borrarDocument(Session cmisSession, String site, String rutaDoc) {
+	public  void borrarDocument(String path, String custodyId) {
+    if (path!=null && !"".equals(path)) {
+      if (!path.startsWith("/")) { 
+        path = "/"+path;
+      }
+    }else{
+      path = "";
+    }
+	  
 		try {
-			//Session cmisSession = getCmisSession();
-			String rutaCompleta = OpenCmisAlfrescoHelper.getPathCarpetaDocs(site)+rutaDoc;
+			Session cmisSession = getCmisSession();
+			String rutaCompleta = getPathCarpetaDocs(custodyId)+path;
 			Document docAborrar = (Document) cmisSession.getObjectByPath(rutaCompleta);
 			docAborrar.delete();
 		} catch (CmisObjectNotFoundException onfe) {
-			System.out.println("El document "+rutaDoc+" no existeix.");
+			System.out.println("El document "+path+" no existeix.");
 			onfe.printStackTrace();
 		} catch (ClassCastException cce) {
-			System.out.println("El document "+rutaDoc+" no es de tipus document.");
+			System.out.println("El document "+path+" no es de tipus document.");
 			cce.printStackTrace();
 		}catch (Exception ex) {
-			System.out.println("Error al intentar borrar el document: "+rutaDoc);
+			System.out.println("Error al intentar borrar el document: "+path);
 			ex.printStackTrace();
 		}
 	}
@@ -385,18 +431,25 @@ public class OpenCmisAlfrescoHelper {
 	/**
 	 * Recupera un document del repositori Alfresco donat una ruta
 	 */
- 	public static Document getDocument(Session cmisSession, String site, String path) {
+ 	public  Document getDocument(String path, String custodyId) {
 		//Session cmisSession = getCmisSession();
-		return (Document) cmisSession.getObjectByPath(getPathCarpetaDocs(site) +path);		
+ 	 if (path!=null && !"".equals(path)) {
+     if (!path.startsWith("/")) { 
+       path = "/"+path;
+     }
+   }else{
+     path = "";
+   }
+		return (Document) getCmisSession().getObjectByPath(getPathCarpetaDocs(custodyId) +path);		
 	}
 
  	/**
  	 * Recupera tots els documents de una custodia si se li passa nomes el custodyID
  	 * Si se li afegeix el sufixe "D" o "S", recuperará nomes el document o la firma respectivament
  	 */
- 	public static List<Document> getDocumentById(Session cmisSession, String id) {
+ 	public  List<Document> getDocumentById(String id) {
  		
-		//Session cmisSession = getCmisSession();
+		Session cmisSession = getCmisSession();
 		List<Document> docs = new ArrayList<Document>();
 		
 	 	ObjectType type = cmisSession.getTypeDefinition(CMIS_DOCUMENT_TYPE);
@@ -421,7 +474,7 @@ public class OpenCmisAlfrescoHelper {
 	/**
 	 * Afegeix una metadada al document o carpeta
 	 */
-	public static void addMetaDataToCMISObject(Folder parentFolder, Document doc, String nom, String valor) {
+	public  void addMetaDataToCMISObject(Folder parentFolder, Document doc, String nom, String valor) {
 		
 		List<CmisExtensionElement> extensions = doc.getExtensions(ExtensionLevel.PROPERTIES);
 		
@@ -452,7 +505,7 @@ public class OpenCmisAlfrescoHelper {
 	/**
 	 * Imprimeix informacion de les metadades o extensions de un objecte CMIS
 	 */
-	public static void printMetadataCMISobject(Folder docmnt, ExtensionLevel eLvl) {
+	public  void printMetadataCMISobject(Folder docmnt, ExtensionLevel eLvl) {
 		
 		if (eLvl!=null) {
 		
@@ -494,7 +547,7 @@ public class OpenCmisAlfrescoHelper {
 		}
 	}
 	
-	public static void setObjectProperties(CmisObject object) {
+	public  void setObjectProperties(CmisObject object) {
 		// some dummy data
 		String typeId = "MyType";
 		String objectId = "1111-2222-3333";
@@ -519,6 +572,192 @@ public class OpenCmisAlfrescoHelper {
 		extensions.add(new CmisExtensionElementImpl(ns, "exampleExtension", null, extElements));
 		//object.setExtensions(extensions);
 	}
+	
+	
+	
+	// --------------------------------
+	
+	
+	public  String crearDocument(byte[] data, String fileName,
+      String path, Map<String, Object> properties, String custodyId) {
+   
+   //Session cmisSession = getCmisSession();
+   Folder parentFolder = null;
+   Document documentCreat = null;
+   
+   try {
+     if (path!=null && !"".equals(path)) {
+       if (!path.startsWith("/")) { 
+         path = "/"+path;
+       }
+     }else{
+       path = "";
+     }
+     parentFolder = (Folder) getCmisSession().getObjectByPath(getPathCarpetaDocs(custodyId)+path);
+   }catch (CmisObjectNotFoundException onfEx) {
+     //Si la carpeta proposada no existeix, es creará la ruta necessaria
+     parentFolder = crearRutaDeCarpetes(path, custodyId);
+   }
+
+   if (parentFolder!=null) { 
+     // contingut
+     String mime = "application/octet-stream";
+
+     InputStream stream = new ByteArrayInputStream(data);
+     ContentStream contentStream = new ContentStreamImpl(fileName, BigInteger.valueOf(data.length), mime, stream);
+     
+     // versionat
+     documentCreat = parentFolder.createDocument(properties, contentStream, VersioningState.MAJOR);
+ 
+     //Document docRecenCreat = getDocument(path+"/"+fileName);
+     //printMetadataCMISobject(docRecenCreat, ExtensionLevel.PROPERTIES);  
+   }
+
+   return documentCreat.getId();
+ }
+ 
+	
+  
+  
+  private Session cmisSession2;
+  
+
+  public Session getCmisSession() {
+    
+    if (cmisSession2 == null) {
+
+      SessionFactory factory = SessionFactoryImpl.newInstance();
+      Map<String, String> parameter = new HashMap<String, String>();
+      String methodAccess = alfresco.getAccessMethod();
+
+      if ("ATOM".equals(methodAccess)) {
+        
+        parameter.put(SessionParameter.ATOMPUB_URL, alfresco.getAlfrescoUrl());
+        parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+        parameter.put(SessionParameter.AUTH_HTTP_BASIC, "true");
+        parameter.put(SessionParameter.USER, alfresco.getUsername());
+        parameter.put(SessionParameter.PASSWORD, alfresco.getPassword());
+        parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
+        parameter.put(SessionParameter.REPOSITORY_ID, alfresco.getRepositoryID());
+
+        
+        List<Repository> repositories = factory.getRepositories(parameter);
+        log.info("Repositoris: " + repositories);
+        if (repositories != null) {
+          log.info("Repositoris.size(): " + repositories.size());
+        }
+        
+        cmisSession2 = repositories.get(0).createSession();
+        
+      } else if ("WS".equals(methodAccess)) {
+        
+        parameter.put(SessionParameter.USER, alfresco.getUsername());
+        parameter.put(SessionParameter.PASSWORD, alfresco.getPassword());
+        parameter.put(SessionParameter.BINDING_TYPE, BindingType.WEBSERVICES.value());
+        parameter.put(SessionParameter.REPOSITORY_ID, alfresco.getRepositoryID());
+        parameter.put(SessionParameter.WEBSERVICES_PORT_PROVIDER_CLASS, CXFPortProvider.class.getName());
+        parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
+        //parameter.put(SessionParameter.WEBSERVICES_JAXWS_IMPL, "sunjre");
+        parameter.put(SessionParameter.WEBSERVICES_ACL_SERVICE, alfresco.getAlfrescoUrl()+"/ACLService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_DISCOVERY_SERVICE, alfresco.getAlfrescoUrl()+"/DiscoveryService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_MULTIFILING_SERVICE, alfresco.getAlfrescoUrl()+"/MultiFilingService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_NAVIGATION_SERVICE, alfresco.getAlfrescoUrl()+"/NavigationService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_OBJECT_SERVICE, alfresco.getAlfrescoUrl()+"/ObjectService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_POLICY_SERVICE, alfresco.getAlfrescoUrl()+"/PolicyService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_RELATIONSHIP_SERVICE, alfresco.getAlfrescoUrl()+"/RelationshipService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_REPOSITORY_SERVICE, alfresco.getAlfrescoUrl()+"/RepositoryService?WSDL");
+        parameter.put(SessionParameter.WEBSERVICES_VERSIONING_SERVICE, alfresco.getAlfrescoUrl()+"/VersioningService?WSDL");
+        parameter.put(SessionParameter.LOCALE_ISO3166_COUNTRY, "ES");
+        parameter.put(SessionParameter.LOCALE_ISO639_LANGUAGE, "es");
+        parameter.put(SessionParameter.LOCALE_VARIANT, "");
+        
+        /*List<Repository> repositories = factory.getRepositories(parameter);
+        for (Repository r : repositories) {
+            System.out.println("Found repository: " + r.getName());
+        }*/
+        
+        cmisSession2 = factory.createSession(parameter);
+      }
+
+    }
+
+    return cmisSession2;
+  }
+  
+  
+  public static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+  
+  private HttpRequestFactory requestFactory;
+
+  public HttpRequestFactory getRequestFactory() {
+    if (requestFactory == null) {
+        requestFactory = HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
+          public void initialize(HttpRequest request) throws IOException {
+            request.setParser(new JsonObjectParser(new JacksonFactory()));
+            request.getHeaders().setBasicAuthentication(alfresco.getUsername(), alfresco.getPassword());
+          }
+        });
+    }
+    return requestFactory;
+  }
+  
+  
+  public static byte[] getCmisObjectContent(Document cmisDoc) throws IOException {
+    if (cmisDoc!=null) {
+      ContentStream cs = cmisDoc.getContentStream();
+      return IOUtils.toByteArray(cs.getStream());
+    }else{
+      return null;
+    }
+  }
+  
+  
+  /*
+  public static String getPathFromRegistreObject(String registreXML) throws UnsupportedEncodingException, IllegalAccessException, ParseException {
+    
+      ByteArrayInputStream stream=new ByteArrayInputStream(registreXML.getBytes("UTF-8"));
+      XMLDecoder xmlDec=new XMLDecoder(stream);
+      Object object=xmlDec.readObject();
+      xmlDec.close();
+    
+      //Variables necessaries per crear la ruta per el document
+      String regES  = "";
+      String regANY = "";
+      String regNUM = "";
+      
+      for (Field field : object.getClass().getDeclaredFields()) {
+        
+          field.setAccessible(true);
+          Object value = field.get(object);
+          
+          if (value != null) {
+            
+            if ("destino".equals(field.getName())) { regES="Entrada"; }
+            if ("origen".equals(field.getName()))  { regES="Salida";  }
+            if ("numeroRegistro".equals(field.getName()))  { regNUM=value.toString();  }
+            if ("fecha".equals(field.getName())) {
+              SimpleDateFormat sdf = new SimpleDateFormat("YYYY");
+              regANY = sdf.format(sdf.parse(value.toString()));
+            }
+            
+              System.out.println(" - "+field.getName() + "=" + value);
+              
+//              if ("registroDetalle".equals(field.getName())) {
+//                
+//                for (Field subField : value.getClass().getDeclaredFields()) {
+//                  subField.setAccessible(true);
+//                  Object subValue = subField.get(value);
+//                  System.out.println("  > "+subField.getName() + "=" + subValue);
+//                }
+//              }
+          }
+      }
+      
+      return "/" + regANY + "/" + regES + "/" + regNUM;
+  }
+  */
+
+	
 	
 
 

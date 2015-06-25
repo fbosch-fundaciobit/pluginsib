@@ -1,11 +1,11 @@
 package org.fundaciobit.plugins.documentcustody.alfresco;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.util.Properties;
 
-import org.fundaciobit.plugins.documentcustody.DocumentCustody;
 import org.fundaciobit.plugins.documentcustody.IDocumentCustodyPlugin;
 import org.fundaciobit.plugins.documentcustody.alfresco.AlfrescoDocumentCustodyPlugin;
+import org.fundaciobit.plugins.test.TestDocumentCustody;
 import org.fundaciobit.plugins.utils.PluginsManager;
 
 /**
@@ -13,54 +13,64 @@ import org.fundaciobit.plugins.utils.PluginsManager;
  * @author anadal
  *
  */
-public class TestAlfrescoCustody {
+public class TestAlfrescoCustody extends TestDocumentCustody {
 
-  
   public static void main(String[] args) {
     try {
-      
-      System.out.println(AlfrescoDocumentCustodyPlugin.class.getCanonicalName());
-      
-     
 
-      
-      final String packageBase = "es.caib.portafib.";
-      
-      final String propertyBase = packageBase + AlfrescoDocumentCustodyPlugin.ALFRESCO_PROPERTY_BASE;
-      
-      
+      System.out.println(AlfrescoDocumentCustodyPlugin.class.getCanonicalName());
+
+      final String packageBase = "es.caib.example.";
+
       Properties alfrescoProperties = new Properties();
-      
-      File f = new File("./testRepos");
-      f.mkdirs();
-      
+
+      alfrescoProperties.load(new FileInputStream("test.properties"));
+
       // Ficar propietats ALFRESCO
-      alfrescoProperties.setProperty(propertyBase + "basedir", f.getAbsolutePath());
-      
-      // TODO FALTEN PROPERTIES ALFRESCO
-      //    URL alfresco
-      //    username alfresco
-      //    password
-      
-      
+
+      /*
+       * 
+       * final String propertyBase = packageBase +
+       * AlfrescoDocumentCustodyPlugin.ALFRESCO_PROPERTY_BASE;
+       * 
+       * 
+       * 
+       * alfrescoProperties.setProperty(propertyBase + "url",
+       * "http://localhost:9080/alfresco/api/-default-/public/cmis/versions/1.0/atom"
+       * );
+       * 
+       * 
+       * //workspace://SpacesStore/b886bad2-998d-4674-a120-1fcc2f1f533c
+       * 
+       * alfrescoProperties.setProperty(propertyBase + "repository",
+       * "b886bad2-998d-4674-a120-1fcc2f1f533c"); //"USER_HOMES/anadal/test/");
+       * 
+       * 
+       * 
+       * alfrescoProperties.setProperty(propertyBase + "basepath","/test");
+       * 
+       * alfrescoProperties.setProperty(propertyBase + "site","ODES");
+       * alfrescoProperties.setProperty(propertyBase + "access.user", "anadal");
+       * 
+       * 
+       * alfrescoProperties.setProperty(propertyBase + "access.pass", "anadal");
+       * 
+       * // WS ATOM
+       * alfrescoProperties.setProperty(propertyBase + "access.method", "ATOM");
+       * 
+       */
+
       IDocumentCustodyPlugin documentCustodyPlugin;
-      documentCustodyPlugin = (IDocumentCustodyPlugin)PluginsManager.instancePluginByClass(AlfrescoDocumentCustodyPlugin.class, packageBase, alfrescoProperties);
-      
-      
-      DocumentCustody doc = new DocumentCustody();
-      doc.setDocumentType(DocumentCustody.DOCUMENT_ONLY);
-      doc.setName("holacaracola.txt");
-      doc.setData("holacaracola".getBytes());
-      
-      String custodyID = "12341234";
-      String custodyParameters = null;
-      
-      documentCustodyPlugin.saveDocument(custodyID, custodyParameters, doc);
+      documentCustodyPlugin = (IDocumentCustodyPlugin) PluginsManager.instancePluginByClass(
+          AlfrescoDocumentCustodyPlugin.class, packageBase, alfrescoProperties);
+
+      TestAlfrescoCustody test = new TestAlfrescoCustody();
+      boolean deleteOnFinish = false;
+      test.testDocumentCustody(documentCustodyPlugin, deleteOnFinish);
 
     } catch (Exception e) {
       e.printStackTrace();
     }
-    
-    
+
   }
 }
