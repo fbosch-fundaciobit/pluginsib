@@ -17,6 +17,7 @@
        <module>filesystem</module>
 	   <module>custodiacaibaxis</module>
 	   <module>alfresco</module>
+	   <module>alfresco-registre-apb</module>
 	   <!--
 	   <module>custodiacaibrest</module>
 	   -->

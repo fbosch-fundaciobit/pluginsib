@@ -6,7 +6,7 @@
   <packaging>jar</packaging>
   <version>1.0.0</version>
 
-  <name>FundacioBit Plugins - Document Custody - Alfresco - APB</name>
+  <name>FundacioBit Plugins - Document Custody - Alfresco_Registre3_APB</name>
 
   <parent>
 	<groupId>org.fundaciobit.plugins</groupId>
@@ -16,13 +16,12 @@
 
   <url>http://maven.apache.org</url>
   
-  <repositories>
-    <repository>
-         <id>maven.alfresco.com</id>
-         <name>Alfresco Maven Repository</name>
-         <url>http://maven.alfresco.com/nexus/content/groups/public/</url>
-    </repository>
-  </repositories>
+  <repositories> 
+		<repository>
+			<id>alfresco-pluginsib-sourceforge</id>      
+			<url>http://pluginsib.sourceforge.net/maven-alfresco/</url>   
+		</repository>  
+  </repositories> 
 
   <dependencies>
   
