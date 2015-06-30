@@ -1,0 +1,8 @@
+
+
+
+es.caib.regweb3.scan.plugin.1=es.fundaciobit.plugins.scanweb.scan_mmscomputing.MmsComputingScanWebPlugin
+es.caib.regweb3.scan.plugin.1.plugins.scanweb.mmscomputing.resourcePath=/anexo/scanwebresource2/1/{0}/
+es.caib.regweb3.scan.plugin.1.plugins.scanweb.mmscomputing.uploadPath=/anexo/guardarScan/{0}
+es.caib.regweb3.scan.plugin.1.plugins.scanweb.mmscomputing.fileFieldName=RemoteFile
+es.caib.regweb3.scan.plugin.1.plugins.scanweb.mmscomputing.submitButton=desaAnnex
