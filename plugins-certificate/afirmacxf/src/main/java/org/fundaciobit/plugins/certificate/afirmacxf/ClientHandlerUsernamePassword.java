@@ -13,7 +13,6 @@ import org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSPasswordCallback;
 import org.apache.ws.security.handler.WSHandlerConstants;
-
 import org.fundaciobit.plugins.certificate.afirmacxf.validarcertificadoapi.Validacion;
 
 /**
@@ -26,6 +25,7 @@ public class ClientHandlerUsernamePassword extends ClientHandler {
   /**
    * 
    */
+  @SuppressWarnings("unused")
   private static final long serialVersionUID = -2810301885896179645L;
   private final String username;
   private final String password;

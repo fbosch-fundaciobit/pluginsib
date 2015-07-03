@@ -10,10 +10,8 @@ import javax.security.auth.callback.CallbackHandler;
 
 import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor;
-
 import org.apache.ws.security.WSPasswordCallback;
 import org.apache.ws.security.handler.WSHandlerConstants;
-
 import org.fundaciobit.plugins.certificate.afirmacxf.validarcertificadoapi.Validacion;
 
 /**
@@ -26,6 +24,7 @@ public class ClientHandlerCertificate extends ClientHandler {
   /**
    * 
    */
+  @SuppressWarnings("unused")
   private static final long serialVersionUID = 3883745902598584073L;
 
   private String keystoreLocation;

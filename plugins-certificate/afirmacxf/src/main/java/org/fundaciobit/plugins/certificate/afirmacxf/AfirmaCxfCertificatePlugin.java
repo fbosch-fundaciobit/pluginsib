@@ -122,7 +122,7 @@ public class AfirmaCxfCertificatePlugin extends AbstractPluginProperties
       if (modeValidacioStr == null) {
         modeValidacio = ValidaCertificat.MODE_VALIDACIO_AMB_REVOCACIO;
       } else {
-        modeValidacio = Integer.parseInt(modeValidacioStr);
+        modeValidacio = Integer.parseInt(modeValidacioStr.trim());
       }
 
       String applicationID = getProperty(APPLICATION_ID);

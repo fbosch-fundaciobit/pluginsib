@@ -15,7 +15,7 @@ import org.fundaciobit.plugins.utils.MetadataType;
  * @author anadal
  * 
  */
-public class Test  {
+public class TestMetadata  {
 
   //@org.junit.Test
   public void test() {
