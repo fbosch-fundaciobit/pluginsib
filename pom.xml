@@ -109,12 +109,12 @@
     <distributionManagement>
         <site>
             <id>org.fundaciobit.plugins</id>
-            <url>scp://shell.sourceforge.net/home/project-web/pluginsib/htdocs/maven</url>
+            <url>sftp://web.sourceforge.net/home/project-web/pluginsib/htdocs/maven</url>
         </site>
         <repository>
             <id>org.fundaciobit.plugins</id>
             <name>PluginsIB Maven Repository</name>
-            <url>scp://shell.sourceforge.net/home/project-web/pluginsib/htdocs/maven</url>
+            <url>sftp://web.sourceforge.net/home/project-web/pluginsib/htdocs/maven</url>
         </repository>
         
         <!--   COM UTILITZAR: AFEGIR AQUEST CODI AL pom.xml    -->

@@ -3,6 +3,7 @@ package org.fundaciobit.plugins.utils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -10,16 +11,39 @@ import java.security.NoSuchProviderException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 
 
 
+import java.util.Map;
 import java.util.logging.Logger;
+
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+
+
+import sun.security.util.DerOutputStream;
 import sun.security.util.DerValue;
+import sun.security.x509.AttributeNameEnumeration;
+import sun.security.x509.CertAttrSet;
+import sun.security.x509.DNSName;
+import sun.security.x509.Extension;
+import sun.security.x509.GeneralName;
+import sun.security.x509.GeneralNameInterface;
+import sun.security.x509.GeneralNames;
+import sun.security.x509.IPAddressName;
+import sun.security.x509.OIDName;
+import sun.security.x509.PKIXExtensions;
+import sun.security.x509.RFC822Name;
+import sun.security.x509.URIName;
+import sun.security.x509.X500Name;
 
 /**
  *
@@ -300,7 +324,7 @@ public class CertificateUtils {
     return cn;
   }
 
-  
+  /*
   public static String getUnitatAdministrativa(X509Certificate cert) {
     return getGenericOID(cert, "OID.2.16.724.1.3.5.3.2.10"); 
   }
@@ -310,27 +334,48 @@ public class CertificateUtils {
    * @param cert
    * @return
    */
+  /*
   public static String getCarrec(X509Certificate cert) {
     return getGenericOID(cert, "OID.2.16.724.1.3.5.3.2.11");
   }
-
   
-  // TODO lleging amb un DerValue (Veure mètode getCertificatePolicyId)
-  private static String getGenericOID(X509Certificate cert, String oid) {
-    String str = cert.toString();
-    
-    int posNom = str.indexOf(oid);
-    if (posNom != -1) {
-      String nom = str.substring(posNom + oid.length() + 1,
-          Math.min(str.indexOf(',', posNom), str.indexOf('\n', posNom)) );
-     
+  */
 
-      return nom;
+  /*
+  // TODO S'ha de llegir amb un DerValue (Veure mètode getCertificatePolicyId)
+
+   private static String getGenericOID(X509Certificate cert, String oid) { 
+     
+    String str = cert.toString();
+    String nom = null;
+    int posOID = str.indexOf(oid);
+    try {
+      if (posOID != -1) {
+        
+        int posComa = str.indexOf(',', posOID);
+        int posNewLine = str.indexOf('\n', posOID);
+        if (posComa == -1) {
+          if (posNewLine == -1) {
+            nom = str.substring(posOID + oid.length() + 1, str.length());
+          } else {
+            nom = str.substring(posOID + oid.length() + 1, posNewLine);
+          }
+        } else {
+          if (posNewLine == -1) {
+            nom = str.substring(posOID + oid.length() + 1, posComa);
+          } else {
+            nom = str.substring(posOID + oid.length() + 1, Math.min(posComa, posNewLine) );
+          }
+        }
+      }
+    } catch(Exception e) {
+      e.printStackTrace();
     }
 
-    return null;
+    return nom;
+    
   }
-  
+  */
 
   /**
    * 
@@ -362,40 +407,24 @@ public class CertificateUtils {
       }
     }
     
-    
 
-    
-
-    // System.out.println("XYZ  CLASSS = " + cert.getClass());
-
-    /*
-     * byte[] data = (byte[])cert.getExtensionValue("2.5.29.17");
-     * 
-     * String oid = "2.5.29.17"; byte[] subjectAltName =
-     * cert.getExtensionValue(oid);
-     * 
-     * sun.security.util.DerInputStream dis = new
-     * sun.security.util.DerInputStream(subjectAltName);
-     */
-    // TODO lleging amb un DerValue (Veure mètode getCertificatePolicyId)
-    String str = cert.toString();
-    {
-      int posNom = str.indexOf("OID.1.3.6.1.4.1.5734.1.1");
-      int posLlinatge1 = str.indexOf("OID.1.3.6.1.4.1.5734.1.2");
-      int posLlinatge2 = str.indexOf("OID.1.3.6.1.4.1.5734.1.3");
-      if (posNom != -1 && posLlinatge1 != -1 && posLlinatge2 != -1) {
-        String nom = str.substring(posNom + "OID.1.3.6.1.4.1.5734.1.1".length() + 1,
-            Math.min(str.indexOf(',', posNom), str.indexOf('\n', posNom)));
-        String llinatge1 = str.substring(posLlinatge1 + "OID.1.3.6.1.4.1.5734.1.2".length()
-            + 1,Math.min( str.indexOf(',', posLlinatge1), str.indexOf('\n', posLlinatge1)));
-        String llinatge2 = str.substring(posLlinatge2 + "OID.1.3.6.1.4.1.5734.1.3".length()
-            + 1,Math.min( str.indexOf(',', posLlinatge2), str.indexOf('\n', posLlinatge2)));
-
-        return nom + " " + llinatge1 + " " + llinatge2;
-      }
-
+    try {
       // OID.1.3.6.1.4.1.5734.1.1=ANTONI, OID.1.3.6.1.4.1.5734.1.2=NADAL,
       // OID.1.3.6.1.4.1.5734.1.3=BENNASAR
+      Map<String, String> values = getAlternativeNamesOfExtension(cert, SUBJECT_ALT_NAME_OID);
+      
+      String nom, llinatge1, llinatge2;
+      
+      if (!values.isEmpty() && ((nom = values.get("OID.1.3.6.1.4.1.5734.1.1")) != null)
+          && ((llinatge1 = values.get("OID.1.3.6.1.4.1.5734.1.2")) != null)
+          && ((llinatge2 = values.get("OID.1.3.6.1.4.1.5734.1.3")) != null)) {
+        
+        
+        return nom + " " + llinatge1 + " " + llinatge2;
+      }
+      
+    } catch(Exception e) {
+      e.printStackTrace();
     }
 
 
@@ -602,5 +631,417 @@ public class CertificateUtils {
 
     return oid;
   }
+  
+  
+  
+  
+
+  
+  private static final String SUBJECT_ALT_NAME_OID = "2.5.29.17";
+  
+  public static String getUnitatAdministrativa(X509Certificate cert) throws Exception {
+    
+    Map<String, String> map = getAlternativeNamesOfExtension(cert, SUBJECT_ALT_NAME_OID);
+        
+    return map.get("OID.2.16.724.1.3.5.3.2.10"); 
+  }
+  
+  /**
+   * 
+   * @param cert
+   * @return
+   */
+  public static String getCarrec(X509Certificate cert) throws Exception {
+    Map<String, String> map = getAlternativeNamesOfExtension(cert, SUBJECT_ALT_NAME_OID);
+    return map.get("OID.2.16.724.1.3.5.3.2.11");
+  }
+  
+  
+
+  
+  
+  /**
+   * This static method is the default implementation of the
+   * getSubjectAlternaitveNames method in X509Certificate. A
+   * X509Certificate provider generally should overwrite this to
+   * provide among other things caching for better performance.
+   */
+  public static Map<String, String> getAlternativeNamesOfExtension(X509Certificate cert,
+      String oid) throws CertificateParsingException {
+    try {
+      
+      Map<String, String> values = new HashMap<String, String>();
+
+      byte[] ext = cert.getExtensionValue(oid);
+      if (ext == null) {
+        return values;
+      }
+
+      DerValue val = new DerValue(ext);
+      byte[] data = val.getOctetString();
+
+      SubjectAlternativeNameExtension subjectAltNameExt = new SubjectAlternativeNameExtension(
+          Boolean.FALSE, data);
+
+      GeneralNames names;
+      Collection<TypeValue> col;
+      try {
+        names = (GeneralNames) subjectAltNameExt
+            .get(SubjectAlternativeNameExtension.SUBJECT_NAME);
+        col = makeAltNames(names);
+      } catch (IOException ioe) {
+        // should not occur
+        col = Collections.<TypeValue> emptySet();
+      }
+
+     
+
+      for (TypeValue typeValue : col) {
+
+        if (typeValue.getType() == GeneralNameInterface.NAME_DIRECTORY) {
+
+          List<Rdn> rdn = new LdapName(typeValue.getValue()).getRdns();
+          for (Rdn rdn2 : rdn) {
+            values.put(rdn2.getType(), rdn2.getValue().toString());
+            // System.out.println("XYZ === " + rdn2.getType() + " ==> " +
+            // rdn2.getValue());
+          }
+
+        }
+
+      }
+
+      return values;
+
+    } catch (Exception ioe) {
+      CertificateParsingException cpe = new CertificateParsingException();
+      cpe.initCause(ioe);
+      throw cpe;
+    }
+  }
+
+
+  
+    
+
+  
+  /**
+   * Converts a GeneralNames structure into an immutable Collection of
+   * alternative names (subject or issuer) in the form required by
+   * {@link #getSubjectAlternativeNames} or
+   * {@link #getIssuerAlternativeNames}.
+   *
+   * @param names the GeneralNames to be converted
+   * @return an immutable Collection of alternative names
+   */
+  private static Collection<TypeValue> makeAltNames( GeneralNames names) {
+
+      if (names.isEmpty()) {
+          return new ArrayList<TypeValue>();
+      }
+      List<TypeValue> newNames = new ArrayList<TypeValue>();
+      for (GeneralName gname : names.names()) {
+          int type;
+          String value;
+          GeneralNameInterface name = gname.getName();
+          //List<Object> nameEntry = new ArrayList<Object>(2);
+          //nameEntry.add(
+          type= Integer.valueOf(name.getType());
+          switch (name.getType()) {
+          case GeneralNameInterface.NAME_RFC822:
+              value = ((RFC822Name) name).getName();
+              break;
+          case GeneralNameInterface.NAME_DNS:
+            value =((DNSName) name).getName();
+              break;
+          case GeneralNameInterface.NAME_DIRECTORY:
+            value =((X500Name) name).getRFC1779Name();  //getRFC2253Name();
+              break;
+          case GeneralNameInterface.NAME_URI:
+            value =((URIName) name).getName();
+              break;
+          case GeneralNameInterface.NAME_IP:
+              try {
+                value =((IPAddressName) name).getName();
+              } catch (IOException ioe) {
+                  // IPAddressName in cert is bogus
+                  throw new RuntimeException("IPAddress cannot be parsed",
+                      ioe);
+              }
+              break;
+          case GeneralNameInterface.NAME_OID:
+            value =((OIDName) name).getOID().toString();
+              break;
+          default:
+              // add DER encoded form
+            
+             
+            
+              DerOutputStream derOut = new DerOutputStream();
+              try {
+                  name.encode(derOut);
+              } catch (IOException ioe) {
+                  // should not occur since name has already been decoded
+                  // from cert (this would indicate a bug in our code)
+                  throw new RuntimeException("name cannot be encoded", ioe);
+              }
+              value = Base64.encode(derOut.toByteArray());
+              break;
+          }
+          newNames.add(new TypeValue(type, value));
+      }
+      return Collections.unmodifiableCollection(newNames);
+  }
+
+
+  
+  
+  
+  private static class TypeValue {
+    
+    final int type;
+    
+    final String value;
+    
+    
+    
+      
+    /**
+       * @param type
+       * @param value
+       */
+      public TypeValue(int type, String value) {
+        super();
+        this.type = type;
+        this.value = value;
+      }
+  
+  
+    public int getType() {
+      return type;
+    }
+  
+    public String getValue() {
+      return value;
+    }
+
+
+  }
+  
+  
+  /**
+   * This represents the Subject Alternative Name Extension.
+   *
+   * This extension, if present, allows the subject to specify multiple
+   * alternative names.
+   *
+   * <p>Extensions are represented as a sequence of the extension identifier
+   * (Object Identifier), a boolean flag stating whether the extension is to
+   * be treated as being critical and the extension value itself (this is again
+   * a DER encoding of the extension value).
+   * <p>
+   * The ASN.1 syntax for this is:
+   * <pre>
+   * SubjectAltName ::= GeneralNames
+   * GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
+   * </pre>
+   * @author Amit Kapoor
+   * @author Hemma Prafullchandra
+   * @see Extension
+   * @see CertAttrSet
+   */
+  private static class SubjectAlternativeNameExtension extends Extension
+  implements CertAttrSet<String> {
+      /**
+       * Identifier for this attribute, to be used with the
+       * get, set, delete methods of Certificate, x509 type.
+       */
+      //public static final String IDENT =
+      //                     "x509.info.extensions.SubjectAlternativeName";
+    
+    
+      /**
+       * Attribute names.
+       */
+      public static final String NAME = "SubjectAlternativeName";
+      public static final String SUBJECT_NAME = "subject_name";
+
+      // private data members
+      GeneralNames        names = null;
+
+      // Encode this extension
+      private void encodeThis() throws IOException {
+          if (names == null || names.isEmpty()) {
+              this.extensionValue = null;
+              return;
+          }
+          DerOutputStream os = new DerOutputStream();
+          names.encode(os);
+          this.extensionValue = os.toByteArray();
+      }
+
+      /**
+       * Create a SubjectAlternativeNameExtension with the passed GeneralNames.
+       * The extension is marked non-critical.
+       *
+       * @param names the GeneralNames for the subject.
+       * @exception IOException on error.
+       */
+      /*
+      public SubjectAlternativeNameExtension(GeneralNames names)
+      throws IOException {
+          this(Boolean.FALSE, names);
+      }
+      */
+
+      /**
+       * Create a SubjectAlternativeNameExtension with the specified
+       * criticality and GeneralNames.
+       *
+       * @param critical true if the extension is to be treated as critical.
+       * @param names the GeneralNames for the subject.
+       * @exception IOException on error.
+       */
+      /*
+      public SubjectAlternativeNameExtension(Boolean critical, GeneralNames names)
+      throws IOException {
+          this.names = names;
+          this.extensionId = PKIXExtensions.SubjectAlternativeName_Id;
+          this.critical = critical.booleanValue();
+          encodeThis();
+      }
+      */
+
+      /**
+       * Create a default SubjectAlternativeNameExtension. The extension
+       * is marked non-critical.
+       */
+      /*
+      public SubjectAlternativeNameExtension() {
+          extensionId = PKIXExtensions.SubjectAlternativeName_Id;
+          critical = false;
+          names = new GeneralNames();
+      }
+      */
+
+      /**
+       * Create the extension from the passed DER encoded value.
+       *
+       * @param critical true if the extension is to be treated as critical.
+       * @param value an array of DER encoded bytes of the actual value.
+       * @exception ClassCastException if value is not an array of bytes
+       * @exception IOException on error.
+       */
+      public SubjectAlternativeNameExtension(Boolean critical, Object value)
+      throws IOException {
+          this.extensionId = PKIXExtensions.SubjectAlternativeName_Id;
+          this.critical = critical.booleanValue();
+
+          this.extensionValue = (byte[]) value;
+          DerValue val = new DerValue(this.extensionValue);
+          if (val.data == null) {
+              names = new GeneralNames();
+              return;
+          }
+
+          names = new GeneralNames(val);
+      }
+
+      /**
+       * Returns a printable representation of the SubjectAlternativeName.
+       */
+      public String toString() {
+
+          String result = super.toString() + "SubjectAlternativeName [\n";
+          if(names == null) {
+              result += "  null\n";
+          } else {
+              for(GeneralName name: names.names()) {
+                  result += "  "+name+"\n";
+              }
+          }
+          result += "]\n";
+          return result;
+      }
+
+      /**
+       * Write the extension to the OutputStream.
+       *
+       * @param out the OutputStream to write the extension to.
+       * @exception IOException on encoding errors.
+       */
+      public void encode(OutputStream out) throws IOException {
+          DerOutputStream tmp = new DerOutputStream();
+          if (extensionValue == null) {
+              extensionId = PKIXExtensions.SubjectAlternativeName_Id;
+              critical = false;
+              encodeThis();
+          }
+          super.encode(tmp);
+          out.write(tmp.toByteArray());
+      }
+
+      /**
+       * Set the attribute value.
+       */
+      public void set(String name, Object obj) throws IOException {
+          if (name.equalsIgnoreCase(SUBJECT_NAME)) {
+              if (!(obj instanceof GeneralNames)) {
+                throw new IOException("Attribute value should be of " +
+                                      "type GeneralNames.");
+              }
+              names = (GeneralNames)obj;
+          } else {
+            throw new IOException("Attribute name not recognized by " +
+                          "CertAttrSet:SubjectAlternativeName.");
+          }
+          encodeThis();
+      }
+
+      /**
+       * Get the attribute value.
+       */
+      public Object get(String name) throws IOException {
+          if (name.equalsIgnoreCase(SUBJECT_NAME)) {
+              return (names);
+          } else {
+            throw new IOException("Attribute name not recognized by " +
+                          "CertAttrSet:SubjectAlternativeName.");
+          }
+      }
+
+      /**
+       * Delete the attribute value.
+       */
+      public void delete(String name) throws IOException {
+          if (name.equalsIgnoreCase(SUBJECT_NAME)) {
+              names = null;
+          } else {
+            throw new IOException("Attribute name not recognized by " +
+                          "CertAttrSet:SubjectAlternativeName.");
+          }
+          encodeThis();
+      }
+
+      /**
+       * Return an enumeration of names of attributes existing within this
+       * attribute.
+       */
+      public Enumeration<String> getElements() {
+          AttributeNameEnumeration elements = new AttributeNameEnumeration();
+          elements.addElement(SUBJECT_NAME);
+
+          return (elements.elements());
+      }
+
+      /**
+       * Return the name of this attribute.
+       */
+      public String getName() {
+          return (NAME);
+      }
+  }
+  
+  
 
 }
