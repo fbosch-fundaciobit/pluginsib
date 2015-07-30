@@ -10,11 +10,6 @@ import java.util.Properties;
  */
 public class Test {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 4212129341357136632L;
-
   public static void main(String[] args) {
 
     try {
