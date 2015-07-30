@@ -125,7 +125,7 @@
              <name>PluginsIB Maven Repository</name>
              <url>http://pluginsib.sourceforge.net/maven/</url>
            </repository>
-        <repositories>
+        </repositories>
         -->
 
     </distributionManagement>

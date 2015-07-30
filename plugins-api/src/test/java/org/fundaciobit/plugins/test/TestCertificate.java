@@ -2,45 +2,14 @@ package org.fundaciobit.plugins.test;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.fundaciobit.plugins.utils.Base64;
 import org.fundaciobit.plugins.utils.CertificateUtils;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import java.io.OutputStream;
-import java.util.Enumeration;
-
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
-import javax.xml.bind.DatatypeConverter;
-
-import sun.security.util.*;
-import sun.security.x509.*;
 
 /**
  * 
