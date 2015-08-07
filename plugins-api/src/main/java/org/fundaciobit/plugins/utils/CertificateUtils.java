@@ -703,8 +703,6 @@ public class CertificateUtils {
           List<Rdn> rdn = new LdapName(typeValue.getValue()).getRdns();
           for (Rdn rdn2 : rdn) {
             values.put(rdn2.getType(), rdn2.getValue().toString());
-            // System.out.println("XYZ === " + rdn2.getType() + " ==> " +
-            // rdn2.getValue());
           }
 
         }
