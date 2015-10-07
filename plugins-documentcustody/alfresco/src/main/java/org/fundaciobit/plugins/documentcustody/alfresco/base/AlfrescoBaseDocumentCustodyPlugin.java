@@ -1,4 +1,4 @@
-package org.fundaciobit.plugins.documentcustody.alfresco;
+package org.fundaciobit.plugins.documentcustody.alfresco.base;
 
 
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.fundaciobit.plugins.documentcustody.AbstractDocumentCustodyPlugin;
 import org.fundaciobit.plugins.documentcustody.CustodyException;
 import org.fundaciobit.plugins.documentcustody.NotSupportedCustodyException;
-import org.fundaciobit.plugins.documentcustody.alfresco.cmis.OpenCmisAlfrescoHelper;
+import org.fundaciobit.plugins.documentcustody.alfresco.base.cmis.OpenCmisAlfrescoHelper;
 
 
 /**
@@ -20,7 +20,7 @@ import org.fundaciobit.plugins.documentcustody.alfresco.cmis.OpenCmisAlfrescoHel
  * 
  * @author anadal
  */
-public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin {
+public class AlfrescoBaseDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin {
   
   
   protected OpenCmisAlfrescoHelper openCmisAlfrescoHelper = new OpenCmisAlfrescoHelper(this);
@@ -29,7 +29,7 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   /**
    * 
    */
-  public AlfrescoDocumentCustodyPlugin() {
+  public AlfrescoBaseDocumentCustodyPlugin() {
     super();
   }
 
@@ -37,7 +37,7 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
    * @param propertyKeyBase
    * @param properties
    */
-  public AlfrescoDocumentCustodyPlugin(String propertyKeyBase, Properties properties) {
+  public AlfrescoBaseDocumentCustodyPlugin(String propertyKeyBase, Properties properties) {
     super(propertyKeyBase, properties);
   }
 

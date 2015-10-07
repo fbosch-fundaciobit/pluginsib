@@ -1,4 +1,4 @@
-package org.fundaciobit.plugins.documentcustody.alfresco.cmis;
+package org.fundaciobit.plugins.documentcustody.alfresco.base.cmis;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -37,7 +37,7 @@ import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.fundaciobit.plugins.documentcustody.AnnexCustody;
-import org.fundaciobit.plugins.documentcustody.alfresco.AlfrescoDocumentCustodyPlugin;
+import org.fundaciobit.plugins.documentcustody.alfresco.base.AlfrescoBaseDocumentCustodyPlugin;
 
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
@@ -62,13 +62,13 @@ public class OpenCmisAlfrescoHelper {
 	 protected final Logger log = Logger.getLogger(getClass());
 	
 	
-	protected final AlfrescoDocumentCustodyPlugin alfresco;
+	protected final AlfrescoBaseDocumentCustodyPlugin alfresco;
 	
 	/**
 	 * 
 	 * @param alfresco
 	 */
-	public OpenCmisAlfrescoHelper(AlfrescoDocumentCustodyPlugin alfresco) {
+	public OpenCmisAlfrescoHelper(AlfrescoBaseDocumentCustodyPlugin alfresco) {
 	  this.alfresco = alfresco;	  
 	}
 	

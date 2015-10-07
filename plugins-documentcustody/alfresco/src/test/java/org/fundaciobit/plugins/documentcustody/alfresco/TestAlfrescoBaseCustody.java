@@ -4,21 +4,21 @@ import java.io.FileInputStream;
 import java.util.Properties;
 
 import org.fundaciobit.plugins.documentcustody.IDocumentCustodyPlugin;
-import org.fundaciobit.plugins.documentcustody.alfresco.AlfrescoDocumentCustodyPlugin;
+import org.fundaciobit.plugins.documentcustody.alfresco.base.AlfrescoBaseDocumentCustodyPlugin;
 import org.fundaciobit.plugins.test.TestDocumentCustody;
 import org.fundaciobit.plugins.utils.PluginsManager;
 
 /**
- * 
+ *
  * @author anadal
  *
  */
-public class TestAlfrescoCustody extends TestDocumentCustody {
+public class TestAlfrescoBaseCustody extends TestDocumentCustody {
 
   public static void main(String[] args) {
     try {
 
-      System.out.println(AlfrescoDocumentCustodyPlugin.class.getCanonicalName());
+      System.out.println(AlfrescoBaseDocumentCustodyPlugin.class.getCanonicalName());
 
       final String packageBase = "es.caib.example.";
 
@@ -27,7 +27,6 @@ public class TestAlfrescoCustody extends TestDocumentCustody {
       alfrescoProperties.load(new FileInputStream("test.properties"));
 
       // Ficar propietats ALFRESCO
-
       /*
        * 
        * final String propertyBase = packageBase +
@@ -62,9 +61,9 @@ public class TestAlfrescoCustody extends TestDocumentCustody {
 
       IDocumentCustodyPlugin documentCustodyPlugin;
       documentCustodyPlugin = (IDocumentCustodyPlugin) PluginsManager.instancePluginByClass(
-          AlfrescoDocumentCustodyPlugin.class, packageBase, alfrescoProperties);
+          AlfrescoBaseDocumentCustodyPlugin.class, packageBase, alfrescoProperties);
 
-      TestAlfrescoCustody test = new TestAlfrescoCustody();
+      TestAlfrescoBaseCustody test = new TestAlfrescoBaseCustody();
       boolean deleteOnFinish = false;
       test.testDocumentCustody(documentCustodyPlugin, deleteOnFinish);
 
