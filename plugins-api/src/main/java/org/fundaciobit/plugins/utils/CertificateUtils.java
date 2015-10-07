@@ -657,8 +657,17 @@ public class CertificateUtils {
   }
   
   
-
   
+  public static String[] getEmpresaNIFNom(X509Certificate cert) throws Exception {
+    Map<String, String> map = getAlternativeNamesOfExtension(cert, SUBJECT_ALT_NAME_OID);
+    String nif = map.get("OID.1.3.6.1.4.1.5734.1.7");
+    if (nif == null) {
+      return null;
+    }
+    
+    return new String[] { nif, map.get("OID.1.3.6.1.4.1.5734.1.6") };
+  }
+    
   
   /**
    * This static method is the default implementation of the

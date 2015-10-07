@@ -89,7 +89,6 @@ public class TestCertificate extends TestUtils {
           System.out.println("Emissior Name DN: " + certificate1.getIssuerDN().toString());
           System.out.println("Emissior Name: "
               + CertificateUtils.getCN(certificate1.getIssuerDN().toString()));
-
           System.out.println();
         }
 
@@ -107,6 +106,13 @@ public class TestCertificate extends TestUtils {
         }
         System.out.println("Emissor: "
             + CertificateUtils.getCN(certificate1.getIssuerDN().toString()));
+        
+        
+        String[] infoEmpresa = CertificateUtils.getEmpresaNIFNom(certificate1);
+        if (infoEmpresa != null) {
+          System.out.println("Empresa-NIF: " + infoEmpresa[0]);
+          System.out.println("Empresa-Nom: " + infoEmpresa[1]);
+        }
 
       } catch (Exception e) {
         System.out.println("ERROR [" + certNumber + "]");
