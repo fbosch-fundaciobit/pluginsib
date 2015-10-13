@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.util.Properties;
 
 import org.bouncycastle.tsp.TimeStampToken;
+import org.fundaciobit.plugins.timestamp.afirmarfc.AfirmaRFCTimeStampPlugin;
 import org.fundaciobit.plugins.timestamp.api.ITimeStampPlugin;
 import org.fundaciobit.plugins.utils.Base64;
 import org.fundaciobit.plugins.utils.PluginsManager;
@@ -13,16 +14,18 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Unit test for simple App.
+ * 
+ * @author anadal
+ *
  */
-public class AppTest extends TestCase {
+public class AfirmaRFCTimeStampTest extends TestCase {
   /**
    * Create the test case
    *
    * @param testName
    *          name of the test case
    */
-  public AppTest(String testName) {
+  public AfirmaRFCTimeStampTest(String testName) {
     super(testName);
   }
 
@@ -30,7 +33,7 @@ public class AppTest extends TestCase {
    * @return the suite of tests being tested
    */
   public static Test suite() {
-    return new TestSuite(AppTest.class);
+    return new TestSuite(AfirmaRFCTimeStampTest.class);
   }
 
   /**
@@ -52,8 +55,6 @@ public class AppTest extends TestCase {
       afirmaRfcProperties.load(new FileInputStream("test.properties"));
       
       System.out.println("Properties: " + afirmaRfcProperties.toString());
-      
-      
 
       ITimeStampPlugin afirmaRFCTimeStampPlugin;
       afirmaRFCTimeStampPlugin = (ITimeStampPlugin) PluginsManager.instancePluginByClass(

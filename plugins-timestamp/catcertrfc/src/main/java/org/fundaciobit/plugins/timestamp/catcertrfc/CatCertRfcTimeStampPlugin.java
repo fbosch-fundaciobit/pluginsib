@@ -1,26 +1,17 @@
 package org.fundaciobit.plugins.timestamp.catcertrfc;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.KeyStore;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.ResourceBundle;
 
-import javax.net.ssl.HostnameVerifier;
+import java.util.Properties;
+
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
+
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -170,9 +161,8 @@ public class CatCertRfcTimeStampPlugin extends AbstractPluginProperties implemen
 
     URL url = new URL(tsaURL);
 
-    HttpsURLConnection tsaConnection = (HttpsURLConnection) url.openConnection();
-    tsaConnection.setHostnameVerifier(new NameVerifier());
-
+    HttpURLConnection tsaConnection = (HttpURLConnection) url.openConnection();
+    
     // Si locTrust es null llavors Acceptar qualsevol certificat
     // cridant a utilitat de pluginsIB
 
@@ -220,116 +210,6 @@ public class CatCertRfcTimeStampPlugin extends AbstractPluginProperties implemen
 
   }
 
-  class NameVerifier implements HostnameVerifier {
-    NameVerifier() {
-    }
-
-    public boolean verify(String hostname, SSLSession session) {
-      boolean result = false;
-      try {
-        ResourceBundle rs = ResourceBundle.getBundle("configuracionCliente");
-        String rutaCert = rs.getString("location.trustkeystore");
-        InputStream inKS = new FileInputStream(rutaCert);
-        KeyStore keyStore = KeyStore.getInstance("JKS");
-        String pass = rs.getString("password.trustkeystore");
-        keyStore.load(inKS, pass.toCharArray());
-
-        Enumeration<String> aliases = keyStore.aliases();
-
-        Certificate[] certs = session.getPeerCertificates();
-        for (int i = 0; i < certs.length; i++) {
-          if ((certs[i] instanceof X509Certificate)) {
-            while (aliases.hasMoreElements()) {
-              String a = (String) aliases.nextElement();
-              Certificate certificadoConfianza = keyStore.getCertificate(a);
-
-              X509Certificate c = (X509Certificate) certs[i];
-              if (certificadoConfianza.equals(c)) {
-                return true;
-              }
-            }
-          }
-        }
-      } catch (Exception e) {
-        result = false;
-      }
-      return result;
-    }
-  }
-
-  public byte[] invocarTsa(byte[] request) throws TSPException, IOException, Exception {
-    ResourceBundle rs = ResourceBundle.getBundle("configuracionCliente");
-    String tsaURL = rs.getString("url.https");
-
-    String autenticacionCliente = rs.getString("https.autenticacion.cliente");
-
-    URL url = new URL(tsaURL);
-
-    HttpsURLConnection tsaConnection = (HttpsURLConnection) url.openConnection();
-
-    tsaConnection.setHostnameVerifier(new NameVerifier());
-
-    String locTrust = rs.getString("location.trustkeystore");
-    String passTrust = rs.getString("password.trustkeystore");
-    try {
-      SSLContext ctx = SSLContext.getInstance("SSL");
-      KeyStore ks = KeyStore.getInstance("PKCS12");
-
-      KeyStore cer = KeyStore.getInstance("JKS");
-      cer.load(new FileInputStream(locTrust), passTrust.toCharArray());
-
-      TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-      tmf.init(cer);
-      if ("SI".equals(autenticacionCliente)) {
-        String locCert = rs.getString("https.autenticacion.location.cert");
-        String passCert = rs.getString("https.autenticacion.password.cert");
-        InputStream inKS = new FileInputStream(locCert);
-        char[] passphrase = passCert.toCharArray();
-        ks.load(inKS, passCert.toCharArray());
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-        kmf.init(ks, passphrase);
-
-        ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-      } else if ("NO".equals(autenticacionCliente)) {
-        ctx.init(null, tmf.getTrustManagers(), null);
-      } else {
-        throw new Exception("Valor incorrecto para la propiedad: https.autenticacion.cliente");
-      }
-      SSLSocketFactory factory = ctx.getSocketFactory();
-
-      tsaConnection.setSSLSocketFactory(factory);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    tsaConnection.setDoInput(true);
-    tsaConnection.setDoOutput(true);
-    tsaConnection.setUseCaches(false);
-    tsaConnection.setRequestProperty("Content-Type", "application/timestamp-query");
-    tsaConnection.setAllowUserInteraction(false);
-
-    tsaConnection.setRequestProperty("Content-Transfer-Encoding", "binary");
-
-    OutputStream out = tsaConnection.getOutputStream();
-
-    out.write(request);
-
-    out.close();
-
-    InputStream inp = tsaConnection.getInputStream();
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    byte[] buffer = new byte[1024];
-    int bytesRead = 0;
-    while ((bytesRead = inp.read(buffer, 0, buffer.length)) >= 0) {
-      baos.write(buffer, 0, bytesRead);
-    }
-    byte[] respBytes = baos.toByteArray();
-
-    String encoding = tsaConnection.getContentEncoding();
-    if ((encoding != null) && (encoding.equalsIgnoreCase("base64"))) {
-      BASE64Decoder dec = new BASE64Decoder();
-      respBytes = dec.decodeBuffer(new String(respBytes));
-    }
-    return respBytes;
-  }
+ 
 
 }
