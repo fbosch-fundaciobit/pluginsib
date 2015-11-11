@@ -79,8 +79,24 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
 	  return getProperty(ALFRESCO_PROPERTY_BASE + "repository");
   }
   
-  private String getPathCarpetaDocuments() {
-	  return "/Sites/"+getProperty(ALFRESCO_PROPERTY_BASE + "site")+"/documentLibrary";
+  private String getPathCarpetaDocuments() throws Exception {
+
+    String site = getProperty(ALFRESCO_PROPERTY_BASE + "site");
+    
+    if (site != null) {
+      return "/Sites/"+site+"/documentLibrary";
+    } else {
+      String fullSitePath = getProperty(ALFRESCO_PROPERTY_BASE + "fullsitepath");
+      if (fullSitePath != null) {
+        return fullSitePath;
+      }
+      String p1 = getPropertyName(ALFRESCO_PROPERTY_BASE + "site");
+      String p2 = getPropertyName(ALFRESCO_PROPERTY_BASE + "fullsitepath");
+      String msg = "Ha de definir una de les següent propietats: " + p1 + " o " + p2;
+      log.error(msg, new Exception());
+      throw new Exception(msg);
+    }
+
   }
   
   // =================================================

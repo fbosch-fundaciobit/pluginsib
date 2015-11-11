@@ -57,6 +57,10 @@ public class AlfrescoBaseDocumentCustodyPlugin extends AbstractDocumentCustodyPl
     return getProperty(ALFRESCO_PROPERTY_BASE + "site");
   }
   
+  public String getFullSitePath() {
+    return getProperty(ALFRESCO_PROPERTY_BASE + "fullsitepath");
+  }
+  
   public String getBasePath() {
     return getProperty(ALFRESCO_PROPERTY_BASE + "basepath", "");
   }
@@ -180,9 +184,11 @@ public class AlfrescoBaseDocumentCustodyPlugin extends AbstractDocumentCustodyPl
   @Override
   public String reserveCustodyID(String parameters) throws CustodyException {
     String custodyId = super.reserveCustodyID(parameters);
-    
-    openCmisAlfrescoHelper.crearCarpeta(custodyId, null, ""); // Està bé que passem custodyID com a Stirng buit
-    
+    try {
+      openCmisAlfrescoHelper.crearCarpeta(custodyId, null, ""); // Està bé que passem custodyID com a Stirng buit
+    }catch(Exception e) {
+      throw new CustodyException(e.getMessage(), e);
+    }
     return custodyId;
   }
   

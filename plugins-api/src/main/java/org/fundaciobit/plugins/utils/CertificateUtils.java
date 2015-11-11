@@ -8,6 +8,8 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -27,7 +29,6 @@ import java.util.logging.Logger;
 
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
-
 
 import sun.security.util.DerOutputStream;
 import sun.security.util.DerValue;
@@ -134,6 +135,32 @@ public class CertificateUtils {
     
     return certificats;
   }
+  
+  
+  
+  public static  PublicCertificatePrivateKeyPair readPKCS12(InputStream p12, String p12Password) throws KeyStoreException,
+    IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
+  
+      
+    String keyAlias= null;
+    KeyStore keystore = KeyStore.getInstance("PKCS12");
+    keystore.load(p12, p12Password.toCharArray());
+    
+    
+    Enumeration<String> aliases = keystore.aliases();
+    
+    while (aliases.hasMoreElements()) {
+        keyAlias = (String) aliases.nextElement();
+    }
+    
+    return  new PublicCertificatePrivateKeyPair(
+        (X509Certificate) keystore.getCertificate(keyAlias),
+        (PrivateKey)keystore.getKey(keyAlias, p12Password.toCharArray())
+        );
+  
+  }
+  
+  
 
   /**
    * Recupera el commonName a partir de los datos del certificado

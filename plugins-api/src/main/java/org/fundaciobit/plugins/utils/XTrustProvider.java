@@ -1,4 +1,4 @@
-package org.fundaciobit.plugins.checkcertificate;
+package org.fundaciobit.plugins.utils;
 
 import java.security.AccessController;
 import java.security.InvalidAlgorithmParameterException;
@@ -51,6 +51,8 @@ public final class XTrustProvider extends java.security.Provider {
    */
   private static final long serialVersionUID = 6918225528412551855L;
 
+  public final static String ALGORITHM = "XTrust509";
+  
   private final static String NAME = "XTrustJSSE";
   private final static String INFO = "XTrust JSSE Provider (implements trust factory with truststore validation disabled)";
   private final static double VERSION = 1.0D;
@@ -67,12 +69,17 @@ public final class XTrustProvider extends java.security.Provider {
     });
   }
 
-  public static void install() {
+  /**
+   * 
+   * @return Algotirh to be used in TrustManagerFactory.getInstance().
+   */
+  public static String install() {
     if (Security.getProvider(NAME) == null) {
       Security.insertProviderAt(new XTrustProvider(), 2);
       Security.setProperty("ssl.TrustManagerFactory.algorithm",
           TrustManagerFactoryImpl.getAlgorithm());
     }
+    return ALGORITHM;
   }
 
   public final static class TrustManagerFactoryImpl extends TrustManagerFactorySpi {
@@ -80,7 +87,7 @@ public final class XTrustProvider extends java.security.Provider {
     }
 
     public static String getAlgorithm() {
-      return "XTrust509";
+      return ALGORITHM;
     }
 
     protected void engineInit(KeyStore keystore) throws KeyStoreException {

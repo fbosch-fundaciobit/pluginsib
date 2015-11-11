@@ -10,8 +10,6 @@ import java.net.URL;
 
 import java.util.Properties;
 
-import javax.net.ssl.HttpsURLConnection;
-
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1InputStream;

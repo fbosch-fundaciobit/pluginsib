@@ -46,11 +46,11 @@ public abstract class TestDocumentCustody {
     
     
     if (documentCustodyPlugin.getDocumentInfo(custodyID) == null) {
-      Assert.fail("Nopot llegir document info");
+      Assert.fail("No pot llegir document info");
     }
     
     if (documentCustodyPlugin.getDocument(custodyID) == null) {
-      Assert.fail("Nopot llegir document byte []");
+      Assert.fail("No pot llegir document byte []");
     }
     
     

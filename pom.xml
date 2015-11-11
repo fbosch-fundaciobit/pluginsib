@@ -17,6 +17,7 @@
        <module>plugins-documentcustody</module>
        <module>plugins-exportdata</module>
 	   <module>plugins-scanweb</module>
+       <module>plugins-timestamp</module>
        <module>loginmodule-jboss</module>
     </modules>
 

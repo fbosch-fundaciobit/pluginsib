@@ -1,7 +1,6 @@
 package org.fundaciobit.plugins.documentcustody.alfresco.base.cmis;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -78,8 +77,22 @@ public class OpenCmisAlfrescoHelper {
 	 * Ja que la carpeta root que et torna la classe CmisSession no es la carpeta arrel que esperam.
 	 * Una cridada a la funció printRootFolderItems() mostraría l´estructura de carpetes desde la root de sistema.
 	 */
-	public  String getPathCarpetaDocs(String custodyId) {
-		return "/Sites/"+ alfresco.getSite() +"/documentLibrary" + alfresco.getBasePath() + "/" + custodyId;
+	public  String getPathCarpetaDocs(String custodyId) throws Exception {
+	  String site = alfresco.getSite();
+	  
+	  if (site != null) {
+	  	return "/Sites/"+ site +"/documentLibrary" + alfresco.getBasePath() + "/" + custodyId;
+	  } else {
+	    String fullSitePath = alfresco.getFullSitePath();
+	    if (fullSitePath != null) {
+	      return fullSitePath  + alfresco.getBasePath() + "/" + custodyId;
+	    }
+      String p1 = alfresco.getPropertyName(AlfrescoBaseDocumentCustodyPlugin.ALFRESCO_PROPERTY_BASE + "site");
+      String p2 = alfresco.getPropertyName(AlfrescoBaseDocumentCustodyPlugin.ALFRESCO_PROPERTY_BASE + "fullsitepath");
+      String msg = "Ha de definir una de les següent propietats: " + p1 + " o " + p2;
+      log.error(msg, new Exception());
+      throw new Exception(msg);
+	  }
 	}
 	
 	/**
@@ -88,12 +101,12 @@ public class OpenCmisAlfrescoHelper {
 	 * @param folderName Nom de la carpeta, no ha de contenir barres.
 	 * @return Carpeta que s´acaba de crear
 	 */
-	public  Folder crearCarpeta(String folderName, String custodyId) {
+	public  Folder crearCarpeta(String folderName, String custodyId) throws Exception {
 		
 		return crearCarpeta(folderName, null, custodyId);
 	}
 	
-	public  Folder crearCarpeta(String folderName, Folder parent, String custodyId) {
+	public  Folder crearCarpeta(String folderName, Folder parent, String custodyId) throws Exception {
 		
 		Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
@@ -112,7 +125,7 @@ public class OpenCmisAlfrescoHelper {
 	 * per això esta el métode createFoldersPath(path)
 	 * Retorna la carpeta creada.
 	 */
-	public  Folder crearCarpeta(Map<String, Object> props, String custodyId) {
+	public  Folder crearCarpeta(Map<String, Object> props, String custodyId) throws Exception {
 		
 		Folder carpCreada = null;
 		
@@ -171,7 +184,7 @@ public class OpenCmisAlfrescoHelper {
 	 * Les carpetes creades serán del tipus cmis:folder
 	 * Retorna la ultima carpeta creada.
 	 */
-	public  Folder crearRutaDeCarpetes(String path, String custodyId) {
+	public  Folder crearRutaDeCarpetes(String path, String custodyId) throws Exception {
 		
 		if (path!=null && path!="") {
 			
@@ -314,7 +327,7 @@ public class OpenCmisAlfrescoHelper {
 	 * Recupera l´objecte Folder corresponent a la carpeta pare de on penja tots els 
 	 * documents i resta de carpetes.
 	 */
-	public  Folder getBaseDocsFolder(String custodyId) {
+	public  Folder getBaseDocsFolder(String custodyId) throws Exception {
 		return (Folder)getCmisSession().getObjectByPath(getPathCarpetaDocs(custodyId));
 	}
 	
@@ -327,7 +340,7 @@ public class OpenCmisAlfrescoHelper {
 	 * @return El document creat o null si no s´ha pogut crear.
 	 */
 	public  String crearDocument( AnnexCustody document, String fileName, 
-	    String path, Map<String, Object> properties, String custodyId) {
+	    String path, Map<String, Object> properties, String custodyId) throws Exception {
 		
 		//Session cmisSession = getCmisSession();
 		Folder parentFolder = null;
@@ -370,7 +383,7 @@ public class OpenCmisAlfrescoHelper {
 	}
 	
 	public  String crearDocument(AnnexCustody document,
-	    String fileName, String path,String custodyId) throws FileNotFoundException {
+	    String fileName, String path,String custodyId) throws Exception {
 
     	Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put(PropertyIds.OBJECT_TYPE_ID, CMIS_DOCUMENT_TYPE);
@@ -380,13 +393,13 @@ public class OpenCmisAlfrescoHelper {
 	}
 
 	public  String crearDocument(AnnexCustody document, String fileName,
-	    Map<String, Object> properties, String custodyId) throws FileNotFoundException {
+	    Map<String, Object> properties, String custodyId) throws Exception {
 		
 		return crearDocument(document, fileName, "", properties, custodyId);
 	}
 	
 	public  String crearDocument(AnnexCustody document,
-	    String fileName, String custodyId) throws FileNotFoundException {
+	    String fileName, String custodyId) throws Exception {
 
     	//Map<String, Object> properties = new HashMap<String, Object>();
 		//properties.put(PropertyIds.OBJECT_TYPE_ID, CMIS_DOCUMENT_TYPE);
@@ -431,7 +444,7 @@ public class OpenCmisAlfrescoHelper {
 	/**
 	 * Recupera un document del repositori Alfresco donat una ruta
 	 */
- 	public  Document getDocument(String path, String custodyId) {
+ 	public  Document getDocument(String path, String custodyId) throws Exception {
 		//Session cmisSession = getCmisSession();
  	 if (path!=null && !"".equals(path)) {
      if (!path.startsWith("/")) { 
@@ -579,7 +592,7 @@ public class OpenCmisAlfrescoHelper {
 	
 	
 	public  String crearDocument(byte[] data, String fileName,
-      String path, Map<String, Object> properties, String custodyId) {
+      String path, Map<String, Object> properties, String custodyId) throws Exception {
    
    //Session cmisSession = getCmisSession();
    Folder parentFolder = null;

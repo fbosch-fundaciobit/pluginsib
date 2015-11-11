@@ -1,6 +1,5 @@
 package org.fundaciobit.plugins.documentcustody.alfresco;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
@@ -28,7 +27,6 @@ public class TestAlfrescoApbCustody {
       Properties alfrescoProperties = new Properties();
 
       alfrescoProperties.load(new FileInputStream("test.properties"));
-      
 
       //File f = new File("./testRepos");
       //f.mkdirs();

@@ -134,8 +134,6 @@ public class AfirmaRFCTimeStampPlugin extends AbstractPluginProperties implement
       PeticionException pExc = new PeticionException(tspException.getMessage());
       throw pExc;
     } catch (IOException ioExc) {
-      // XYZ
-
       AutenticacionException autExc = null;
       if (ioExc.getMessage().contains("402")) {
         autExc = new AutenticacionException("Error en el proceso de autenticación");
@@ -192,66 +190,5 @@ public class AfirmaRFCTimeStampPlugin extends AbstractPluginProperties implement
     return tss;
   }
 
-  /*
-   * public static void main(String[] args) { byte[] entrada = new
-   * String("hola").getBytes(); try {
-   * 
-   * System.out.println("*** INICIO RFC3161+HTTPS (Port 8443) ***");
-   * TimeStampToken tst3 = generarTS(entrada); if (tst3 != null) {
-   * System.out.println("Sello obtenido:"); System.out.println(new
-   * String(Base64.encode(tst3.getEncoded())));
-   * 
-   * } else { System.out.println("Error desconocido. Respuesta vacia."); }
-   * System.out.println("*** FIN RFC3161+HTTPS (Port 8443) ***"); } catch
-   * (Exception ex1) { System.err.println(ex1.getMessage());
-   * ex1.printStackTrace(); }
-   * 
-   * }
-   * 
-   * public static TimeStampToken generarTS(byte[] fichero) throws
-   * ConexionException, AutenticacionException, PeticionException { byte[] datos
-   * = null; try { if (fichero == null) { return null; } datos = new
-   * byte[fichero.length]; datos = (byte[]) fichero.clone();
-   * 
-   * ResourceBundle rs = ResourceBundle.getBundle("configuracionCliente");
-   * 
-   * String oid = null; oid = rs.getString("oid.rfc3161");
-   * 
-   * String appID = null; appID = rs.getString("ident.aplicacion");
-   * 
-   * String tsaURL = rs.getString("url.https");
-   * 
-   * // XYZ Opcional String locTrust = rs.getString("location.trustkeystore");
-   * String passTrust = rs.getString("password.trustkeystore");
-   * 
-   * String locCert = rs.getString("https.autenticacion.location.cert"); String
-   * passCert = rs.getString("https.autenticacion.password.cert");
-   * 
-   * TimeStampService tss; if (locTrust == null) { tss = new
-   * TimeStampService(tsaURL, appID, locCert, passCert, oid); } else { tss = new
-   * TimeStampService(tsaURL, appID, locCert, passCert, oid, locTrust,
-   * passTrust); }
-   * 
-   * return tss.requestTimeStampHTTPS(datos);
-   * 
-   * } catch (ConnectException cExc) { ConexionException ce = new
-   * ConexionException(
-   * "Error de conexion. Compruebe el Host establecido o que el servicio este habilitado"
-   * );
-   * 
-   * throw ce; } catch (TSPException tspException) { PeticionException pExc =
-   * new PeticionException(tspException.getMessage()); throw pExc; } catch
-   * (IOException ioExc) { AutenticacionException autExc = null; if
-   * (ioExc.getMessage().contains("402")) { autExc = new
-   * AutenticacionException("Error en el proceso de autenticación"); throw
-   * autExc; } if ((ioExc.getMessage().contains("401")) ||
-   * (ioExc.getMessage().contains("handshake_failure"))) { autExc = new
-   * AutenticacionException("Certificado no válido"); throw autExc; } if
-   * (ioExc.getMessage().contains("400")) { PeticionException pExc = new
-   * PeticionException("Petición Incorrecta"); throw pExc; } throw new
-   * ConexionException("Error de Conexion desconocido:" + ioExc.getMessage(),
-   * ioExc); }
-   * 
-   * }
-   */
+
 }
