@@ -1,17 +1,20 @@
 package org.fundaciobit.plugins.timestamp.afirmarfc;
 
-import java.io.IOException;
-import java.net.ConnectException;
+import java.io.File;
+import java.util.Calendar;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.fundaciobit.plugins.timestamp.api.ITimeStampPlugin;
+import org.fundaciobit.plugins.timestamp.api.utils.RFC3161Connection;
+import org.fundaciobit.plugins.timestamp.api.utils.RFC3161Params;
 import org.fundaciobit.plugins.utils.AbstractPluginProperties;
+import org.fundaciobit.plugins.utils.Base64;
+import org.fundaciobit.plugins.utils.FileUtils;
 
 /**
- * 
+ *
  * @author anadal
  *
  */
@@ -27,6 +30,8 @@ public class AfirmaRFCTimeStampPlugin extends AbstractPluginProperties implement
   public static final String APPLICATION_ID = AFIRMARFC_BASE_PROPERTIES + "applicationid";
 
   public static final String URL_RFC = AFIRMARFC_BASE_PROPERTIES + "url_rfc";
+
+  public static final String HASH_ALGORITHM = AFIRMARFC_BASE_PROPERTIES + "hashalgorithm";
 
   // String locCert = rs.getString("https.autenticacion.location.cert");
   public static final String AUTH_CERT_PATH = AFIRMARFC_BASE_PROPERTIES + "auth.cert.p12.path";
@@ -66,129 +71,84 @@ public class AfirmaRFCTimeStampPlugin extends AbstractPluginProperties implement
     super(propertyKeyBase);
   }
 
-  
-  public byte[] getTimeStampDirect(byte[] fichero) throws Exception {
-    try {
-      if (fichero == null) {
-        return null;
-      }
-      byte[] datos = null;
-      datos = new byte[fichero.length];
-      datos = (byte[]) fichero.clone();
-
-      TimeStampService tss = getTimeStampService();
-
-      return tss.requestTimeStampHTTPSDirect(datos).respBytes;
-
-    } catch (ConnectException cExc) {
-      ConexionException ce = new ConexionException(
-          "Error de conexion. Compruebe el Host establecido o que el servicio este habilitado");
-      throw ce;
-    } catch (TSPException tspException) {
-      PeticionException pExc = new PeticionException(tspException.getMessage());
-      throw pExc;
-    } catch (IOException ioExc) {
-      AutenticacionException autExc = null;
-      if (ioExc.getMessage().contains("402")) {
-        autExc = new AutenticacionException("Error en el proceso de autenticación");
-        throw autExc;
-      }
-      if ((ioExc.getMessage().contains("401"))
-          || (ioExc.getMessage().contains("handshake_failure"))) {
-        autExc = new AutenticacionException("Certificado no válido");
-        throw autExc;
-      }
-      if (ioExc.getMessage().contains("400")) {
-        PeticionException pExc = new PeticionException("Petición Incorrecta");
-        throw pExc;
-      }
-      throw new ConexionException("Error de Conexion desconocido:" + ioExc.getMessage(), ioExc);
-    }
-
+  @Override
+  public String getTimeStampPolicyOID() {
+    return getProperty(OID_RFC3161);
   }
-  
-  
-  /**
-   * 
-   */
-  public TimeStampToken getTimeStamp(byte[] fichero) throws Exception {
 
-   
-    try {
-      if (fichero == null) {
-        return null;
-      }
-      byte[] datos = null;
-      datos = new byte[fichero.length];
-      datos = (byte[]) fichero.clone();
+  @Override
+  public String getTimeStampHashAlgorithm() {
+    return getProperty(HASH_ALGORITHM);
+  }
 
-      TimeStampService tss = getTimeStampService();
+  @Override
+  public TimeStampToken getTimeStamp(byte[] inputdata, Calendar time) throws Exception {
 
-      return tss.requestTimeStampHTTPS(datos);
+    byte[] ts = getTimeStampDirect(inputdata, time);
 
-    } catch (ConnectException cExc) {
-      ConexionException ce = new ConexionException(
-          "Error de conexion. Compruebe el Host establecido o que el servicio este habilitado");
-      throw ce;
-    } catch (TSPException tspException) {
-      PeticionException pExc = new PeticionException(tspException.getMessage());
-      throw pExc;
-    } catch (IOException ioExc) {
-      AutenticacionException autExc = null;
-      if (ioExc.getMessage().contains("402")) {
-        autExc = new AutenticacionException("Error en el proceso de autenticación");
-        throw autExc;
-      }
-      if ((ioExc.getMessage().contains("401"))
-          || (ioExc.getMessage().contains("handshake_failure"))) {
-        autExc = new AutenticacionException("Certificado no válido");
-        throw autExc;
-      }
-      if (ioExc.getMessage().contains("400")) {
-        PeticionException pExc = new PeticionException("Petición Incorrecta");
-        throw pExc;
-      }
-      throw new ConexionException("Error de Conexion desconocido:" + ioExc.getMessage(), ioExc);
-    }
+    return RFC3161Connection.getTimeStampTokenFromTimeStampResponse(ts);
 
   }
 
-  private TimeStampService getTimeStampService() {
-    String oid = getProperty(OID_RFC3161);
-    
+  @Override
+  public byte[] getTimeStampDirect(byte[] inputdata, Calendar time) throws Exception {
 
-    String appID = null;
-    appID = getProperty(APPLICATION_ID);
-    
+    RFC3161Params tsaparams = new RFC3161Params(getProperties());
+    String hashAlgorithm = tsaparams.getTsaHashAlgorithm();
+    RFC3161Connection ts = new RFC3161Connection(tsaparams);
+
+    return ts.getTimeStampResponse(inputdata, hashAlgorithm, time);
+  }
+
+  public Properties getProperties() throws Exception {
+
+    Properties miniAppletProperties = new Properties();
 
     String tsaURL = getProperty(URL_RFC);
+    miniAppletProperties.setProperty("tsaURL", tsaURL);
 
+    miniAppletProperties.setProperty("tsaPolicy", getTimeStampPolicyOID());
+
+    miniAppletProperties.setProperty("tsaHashAlgorithm", getTimeStampHashAlgorithm());
+
+    // TODO Passar com parametre
+    miniAppletProperties.setProperty("tsaRequireCert", "true");
 
     String locCert = getProperty(AUTH_CERT_PATH);
     String passCert = getProperty(AUTH_CERT_PASSWORD);
+    // Almacen para el SSL cliente
+    miniAppletProperties.setProperty("tsaSslKeyStore", toB64(locCert));
 
+    miniAppletProperties.setProperty("tsaSslKeyStorePassword", passCert);
 
+    // TODO Passar com parametre
+    miniAppletProperties.setProperty("tsaSslKeyStoreType", "PKCS12");
+
+    // TrustStore con los certificados de confianza para el SSL ==> BASE 64
     String locTrust = getProperty(SERVER_TRUSTKEYSTORE_PATH);
     String passTrust = getProperty(SERVER_TRUSTKEYSTORE_PASSWORD);
 
-    if (log.isDebugEnabled()) {
-      log.debug("OID = " + oid);
-      log.debug("APPLICATION_ID = " + appID);
-      log.debug("tsaURL = " + tsaURL);
-      log.debug("locCert = " + locCert);
-      log.debug("passCert = " + passCert);
-      log.debug("locTrust = " + locTrust);
-      log.debug("passTrust = " + passTrust);
-    }
+    miniAppletProperties.setProperty("tsaSslTrustStore", toB64(locTrust));
 
-    TimeStampService tss;
-    if (locTrust == null && passTrust != null) {
-      tss = new TimeStampService(tsaURL, appID, locCert, passCert, oid);
-    } else {
-      tss = new TimeStampService(tsaURL, appID, locCert, passCert, oid, locTrust, passTrust);
-    }
-    return tss;
+    miniAppletProperties.setProperty("tsaSslTrustStorePassword", passTrust);
+
+    // TODO Passar com parametre
+    miniAppletProperties.setProperty("tsaSslTrustStoreType", "JKS");
+    miniAppletProperties.setProperty("verifyHostname", "false");
+
+    String appID = getProperty(APPLICATION_ID);
+    miniAppletProperties.setProperty("tsaExtensionOid", "1.3.4.6.1.3.4.6");
+    miniAppletProperties.setProperty("tsaExtensionCritical", "false");
+    miniAppletProperties.setProperty("tsaExtensionValueBase64", Base64.encode(appID));
+
+    return miniAppletProperties;
   }
 
+  public static String toB64(String filePath) throws Exception {
+    byte[] dataTS = FileUtils.readFromFile(new File(filePath));
+
+    return Base64.encode(dataTS);
+
+  }
 
 }

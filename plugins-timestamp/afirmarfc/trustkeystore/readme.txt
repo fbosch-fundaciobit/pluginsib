@@ -9,4 +9,5 @@ echo SET PASSWORD  123456789
 
 keytool -import -alias 1 -keystore truststore.jks  -file certificate.der
 
-// COntrasenya 123456789
+// Contrasenya 123456789
+// Alias 1

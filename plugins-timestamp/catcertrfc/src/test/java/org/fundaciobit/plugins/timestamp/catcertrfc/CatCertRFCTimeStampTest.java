@@ -1,6 +1,7 @@
 package org.fundaciobit.plugins.timestamp.catcertrfc;
 
 import java.io.FileInputStream;
+import java.util.Calendar;
 import java.util.Properties;
 
 import org.bouncycastle.tsp.TimeStampToken;
@@ -17,9 +18,7 @@ import junit.framework.TestSuite;
  * @author anadal
  *
  */
-public class CatCertRFCTimeStampTest 
-    extends TestCase
-{
+public class CatCertRFCTimeStampTest  extends TestCase {
     /**
      * Create the test case
      *
@@ -44,6 +43,7 @@ public class CatCertRFCTimeStampTest
     public void testApp()
     {
         assertTrue( true );
+        // main(null);
     }
     
     public static void main(String[] args) {
@@ -66,7 +66,7 @@ public class CatCertRFCTimeStampTest
         byte[] fichero = new String("hola").getBytes();
 
         System.out.println("*** INICIO RFC3161  ***");
-        TimeStampToken tst3 = catCertRFCTimeStampPlugin.getTimeStamp(fichero);
+        TimeStampToken tst3 = catCertRFCTimeStampPlugin.getTimeStamp(fichero, Calendar.getInstance());
         if (tst3 != null) {
           System.out.println("Sello obtenido:");
           System.out.println(new String(tst3.getEncoded()));
