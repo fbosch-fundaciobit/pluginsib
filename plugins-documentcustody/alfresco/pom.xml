@@ -34,7 +34,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- reuse src/test/java code from plugins-api  -->
+			<!-- Reuse src/test/java code from plugins-api  -->
 			<groupId>org.fundaciobit.plugins</groupId>
 			<artifactId>plugins-api</artifactId>
 			<version>1.0.0</version>
@@ -72,7 +72,14 @@
 			<artifactId>alfresco-opencmis-extension</artifactId>
 			<version>1.0</version>
 		</dependency>
-
+        
+        <dependency>
+			<groupId>com.google.http-client</groupId>
+			<artifactId>google-http-client-jackson</artifactId>
+			<version>1.16.0-rc</version>
+		</dependency>
+        
+<!--
 		<dependency>
 			<groupId>com.google.oauth-client</groupId>
 			<artifactId>google-oauth-client</artifactId>
@@ -85,11 +92,7 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
-			<groupId>com.google.http-client</groupId>
-			<artifactId>google-http-client-jackson</artifactId>
-			<version>1.16.0-rc</version>
-		</dependency>
+
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -102,7 +105,8 @@
 			<artifactId>spring-beans</artifactId>
 			<version>4.1.6.RELEASE</version>
 		</dependency>
-
+-->
+        
 		<!-- dependency>
 		<groupId>org.apache.axis2</groupId>
 		<artifactId>axis2-jaxws</artifactId>
