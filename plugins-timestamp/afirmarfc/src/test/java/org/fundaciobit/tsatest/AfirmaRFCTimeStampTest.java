@@ -48,6 +48,7 @@ public class AfirmaRFCTimeStampTest extends TestCase {
   public static void main(String[] args) {
 
     try {
+      
       System.out.println(AfirmaRFCTimeStampPlugin.class.getCanonicalName());
 
       final String packageBase = "es.caib.example.";
@@ -88,8 +89,10 @@ public class AfirmaRFCTimeStampTest extends TestCase {
       
       
       System.out.println("\n\n*** INICIO RFC3161+HTTPS (Port 8443) == TIMESTAMP BC ***");
-      
+      long start = System.currentTimeMillis();
       TimeStampToken tst3 = afirmaRFCTimeStampPlugin.getTimeStamp(fichero, Calendar.getInstance());
+      System.out.println("Elapsed MS: " + (System.currentTimeMillis() - start));
+      
       if (tst3 != null) {
         System.out.println("TIMESTAMP BC Sello obtenido:");
         System.out.println(new String(tst3.getEncoded()));

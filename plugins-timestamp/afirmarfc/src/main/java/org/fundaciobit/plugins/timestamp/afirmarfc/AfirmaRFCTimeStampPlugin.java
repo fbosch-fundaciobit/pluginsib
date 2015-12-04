@@ -125,15 +125,17 @@ public class AfirmaRFCTimeStampPlugin extends AbstractPluginProperties implement
     miniAppletProperties.setProperty("tsaSslKeyStoreType", "PKCS12");
 
     // TrustStore con los certificados de confianza para el SSL ==> BASE 64
+    
     String locTrust = getProperty(SERVER_TRUSTKEYSTORE_PATH);
     String passTrust = getProperty(SERVER_TRUSTKEYSTORE_PASSWORD);
+    
+    if (locTrust != null && passTrust != null) {
+      miniAppletProperties.setProperty("tsaSslTrustStore", toB64(locTrust));
+      miniAppletProperties.setProperty("tsaSslTrustStorePassword", passTrust);
+      // TODO Passar com parametre
+      miniAppletProperties.setProperty("tsaSslTrustStoreType", "JKS");
+    }
 
-    miniAppletProperties.setProperty("tsaSslTrustStore", toB64(locTrust));
-
-    miniAppletProperties.setProperty("tsaSslTrustStorePassword", passTrust);
-
-    // TODO Passar com parametre
-    miniAppletProperties.setProperty("tsaSslTrustStoreType", "JKS");
     miniAppletProperties.setProperty("verifyHostname", "false");
 
     String appID = getProperty(APPLICATION_ID);
