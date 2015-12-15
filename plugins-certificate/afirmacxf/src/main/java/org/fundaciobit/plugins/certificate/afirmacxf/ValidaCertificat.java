@@ -113,8 +113,9 @@ public class ValidaCertificat {
     
     Excepcion ex = ms.getRespuesta().getExcepcion();
     
-
-    log.info("Exceptcion = " + ex);
+    if (ex != null) {
+      log.error("Exception = " + ex);
+    }
 
 
     if (ex == null) {
