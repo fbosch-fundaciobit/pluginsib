@@ -251,12 +251,26 @@ public class ValidaCertificat {
     }
     return dades;
   }
+  
+  // Cache
+  protected Validacion api = null;
+  
+  protected long lastConnection = 0;
 
   private String cridarValidarCertificado(String certificatBase64,
       boolean obtenirDadesCertificat, int modeValidacio) throws Exception {
 
-    ValidacionService service = new ValidacionService(new java.net.URL(getEndPoint() + "?wsdl"));
-    Validacion api = service.getValidarCertificado();
+    // Cada 10 minuts refem la comunicació
+    long now = System.currentTimeMillis();
+    if (lastConnection + 10 * 60 * 1000L < now) {
+      lastConnection = now;
+      api = null;
+    }
+    
+    if (api == null) {
+      ValidacionService service = new ValidacionService(new java.net.URL(getEndPoint() + "?wsdl"));
+      api = service.getValidarCertificado();
+    }
 
     Map<String, Object> reqContext = ((BindingProvider) api).getRequestContext();
     reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, getEndPoint());
