@@ -16,13 +16,6 @@
 
 	<url>http://maven.apache.org</url>
 
-	<repositories> 
-		<repository>
-			<id>alfresco-pluginsib-sourceforge</id>      
-			<url>http://pluginsib.sourceforge.net/maven-alfresco/</url>   
-		</repository>  
-	</repositories> 
-
 
 	<dependencies>
 

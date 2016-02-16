@@ -25,14 +25,6 @@
 	<afirma.keytool.password>afirma</afirma.keytool.password>
   </properties>
   
-  	<repositories> 
-		<repository>
-			<id>mmscomputing-pluginsib-sourceforge</id>      
-			<url>http://pluginsib.sourceforge.net/maven-mmscomputing/</url>   
-		</repository>  
-	</repositories> 
-  
-  
 
   <dependencies>
   
