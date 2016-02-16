@@ -1,0 +1,45 @@
+
+Maven dependencies for jboss development:
+
+
+		
+		<dependency>
+		  <groupId>org.fundaciobit.plugins</groupId>
+		  <artifactId>plugins-api</artifactId>
+		  <version>1.0</version>
+		  <type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.9-RC2-PluginsIB</version>
+	        <exclusions>
+                <exclusion>
+					<groupId>dom4j</groupId>
+					<artifactId>dom4j</artifactId>
+                </exclusion>
+				<exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+				<exclusion>
+				  <groupId>org.javassist</groupId>
+				  <artifactId>javassist</artifactId>
+				</exclusion>
+            </exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-vfs2</artifactId>
+			<version>2.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
+
+

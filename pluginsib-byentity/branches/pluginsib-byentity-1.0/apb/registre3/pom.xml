@@ -1,0 +1,72 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>pluginsib-byentity-apb-earplugins</artifactId>
+	<groupId>es.caib.regweb3</groupId>
+	<packaging>ear</packaging>
+
+	<name>Regweb3 EarPlugins</name>
+
+	<parent>
+		<groupId>es.caib.regweb3</groupId>
+		<artifactId>regweb3</artifactId>
+		<version>3.0.0</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.fundaciobit.plugins</groupId>
+			<artifactId>plugin-scanweb-dynamicwebtwain</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<finalName>plugins-regweb3-apb</finalName>
+
+		<!-- filters> <filter>../config.properties</filter> </filters -->
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ear-plugin</artifactId>
+				<version>2.3.2</version>
+
+				<configuration>
+					<displayName>Regweb3 EarPlugins</displayName>
+					<description>Regweb3 EarPlugins</description>
+
+					<defaultLibBundleDir>lib</defaultLibBundleDir>
+
+					<jboss>
+						<version>5</version>
+						<loader-repository>es.caib.regweb3.:loader=regweb3_plugins.ear</loader-repository> 
+						<loader-repository-config>java2ParentDelegation=false</loader-repository-config> 
+					</jboss>
+
+					<modules>
+						<jarModule>
+							<groupId>org.fundaciobit.plugins</groupId>
+							<artifactId>plugin-scanweb-dynamicwebtwain</artifactId>
+							<includeInApplicationXml>true</includeInApplicationXml>
+						</jarModule>
+					</modules>
+
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jboss-maven-plugin</artifactId>
+				<version>1.5.0</version>
+				<configuration>
+					<!-- <jbossHome>D:\servers\jboss-eap-5.1\jboss-as</jbossHome> -->
+					<serverName>default</serverName>
+					<fileName>target/regweb3_plugins.ear</fileName>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>
