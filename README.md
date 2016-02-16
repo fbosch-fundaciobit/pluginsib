@@ -33,7 +33,7 @@ Repositori de Plugins per les Aplicacions del KitAnibal i qualsevol aplicació q
 **Captures de pantalla**
 
 ![Exportació de dades a cvs,xls, ods, ...](https://raw.githubusercontent.com/GovernIB/pluginsib/binaris/projectinfo_Attachments/screenshots/exportdata1.png)
-Exportació de dades a cvs,xls, ods, ...
+<br/>Exportació de dades a cvs,xls, ods, ...
  
 
 
