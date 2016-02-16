@@ -17,3 +17,24 @@ Repositori de Plugins per les Aplicacions del KitAnibal i qualsevol aplicació q
 
 
 
+**Característiques**
+
+* Registered: 2014-08-04
+* Project Labels: Plugin 
+* Topic: Software Development :: Libraries
+* License:  European Union Public License &  GNU General Public License version 3.0 (GPLv3)
+* Database Environment: No Database Environment
+* Development Status: Production/Stable
+* Intended Audience: Developers & Government
+* Operating System: OS Independent (Written in an interpreted language)
+* Programming Language: Java & JSP
+
+
+**Captures de pantalla**
+
+![Exportació de dades a cvs,xls, ods, ...](https://github.com/GovernIB/pluginsib/blob/binaris/projectinfo_Attachments/screenshots/exportdata1.png)
+Exportació de dades a cvs,xls, ods, ...
+ 
+
+
+
