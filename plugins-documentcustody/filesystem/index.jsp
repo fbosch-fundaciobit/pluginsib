@@ -6,13 +6,8 @@
 %><%@page language="java" 
 %><%!
 
-  /**
-   *  Modficar aquest valor per la propietat base del plugin. Per exemple:
-   *       es.caib.portafib.plugins.documentcustody.filesystem.
-   *       es.caib.regweb.plugins.documentcustody.alfresco.
-   */
-  //private static final String PROPERTY_BASE = << MODIFICA AQUEST VALOR !!!! >>;
-  private static final String PROPERTY_BASE = "es.caib.portafib.plugins.documentcustody.filesystem.";
+ 
+  private static final String CUSTODY_PREFIX = << MODIFICA AQUEST VALOR AMB LA PROPIETAT PREFIX DEFINIDA AL PLUGIN !!!! >>;
 
   /** Modificar aquest valor segons si accedim as fitxer:
     *  custodyID (per exemple http://localhost:8080/custodia/index.jsp?custodyID={1}) ha de valer false
@@ -36,43 +31,24 @@
   public static final String NONE_SIGNATURE = "none";
 
   private final String getCustodyDocumentName(String custodyID) {
-    return CUSTODY_PREFIX() + custodyID + ".DOC";
+    return CUSTODY_PREFIX + custodyID + ".DOC";
   }
   
   private final String getCustodyDocumentInfoName(String custodyID) {
-    return CUSTODY_PREFIX() + custodyID + ".DOCINFO";
+    return CUSTODY_PREFIX + custodyID + ".DOCINFO";
   }
 
   private final String getCustodySignatureName(String custodyID) {
-    return CUSTODY_PREFIX() + custodyID + ".SIGN";
+    return CUSTODY_PREFIX + custodyID + ".SIGN";
   }
 
   private final String getCustodySignatureInfoName(String custodyID) {
-    return CUSTODY_PREFIX() +  custodyID + ".SIGNINFO";
+    return CUSTODY_PREFIX +  custodyID + ".SIGNINFO";
   }
   
   private final String getCustodyHashesFile() {
-    return CUSTODY_PREFIX() + "HASH__FILE.properties";
+    return CUSTODY_PREFIX + "HASH__FILE.properties";
   }
-    
-	private static String prefix = null;
-
-    protected String CUSTODY_PREFIX() {
-		if (prefix == null) {
-		  String pfix = System.getProperty(PROPERTY_BASE + "prefix");
-		  if (pfix == null || pfix.trim().length() == 0) {
-			pfix = "";
-		  } else {
-			pfix = pfix.trim();
-			if (!pfix.endsWith("_")) {
-			  pfix = pfix + "_";
-			}
-		  }
-		  prefix = pfix;  
-		}
-		return prefix; 
-	}
-
 
     
     public byte[] readFile(File info) throws Exception {
