@@ -36,6 +36,19 @@
                 <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
+        
+		<repository>
+			<id>pluginsib-alfresco-maven-repos</id>
+            <name>PluginsIB-Alfresco Maven Repository</name>
+			<url>http://GovernIB.github.io/pluginsib/maven-alfresco/</url>   
+		</repository>  
+          
+		<repository>
+			<id>pluginsib-mmscomputing-maven-repos</id>
+            <name>PluginsIB MMS Computing Maven Repository</name>            
+			<url>http://GovernIB.github.io/pluginsib/maven-mmscomputing/</url>   
+		</repository>  
+
     </repositories>
 
 
