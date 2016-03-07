@@ -17,6 +17,7 @@
 	   <module>api</module>
 	   <module>dynamicwebtwain</module>
 	   <module>mmscomputing</module>
+       <module>iecisascanweb</module>
     </modules>
 	
 	<dependencies>
