@@ -87,9 +87,19 @@ public interface LDAPConstants {
   String LDAP_NAME_ATTRIBUTE =  "ldap.attribute.name";
 
   /**
-   * LDAP of Property key name that represents surname.
+   * LDAP of Property key name that represents all surnames.
    */
-  String LDAP_SURNAME_ATTRIBUTE = "ldap.attribute.surname";
+  String LDAP_SURNAMES_ATTRIBUTE = "ldap.attribute.surname";
+
+  /**
+   * LDAP of Property key name that represents first surname.
+   */
+  String LDAP_SURNAME1_ATTRIBUTE = "ldap.attribute.surname1";
+  
+  /**
+   * LDAP of Property key name that represents second surname.
+   */
+  String LDAP_SURNAME2_ATTRIBUTE = "ldap.attribute.surname2";
   
   String LDAP_MEMBEROF_ATTRIBUTE="ldap.attribute.memberof";
 
@@ -106,8 +116,8 @@ public interface LDAPConstants {
     PREFIX_ROLE_MATCH_MEMBEROF,SUFFIX_ROLE_MATCH_MEMBEROF,
     // ATTRIBUTES
     LDAP_USERNAME_ATTRIBUTE, LDAP_EMAIL_ATTRIBUTE, LDAP_ADMINISTRATIONID_ATTRIBUTE,
-    LDAP_NAME_ATTRIBUTE, LDAP_SURNAME_ATTRIBUTE, LDAP_TELEPHONE_ATTRIBUTE,
-    LDAP_MEMBEROF_ATTRIBUTE
+    LDAP_NAME_ATTRIBUTE, LDAP_SURNAMES_ATTRIBUTE, LDAP_SURNAME1_ATTRIBUTE, LDAP_SURNAME2_ATTRIBUTE,
+    LDAP_TELEPHONE_ATTRIBUTE, LDAP_MEMBEROF_ATTRIBUTE
   };
 
 }

@@ -67,7 +67,9 @@ public class Test {
       ldapProperties.setProperty(LDAPConstants.LDAP_NAME_ATTRIBUTE, "givenName");
       ldapProperties.setProperty(LDAPConstants.LDAP_EMAIL_ATTRIBUTE, "mail");
       ldapProperties.setProperty(LDAPConstants.LDAP_ADMINISTRATIONID_ATTRIBUTE, "postOfficeBox");
-      ldapProperties.setProperty(LDAPConstants.LDAP_SURNAME_ATTRIBUTE, "sn");
+      ldapProperties.setProperty(LDAPConstants.LDAP_SURNAMES_ATTRIBUTE, "sn");
+      ldapProperties.setProperty(LDAPConstants.LDAP_SURNAME1_ATTRIBUTE, "sn1");
+      ldapProperties.setProperty(LDAPConstants.LDAP_SURNAME1_ATTRIBUTE, "sn2");
       ldapProperties.setProperty(LDAPConstants.LDAP_MEMBEROF_ATTRIBUTE, "memberOf");
       ldapProperties.setProperty(LDAPConstants.LDAP_TELEPHONE_ATTRIBUTE, "telephoneNumber");
 
@@ -82,8 +84,10 @@ public class Test {
       int i = 0;
       System.out.println(" ALL USERS (" + all.length + ")");
       for (LDAPUser u : all) {
+        String surnames = LDAPUser.getCorrectSurname(u);
+        
         System.out.println((i++) + ".- " + u.getUserName() + " -> " + u.getName() + " "
-            + u.getSurname() + "  [" + u.getEmail() + "]");
+            + surnames + "  [" + u.getEmail() + "]");
         if (i > 10) {
           System.out.println("...");
           break;
@@ -107,7 +111,7 @@ public class Test {
       // 3.2.- Obtenir usuari per NIF
       LDAPUser u2 = um.getUserByAdministrationID(u.getAdministrationID());
       System.out.println("El nom de l'usuari amb NIF [" + u.getAdministrationID() + "] és " + u2.getAdministrationID()
-          + " " + u2.getSurname());
+          + " " + LDAPUser.getCorrectSurname(u2));
 
       // 4.- Existeix usuari?
       boolean existeix = um.userExists(username);

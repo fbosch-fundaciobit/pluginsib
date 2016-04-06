@@ -39,7 +39,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author anadal
  *
  */
-public class TesterLdapApp extends JFrame {
+public class TesterLdapApp extends JFrame implements LDAPConstants {
 
   public static final Map<String, String> trans = new HashMap<String, String>();
 
@@ -59,13 +59,15 @@ public class TesterLdapApp extends JFrame {
     trans.put("ldap.attribute.mail", "Atribut[Correu]");
     trans.put("ldap.attribute.administration_id", "Atribut[NIF]");
     trans.put("ldap.attribute.name", "Atribut[Nom]");
-    trans.put("ldap.attribute.surname", "Atribut[Llinatges]");
+    trans.put(LDAP_SURNAMES_ATTRIBUTE, "Atribut[Llinatge1 o Llinatges]");
+    trans.put(LDAP_SURNAME1_ATTRIBUTE, "Atribut[Llinatge1]");
+    trans.put(LDAP_SURNAME2_ATTRIBUTE, "Atribut[Llinatge2]");
     trans.put("ldap.attribute.telephone", "Atribut[Telefon]");
     trans.put("ldap.attribute.memberof", "Atribut[Rols]");
 
     defvalues.put("ldap.host_url", "ldap://ldap.ibit.org:389");
     defvalues.put("ldap.security_authentication", "simple");
-    // XYZ
+
     defvalues.put("ldap.security_principal", "lectorldap");
     defvalues.put("ldap.security_credentials", "lectorldap");
     defvalues.put("ldap.users_context_dn", "cn=Users,dc=ibitnet,dc=lan");
@@ -80,7 +82,9 @@ public class TesterLdapApp extends JFrame {
     defvalues.put("ldap.attribute.mail", "mail");
     defvalues.put("ldap.attribute.administration_id", "postOfficeBox");
     defvalues.put("ldap.attribute.name", "givenName");
-    defvalues.put("ldap.attribute.surname", "sn");
+    defvalues.put(LDAP_SURNAMES_ATTRIBUTE, "sn");
+    defvalues.put(LDAP_SURNAME1_ATTRIBUTE, "sn1");
+    defvalues.put(LDAP_SURNAME2_ATTRIBUTE, "sn2");
     defvalues.put("ldap.attribute.telephone", "telephoneNumber");
     defvalues.put("ldap.attribute.memberof", "memberOf");
   }
@@ -406,7 +410,8 @@ public class TesterLdapApp extends JFrame {
   protected String getUserByUsername(String username) {
     try {
       LDAPUser user = this.ldapUserManager.getUserByUsername(username);
-      StringBuffer str = new StringBuffer("USERNAME " + username);
+      StringBuffer str = new StringBuffer("USERNAME " + username
+          + "\n=================================\n");
 
       if (user == null) {
         str.append(" NULL !!!!!");
@@ -438,7 +443,7 @@ public class TesterLdapApp extends JFrame {
 
     str.append("getAdministrationID: " + user.getAdministrationID() + " \n");
     str.append("getName: " + user.getName() + " \n");
-    str.append("getSurname: " + user.getSurname() + " \n");
+    str.append("getSurname: " + LDAPUser.getCorrectSurname(user) + " \n");
     str.append("getEmail: " + user.getEmail() + " \n");
     str.append("getTelephoneNumber: " + user.getTelephoneNumber() + " \n");
   }

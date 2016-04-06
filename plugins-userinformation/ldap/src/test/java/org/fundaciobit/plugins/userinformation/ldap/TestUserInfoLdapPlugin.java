@@ -7,7 +7,6 @@ import java.util.Properties;
 
 import org.fundaciobit.plugins.userinformation.UserInfo;
 import org.fundaciobit.plugins.userinformation.ldap.LdapUserInformationPlugin;
-import org.fundaciobit.plugins.utils.ldap.LDAPConstants;
 
 /**
  * 
@@ -20,86 +19,21 @@ public class TestUserInfoLdapPlugin {
   public static void main(String[] args) {
     try {
 
-      String username, password;
-      
-      /**  =======  connection.properties =============== */
-//         ldap.host_url=ldap://ldap.ibit.org:389
-//         ldap.security_principal=<<query_username>>
-//         ldap.security_credentials=<<query_password>>
-//          
-//         test.username=<username>
-//         test.password=<password
      
 
       File f = new File("connection.properties");
 
       Properties ldapProperties = new Properties();
-
-      if (f.exists()) {
-
-        ldapProperties.load(new FileInputStream(f));
-
-        username = ldapProperties.getProperty("test.username");
-        password = ldapProperties.getProperty("test.password");
-
-      } else {
-
-        ldapProperties = new Properties();
-        // Host
-        ldapProperties.setProperty(LDAPConstants.LDAP_PROVIDERURL, "ldap://ldap.ibit.org:389");
-        // Nom de l'usuari LDAP amb permisos de lectura
-        String loginUserName = "login_user";
-        String loginPassword = "login_password";
-        // Usuari i contrasenya (usat per llistar usuaris)
-        ldapProperties.setProperty(LDAPConstants.LDAP_SECURITYPRINCIPAL, loginUserName);
-        ldapProperties.setProperty(LDAPConstants.LDAP_SECURITYCREDENTIALS, loginPassword);
-        // ususari de prova
-        username = "anadal";
-        password = "password_of_anadal";
-      }
-
-      // Tipus Seguretat
-      ldapProperties.setProperty(LDAPConstants.LDAP_SECURITYAUTHENTICATION,
-          LDAPConstants.LDAP_SECURITYAUTHENTICATION_SIMPLE);
-      // Directory on estan tots els usuaris
-      ldapProperties.setProperty(LDAPConstants.LDAP_USERSCONTEXTDN,
-          "cn=Users,dc=ibitnet,dc=lan");
-      // No cercar en subdirectoris
-      ldapProperties.setProperty(LDAPConstants.LDAP_SEARCHSCOPE,
-          LDAPConstants.LDAP_SEARCHSCOPE_ONELEVEL);
-
-      // SEARCH si no el definim automàticament selecciona tot
-      ldapProperties.setProperty(LDAPConstants.LDAP_SEARCHFILTER,
-          "(|(memberOf=CN=@PFI_ADMIN,CN=Users,DC=ibitnet,DC=lan)(memberOf=CN=@PFI_USER,CN=Users,DC=ibitnet,DC=lan))"
-         // "(&(memberOf=CN=@Oficina,CN=Users,DC=ibitnet,DC=lan)(memberOf=CN=@Negoci,CN=Users,DC=ibitnet,DC=lan))"
-          );
-
-      ldapProperties.setProperty(LDAPConstants.PREFIX_ROLE_MATCH_MEMBEROF,"CN=@");
-      ldapProperties.setProperty(LDAPConstants.SUFFIX_ROLE_MATCH_MEMBEROF,",CN=Users,DC=ibitnet,DC=lan");
-
-
-      // Propietats de camps LDAP associats a atributs.
-      ldapProperties.setProperty(LDAPConstants.LDAP_USERNAME_ATTRIBUTE, "sAMAccountName");
-      ldapProperties.setProperty(LDAPConstants.LDAP_NAME_ATTRIBUTE, "givenName");
-      ldapProperties.setProperty(LDAPConstants.LDAP_EMAIL_ATTRIBUTE, "mail");
-      ldapProperties.setProperty(LDAPConstants.LDAP_ADMINISTRATIONID_ATTRIBUTE, "postOfficeBox");
-      ldapProperties.setProperty(LDAPConstants.LDAP_SURNAME_ATTRIBUTE, "sn");
-      ldapProperties.setProperty(LDAPConstants.LDAP_MEMBEROF_ATTRIBUTE, "memberOf");
-      ldapProperties.setProperty(LDAPConstants.LDAP_TELEPHONE_ATTRIBUTE, "telephoneNumber");
-
-      for (String attrib :  LDAPConstants.LDAP_PROPERTIES) {
-        String value = ldapProperties.getProperty(attrib);
-        
-        if (value == null) {
-          System.err.println("Atribut " + attrib + " val null.");
-        } else {
-          System.setProperty(LdapUserInformationPlugin.LDAP_BASE_PROPERTIES + attrib, value);
-          System.out.println(LdapUserInformationPlugin.LDAP_BASE_PROPERTIES + attrib + "=" + value);
-        }
-      }
-     
+      ldapProperties.load(new FileInputStream(f));
       
-      LdapUserInformationPlugin ldap = new LdapUserInformationPlugin();
+      String username, password;
+      username = ldapProperties.getProperty("test.username");
+      password = ldapProperties.getProperty("test.password");
+      
+      System.out.println("username: " + username);
+     
+      // Si no es defineix res llavors obté la configuració de les Propietats de Sistema
+      LdapUserInformationPlugin ldap = new LdapUserInformationPlugin("es.caib.example.", ldapProperties);
       
       UserInfo userInfo = ldap.getUserInfoByUserName(username);
       if (userInfo != null) {
@@ -139,12 +73,6 @@ public class TestUserInfoLdapPlugin {
         System.out.println(Arrays.toString(users));        
       }
       
-      
-      
-      
-      
-      //LDAPUserManager um = ldap.getLDAPUserManager();
-
       // 1.- Mètode per autenticar amb usuari contrasenya
       System.out.println();
       System.out.println("------------- Authenticate: " + ldap.authenticate(username, password));

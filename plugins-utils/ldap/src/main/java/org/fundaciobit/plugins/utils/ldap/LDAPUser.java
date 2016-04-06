@@ -19,7 +19,11 @@ public class LDAPUser implements Comparable<LDAPUser>, Cloneable {
    */
   private String name;
 
-  private String surname;
+  private String surnames;
+  
+  private String surname1;
+  
+  private String surname2;
 
   private String[] memberOf;
 
@@ -95,14 +99,29 @@ public class LDAPUser implements Comparable<LDAPUser>, Cloneable {
     this.name = name;
   }
 
-  public String getSurname() {
-    return surname;
+  public String getSurnames() {
+    return surnames;
   }
 
-  public void setSurname(String surname) {
-    this.surname = surname;
+  public void setSurnames(String surnames) {
+    this.surnames = surnames;
   }
 
+  public String getSurname1() {
+    return surname1;
+  }
+
+  public void setSurname1(String surname1) {
+    this.surname1 = surname1;
+  }
+
+  public String getSurname2() {
+    return surname2;
+  }
+
+  public void setSurname2(String surname2) {
+    this.surname2 = surname2;
+  }
 
   public String getTelephoneNumber() {
     return telephoneNumber;
@@ -165,5 +184,20 @@ public class LDAPUser implements Comparable<LDAPUser>, Cloneable {
       throw new InternalError("Failed to clone a User instance");
     }
   }
+  
+  
+  public static String getCorrectSurname(LDAPUser u) {
+    String surnames = null;
+    if (u.getSurname1() != null && u.getSurname2() != null) {
+      surnames = u.getSurname1() + " " + u.getSurname2();
+    } else {
+      surnames = u.getSurnames();
+      if (surnames == null) {
+        surnames = u.getSurname1();
+      }
+    }
+    return surnames;
+  }
+  
 
 }

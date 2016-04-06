@@ -120,7 +120,14 @@ public class LdapUserInformationPlugin extends AbstractPluginProperties
     UserInfo info = new UserInfo();
     info.setLanguage("ca");
     info.setName(ldapUser.getName());
-    info.setSurname1(ldapUser.getSurname());
+    if(ldapUser.getSurname1() == null) {
+      info.setSurname1(ldapUser.getSurnames());
+      info.setSurname2(ldapUser.getSurname2());
+    } else {
+      info.setSurname1(ldapUser.getSurname1());
+      info.setSurname2(ldapUser.getSurname2());
+    }
+
     info.setAdministrationID(ldapUser.getAdministrationID());
     info.setUsername(ldapUser.getUserName());
     info.setEmail(ldapUser.getEmail());

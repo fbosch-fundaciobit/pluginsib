@@ -43,7 +43,7 @@ public interface IUserInformationPlugin extends IPlugin {
 
   /**
    * Mètode que retorna els roles associats a l'usuari username per
-   * l'aplicatiu PortaFIB
+   * l'aplicatiu
    * 
    * @param username
    * @return
