@@ -137,29 +137,37 @@ public class LDAPUserManager implements LDAPConstants, Serializable {
     }
     
     
-    String surnameKey = ldapProperties.getProperty(LDAP_SURNAMES_ATTRIBUTE);
-    Attribute surname = attrib.get(surnameKey);
-    if (surname == null) {
-      user.setSurnames(null);
+    String surname1Key = ldapProperties.getProperty(LDAP_SURNAME1_ATTRIBUTE);
+    String surname2Key = ldapProperties.getProperty(LDAP_SURNAME2_ATTRIBUTE);
+    
+    if (surname1Key == null || surname2Key == null) {
+      //  Els llinatges es troben només a dins una sola clau 
+      String surnameKey = ldapProperties.getProperty(LDAP_SURNAMES_ATTRIBUTE);
+      
+      Attribute surname = attrib.get(surnameKey);
+      if (surname == null) {
+        user.setSurnames(null);
+      } else {
+        user.setSurnames((String) surname.get());
+      }
     } else {
-      user.setSurnames((String) surname.get());
+       // Està definit el llinatge emprant dos camps: llinatge1 i llinatge2
+      Attribute surname1 = attrib.get(surname1Key);
+      if (surname1 == null) {
+        user.setSurname1(null);
+      } else {
+        user.setSurname1((String) surname1.get());
+      }
+  
+      
+      Attribute surname2 = attrib.get(surname2Key);
+      if (surname2 == null) {
+        user.setSurname2(null);
+      } else {
+        user.setSurname2((String) surname2.get());
+      }
     }
     
-    String surname1Key = ldapProperties.getProperty(LDAP_SURNAME1_ATTRIBUTE);
-    Attribute surname1 = attrib.get(surname1Key);
-    if (surname1 == null) {
-      user.setSurname1(null);
-    } else {
-      user.setSurname1((String) surname1.get());
-    }
-
-    String surnameKey2 = ldapProperties.getProperty(LDAP_SURNAME2_ATTRIBUTE);
-    Attribute surname2 = attrib.get(surnameKey2);
-    if (surname2 == null) {
-      user.setSurname2(null);
-    } else {
-      user.setSurname2((String) surname2.get());
-    }
 
     String memberOfKey = ldapProperties.getProperty(LDAP_MEMBEROF_ATTRIBUTE);
     Attribute memberOf = attrib.get(memberOfKey);
