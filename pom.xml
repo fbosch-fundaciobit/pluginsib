@@ -18,6 +18,7 @@
        <module>plugins-exportdata</module>
 	   <module>plugins-scanweb</module>
        <module>plugins-timestamp</module>
+	   <module>plugins-paymentweb</module>
        <module>loginmodule-jboss</module>
     </modules>
 
