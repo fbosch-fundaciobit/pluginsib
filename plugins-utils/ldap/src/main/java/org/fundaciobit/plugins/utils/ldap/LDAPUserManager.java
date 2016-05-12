@@ -135,8 +135,7 @@ public class LDAPUserManager implements LDAPConstants, Serializable {
     } else {
       user.setName((String)givenName.get());
     }
-    
-    
+
     String surname1Key = ldapProperties.getProperty(LDAP_SURNAME1_ATTRIBUTE);
     String surname2Key = ldapProperties.getProperty(LDAP_SURNAME2_ATTRIBUTE);
     

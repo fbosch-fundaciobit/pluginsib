@@ -154,20 +154,6 @@ public class AdyenPaymentWebPlugin extends AbstractPaymentWeb {
       }
     }
 
-    /*
-     * merchantReturnData ==>> |transactionID_1458854858771| shopperLocale ==>>
-     * |es_ES| skinCode ==>> |1QcLkuoN| merchantReference ==>>
-     * |Inscripcio_Aplec_1458854858771| merchantSig ==>>
-     * |VuvGBn0bXqk4JBwYLAWX9xr87jU=| authResult ==>> |CANCELLED|
-     */
-    /*
-     * PAGAR AMB TARGETA DE DEBIT pspReference ==>> |7914588561504874|
-     * merchantReturnData ==>> |transactionID_1458856063314| shopperLocale ==>>
-     * |es_ES| skinCode ==>> |1QcLkuoN| merchantReference ==>>
-     * |Inscripcio_Aplec_1458856063314| merchantSig ==>>
-     * |NgUpr1WNhiEZbifi2wXUnxN/Q4Y=| authResult ==>> |REFUSED| paymentMethod
-     * ==>> |mc|
-     */
 
     /*
      * authResult The result of the payment. One of: ◦AUTHORISED Payment
