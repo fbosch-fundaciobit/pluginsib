@@ -1,4 +1,4 @@
-package sis.redsys.api;
+锘縫ackage sis.redsys.api;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,7 +25,7 @@ public class ApiWsMacSha256 {
 	/** Numero de bytes para obtener cadenas multiplos de 8 */
 	private final short OCHO = 8;
 
-	/** Constante de array de inicializaci髇 */
+	/** Constante de array de inicializaci贸n */
 	private final byte [] IV = {0, 0, 0, 0, 0, 0, 0, 0};
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ public class ApiWsMacSha256 {
 		// Inicializa el cifrador para encriptar
 		desCipher.init(Cipher.ENCRYPT_MODE, desKey, new IvParameterSpec(IV));
 
-		// Se a馻den los 0 en bytes necesarios para que sea un m鷏tiplo de 8
+		// Se a帽aden los 0 en bytes necesarios para que sea un m煤ltiplo de 8
 		int numeroCerosNecesarios = OCHO - (datos.length() % OCHO);
 		if (numeroCerosNecesarios == OCHO) {
 			numeroCerosNecesarios = 0;
@@ -118,7 +118,7 @@ public class ApiWsMacSha256 {
 		int leido = input.read();
 		while (leido != -1) {
 			cadAux = Integer.toHexString(leido);
-			if (cadAux.length() < 2)// Hay que a馻dir un 0
+			if (cadAux.length() < 2)// Hay que a帽adir un 0
 				resultado += "0";
 			resultado += cadAux;
 			leido = input.read();
@@ -127,7 +127,7 @@ public class ApiWsMacSha256 {
 	}
 
 	public byte[] toByteArray(String cadena){
-		//Si es impar se a馻de un 0 delante
+		//Si es impar se a帽ade un 0 delante
 		if(cadena.length() % 2 != 0)
 			cadena = "0"+cadena;
 			
@@ -150,7 +150,7 @@ public class ApiWsMacSha256 {
 	 * @throws InvalidKeyException 
 	 * @throws NoSuchAlgorithmException */
 	public byte [] mac256(final String dsMerchantParameters, final byte [] secretKo) throws IllegalStateException, UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
-		// Se hace el MAC con la clave de la operaci髇 "Ko" y se codifica en BASE64
+		// Se hace el MAC con la clave de la operaci贸n "Ko" y se codifica en BASE64
 		Mac sha256HMAC = Mac.getInstance("HmacSHA256");
 		SecretKeySpec secretKey = new SecretKeySpec(secretKo, "HmacSHA256");
 		sha256HMAC.init(secretKey);
@@ -160,7 +160,7 @@ public class ApiWsMacSha256 {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	//////////// 		FUNCIONES PARA LA GENERACI覰 DE LA PETICI覰 DE PAGO: 				 ////////////
+	//////////// 		FUNCIONES PARA LA GENERACI脫N DE LA PETICI脫N DE PAGO: 				 ////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	public String getOrder(final String datos) {
@@ -176,7 +176,7 @@ public class ApiWsMacSha256 {
 		String secretKc = toHexadecimal(clave, clave.length);
 		byte [] secretKo = encrypt_3DES(secretKc, getOrder(datosEntrada));
 
-		// Se hace el MAC con la clave de la operaci髇 "Ko" y se codifica en BASE64
+		// Se hace el MAC con la clave de la operaci贸n "Ko" y se codifica en BASE64
 		byte [] hash = mac256(datosEntrada, secretKo);
 		String res = encodeB64String(hash);
 		return res;
@@ -185,7 +185,7 @@ public class ApiWsMacSha256 {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	//////////// FUNCIONES PARA LA RECEPCI覰 DE DATOS DE PAGO (Respuesta HOST to HOST): //////////
+	//////////// FUNCIONES PARA LA RECEPCI脫N DE DATOS DE PAGO (Respuesta HOST to HOST): //////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -195,7 +195,7 @@ public class ApiWsMacSha256 {
 		String secretKc = toHexadecimal(clave, clave.length);
 		byte [] secretKo = encrypt_3DES(secretKc, numPedido);
 
-		// Se hace el MAC con la clave de la operaci髇 "Ko" y se codifica en BASE64
+		// Se hace el MAC con la clave de la operaci贸n "Ko" y se codifica en BASE64
 		byte [] hash = mac256(datosEntrada, secretKo);
 		String res = encodeB64String(hash);
 		return res;
