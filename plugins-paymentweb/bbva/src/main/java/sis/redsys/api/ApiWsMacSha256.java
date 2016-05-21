@@ -1,4 +1,5 @@
-﻿package sis.redsys.api;
+﻿
+package sis.redsys.api;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
