@@ -16,7 +16,7 @@
 	*/
   private static final boolean onlyHash = true;
 
-  public static final String PADES_SIGNATURE = "pdf";
+  public static final String PADES_SIGNATURE = "pades";
 
   public static final String CADES_SIGNATURE = "cades";
 

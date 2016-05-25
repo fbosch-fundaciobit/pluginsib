@@ -5,6 +5,7 @@ package org.fundaciobit.plugins.documentcustody;
  * @author anadal
  * 
  */
+@Deprecated
 public class DocumentCustody extends AnnexCustody {
 
   public static final String PDF_WITH_SIGNATURE = "pdf";

@@ -12,6 +12,7 @@ import org.fundaciobit.plugins.utils.MetadataFormatException;
  * @author anadal
  * 
  */
+@Deprecated
 public interface IDocumentCustodyPlugin extends IPlugin {
   
   public static final String DOCUMENTCUSTODY_BASE_PROPERTY = IPLUGIN_BASE_PROPERTIES + "documentcustody.";

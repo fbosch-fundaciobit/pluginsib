@@ -3,15 +3,15 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.fundaciobit.plugins</groupId>
 	<artifactId>plugin-documentcustody-filesystem</artifactId>
-	<packaging>jar</packaging>
-	<version>1.0.0</version>
+	<version>2.0.0</version>
+  <packaging>jar</packaging>
 
 	<name>FundacioBit Plugins - Document Custody - FileSystem</name>
 
 	<parent>
 		<groupId>org.fundaciobit.plugins</groupId>
-		<version>1.0.0</version>
 		<artifactId>plugins-documentcustody</artifactId>
+    <version>2.0.0</version>
 	</parent>
 
 	<url>http://maven.apache.org</url>
@@ -24,16 +24,22 @@
 			<version>1.0.0</version>
 			<scope>provided</scope>
 		</dependency>
-
+    
+    <dependency>
+    	<groupId>org.fundaciobit.plugins</groupId>
+	    <artifactId>plugin-documentcustody-api</artifactId>
+	    <version>2.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+      
 		<dependency>
-			<!-- reuse src/test/java code from plugins-api  -->
-			<groupId>org.fundaciobit.plugins</groupId>
-			<artifactId>plugins-api</artifactId>
-			<version>1.0.0</version>
+			<!-- reuse src/test/java code from plugin-documentcustody-api  -->
+	    <groupId>org.fundaciobit.plugins</groupId>
+	    <artifactId>plugin-documentcustody-api</artifactId>
+	    <version>2.0.0</version>
 			<scope>test</scope>
 			<classifier>tests</classifier>
 		</dependency>
-
 
 	</dependencies>
 

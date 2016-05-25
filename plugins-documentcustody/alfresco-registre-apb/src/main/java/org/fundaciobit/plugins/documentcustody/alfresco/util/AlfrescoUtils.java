@@ -21,7 +21,7 @@ import java.util.Set;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.commons.io.IOUtils;
-import org.fundaciobit.plugins.documentcustody.CustodyException;
+import org.fundaciobit.plugins.documentcustody.api.CustodyException;
 
 public class AlfrescoUtils {
 

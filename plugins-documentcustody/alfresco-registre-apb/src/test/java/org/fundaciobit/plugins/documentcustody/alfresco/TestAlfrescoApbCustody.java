@@ -5,8 +5,8 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
-import org.fundaciobit.plugins.documentcustody.DocumentCustody;
-import org.fundaciobit.plugins.documentcustody.IDocumentCustodyPlugin;
+import org.fundaciobit.plugins.documentcustody.api.DocumentCustody;
+import org.fundaciobit.plugins.documentcustody.api.IDocumentCustodyPlugin;
 import org.fundaciobit.plugins.utils.PluginsManager;
 
 /**
@@ -36,7 +36,6 @@ public class TestAlfrescoApbCustody {
       
       
       DocumentCustody doc = new DocumentCustody();
-      doc.setDocumentType(DocumentCustody.DOCUMENT_ONLY);
       doc.setName("holacaracola.txt");
       doc.setData("holacaracola".getBytes());
       

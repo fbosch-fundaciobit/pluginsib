@@ -5,6 +5,7 @@ package org.fundaciobit.plugins.documentcustody;
  * @author anadal
  *
  */
+@Deprecated
 public class SignatureCustody extends AnnexCustody {
 
   public static final String CADES_SIGNATURE = "cades";
