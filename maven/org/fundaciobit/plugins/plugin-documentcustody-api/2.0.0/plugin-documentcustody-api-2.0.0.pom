@@ -53,8 +53,7 @@
 						</goals>
 						<configuration>
 							<includes>
-                <include>**/plugins/documentcustody/api/test/**</include>
-								<!-- XYZ <include>**/plugins/test/**</include> -->
+                                <include>**/plugins/documentcustody/api/test/**</include>
 							</includes>
 						</configuration>
 					</execution>
