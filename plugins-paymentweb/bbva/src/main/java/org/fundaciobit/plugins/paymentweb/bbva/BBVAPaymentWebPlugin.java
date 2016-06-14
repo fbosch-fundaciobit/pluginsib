@@ -170,13 +170,20 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
         "Ds_SecurePayment","Ds_TransactionType","Ds_Card_Country","Ds_AuthorisationCode",
         "Ds_ConsumerLanguage", "Ds_Card_Type"
     };
+    StringBuffer allInfo = new StringBuffer();
+    allInfo.append("Ds_SignatureVersion: " + version + "\n");
     for (int i = 0; i < all.length; i++) {
       try {
-      System.out.println("XYZ " + all[i] + ":  " + apiMacSha256.getParameter(all[i]));
+         String value = apiMacSha256.getParameter(all[i]);
+         if (value != null) {
+           allInfo.append(all[i] + ": " + value + "\n");
+           System.out.println("XYZ " + all[i] + ":  " + value);
+         }
       } catch(Exception e) {
         log.warn(e.getMessage());
       }
     }
+    allInfo.append("Ds_Signature: " + signatureRecibida + "\n");
     
     String codigoRespuestaStr = apiMacSha256.getParameter("Ds_Response");
     
@@ -196,14 +203,16 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
         try {
           cardType = apiMacSha256.getParameter("Ds_Card_Type");
           } catch(Exception e) {  }
-        String auth ="unknown";
-        try {
-          auth =  apiMacSha256.getParameter("Ds_AuthorisationCode");
-          
-          } catch(Exception e) {  }
+        //String auth ="unknown";
+//        try {
+//          auth =  apiMacSha256.getParameter("Ds_AuthorisationCode");
+//          
+//          } catch(Exception e) {  }
         
-        status.setPaymentReference( "Order: " + apiMacSha256.getParameter("Ds_Order") + "\n"
-            + "AuthorisationCode: " + auth );
+        status.setPaymentReference(allInfo.toString());
+            
+            /*"Order: " + apiMacSha256.getParameter("Ds_Order") + "\n"
+            + "AuthorisationCode: " + auth */
         status.setPaymentMethod(cardType);
       } else if (codigoResp == 9915) {
         status.setStatus(PaymentStatus.STATUS_CANCELLED);
@@ -268,6 +277,7 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
     apiMacSha256.setParameter("DS_MERCHANT_TITULAR", paymentInfo.getShopperName());
     apiMacSha256.setParameter("DS_MERCHANT_URLOK",returnURL);
     apiMacSha256.setParameter("DS_MERCHANT_URLKO",returnURL);
+    apiMacSha256.setParameter("DS_MERCHANT_MERCHANTDATA","" + paymentID);
     
     
 
@@ -283,7 +293,7 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
     System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_TITULAR\"," +  paymentInfo.getShopperName()+");");
     System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_URLOK\"," + returnURL+");");
     System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_URLKO\"," + returnURL+");");
-    
+    System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_MERCHANTDATA\"," +  paymentID+");");
 
     
     /** XYZ
@@ -327,8 +337,8 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
     // Set correct character encoding
     response.setCharacterEncoding("UTF-8");
 
-    String html = "<html>\n" + "<body>\n"
-        + " <form action=\"" + getPropertyRequired(URL) + "\" method=\"POST\" >\n"
+    String html = "<!DOCTYPE html>\n" + "<html>\n" + "<body>\n"
+        + " <form id=\"formPagament\"  action=\"" + getPropertyRequired(URL) + "\" method=\"POST\" >\n"
         // ------------
         + "     <input type=\"text\" name=\"Ds_SignatureVersion\" value=\"HMAC_SHA256_V1\" /> <br/>\n"
 
@@ -339,8 +349,19 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
 
 
         // TODO ELIMINAR Substituir per javascript amb submit
-        + "<input type =\"submit\" name=\"submit\" value=\"Submit Button\" />\n"
-        + "</form>\n" + " </body>\n" + " </html>\n";
+        + "<input type =\"submit\" name=\"submitButton\" value=\"Submit Button\" />\n"
+        + "</form>\n"
+        + "<script type=\"text/javascript\">\n"
+        
+        + "window.onload = function() {\n"
+        //+ "   alert('hola');\n"
+        + "   document.getElementById(\"formPagament\").submit();\n"
+        + "};\n"
+
+        + "</script>\n"
+
+        + " </body>\n" 
+        + " </html>\n";
 
     response.getWriter().print(html);
 
