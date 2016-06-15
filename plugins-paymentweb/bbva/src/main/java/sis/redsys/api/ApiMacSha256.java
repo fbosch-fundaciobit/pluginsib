@@ -1,3 +1,4 @@
+
 package sis.redsys.api;
 
 import java.io.ByteArrayInputStream;
@@ -27,7 +28,7 @@ public class ApiMacSha256 {
 	/** Numero de bytes para obtener cadenas multiplos de 8 */
 	private final short OCHO = 8;
 
-	/** Constante de array de inicializaci髇 */
+	/** Constante de array de inicializaci贸n */
 	private final byte [] IV = {0, 0, 0, 0, 0, 0, 0, 0};
 
 	/** Array de DatosEntrada */
@@ -68,7 +69,7 @@ public class ApiMacSha256 {
 		// Inicializa el cifrador para encriptar
 		desCipher.init(Cipher.ENCRYPT_MODE, desKey, new IvParameterSpec(IV));
 
-		// Se a馻den los 0 en bytes necesarios para que sea un m鷏tiplo de 8
+		// Se a帽aden los 0 en bytes necesarios para que sea un m煤ltiplo de 8
 		int numeroCerosNecesarios = OCHO - (datos.length() % OCHO);
 		if (numeroCerosNecesarios == OCHO) {
 			numeroCerosNecesarios = 0;
@@ -133,7 +134,7 @@ public class ApiMacSha256 {
 		int leido = input.read();
 		while (leido != -1) {
 			cadAux = Integer.toHexString(leido);
-			if (cadAux.length() < 2)// Hay que a馻dir un 0
+			if (cadAux.length() < 2)// Hay que a帽adir un 0
 				resultado += "0";
 			resultado += cadAux;
 			leido = input.read();
@@ -142,7 +143,7 @@ public class ApiMacSha256 {
 	}
 
 	public byte[] toByteArray(String cadena){
-		//Si es impar se a馻de un 0 delante
+		//Si es impar se a帽ade un 0 delante
 		if(cadena.length() % 2 != 0)
 			cadena = "0"+cadena;
 			
@@ -165,7 +166,7 @@ public class ApiMacSha256 {
 	 * @throws UnsupportedEncodingException 
 	 * @throws IllegalStateException */
 	public byte [] mac256(final String dsMerchantParameters, final byte [] secretKo) throws NoSuchAlgorithmException, InvalidKeyException, IllegalStateException, UnsupportedEncodingException {
-		// Se hace el MAC con la clave de la operaci髇 "Ko" y se codifica en BASE64
+		// Se hace el MAC con la clave de la operaci贸n "Ko" y se codifica en BASE64
 		Mac sha256HMAC = Mac.getInstance("HmacSHA256");
 		SecretKeySpec secretKey = new SecretKeySpec(secretKo, "HmacSHA256");
 		sha256HMAC.init(secretKey);
@@ -175,7 +176,7 @@ public class ApiMacSha256 {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	//////////// 		FUNCIONES PARA LA GENERACI覰 DEL FORMULARIO DE PAGO: 				 ////////////
+	//////////// 		FUNCIONES PARA LA GENERACI脫N DEL FORMULARIO DE PAGO: 				 ////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	public String getOrder() {
@@ -199,7 +200,7 @@ public class ApiMacSha256 {
 		String secretKc = toHexadecimal(clave, clave.length);
 		byte [] secretKo = encrypt_3DES(secretKc, getOrder());
 
-		// Se hace el MAC con la clave de la operaci髇 "Ko" y se codifica en BASE64
+		// Se hace el MAC con la clave de la operaci贸n "Ko" y se codifica en BASE64
 		byte [] hash = mac256(merchantParams, secretKo);
 		String res = encodeB64String(hash);
 		return res;
@@ -207,7 +208,7 @@ public class ApiMacSha256 {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	//////////// FUNCIONES PARA LA RECEPCI覰 DE DATOS DE PAGO (Notif, URLOK y URLKO): ////////////
+	//////////// FUNCIONES PARA LA RECEPCI脫N DE DATOS DE PAGO (Notif, URLOK y URLKO): ////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -252,7 +253,7 @@ public class ApiMacSha256 {
 		String secretKc = toHexadecimal(clave, clave.length);
 		byte [] secretKo = encrypt_3DES(secretKc, getOrderNotif());
 
-		// Se hace el MAC con la clave de la operaci髇 "Ko" y se codifica en BASE64
+		// Se hace el MAC con la clave de la operaci贸n "Ko" y se codifica en BASE64
 		byte [] hash = mac256(merchantParams, secretKo);
 		byte [] res = encodeB64UrlSafe(hash);
 		return new String(res, "UTF-8");
@@ -272,7 +273,7 @@ public class ApiMacSha256 {
 		String secretKc = toHexadecimal(clave, clave.length);
 		byte [] secretKo = encrypt_3DES(secretKc, getOrderNotifSOAP(request));
 		
-		// Se hace el MAC con la clave de la operaci髇 "Ko" y se codifica en BASE64
+		// Se hace el MAC con la clave de la operaci贸n "Ko" y se codifica en BASE64
 		byte [] hash = mac256(getRequestNotifSOAP(request), secretKo);
 		byte [] res = encodeB64(hash);
 		return new String(res, "UTF-8");
@@ -292,7 +293,7 @@ public class ApiMacSha256 {
 		String secretKc = toHexadecimal(clave, clave.length);
 		byte [] secretKo = encrypt_3DES(secretKc, numPedido);
 		
-		// Se hace el MAC con la clave de la operaci髇 "Ko" y se codifica en BASE64
+		// Se hace el MAC con la clave de la operaci贸n "Ko" y se codifica en BASE64
 		byte [] hash = mac256(getResponseNotifSOAP(response), secretKo);
 		byte [] res = encodeB64(hash);
 		return new String(res, "UTF-8");
