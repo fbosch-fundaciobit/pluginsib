@@ -31,6 +31,9 @@ public class SignatureCustody extends AnnexCustody {
   
   // Ignore attachedDocument value
   public static final String OTHER_SIGNATURE_WITH_DETACHED_DOCUMENT = "detached";
+  
+  // Només sabem que és una firma però res més.
+  public static final String UNKNOWN_SIGNATURE = "unknown";
 
   
   public static final String[] ALL_TYPES_OF_SIGNATURES = {

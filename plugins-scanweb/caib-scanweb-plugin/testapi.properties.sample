@@ -1,0 +1,6 @@
+
+test_hostport=http://localhost:8080
+
+test_usr=app_user
+test_pwd=app_pwd
+

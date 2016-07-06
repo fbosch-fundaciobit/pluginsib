@@ -877,7 +877,16 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       if (data == null) {
         return null;
       }
-      XMLDecoder decoder = new XMLDecoder(new ByteArrayInputStream(data));
+      
+      // Replace old API to new API
+      String dataStr = new String(data);
+      
+      dataStr = dataStr.replace("class=\"org.fundaciobit.plugins.documentcustody.AnnexCustody\"", "class=\"org.fundaciobit.plugins.documentcustody.api.AnnexCustody\"");
+      dataStr = dataStr.replace("class=\"org.fundaciobit.plugins.documentcustody.DocumentCustody\"", "class=\"org.fundaciobit.plugins.documentcustody.api.DocumentCustody\"");
+      dataStr = dataStr.replace("class=\"org.fundaciobit.plugins.documentcustody.SignatureCustody\"", "class=\"org.fundaciobit.plugins.documentcustody.api.SignatureCustody\"");
+
+      
+      XMLDecoder decoder = new XMLDecoder(new ByteArrayInputStream(dataStr.getBytes()));
       Object o = (Object) decoder.readObject();
       decoder.close();
       return o;

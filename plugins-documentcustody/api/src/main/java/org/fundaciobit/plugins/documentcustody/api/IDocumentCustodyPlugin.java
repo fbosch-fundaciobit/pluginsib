@@ -140,14 +140,10 @@ public interface IDocumentCustodyPlugin extends IPlugin {
 
 
   /**
-   * Return detached sign if the document has it. For plain document (without attached 
-   * or detached signatures) or document with attached signatures then return null 
-   * @param custodyID
-   * @return null if does not exist signature.
-   * @throws Exception
+   * 
    */
   void saveSignature(String custodyID, String custodyParameters,
-      SignatureCustody signatureCustody) throws CustodyException, NotSupportedCustodyException;;
+      SignatureCustody signatureCustody) throws CustodyException, NotSupportedCustodyException;
 
 
 
