@@ -14,9 +14,21 @@
 	</parent>
 
     <modules>
-	   <module>iecisa-scan-applet</module>
+	   <module></module>
 	   <module>iecisa-scanweb-plugin</module>
     </modules>
+    
+    
+    <profiles>
+        <profile>
+            <id>sign</id>
+            <modules>
+                <module>iecisa-scan-applet</module>
+            </modules>
+        </profile>
+    </profiles>
+    
+    
 	
 	<dependencies>
 	    <dependency>
