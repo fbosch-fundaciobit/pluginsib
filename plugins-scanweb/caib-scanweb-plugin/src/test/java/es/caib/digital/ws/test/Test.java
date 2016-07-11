@@ -329,15 +329,12 @@ public class Test extends TestUtils {
       
       System.out.println("eniFirm.getFirmaConCertificado().getReferenciaFirma():  " +eniFirm.getFirmaConCertificado().getReferenciaFirma());
 
-      // XYZ convertir List<Byte> a byte[]
+      // convertir List<Byte> a byte[]
       for (Byte sign : eniFirm.getFirmaConCertificado().getFirmaBase64()) {
         System.out.println("eniFirm.getFirmaConCertificado().getFirmaBase64()[?]:  " + sign);  
       }
       
-      
-      
-      
-      
+
       System.out.println("metas.getNombreFormato() = " + metas.getNombreFormato());
       //
       System.out.println("metas.getTipoDocumentoCAIB() = " + metas.getTipoDocumentoCAIB());

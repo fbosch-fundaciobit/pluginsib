@@ -61,12 +61,7 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
     super(propertyKeyBase);
   }
 
-
-  // TODO XYZ
-  public String getSubmitButton() {
-    return getProperty(PROPERTY_BASE + "submitButton");
-  }
-  
+ 
   
   public boolean isShowInModal() {
     return "true".equals(getProperty(PROPERTY_BASE + "showInModal"));
@@ -217,10 +212,8 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
             request, response, fullInfo, languageUI);
       } else {
 
-        String titol = (isGet ? "GET" : "POST") + " " + getName(new Locale("ca"))
-            + " DESCONEGUT";
-        requestNotFoundError(titol, absolutePluginRequestPath, relativePluginRequestPath,
-            query, String.valueOf(scanWebID), request, response, languageUI);
+        super.requestGETPOST(absolutePluginRequestPath, relativePluginRequestPath,
+            scanWebID, fullInfo, query, languageUI, request, response, isGet);
       }
 
     }
@@ -253,12 +246,12 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
     
     out.println("  <tr valign=\"middle\">");
     out.println("    <td align=\"center\">");
-    out.println("      <h3 style=\"padding:5px\">" + getTraduccio("llistatescanejats", languageUI) + "</h3>");
+    //out.println("      <h3 style=\"padding:5px\">" + getTraduccio("llistatescanejats", languageUI) + "</h3>");
     
     out.println("    <table style=\"border: 2px solid black;\">");
     out.println("     <tr><td>");
     out.println("      <div id=\"escanejats\" style=\"width:400px;\">");
-    out.println("        <img alt=\"Esperi\" style=\"vertical-align:middle;z-index:200\" src=\"" + absolutePluginRequestPath + "img/ajax-loader2.gif" + "\">");
+    out.println("        <img alt=\"Esperi\" style=\"vertical-align:middle;z-index:200\" src=\"" + absolutePluginRequestPath + WEBRESOURCE + "/img/ajax-loader2.gif" + "\">");
     out.println("        &nbsp;&nbsp;<i>" +  getTraduccio("esperantservidor", languageUI) + "</i>");
     out.println("      </div>");
     out.println("     </td>");
@@ -327,33 +320,10 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
         + "\";\n"
         + "  }\n"
 
-        + "\n"
-        // XYZ Falta 
-        // + "  function enviarFitxer() {\n"
-        // + "    var scan;       \n"
-        // + "    scan = document.getElementById('iecisa_scan');\n"
-        // + "    var result;\n"
-        // + "    result = scan.upload('" + context + uploadPath + "','" +
-        // fileFieldName + "');\n\n"
-        // + "    if (result) {\n"
-        // + "      if (result == '') {\n"
-        // + "        alert(\"WARNING: No s'ha escanejat cap pagina\");\n"
-        // + "      } else {\n"
-        // + "        alert(\"ERROR: \" +result);\n"
-        // + "      }\n"
-        // + "    } else {\n"
-        // + "      alert('OK');\n"
-        // + "    }\n"
-        // + "       \n"
-        // + "  }\n"
-        + "\n\n"
+        + "\n\n\n"
         // + "   alert('IS CROME? ' + isChrome);"
         + "  if (isFirefox && " + isShowInModal() + ") {\n"
-        // XYZ 
-        // + "    var scan;\n"
-        // + "    scan = document.getElementById('iecisa_scan');\n"
-        // + "    if (scan) { scan.style.display = 'none' }\n"
-        + "    document.write('<input type=\"button\" value=\"" + getTraduccio("pitja", languageUI) + "\" onclick=\"escanejarAmbFinestra();\" /><br/>');\n"
+        + "    document.write('<input type=\"button\" class=\"btn btn-primary\" value=\"" + getTraduccio("pitja", languageUI) + "\" onclick=\"escanejarAmbFinestra();\" /><br/>');\n"
         + "  }\n"
         + "\n\n"
         
@@ -383,13 +353,7 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
         + " L´ha d´executar per obrir l´aplicació d´escaneig ... </h4><br/>');\n"
         + "     setTimeout(downloadJNLP, 1000);\n" // directament obrim el JNLP
         + "  }\n");
-        // XYZ
-        // + "  $( document ).ready(function() {\n"
-        // + "    $('#" + getSubmitButton() + "')[0].onclick = null;\n"
-        // + "    $('#" + getSubmitButton() + "').click(function() {  \n"
-        // // TODO COM HO FEIM !!!!!!
-        // + "          enviarFitxer();\n"
-        // + "    });\n"
+
      if ((fullInfo.getMode() == ScanWebMode.SYNCHRONOUS))  { 
        out.println("  function finalScanProcess() {");
        out.println("    if (document.getElementById(\"escanejats\").innerHTML.indexOf(\"ajax\") !=-1) {");
@@ -403,7 +367,6 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
      
     out.println("</script>");
 
-    //out.println("<br/><br/>");
     out.println("</center></div>");
         
     out.println("  </td></tr>");
@@ -442,10 +405,7 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
     out.println();
     out.println();
     out.println("</script>");
-    
-    
-    
-    
+
 
     generateFooter(out);
 
@@ -515,9 +475,7 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
 
   public static final String APPLET = "applet/";
   
-  
-  public static final String IMG = "img/";
-  
+
 
 
   // -------------------------------------------------------------------------
@@ -671,10 +629,10 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
     final Date date = new Date(System.currentTimeMillis());
     
     List<Metadata> metadatas = new ArrayList<Metadata>();
-    metadatas.add(new Metadata("TipoDocumental", "TD99"));
-    metadatas.add(new Metadata("EstadoElaboracion", "EE99"));
-    metadatas.add(new Metadata("Identificador", Calendar.getInstance().get(Calendar.YEAR)
-        + "_" + fullInfo.getScannedFiles().size() + scanWebID));
+    //metadatas.add(new Metadata("TipoDocumental", "TD99"));
+    //metadatas.add(new Metadata("EstadoElaboracion", "EE99"));
+    //metadatas.add(new Metadata("Identificador", Calendar.getInstance().get(Calendar.YEAR)
+    //    + "_" + fullInfo.getScannedFiles().size() + scanWebID));
     metadatas.add(new Metadata("FechaCaptura", date));
     metadatas.add(new Metadata("VersionNTI", "http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e"));
     

@@ -28,7 +28,10 @@ import org.fundaciobit.plugins.scanweb.tester.ejb.utils.ScanWebPluginManager;
 public class ScanWebModuleEjb implements ScanWebModuleLocal {
 
   protected static Logger log = Logger.getLogger(ScanWebModuleEjb.class);
-
+  
+  
+  
+  
   @Override
   public List<Plugin> getAllPluginsFiltered(HttpServletRequest request, long scanWebID)
       throws Exception {

@@ -149,7 +149,7 @@ public class ScanWebProcessController {
 
     // /WEB-INF/views/plugindescan_contenidor.jsp
     final String view = "/plugindescan_contenidor";
-    ModelAndView mav = ScanWebModuleController.startSignatureProcess(request, view,
+    ModelAndView mav = ScanWebModuleController.startScanWebProcess(request, view,
         scanWebModuleEjb, swc);
 
     return mav;

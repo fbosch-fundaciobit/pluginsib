@@ -44,7 +44,7 @@ public class ScanWebModuleController extends HttpServlet {
   protected ScanWebModuleLocal scanWebModuleEjb;
 
   @RequestMapping(value = "/selectscanwebmodule/{scanWebID}")
-  public ModelAndView selectSignModules(HttpServletRequest request,
+  public ModelAndView selectScanWebModule(HttpServletRequest request,
       HttpServletResponse response, @PathVariable("scanWebID") long scanWebID)
       throws Exception {
 
@@ -75,24 +75,6 @@ public class ScanWebModuleController extends HttpServlet {
 
   }
 
-  // XYZ NO TE SENTIT !!!!
-  /*
-  @RequestMapping(value = "/final/{scanWebID}")
-  public ModelAndView finalProcesDeScan(HttpServletRequest request,
-      HttpServletResponse response, @PathVariable("scanWebID") long scanWebID)
-      throws Exception {
-
-    ScanWebConfigTester pss = scanWebModuleEjb.getScanWebConfig(request, scanWebID);
-
-    String urlFinal = pss.getUrlFinal();
-
-    ModelAndView mav = new ModelAndView("/plugindescan_final");
-    mav.addObject("URL_FINAL", urlFinal);
-
-    return mav;
-
-  }
-  */
 
   @RequestMapping(value = "/error")
   public ModelAndView errorProcesDeScan(HttpServletRequest request,
@@ -106,12 +88,12 @@ public class ScanWebModuleController extends HttpServlet {
   }
 
   @RequestMapping(value = "/showscanwebmodule/{pluginID}/{scanWebID}")
-  public ModelAndView showSignatureModule(HttpServletRequest request,
+  public ModelAndView showScanWebModule(HttpServletRequest request,
       HttpServletResponse response, @PathVariable("pluginID") Long pluginID,
       @PathVariable("scanWebID") long scanWebID) throws Exception {
 
-    log.info("SMC :: showsignaturemodule: PluginID = " + pluginID);
-    log.info("SMC :: showsignaturemodule: scanWebID = " + scanWebID);
+    log.info("SMC :: showscanwebmodule: PluginID = " + pluginID);
+    log.info("SMC :: showscanwebmodule: scanWebID = " + scanWebID);
 
     // Assignar plugin Elegit
     ScanWebConfigTester ss = scanWebModuleEjb.getScanWebConfig(request, scanWebID);
@@ -136,7 +118,7 @@ public class ScanWebModuleController extends HttpServlet {
     urlToPluginWebPage = scanWebModuleEjb.scanDocument(request,
         absoluteRequestPluginBasePath, relativeRequestPluginBasePath, scanWebID);
 
-    log.info("SMC :: showsignaturemodule: redirectTO = " + urlToPluginWebPage);
+    log.info("SMC :: showscanwebmodule: redirectTO = " + urlToPluginWebPage);
 
     return new ModelAndView(new RedirectView(urlToPluginWebPage, false));
 
@@ -221,7 +203,7 @@ public class ScanWebModuleController extends HttpServlet {
     //  idAndQuery = 1466408733012148444/index.html
     String idAndQuery = uri.substring(index + BASE.length() + 1);
     if (debug) {
-      log.debug(" XYZ idAndQuery = " + idAndQuery);
+      log.debug(" idAndQuery = " + idAndQuery);
     }
     
     index = idAndQuery.indexOf('/');
@@ -230,8 +212,8 @@ public class ScanWebModuleController extends HttpServlet {
     String query = idAndQuery.substring(index + 1, idAndQuery.length());
         
     if (debug) {
-      log.debug(" XYZ idStr = " + idStr);
-      log.debug(" XYZ query = " + query);
+      log.debug(" idStr = " + idStr);
+      log.debug(" query = " + query);
     }
     
     long scanWebID = Long.parseLong(idStr);
@@ -244,15 +226,7 @@ public class ScanWebModuleController extends HttpServlet {
   
   }
   
-  
-  
-  
-  
 
-  
-  
-  
-  
   
 
   protected void requestPlugin(HttpServletRequest request, HttpServletResponse response,
@@ -347,23 +321,20 @@ public class ScanWebModuleController extends HttpServlet {
    * @return
    * @throws Exception
    */
-  public static ModelAndView startSignatureProcess(HttpServletRequest request, String view,
-      ScanWebModuleLocal signatureModuleEjb, ScanWebConfigTester scanWebConfig)
+  public static ModelAndView startScanWebProcess(HttpServletRequest request, String view,
+      ScanWebModuleLocal scanWebModuleEjb, ScanWebConfigTester scanWebConfig)
       throws Exception {
 
     final long scanWebID = scanWebConfig.getScanWebID();
     
-    // final Set<String> flags = 
-    
+    scanWebModuleEjb.startScanWebProcess(scanWebConfig);
 
-    signatureModuleEjb.startScanWebProcess(scanWebConfig);
-
-    final String urlToSelectPluginPagePage = getAbsoluteControllerBase(request, CONTEXTWEB)
+    final String urlToSelectPluginPage = getAbsoluteControllerBase(request, CONTEXTWEB)
         + "/selectscanwebmodule/" + scanWebID;
 
     ModelAndView mav = new ModelAndView(view);
     mav.addObject("scanWebID", scanWebID);
-    mav.addObject("urlToSelectPluginPage", urlToSelectPluginPagePage);
+    mav.addObject("urlToSelectPluginPage", urlToSelectPluginPage);
     
     if (scanWebConfig.getMode() == ScanWebMode.ASYNCHRONOUS) {
       mav.addObject("urlFinal", scanWebConfig.getUrlFinal());

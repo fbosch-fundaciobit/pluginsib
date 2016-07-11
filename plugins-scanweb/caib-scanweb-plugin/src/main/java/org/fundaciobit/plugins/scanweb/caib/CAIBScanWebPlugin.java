@@ -81,19 +81,7 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
     super(propertyKeyBase);
   }
 
-/*
-  // TODO XYZ
-  public String getSubmitButton() {
-    return getProperty(PROPERTY_BASE + "submitButton");
-  }
-  
-  
-  public boolean isShowInModal() {
-    return "true".equals(getProperty(PROPERTY_BASE + "showInModal"));
-  }
-  */
-  
-  
+ 
   public String getWSUsername() throws Exception {
     return getPropertyRequired(PROPERTY_BASE + "ws_username");
   }
@@ -202,8 +190,8 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
       String absolutePluginRequestPath, String relativePluginRequestPath, PrintWriter out,
       Locale languageUI) {
     
+    super.getJavascriptCSS(request, absolutePluginRequestPath, relativePluginRequestPath, out, languageUI);
     
-    out.println("<script src=\"" + relativePluginRequestPath + "js/jquery.js\" type=\"text/javascript\"></script>");
     out.println("<script src=\"" + relativePluginRequestPath + "js/registroCompulsaExt.js\" type=\"text/javascript\"></script>");
   }
   
@@ -271,7 +259,7 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
         indexPage(absolutePluginRequestPath, relativePluginRequestPath, scanWebID, query,
             request, response, fullInfo, languageUI);
 
-      } else if (query.startsWith(IMG) || query.startsWith(JS)) {
+      } else if (query.startsWith(JS)) {
 
         retornarRecursLocal(absolutePluginRequestPath, relativePluginRequestPath, scanWebID,
             query, request, response, languageUI);
@@ -287,10 +275,8 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
             request, response, fullInfo, languageUI);
       } else {
 
-        String titol = (isGet ? "GET" : "POST") + " " + getName(new Locale("ca"))
-            + " DESCONEGUT";
-        requestNotFoundError(titol, absolutePluginRequestPath, relativePluginRequestPath,
-            query, String.valueOf(scanWebID), request, response, languageUI);
+        super.requestGETPOST(absolutePluginRequestPath, relativePluginRequestPath, 
+            scanWebID, fullInfo, query, languageUI, request, response, isGet);
       }
 
     }
@@ -331,9 +317,9 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
       out.println("    <table style=\"border: 2px solid black;\">");
       out.println("     <tr><td>");
       out.println("      <div id=\"escanejats\" style=\"width:400px;\">");
-      
-      out.println("        <img alt=\"Esperi\" style=\"vertical-align:middle;z-index:200\" src=\"" + absolutePluginRequestPath + "img/ajax-loader2.gif" + "\">");
-        
+
+      out.println("        <img alt=\"Esperi\" style=\"vertical-align:middle;z-index:200\" src=\"" + absolutePluginRequestPath + WEBRESOURCE + "/img/ajax-loader2.gif" + "\">");
+
       out.println("        &nbsp;&nbsp;<i>" +  getTraduccio("esperantservidor", languageUI) + "</i>");
       out.println("     </td>");
       if (fullInfo.getMode() == ScanWebMode.SYNCHRONOUS) {
@@ -343,7 +329,7 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
         out.println("</td>");
       }
       out.println("     </tr></table>");
-      
+
       out.println("      </div>");
       out.println("      <br/>");
       //out.println("  <input type=\"button\" class=\"btn btn-primary\" onclick=\"gotoCancel()\" value=\"" + getTraduccio("cancel", locale) + "\">");
@@ -438,7 +424,7 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
       String escanejar = getTraduccio("escanejar", languageUI);
 
       out.println("<br/>");
-      out.println("            <input type=\"button\" value=\"" + escanejar + "!!!\" onclick=\"copiasimple()\" />");
+      out.println("            <input type=\"button\" class=\"btn btn-primary\" value=\"" + escanejar + "!!!\" onclick=\"copiasimple()\" />");
 
       out.println("");
       out.println("");
@@ -559,7 +545,7 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
       generateFooter(out);
     
     } catch(Exception e) {
-      // XYZ
+      // TODO traduir
       String msg = "s'ha produit un error precessant la pàgina index.html:" + e.getMessage();
       
       String urlfinal = fullInfo.getUrlFinal();
@@ -668,7 +654,7 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
 
      fullInfo.getScannedFiles().add(scannedDoc);
 
-     // XYZ 
+     // XYZ TODO Hauria de retornar el PDF dins firma electronica
      /*
      FirmaElectronica firma = docEle.getFirma();
      
@@ -833,7 +819,6 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
         str.append("\nmetas.getMetadatosFirmas[" + count + "].getContenidoFirma()" + f.getContenidoFirma());
         str.append("\nmetas.getMetadatosFirmas[" + count + "].getContenidoFirma()" + f.getContenidoFirma());
         str.append("\nmetas.getMetadatosFirmas[" + count + "].getTipoFirma()" + f.getTipoFirma());
-        // XYZ
         str.append("\nmetas.getMetadatosFirmas[" + count + "].getTipoFirmaOriginal()" + f.getTipoFirmaOriginal());
 
         {
@@ -915,7 +900,13 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
     //    eni.getVersionNTI(): http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e
     EniMetadata eni = metas.getEniMetadata();
 
-    metadatas.add(new Metadata("TipoDocumental", getTipoDocumental(eni.getTipoDocumental())));
+    final String tipusDocumental = getTipoDocumental(eni.getTipoDocumental());
+    if (tipusDocumental != null) {
+      metadatas.add(new Metadata("TipoDocumental", tipusDocumental));
+    }
+    
+    
+    
     metadatas.addAll(getEstadoElaboracion(eni.getEstadoElaboracion()));
     metadatas.add(new Metadata("Identificador", eni.getIdentificador()));
     metadatas.add(new Metadata("FechaCaptura", eni.getFechaCaptura()));
@@ -1118,33 +1109,35 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
     
    
     if (estadoElaboracion == null) {
-      metas.add(new Metadata("EstadoElaboracion", "EE99"));
-    } 
+      
+      //metas.add(new Metadata("EstadoElaboracion", "EE99"));
+    } else {
     
-    String ido =  estadoElaboracion.getIdentificadorDocumentoOrigen();
-    if (ido != null) {
-      metas.add(new Metadata("IdentificadorDocumentoOrigen", ido));
-    }
-
-    EniEnumEstadoElaboracion eeee = estadoElaboracion.getValorEstadoElaboracion();
-
-    switch(eeee) {
-      case ESTADO_ELABORACION_ORIGINAL:
-        metas.add(new Metadata("EstadoElaboracion", "EE01"));
-      break;
-      case ESTADO_ELABORACION_COPIA_AUTENTICA_CAMBIO_FORMATO:
-        metas.add(new Metadata("EstadoElaboracion", "EE02"));
-      break;
-      case ESTADO_ELABORACION_COPIA_AUTENTICA_DOCUMENTO_PAPEL:
-        metas.add(new Metadata("EstadoElaboracion", "EE03"));
-      break;
-      case ESTADO_ELABORACION_COPIA_PARCIAL_AUTENTICA:
-        metas.add(new Metadata("EstadoElaboracion", "EE04"));
-      break;
-      default:
-      case ESTADO_ELABORACION_OTROS:
-        metas.add(new Metadata("EstadoElaboracion", "EE99"));
-      break;
+      String ido =  estadoElaboracion.getIdentificadorDocumentoOrigen();
+      if (ido != null) {
+        metas.add(new Metadata("IdentificadorDocumentoOrigen", ido));
+      }
+  
+      EniEnumEstadoElaboracion eeee = estadoElaboracion.getValorEstadoElaboracion();
+      if (eeee != null) {
+        switch(eeee) {
+          case ESTADO_ELABORACION_ORIGINAL:
+            metas.add(new Metadata("EstadoElaboracion", "EE01"));
+          break;
+          case ESTADO_ELABORACION_COPIA_AUTENTICA_CAMBIO_FORMATO:
+            metas.add(new Metadata("EstadoElaboracion", "EE02"));
+          break;
+          case ESTADO_ELABORACION_COPIA_AUTENTICA_DOCUMENTO_PAPEL:
+            metas.add(new Metadata("EstadoElaboracion", "EE03"));
+          break;
+          case ESTADO_ELABORACION_COPIA_PARCIAL_AUTENTICA:
+            metas.add(new Metadata("EstadoElaboracion", "EE04"));
+          break;        
+          case ESTADO_ELABORACION_OTROS:
+            metas.add(new Metadata("EstadoElaboracion", "EE99"));
+          break;
+        }
+      }
     }
     
     return metas;
@@ -1158,7 +1151,8 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
     
 
     if (eniEnumTipoDocumental == null) {
-      return "TD99";
+      return null;
+      //return "TD99";
     }
 
     switch (eniEnumTipoDocumental) {
@@ -1202,11 +1196,14 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
         return "TD19";
       case TIPO_DOCUMENTAL_OTROS_INCAUTADOS:
         return "TD20";
-      default:
+     // default:
+      case TIPO_DOCUMENTAL_OTROS:
         return "TD99";
 
     }
 
+    return null;
+    
   }
   
   
@@ -1267,9 +1264,6 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
   // -------------------------------------------------------------------------
 
   public static final String JS = "js/";
-  
-  
-  public static final String IMG = "img/";
   
 
   // -------------------------------------------------------------------------

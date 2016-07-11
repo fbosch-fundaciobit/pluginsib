@@ -44,7 +44,9 @@ public class DigitalUtils {
 
     final String endPoint = hostport + "/digitalfront/ws/" + DigitalUtils.COPIA_AUTENTICA;
     
-    log.info(" XYZ endPoint = " + endPoint);
+    if (log.isDebugEnabled()) {
+      log.debug(" Digital WS endPoint = " + endPoint);
+    }
     
     String fileName = "ServicioCopiaAutentica.wsdl";
     ClassLoader classLoader = DigitalUtils.class.getClassLoader();

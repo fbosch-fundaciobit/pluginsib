@@ -176,23 +176,6 @@ public abstract class AbstractScanWebPlugin extends AbstractPluginProperties imp
     out.println("</head>");
     out.println("<body>");
 
-    // Missatges XYZ
-    /*
-     * Map<String, List<String>> missatgesBySignID = missatges.get(signaturesSet
-     * .getSignaturesSetID());
-     * 
-     * if (missatgesBySignID != null && !missatgesBySignID.isEmpty()) {
-     * out.println("<div class=\"spacer\"></div>");
-     * 
-     * for (String tipus : missatgesBySignID.keySet()) {
-     * 
-     * for (String msg : missatgesBySignID.get(tipus)) {
-     * out.println("<div class=\"alert alert-" + tipus + "\">"); out.println(
-     * "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>"
-     * ); out.println(msg); out.println("</div>"); } }
-     * out.println("<div class=\"spacer\"></div>");
-     * missatges.remove(signaturesSet.getSignaturesSetID()); }
-     */
     return out;
 
   }
@@ -202,11 +185,58 @@ public abstract class AbstractScanWebPlugin extends AbstractPluginProperties imp
     out.println("</html>");
   }
 
+  
   protected void getJavascriptCSS(HttpServletRequest request,
       String absolutePluginRequestPath, String relativePluginRequestPath, PrintWriter out,
       Locale languageUI) {
+    
+    out.println("<script type=\"text/javascript\" src=\"" + relativePluginRequestPath + WEBRESOURCE + "/js/jquery.js\"></script>");
+    out.println("<script type=\"text/javascript\" src=\"" + relativePluginRequestPath + WEBRESOURCE + "/js/bootstrap.js\"></script>");
+    out.println("<link href=\"" + relativePluginRequestPath + WEBRESOURCE + "/css/bootstrap.css\" rel=\"stylesheet\" media=\"screen\">");
+
   }
 
+  
+  
+//----------------------------------------------------------------------------
+ // ----------------------------------------------------------------------------
+ // ------------------- REQUEST GET-POST ---------------------------------------
+ // ----------------------------------------------------------------------------
+ // ----------------------------------------------------------------------------
+
+  public static final String WEBRESOURCE = "webresource";
+  
+ /**
+  * 
+  */
+ protected void requestGETPOST(String absolutePluginRequestPath,
+     String relativePluginRequestPath, long scanWebID, ScanWebConfig fullInfo,
+     String query, Locale languageUI,
+     HttpServletRequest request, HttpServletResponse response, boolean isGet) {
+
+  
+
+   if (fullInfo == null) {
+     String titol = (isGet ? "GET" : "POST") + " " + getName(new Locale("ca"))
+         + " PETICIO HA CADUCAT";
+
+     requestTimeOutError(absolutePluginRequestPath, relativePluginRequestPath, query,
+         String.valueOf(scanWebID), request, response, titol);
+
+   } else if (query.startsWith(WEBRESOURCE)) {
+
+     retornarRecursLocal(absolutePluginRequestPath, relativePluginRequestPath, scanWebID,
+         query, request, response, languageUI);
+   
+   } else {
+     String titol = (isGet ? "GET" : "POST") + " " + getName(new Locale("ca"))
+         + " DESCONEGUT";
+     requestNotFoundError(titol, absolutePluginRequestPath, relativePluginRequestPath,
+         query, String.valueOf(scanWebID), request, response, languageUI);
+   }
+ }
+  
+  
   
 
   // ---------------------------------------------------------------------------
