@@ -136,6 +136,8 @@ public abstract class AbstractScanWebPlugin extends AbstractPluginProperties imp
   // ----------------------------------------------------------------------------
   // ----------------------------------------------------------------------------
 
+  // TODO XYZ mogut a base
+  
   protected void sendRedirect(HttpServletResponse response, String url) {
     try {
       response.sendRedirect(url);
@@ -204,6 +206,7 @@ public abstract class AbstractScanWebPlugin extends AbstractPluginProperties imp
  // ----------------------------------------------------------------------------
  // ----------------------------------------------------------------------------
 
+  // XYZ TODO Passat a pare web
   public static final String WEBRESOURCE = "webresource";
   
  /**
@@ -229,6 +232,7 @@ public abstract class AbstractScanWebPlugin extends AbstractPluginProperties imp
          query, request, response, languageUI);
    
    } else {
+     // XYZ Fer un missatges com toca
      String titol = (isGet ? "GET" : "POST") + " " + getName(new Locale("ca"))
          + " DESCONEGUT";
      requestNotFoundError(titol, absolutePluginRequestPath, relativePluginRequestPath,
@@ -245,6 +249,7 @@ public abstract class AbstractScanWebPlugin extends AbstractPluginProperties imp
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
+ // TODO XYZ Llegir de AbstractWebPlugin
   
   /**
    * 
@@ -337,6 +342,7 @@ public abstract class AbstractScanWebPlugin extends AbstractPluginProperties imp
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
+  // TODO XYZ mogut a base
   
   protected static final String ABSTRACT_SCAN_WEB_RES_BUNDLE = "scanwebapi";
   
@@ -398,6 +404,7 @@ public abstract class AbstractScanWebPlugin extends AbstractPluginProperties imp
   // ------------------- I18N Utils ------------------------
   // ---------------------------------------------------------
 
+  // TODO XYZ mogut a base
   public abstract String getResourceBundleName();
 
   public final String getTraduccio(String key, Locale locale, Object... params) {
@@ -467,7 +474,7 @@ public abstract class AbstractScanWebPlugin extends AbstractPluginProperties imp
   // ------------------- READ LOCAL RESOURCES  ---------------
   // ---------------------------------------------------------
 
-
+  // TODO XYZ mogut a base
   protected void retornarRecursLocal(String absolutePluginRequestPath,
       String relativePluginRequestPath, long scanWebID, String query,
       HttpServletRequest request, HttpServletResponse response, Locale languageUI) {
