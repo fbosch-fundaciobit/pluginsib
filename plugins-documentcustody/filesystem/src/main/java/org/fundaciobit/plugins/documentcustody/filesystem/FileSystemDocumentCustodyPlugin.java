@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
-import org.fundaciobit.plugins.documentcustody.AbstractDocumentCustodyPlugin;
+import org.fundaciobit.plugins.documentcustody.api.AbstractDocumentCustodyPlugin;
 
 
 /**

@@ -3,9 +3,9 @@ package org.fundaciobit.plugins.documentcustody.alfresco;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import org.fundaciobit.plugins.documentcustody.IDocumentCustodyPlugin;
 import org.fundaciobit.plugins.documentcustody.alfresco.base.AlfrescoBaseDocumentCustodyPlugin;
-import org.fundaciobit.plugins.test.TestDocumentCustody;
+import org.fundaciobit.plugins.documentcustody.api.IDocumentCustodyPlugin;
+import org.fundaciobit.plugins.documentcustody.api.test.TestDocumentCustody;
 import org.fundaciobit.plugins.utils.PluginsManager;
 
 /**

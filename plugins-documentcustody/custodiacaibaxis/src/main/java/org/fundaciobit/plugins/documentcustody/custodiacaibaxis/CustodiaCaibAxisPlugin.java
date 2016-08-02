@@ -14,12 +14,12 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
-import org.fundaciobit.plugins.documentcustody.AnnexCustody;
-import org.fundaciobit.plugins.documentcustody.CustodyException;
-import org.fundaciobit.plugins.documentcustody.DocumentCustody;
-import org.fundaciobit.plugins.documentcustody.IDocumentCustodyPlugin;
-import org.fundaciobit.plugins.documentcustody.NotSupportedCustodyException;
-import org.fundaciobit.plugins.documentcustody.SignatureCustody;
+import org.fundaciobit.plugins.documentcustody.api.AnnexCustody;
+import org.fundaciobit.plugins.documentcustody.api.CustodyException;
+import org.fundaciobit.plugins.documentcustody.api.DocumentCustody;
+import org.fundaciobit.plugins.documentcustody.api.IDocumentCustodyPlugin;
+import org.fundaciobit.plugins.documentcustody.api.NotSupportedCustodyException;
+import org.fundaciobit.plugins.documentcustody.api.SignatureCustody;
 import org.fundaciobit.plugins.utils.AbstractPluginProperties;
 import org.fundaciobit.plugins.utils.Metadata;
 import org.fundaciobit.plugins.utils.MetadataFormatException;
@@ -61,21 +61,14 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
   public static final String DEFAULT_DOCUMENTTYPE_PROPERTY = BASEKEY + "defaultdocumenttype";
   public static final String DEFAULT_RESERVEPREFIX_PROPERTY = BASEKEY + "defaultreserveprefix";
   
-  public static final Set<String> SUPPORTED_DOC_TYPES = new TreeSet<String>();
-  
-  public static final String[] SUPPORTED_DOC_TYPES_ARRAY;
+
 
   public static final Set<String> SUPPORTED_SIGN_TYPES = new TreeSet<String>();
 
   public static final String[] SUPPORTED_SIGN_TYPES_ARRAY;
 
   static {
-    SUPPORTED_DOC_TYPES.add(DocumentCustody.PDF_WITH_SIGNATURE);
-    SUPPORTED_DOC_TYPES.add(DocumentCustody.DOCUMENT_ONLY);
-    
-    SUPPORTED_DOC_TYPES_ARRAY = SUPPORTED_DOC_TYPES.toArray(new String[SUPPORTED_DOC_TYPES
-                                                                         .size()]);
-    
+    SUPPORTED_SIGN_TYPES.add(SignatureCustody.PADES_SIGNATURE);
     SUPPORTED_SIGN_TYPES.add(SignatureCustody.XADES_SIGNATURE);
     SUPPORTED_SIGN_TYPES.add(SignatureCustody.SMIME_SIGNATURE);
 
@@ -213,6 +206,30 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
   }
   
   
+  /**
+   * Custodia un document
+   * @param custodyID
+   * @param document
+   * @throws Exception
+   */
+  @Override
+  public void saveAll(String custodyID, String custodyParameters,
+      DocumentCustody document,  SignatureCustody signature,
+      Metadata[] metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException {
+    
+    if (document != null) {
+      saveDocument(custodyID, custodyParameters, document);
+    }
+    
+    if (signature != null) {
+      saveSignature(custodyID, custodyParameters, signature);
+    }
+    
+    if (metadata != null) {
+      addMetadata(custodyID, metadata);
+    }
+    
+  }
   
 
   /**
@@ -222,14 +239,9 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
   public void saveDocument(String custodyID, String custodyParameters,
       DocumentCustody document) throws CustodyException,
       NotSupportedCustodyException {
-
-    String documentType = document.getDocumentType();
-    if (documentType == null || !SUPPORTED_DOC_TYPES.contains(documentType)) {
-      throw new NotSupportedCustodyException(documentType);
-    }
     
     internalsaveDocument(custodyID, custodyParameters,
-         document, documentType);
+         document, null);
   }
   
   
@@ -259,7 +271,7 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
     try {
       String codigoExternoTipoDocumento = getDocumentType(custodyParameters);
       log.info(" codigoExternoTipoDocumento =  ]" + codigoExternoTipoDocumento + "[");
-      if (DocumentCustody.PDF_WITH_SIGNATURE.equals(type)) {
+      if (SignatureCustody.PADES_SIGNATURE.equals(type)) {
         log.info(" Custodia PADES");
         response = clienteCustodia.custodiarPDFFirmado(
             new ByteArrayInputStream(document.getData()), document.getName(), custodyID,
@@ -419,10 +431,6 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
     return custodyID;
   }
   
-  @Override
-  public String[] getSupportedDocumentTypes() {
-    return SUPPORTED_DOC_TYPES_ARRAY;
-  }
 
   @Override
   public String[] getSupportedSignatureTypes() {
@@ -439,14 +447,8 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
     dc.setData(getDocument(custodyID));
     dc.setName(doc.getNombre());
     
-    String clase = doc.getClase();
-    
-    if (ClienteCustodia.PDF_FIRMADO.equals(clase)) {
-      dc.setDocumentType(DocumentCustody.PDF_WITH_SIGNATURE);
-    } else {
-      // ClienteCustodia.SIN_FIRMAR.equals(clase)
-      dc.setDocumentType(DocumentCustody.DOCUMENT_ONLY);
-    } 
+    //String clase = doc.getClase();
+
     return dc;
   }
   
@@ -489,6 +491,9 @@ public class CustodiaCaibAxisPlugin extends AbstractPluginProperties
       dc.setAttachedDocument(null);
     } else if (ClienteCustodia.SMIME.equals(clase)) {
       dc.setSignatureType(SignatureCustody.SMIME_SIGNATURE);
+      dc.setAttachedDocument(null);
+    } else if (ClienteCustodia.PDF_FIRMADO.equals(clase)) {
+      dc.setSignatureType(SignatureCustody.PADES_SIGNATURE);
       dc.setAttachedDocument(null);
     } else {
       return null;

@@ -18,6 +18,7 @@ import org.junit.Assert;
  * @author anadal
  *
  */
+@Deprecated
 public abstract class TestDocumentCustody {
   
   /**

@@ -3,7 +3,6 @@ package org.fundaciobit.plugins.documentcustody.custodiacaibaxis;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
 import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -13,8 +12,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
-import org.fundaciobit.plugins.documentcustody.DocumentCustody;
-import org.fundaciobit.plugins.documentcustody.IDocumentCustodyPlugin;
+import org.fundaciobit.plugins.documentcustody.api.DocumentCustody;
+import org.fundaciobit.plugins.documentcustody.api.IDocumentCustodyPlugin;
 
 import es.caib.signatura.api.CustodiaResponse;
 import es.caib.signatura.api.ReservaResponse;
@@ -90,14 +89,13 @@ public class TestCustodiaCaibAxis {
         String[][] dades = new String[][] {
             //{ "xades_dnie.xml", DocumentCustody.XADES_SIGNATURE, ""},
             //{"hola_dnie.pdf", DocumentCustody.PADES_SIGNATURE, "documenttype=PDF\\" }
-            {"hola.pdf", DocumentCustody.DOCUMENT_ONLY, "documenttype=PDF\nreserveprefix=PORTAFIBXX" }
+            {"hola.pdf", "documenttype=PDF\nreserveprefix=PORTAFIBXX" }
         };
         
         
         for (int i = 0; i < dades.length; i++) {
           String file= dades[i][0];
-          String signatureType = dades[i][1];
-          String custodyParameters= dades[i][2];
+          String custodyParameters= dades[i][1];
           
           InputStream is = TestCustodiaCaibAxis.class.getResourceAsStream("/" + file);
           byte[] data = IOUtils.toByteArray(is);
@@ -111,7 +109,7 @@ public class TestCustodiaCaibAxis {
           DocumentCustody document = new DocumentCustody();
           document.setName(file);
           document.setData(data);
-          document.setDocumentType(signatureType);
+          //document.setDocumentType(signatureType);
           
           plugin.saveDocument(custodyID, custodyParameters, document);
           

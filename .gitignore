@@ -6,3 +6,17 @@ target
 .project
 .settings/
 
+/plugins-documentcustody/filesystem/testRepos
+/plugins-api/personal
+/plugins-api/ACUSUARIOS
+/plugins-api/AdministracionPublica
+/plugins-api/personajuridica
+/plugins-scanweb/compil.bat
+/plugins-scanweb/compil2.bat
+/plugins-api/passwords.txt
+/plugins-api/results.txt
+/plugins-api/test.log
+/plugins-api/test.properties
+/plugins-certificate/afirma/passwords.txt
+/plugins-certificate/afirmacxf/test.log
+/plugins-scanweb/caib-scanweb-plugin/testapi.properties

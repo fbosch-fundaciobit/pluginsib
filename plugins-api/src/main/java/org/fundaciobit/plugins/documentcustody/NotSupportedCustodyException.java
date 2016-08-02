@@ -5,6 +5,7 @@ package org.fundaciobit.plugins.documentcustody;
  * @author anadal
  * 
  */
+@Deprecated
 public class NotSupportedCustodyException extends Exception {
 
   /**

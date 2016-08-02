@@ -7,9 +7,9 @@ import java.util.Properties;
 
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
-import org.fundaciobit.plugins.documentcustody.AbstractDocumentCustodyPlugin;
-import org.fundaciobit.plugins.documentcustody.CustodyException;
-import org.fundaciobit.plugins.documentcustody.NotSupportedCustodyException;
+import org.fundaciobit.plugins.documentcustody.api.AbstractDocumentCustodyPlugin;
+import org.fundaciobit.plugins.documentcustody.api.CustodyException;
+import org.fundaciobit.plugins.documentcustody.api.NotSupportedCustodyException;
 import org.fundaciobit.plugins.documentcustody.alfresco.base.cmis.OpenCmisAlfrescoHelper;
 
 

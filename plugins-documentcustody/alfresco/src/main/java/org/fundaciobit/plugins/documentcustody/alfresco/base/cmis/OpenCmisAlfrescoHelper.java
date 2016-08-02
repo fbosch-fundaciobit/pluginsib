@@ -35,7 +35,7 @@ import org.apache.chemistry.opencmis.commons.impl.dataobjects.CmisExtensionEleme
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.fundaciobit.plugins.documentcustody.AnnexCustody;
+import org.fundaciobit.plugins.documentcustody.api.AnnexCustody;
 import org.fundaciobit.plugins.documentcustody.alfresco.base.AlfrescoBaseDocumentCustodyPlugin;
 
 import com.google.api.client.http.HttpRequest;

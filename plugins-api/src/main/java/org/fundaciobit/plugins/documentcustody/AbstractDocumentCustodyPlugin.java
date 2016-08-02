@@ -33,6 +33,7 @@ import org.fundaciobit.plugins.utils.MetadataFormatException;
  * @author anadal
  *
  */
+@Deprecated
 public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProperties
   implements IDocumentCustodyPlugin {
 
@@ -220,7 +221,6 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
    *     // {1} => URLEncode(custodyID)
    *     // {2} => Hash(custodyID)
    */
-  @SuppressWarnings("deprecation")
   @Override
   public String getValidationUrl(String custodyID) throws CustodyException {
 
