@@ -16,7 +16,7 @@ import org.fundaciobit.plugins.certificate.afirmacxf.ValidaCertificat;
 public class TestValidaCertificat {
 
   public static void main(String[] args) {
-    String endPoint = "http://des-afirma.redsara.es/afirmaws/services//ValidarCertificado";
+    String endPoint = "http://des-afirma.redsara.es/afirmaws/services/ValidarCertificado";
     testCertWithCertificateLogin(endPoint);
     testCertWithUsrPwdLogin(endPoint);
   }
