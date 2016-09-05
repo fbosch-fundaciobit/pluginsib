@@ -119,7 +119,7 @@ public abstract class TestDocumentCustody {
    Assert.assertEquals(1, documentCustodyPlugin.getMetadata(custodyID, "k2").size());
    
    Metadata[] errors = new Metadata[] {
-       new Metadata("key", "zzzzññ", MetadataType.BASE64),
+       new Metadata("key", "kkkkzññ", MetadataType.BASE64),
        new Metadata("key", "12.8", MetadataType.INTEGER),
        new Metadata("key", "12,8", MetadataType.DECIMAL),
        //new Metadata("key", "truez", MetadataType.BOOLEAN),
