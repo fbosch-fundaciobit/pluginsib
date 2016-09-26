@@ -2,21 +2,26 @@ package org.fundaciobit.plugins.scanweb.caib;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringReader;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.ws.BindingProvider;
 
+import org.apache.log4j.Logger;
 import org.fundaciobit.plugins.scanweb.api.AbstractScanWebPlugin;
 import org.fundaciobit.plugins.scanweb.api.ScanWebConfig;
 import org.fundaciobit.plugins.scanweb.api.ScanWebMode;
@@ -26,26 +31,31 @@ import org.fundaciobit.plugins.scanweb.api.ScannedSignedFile;
 import org.fundaciobit.plugins.utils.Metadata;
 import org.fundaciobit.plugins.utils.MetadataType;
 
-import es.caib.digital.ws.api.copiaautentica.CopiaAutenticaWSService;
-import es.caib.digital.ws.api.copiaautentica.DatosDocumento;
-import es.caib.digital.ws.api.copiaautentica.DocumentoElectronico;
-import es.caib.digital.ws.api.copiaautentica.EniContenidoFirma;
-import es.caib.digital.ws.api.copiaautentica.EniEnumEstadoElaboracion;
-import es.caib.digital.ws.api.copiaautentica.EniEnumOrigenCreacion;
-import es.caib.digital.ws.api.copiaautentica.EniEnumTipoDocumental;
-import es.caib.digital.ws.api.copiaautentica.EniEnumTipoFirma;
-import es.caib.digital.ws.api.copiaautentica.EniEstadoElaboracion;
-import es.caib.digital.ws.api.copiaautentica.EniFirmaConCertificado;
-import es.caib.digital.ws.api.copiaautentica.EniMetadata;
-import es.caib.digital.ws.api.copiaautentica.FirmaElectronica;
-import es.caib.digital.ws.api.copiaautentica.InformacionDocumento;
-import es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico;
-import es.caib.digital.ws.api.copiaautentica.MetadatosFirmaElectronica;
-import es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.LabelMetadatosComplementarios;
-import es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios;
-import es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.LabelMetadatosComplementarios.Entry;
-import es.caib.digital.ws.api.copiaautentica.TipoFirmaOriginal;
-import es.caib.digital.ws.api.utils.DigitalUtils;
+import es.caib.digital.ws.api.v1.copiaautentica.CopiaAutenticaWSService;
+import es.caib.digital.ws.api.v1.copiaautentica.CopiaAutenticaWSServiceService;
+import es.caib.digital.ws.api.v1.copiaautentica.DatosDocumento;
+import es.caib.digital.ws.api.v1.copiaautentica.DocumentoElectronico;
+import es.caib.digital.ws.api.v1.copiaautentica.EniContenidoFirma;
+import es.caib.digital.ws.api.v1.copiaautentica.EniEnumEstadoElaboracion;
+import es.caib.digital.ws.api.v1.copiaautentica.EniEnumOrigenCreacion;
+import es.caib.digital.ws.api.v1.copiaautentica.EniEnumTipoDocumental;
+import es.caib.digital.ws.api.v1.copiaautentica.EniEnumTipoFirma;
+import es.caib.digital.ws.api.v1.copiaautentica.EniEstadoElaboracion;
+import es.caib.digital.ws.api.v1.copiaautentica.EniFirmaConCertificado;
+import es.caib.digital.ws.api.v1.copiaautentica.EniMetadata;
+import es.caib.digital.ws.api.v1.copiaautentica.FirmaElectronica;
+import es.caib.digital.ws.api.v1.copiaautentica.InformacionDocumento;
+import es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico;
+import es.caib.digital.ws.api.v1.copiaautentica.MetadatosFirmaElectronica;
+import es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.LabelMetadatosComplementarios;
+import es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios;
+import es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.LabelMetadatosComplementarios.Entry;
+import es.caib.digital.ws.api.v1.copiaautentica.TipoFirmaOriginal;
+import es.caib.digital.ws.api.v1.entidades.Entidad;
+import es.caib.digital.ws.api.v1.entidades.EntidadesWSService;
+import es.caib.digital.ws.api.v1.entidades.EntidadesWSServiceImplService;
+import es.caib.digital.ws.api.v1.entidades.MetaDato;
+import es.caib.digital.ws.api.v1.entidades.ValorMetaDato;
 
 
 /**
@@ -55,6 +65,7 @@ import es.caib.digital.ws.api.utils.DigitalUtils;
  */
 public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
   
+  protected static Logger log = Logger.getLogger(CAIBScanWebPlugin.class);
 
   private static final String PROPERTY_BASE = SCANWEB_BASE_PROPERTY + "caib.";
 
@@ -91,37 +102,22 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
   }
   
   
-  public String getHostPort() throws Exception {
-    return getPropertyRequired(PROPERTY_BASE + "hostport");
+  public String getWSUrlBase() throws Exception {
+    return getPropertyRequired(PROPERTY_BASE + "ws_urlbase");
   }
+  
+  /**
+   * Si val null s'utilitzarà l'entitat per defecte
+   * @return
+   * @throws Exception
+   */
+  public String getCodiIntegracio() throws Exception {
+    return getProperty(PROPERTY_BASE + "codi_integracio");
+  }
+  
   
   public boolean isDebug() {
     return "true".equals(getProperty(PROPERTY_BASE + "debug"));
-  }
-  
-  
-  public String getValorIdentificadorDocumentOrigen() {
-    String val = getProperty(PROPERTY_BASE + "identificadorDocumentOrigen");
-    if (val == null) {
-      val = "";
-    }
-    return val;
-  }
-  
-  
-  
-  
-  protected Properties getValues(String key, Locale languageUI ) throws Exception {
-     String lang =  languageUI.getLanguage();
-
-     
-     String values = getPropertyRequired(PROPERTY_BASE +  key + "." + lang);
-     
-     Properties propValues = new Properties();
-     propValues.load(new StringReader(values));
-     
-     return propValues;
-     
   }
   
 
@@ -321,6 +317,7 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
       out.println("        <img alt=\"Esperi\" style=\"vertical-align:middle;z-index:200\" src=\"" + absolutePluginRequestPath + WEBRESOURCE + "/img/ajax-loader2.gif" + "\">");
 
       out.println("        &nbsp;&nbsp;<i>" +  getTraduccio("esperantservidor", languageUI) + "</i>");
+      out.println("      </div>");
       out.println("     </td>");
       if (fullInfo.getMode() == ScanWebMode.SYNCHRONOUS) {
         out.println("<td>");
@@ -330,7 +327,6 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
       }
       out.println("     </tr></table>");
 
-      out.println("      </div>");
       out.println("      <br/>");
       //out.println("  <input type=\"button\" class=\"btn btn-primary\" onclick=\"gotoCancel()\" value=\"" + getTraduccio("cancel", locale) + "\">");
       out.println("    </td>");
@@ -345,6 +341,115 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
       out.println("    ");
       out.println("        <form id=\"documentoElectronico\"  action=\"\" method=\"post\">");
       out.println("        <table border=\"0px\">");
+      
+      String codiIntegracio = getCodiIntegracio();
+      
+      
+      EntidadesWSService api;
+      
+      api = getEntidadesWSServiceApi(getWSUrlBase(),
+          getWSUsername(), getWSPassword());
+
+      Entidad entidad;
+      if (codiIntegracio == null) {
+        entidad = getEntidadDefault(api);
+        if (entidad == null) {
+          throw new Exception("No es troba l'entitat/integració per defecte.");
+        }
+      } else {
+        entidad = getEntidadByCodi(api, codiIntegracio);
+        if (entidad == null) {
+          throw new Exception("No es troba l'entitat/integració amb codi " + codiIntegracio);
+        }
+      }
+      
+      
+      List<MetaDato> metadades = new ArrayList<MetaDato>();
+      metadades.addAll(entidad.getMetaDatos());
+      
+      
+      // Incloure Metadades entitat per defecte ?
+      if (entidad.isIncluirMetadatosPorDefecto()) {
+        
+        Entidad entidadDefault = getEntidadDefault(api);
+        
+        if (entidadDefault == null) {
+          log.warn("No s'ha pogut recuperar l'entitat per defecte.", new Exception());
+        } else {
+          
+          metadades.addAll(entidadDefault.getMetaDatos());
+          
+        }
+        
+      }
+      
+      
+      Collections.sort(metadades, new Comparator<MetaDato>() {
+
+        @Override
+        public int compare(MetaDato o1, MetaDato o2) {
+          return o2.getOrden() - o1.getOrden();
+        }
+      });
+      
+      
+      for (MetaDato metaDato : metadades) {
+        
+        switch((int)metaDato.getTipoMetaDato()) {
+           case 1: // Select
+           {
+             String nombre = metaDato.getNombreMetaDato();
+             out.println("          <tr>");
+             out.println("            <td align=\"right\">"
+                 + "<label for='_SDC_" +nombre + "'>" + metaDato.getLabelMetaDato() + "</label>&nbsp;&nbsp;</td>");
+             out.println("            <td><select id='_SDC_" +nombre + "' name='_SDC_" +nombre + "' style='width: 200px;'>");
+             
+             for (ValorMetaDato entry : metaDato.getValoresMetaDatos()) {
+               out.println("              <option value='" + entry.getClave()+ "'>" + entry.getValor()+ "</option>");
+             }
+             
+             //out.println("              <option value='1'>Administración</option>");
+             //out.println("              <option value='0'>Ciudadano</option>");
+             out.println("            </select></td>");
+             out.println("          </tr>");
+           }
+           break;
+           
+           case 2: // Textbox
+             String nombre = metaDato.getNombreMetaDato();
+             String def = metaDato.getValorDefault();
+             if (def == null) {
+               def = "";
+             } else {
+               def = def.replace("\"", "\\\"");
+             }
+
+             Integer maxlength =metaDato.getLongitud();
+             String maxlengthStr = "";
+             if (maxlength == null) {
+               maxlengthStr = "";
+             } else {
+               maxlengthStr = " maxlength='" + maxlength + "' ";
+             }
+             
+
+             out.println("          <tr>");
+             out.println("            <td align=\"right\">"
+                 + "<label for='_SDC_" +nombre + "'>" + metaDato.getLabelMetaDato() +  " </label>&nbsp;&nbsp;</td>");
+             out.println("            <td><input type='text' id='_SDC_" +nombre + "' name='_SDC_" +nombre + "' value=\"" + def + "\" " + maxlengthStr + "/></td>");
+             out.println("          </tr>");
+           break;
+           
+           default:
+             throw new Exception("Tipo de Metadato desconegut (" +metaDato.getTipoMetaDato()
+                 + ") ");
+        }
+      }
+      
+      
+     // XYZ ZZZ  Esborrar Bindings 
+      
+      /* XYZ ZZZ 
       out.println("          <tr>");
       String id = getValorIdentificadorDocumentOrigen();
       out.println("            <td align=\"right\"><label for='_SDC_identificadorDocumentoOrigen'>" + getTraduccio("iddocorigen", languageUI)    + " </label>&nbsp;&nbsp;</td>");
@@ -361,12 +466,12 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
       for (java.util.Map.Entry<Object,Object> entry : organ.entrySet()  ) {
         out.println("              <option value='" + entry.getKey()+ "'>" + entry.getValue()+ "</option>");
       }
-      /*
-      out.println("              <option value='A04013518'>DG. Personal Docent</option>");
-      out.println("              <option value='A04013600'>DG Participació i Transparència</option>");
-      out.println("              <option value='A04013511'>DG DE DESARROLLO TECNOLÓGICO</option>");
-      out.println("              <option value='A04003746'>DG Turisme</option>");
-      */
+      
+//      out.println("              <option value='A04013518'>DG. Personal Docent</option>");
+//      out.println("              <option value='A04013600'>DG Participació i Transparència</option>");
+//      out.println("              <option value='A04013511'>DG DE DESARROLLO TECNOLÓGICO</option>");
+//      out.println("              <option value='A04003746'>DG Turisme</option>");
+      
       out.println("            </select></td>");
       out.println("          </tr>");
       
@@ -397,14 +502,35 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
       out.println("            </select></td>");
       out.println("          </tr>");
       out.println("          </table>");
-
-     /*
-      out.println("            <label for='_SDC_codigo'>_SDC_codigo</label>");
-      //out.println("            <td align=\"right\"><label>_SDC_codigo</label>&nbsp;&nbsp;</td>");
-      out.println("            <input type='text' id='_SDC_codigo' name='_SDC_codigo' value='FUNDACIO_BIT'/>");
-      out.println("          ");
       */
+
       
+      
+      if (codiIntegracio != null) {
+        out.println("          <tr>");
+        out.println("            <td align=\"right\">"
+            + "<label for='_SDC_codigo'>" + getTraduccio("codiintegracio", languageUI) + "</label>&nbsp;&nbsp;</td>");
+        //out.println("          <td align=\"right\"><label>_SDC_codigo</label>&nbsp;&nbsp;</td>");
+        
+        String readonly = isDebug()? "" : " readonly";
+        out.println("            <td><input type='text' id='_SDC_codigo' name='_SDC_codigo' value='" + codiIntegracio + "' " + readonly + " /></td>");
+        out.println("          </tr>");
+        out.println("");
+      };
+
+      
+
+
+
+      // Escanejar
+      String escanejar = getTraduccio("escanejar", languageUI);
+      out.println("          <tr>");
+      out.println("            <td align=\"right\" colspan='2'>");
+      out.println("              <br/>");
+      out.println("              <input type=\"button\" class=\"btn btn-primary\" value=\"" + escanejar + "!!!\" onclick=\"copiasimple()\" />");
+      out.println("            </td>");
+      out.println("          </tr>");
+      out.println("</table>");
       
       out.println("");
       if (isDebug()) {
@@ -418,14 +544,7 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
       } else {
         out.println("            <input type='hidden' id='csv' name='csv' value=''/>            ");
       }
-
-
-      // Escanejar
-      String escanejar = getTraduccio("escanejar", languageUI);
-
-      out.println("<br/>");
-      out.println("            <input type=\"button\" class=\"btn btn-primary\" value=\"" + escanejar + "!!!\" onclick=\"copiasimple()\" />");
-
+      
       out.println("");
       out.println("");
       out.println("        </form>");
@@ -476,11 +595,13 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
   
       out.println("  function getHostPort() {");
       
-      String hostport = getHostPort();
-      if (hostport == null) {
-        hostport = "location.protocol + '//' + location.host";
+      String urlBase = getWSUrlBase();
+      String hostport;
+      if (urlBase == null) {
+        hostport = "location.protocol + '//' + location.host"; // location.host conte ip i port
       } else {
-        hostport = "'" + hostport + "'";
+        URL url = new URL(urlBase);
+        hostport = "'" + url.getProtocol()+ "://" + url.getHost() + ":" + url.getPort() + "'";
       }
       
 
@@ -559,6 +680,37 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
   }
   
   
+  public static Entidad getEntidadDefault(
+      EntidadesWSService api) {
+    
+    Entidad entidadDefault = new Entidad();
+    entidadDefault.setEsDefault("1");
+    
+    List<Entidad> listEntidades;
+    listEntidades = api.getEntidadDynamic(entidadDefault);
+    if (listEntidades==null || listEntidades.isEmpty()) {
+       return null;
+    } else {
+       return (Entidad)listEntidades.get(0);
+    }
+
+  }
+  
+  public static Entidad getEntidadByCodi(
+      EntidadesWSService api, String codigo) {
+    
+    Entidad entidadByCodigo = new Entidad();
+    entidadByCodigo.setCodigo(codigo);
+    
+    List<Entidad> listEntidades;
+    listEntidades = api.getEntidadDynamic(entidadByCodigo);
+    if (listEntidades==null || listEntidades.isEmpty()) {
+       return null;
+    } else {
+       return (Entidad)listEntidades.get(0);
+    }
+
+  }
 
   
   
@@ -604,9 +756,9 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
 
    try {
      
-     String hostPort = getHostPort();
+     String urlBase = getWSUrlBase();
      if (debuglog) { 
-       log.debug("hostPort = " + hostPort);
+       log.debug("urlBase = " + urlBase);
        log.debug("user = " + getWSUsername());
        log.debug("password = " + getWSPassword());
      }
@@ -614,7 +766,7 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
      
      CopiaAutenticaWSService apiCA;
     
-     apiCA = DigitalUtils.getCopiaAutenticaWSServiceApi(hostPort,
+     apiCA = getCopiaAutenticaWSServiceApi(urlBase,
          getWSUsername(), getWSPassword());
   
      
@@ -644,8 +796,6 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
      
      
      //ScannedPlainFile singleScanFile = new ScannedPlainFile(name, mime, data);
-  
-     
      ScannedDocument scannedDoc = new ScannedDocument();
      scannedDoc.setMetadatas(metadatas);
      scannedDoc.setScannedSignedFile(signedScanFile);
@@ -753,10 +903,10 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
     
     MetadatosComplementarios complVal = metas.getMetadatosComplementarios();
     
-    List<es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry> listVal;
+    List<es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry> listVal;
     listVal = complVal.getEntry();
     
-    for (es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry entry : listVal) {
+    for (es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry entry : listVal) {
       str.append("\nmetas.getMetadatosComplementarios()[" + entry.getKey() + "] => " + entry.getValue());
     }
     
@@ -909,7 +1059,9 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
     
     metadatas.addAll(getEstadoElaboracion(eni.getEstadoElaboracion()));
     metadatas.add(new Metadata("Identificador", eni.getIdentificador()));
-    metadatas.add(new Metadata("FechaCaptura", eni.getFechaCaptura()));
+    // metadatas.add(new Metadata("FechaCaptura", eni.getFechaCaptura()));
+    addMeta(metadatas, "FechaCaptura", eni.getFechaCaptura());
+    
     metadatas.add(new Metadata("VersionNTI", eni.getVersionNTI()));
     for(String org : eni.getOrgano()) {
       metadatas.add(new Metadata("Organo", org));
@@ -961,10 +1113,10 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
     
     MetadatosComplementarios complVal = metas.getMetadatosComplementarios();
     
-    List<es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry> listVal;
+    List<es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry> listVal;
     listVal = complVal.getEntry();
     
-    for (es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry entry : listVal) {
+    for (es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry entry : listVal) {
       addMeta(metadatas, "MetadatosComplementarios." + entry.getKey(), entry.getValue());
     }
     
@@ -1081,6 +1233,16 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
     if (tfo != null) {
       addMeta(metadatas, base + ".TipoFirmaOriginal", tfo.value());
     }
+  }
+  
+  
+  public void addMeta(List<Metadata> metadatas, String key, XMLGregorianCalendar gc) {
+    
+    if (gc != null) {
+      Timestamp timestamp = new Timestamp(gc.toGregorianCalendar().getTimeInMillis());
+      metadatas.add(new Metadata(key, timestamp));     
+    }
+    
   }
   
   
@@ -1289,6 +1451,80 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
     }
   
   }
+  
+  
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // --------------- UTILITATS -------------------------------
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+
+  
+  
+
+  public static final String COPIA_AUTENTICA = "ServicioCopiaAutentica"; 
+  
+  public static final String ENTIDADES = "ServicioEntidades";
+
+  
+  public static void configAddressUserPassword(String usr, String pwd, String endpoint,
+      Object api) {
+
+    Map<String, Object> reqContext = ((BindingProvider) api).getRequestContext();
+    reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpoint);
+    reqContext.put(BindingProvider.USERNAME_PROPERTY, usr);
+    reqContext.put(BindingProvider.PASSWORD_PROPERTY, pwd);
+    
+    reqContext.put("disableCNCheck", "true");
+  }
+
+  public static CopiaAutenticaWSService getCopiaAutenticaWSServiceApi(String urlBase, String usr, String pwd)
+      throws Exception {
+
+    final String endPoint = urlBase +  COPIA_AUTENTICA;
+    
+    if (log.isDebugEnabled()) {
+      log.debug(" Digital WS endPoint = " + endPoint);
+    }
+    
+    String fileName = "wsdl/ServicioCopiaAutentica.wsdl";
+    ClassLoader classLoader = CAIBScanWebPlugin.class.getClassLoader();
+    URL wsdlLocation = classLoader.getResource(fileName);
+    
+
+    CopiaAutenticaWSServiceService srv = new CopiaAutenticaWSServiceService(wsdlLocation);
+
+    CopiaAutenticaWSService api = srv.getCopiaAutenticaWSServiceImplWs();
+
+    configAddressUserPassword(usr, pwd, endPoint, api);
+
+    return api;
+
+  }
+  
+  
+  public static EntidadesWSService getEntidadesWSServiceApi(String urlBase, String usr, String pwd)
+      throws Exception {
+    
+
+    final String endPoint = urlBase +  ENTIDADES;
+    
+
+    String fileName = "wsdl/ServicioEntidades.wsdl";
+    ClassLoader classLoader = CAIBScanWebPlugin.class.getClassLoader();
+    URL wsdlLocation = classLoader.getResource(fileName);
+
+    EntidadesWSServiceImplService srv = new EntidadesWSServiceImplService(wsdlLocation);
+
+    EntidadesWSService api = srv.getEntidadesWSServiceImplWs();
+
+    configAddressUserPassword(usr, pwd, endPoint, api);
+
+    return api;
+
+  }
+  
+  
 
 
 }

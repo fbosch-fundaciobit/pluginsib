@@ -1,33 +1,36 @@
 package es.caib.digital.ws.test;
 
-
-import java.sql.Timestamp;
+import java.util.GregorianCalendar;
 import java.util.List;
 
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.apache.log4j.Logger;
+import org.fundaciobit.plugins.scanweb.caib.CAIBScanWebPlugin;
 import org.fundaciobit.plugins.utils.XTrustProvider;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import es.caib.digital.ws.api.copiaautentica.CopiaAutenticaWSService;
-import es.caib.digital.ws.api.copiaautentica.DatosDocumento;
-import es.caib.digital.ws.api.copiaautentica.DocumentoElectronico;
-import es.caib.digital.ws.api.copiaautentica.EniContenidoFirma;
-import es.caib.digital.ws.api.copiaautentica.EniEnumOrigenCreacion;
-import es.caib.digital.ws.api.copiaautentica.EniEnumTipoDocumental;
-import es.caib.digital.ws.api.copiaautentica.EniEstadoElaboracion;
-import es.caib.digital.ws.api.copiaautentica.EniMetadata;
-import es.caib.digital.ws.api.copiaautentica.FirmaElectronica;
-import es.caib.digital.ws.api.copiaautentica.InformacionDocumento;
-import es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico;
-import es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.LabelMetadatosComplementarios.Entry;
-import es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios;
-import es.caib.digital.ws.api.copiaautentica.MetadatosFirmaElectronica;
-import es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.LabelMetadatosComplementarios;
-import es.caib.digital.ws.api.entidades.Entidad;
-import es.caib.digital.ws.api.entidades.EntidadesWSService;
-import es.caib.digital.ws.api.entidades.MetaDato;
-import es.caib.digital.ws.api.entidades.ValorMetaDato;
+import es.caib.digital.ws.api.v1.copiaautentica.CopiaAutenticaWSService;
+import es.caib.digital.ws.api.v1.copiaautentica.DatosDocumento;
+import es.caib.digital.ws.api.v1.copiaautentica.DocumentoElectronico;
+import es.caib.digital.ws.api.v1.copiaautentica.EniContenidoFirma;
+import es.caib.digital.ws.api.v1.copiaautentica.EniEnumOrigenCreacion;
+import es.caib.digital.ws.api.v1.copiaautentica.EniEnumTipoDocumental;
+import es.caib.digital.ws.api.v1.copiaautentica.EniEstadoElaboracion;
+import es.caib.digital.ws.api.v1.copiaautentica.EniMetadata;
+import es.caib.digital.ws.api.v1.copiaautentica.FirmaElectronica;
+import es.caib.digital.ws.api.v1.copiaautentica.InformacionDocumento;
+import es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico;
+import es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.LabelMetadatosComplementarios.Entry;
+import es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios;
+import es.caib.digital.ws.api.v1.copiaautentica.MetadatosFirmaElectronica;
+import es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.LabelMetadatosComplementarios;
+import es.caib.digital.ws.api.v1.entidades.Entidad;
+import es.caib.digital.ws.api.v1.entidades.EntidadesWSService;
+import es.caib.digital.ws.api.v1.entidades.MetaDato;
+import es.caib.digital.ws.api.v1.entidades.ValorMetaDato;
 
 
 /**
@@ -97,12 +100,17 @@ public class Test extends TestUtils {
     EniMetadata enimetadata = new EniMetadata();
     enimetadata.setIdentificador(id);
     enimetadata.setEstadoElaboracion(new EniEstadoElaboracion());
-    enimetadata.setFechaCaptura(new Timestamp(System.currentTimeMillis()));
+
+
+    //enimetadata.setFechaCaptura(new Timestamp(System.currentTimeMillis()));
+    GregorianCalendar gcal = new GregorianCalendar();
+    gcal.setTimeInMillis(System.currentTimeMillis());
+    XMLGregorianCalendar xgcal = DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
+    enimetadata.setFechaCaptura(xgcal);
+    
     enimetadata.setOrigenCiudadanoAdministracion(EniEnumOrigenCreacion.ORIGEN_CREACION_CIUDADANO);
     enimetadata.setTipoDocumental(EniEnumTipoDocumental.TIPO_DOCUMENTAL_DECLARACION);
     
-    
-
     metadatos.setEniMetadata(enimetadata);
 
     //metadatos.se
@@ -157,14 +165,16 @@ public class Test extends TestUtils {
 
   public static void main(String[] args) {
     
-   // printEntitatInfo();
+    printEntitatDefaultInfo();
+
+    //printEntitatInfoByCodigo();
     
-    printCSVINfo();
+    //printCSVINfo();
     
   }
   
   
-  public static void printEntitatInfo() {
+  public static void printEntitatInfoByCodigo() {
     try {
       Test test = new Test();
       
@@ -172,44 +182,11 @@ public class Test extends TestUtils {
       
       test.testEntidades();
       
-      Entidad entitat = apiE.getEntidad("10");
+      Entidad entitat = CAIBScanWebPlugin.getEntidadByCodi(apiE, getCodigoEntidad() );  //apiE.getEntidad("10");
 
       //entitat.getConfiguracionPlantillaEntidad().g
 
-      List<MetaDato> h = entitat.getMetaDatos();
-      
-      
-      int m = 1;
-      for (MetaDato metaDato : h) {
-        
-        System.out.println();
-        System.out.println(" =========== ValorMetaDato [" + (m++) + "] =============== ");
-        
-        System.out.println("metaDato.getId() = " + metaDato.getId());
-        
-        System.out.println("metaDato.getIdEntidad() = " + metaDato.getIdEntidad());
-        System.out.println("metaDato.getLabelMetaDato() = " + metaDato.getLabelMetaDato());
-        System.out.println("metaDato.getLongitud() = " + metaDato.getLongitud());
-        System.out.println("metaDato.getNombreMetaDato() = " + metaDato.getNombreMetaDato());
-        System.out.println("metaDato.getOrden() = " + metaDato.getOrden());
-        System.out.println("metaDato.getTipoMetaDato() = " + metaDato.getTipoMetaDato());
-        System.out.println("metaDato.getValorDefault() = " + metaDato.getValorDefault());
-
-        List<ValorMetaDato> values = metaDato.getValoresMetaDatos();
-        
-        int count = 1;
-        for (ValorMetaDato valorMetaDato : values) {
-          
-          System.out.println("         ------ ValorMetaDato [" + m + "." + (count++) + "] ----- ");
-          
-          System.out.println("         valorMetaDato.getClave() = " + valorMetaDato.getClave());
-          System.out.println("         valorMetaDato.getId() = " + valorMetaDato.getId());
-          System.out.println("         valorMetaDato.getIdMetaDato() = " + valorMetaDato.getIdMetaDato());
-          System.out.println("         valorMetaDato.getValor() = " + valorMetaDato.getValor());
-          
-        }
-
-      }
+      printInfoEntitat(entitat);
 
     
     } catch(Exception e) {
@@ -217,6 +194,73 @@ public class Test extends TestUtils {
     }
     
     
+  }
+  
+  
+  public static void printEntitatDefaultInfo() {
+    try {
+      Test test = new Test();
+      
+      test.setUpBeforeClass();
+      
+      test.testEntidades();
+      
+      Entidad entitat = CAIBScanWebPlugin.getEntidadDefault(apiE);
+
+      //entitat.getConfiguracionPlantillaEntidad().g
+
+      printInfoEntitat(entitat);
+
+    
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+    
+    
+  }
+  
+
+  public static void printInfoEntitat(Entidad entitat) {
+    List<MetaDato> h = entitat.getMetaDatos();
+    
+    System.out.println(" ID: " + entitat.getId());
+    System.out.println(" Nom: " + entitat.getNombre());
+    System.out.println(" CODI: " + entitat.getCodigo());
+    
+    System.out.println(" isIncluirMetadatosEnPdf: " + entitat.isIncluirMetadatosEnPdf());
+    System.out.println(" isIncluirMetadatosPorDefecto: " + entitat.isIncluirMetadatosPorDefecto());
+    
+    int m = 1;
+    for (MetaDato metaDato : h) {
+      
+      System.out.println();
+      System.out.println(" =========== ValorMetaDato [" + (m++) + "] =============== ");
+      
+      System.out.println("metaDato.getId() = " + metaDato.getId());
+      
+      System.out.println("metaDato.getIdEntidad() = " + metaDato.getIdEntidad());
+      System.out.println("metaDato.getLabelMetaDato() = " + metaDato.getLabelMetaDato());
+      System.out.println("metaDato.getLongitud() = " + metaDato.getLongitud());
+      System.out.println("metaDato.getNombreMetaDato() = " + metaDato.getNombreMetaDato());
+      System.out.println("metaDato.getOrden() = " + metaDato.getOrden());
+      System.out.println("metaDato.getTipoMetaDato() = " + metaDato.getTipoMetaDato());
+      System.out.println("metaDato.getValorDefault() = " + metaDato.getValorDefault());
+
+      List<ValorMetaDato> values = metaDato.getValoresMetaDatos();
+      
+      int count = 1;
+      for (ValorMetaDato valorMetaDato : values) {
+        
+        System.out.println("         ------ ValorMetaDato [" + m + "." + (count++) + "] ----- ");
+        
+        System.out.println("         valorMetaDato.getClave() = " + valorMetaDato.getClave());
+        System.out.println("         valorMetaDato.getId() = " + valorMetaDato.getId());
+        System.out.println("         valorMetaDato.getIdMetaDato() = " + valorMetaDato.getIdMetaDato());
+        System.out.println("         valorMetaDato.getValor() = " + valorMetaDato.getValor());
+        
+      }
+
+    }
   }
   
   
@@ -296,10 +340,10 @@ public class Test extends TestUtils {
       {
         MetadatosComplementarios compl = metas.getMetadatosComplementarios();
         
-        List<es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry> list;
+        List<es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry> list;
         list = compl.getEntry();
         
-        for (es.caib.digital.ws.api.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry entry : list) {
+        for (es.caib.digital.ws.api.v1.copiaautentica.MetadatosDocumentoElectronico.MetadatosComplementarios.Entry entry : list) {
           System.out.println("       metas.getMetadatosComplementarios()[ENTRy]: " + entry.getKey() + " => " + entry.getValue());
         }
       }

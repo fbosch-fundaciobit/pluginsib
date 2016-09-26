@@ -7,9 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import es.caib.digital.ws.api.copiaautentica.CopiaAutenticaWSService;
-import es.caib.digital.ws.api.entidades.EntidadesWSService;
-import es.caib.digital.ws.api.utils.DigitalUtils;
+import org.fundaciobit.plugins.scanweb.caib.CAIBScanWebPlugin;
+
+import es.caib.digital.ws.api.v1.copiaautentica.CopiaAutenticaWSService;
+import es.caib.digital.ws.api.v1.entidades.EntidadesWSService;
 
 /**
  * 
@@ -34,8 +35,8 @@ public abstract class TestUtils {
     }
   }
 
-  public static String getHostPort() {
-    return testProperties.getProperty("test_hostport");
+  public static String getUrlBase() {
+    return testProperties.getProperty("test_urlbase");
   }
 
 
@@ -47,13 +48,21 @@ public abstract class TestUtils {
     return testProperties.getProperty("test_pwd");
   }
   
+  
+  public static String getCodigoEntidad() {
+    return testProperties.getProperty("UrlBase");
+  }
+  
+  
+  
+  
 
   public static CopiaAutenticaWSService getCopiaAutenticaWSServiceApi(String usr, String pwd)
       throws Exception {
 
     //final String endpoint = getEndPoint(COPIA_AUTENTICA);
 
-    return DigitalUtils.getCopiaAutenticaWSServiceApi(getHostPort(), usr, pwd);
+    return CAIBScanWebPlugin.getCopiaAutenticaWSServiceApi(getUrlBase(), usr, pwd);
 
   }
   
@@ -63,12 +72,10 @@ public abstract class TestUtils {
 
     //final String endpoint = getEndPoint(ENTIDADES);
 
-    return DigitalUtils.getEntidadesWSServiceApi(getHostPort(), usr, pwd);
+    return CAIBScanWebPlugin.getEntidadesWSServiceApi(getUrlBase(), usr, pwd);
 
   }
-  
-  
-  
+
 
   /**
    *
