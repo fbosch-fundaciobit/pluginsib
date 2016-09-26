@@ -1,6 +1,7 @@
 package org.fundaciobit.plugins.paymentweb.bbva;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -114,12 +115,46 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
 
     if (query.startsWith(FINAL)) {
       finalPost(request, response, absoluteAddress, relativeAddress, paymentID);
+    } else if (query.startsWith(NOTIFICACIO)) {
+      notificacioPost(request, response, absoluteAddress, relativeAddress, paymentID);
     } else {
       final String type = "POST";
       sendNotFound(response, absoluteAddress, relativeAddress, paymentID,
           query, type);
     }
   }
+  
+  
+  
+  
+  
+//--------------------------------------------------------------------------
+ // --------------------------------------------------------------------------
+ // ---------------------------------- FINAL ---------------------------------
+ // --------------------------------------------------------------------------
+ // --------------------------------------------------------------------------
+
+ protected static final String NOTIFICACIO = "notificacio";
+
+ protected void notificacioPost(HttpServletRequest request,
+     HttpServletResponse response, String absoluteAddress,
+     String relativeAddress, Long paymentID) throws Exception {
+
+   PaymentInfo paymentInfo = getPaymentInfo(paymentID);
+   
+   log.info(" XYZ ===============  BBVA NOTIFICACIO " + paymentID + " ==================");
+   
+   commonFinalNotificacio(request, response, paymentID);
+   
+   
+   log.info(" XYZ ---------------(End of NOTIFICACIO " + paymentID + ")------------------");
+
+   
+ }
+  
+  
+  
+  
 
   // --------------------------------------------------------------------------
   // --------------------------------------------------------------------------
@@ -135,15 +170,47 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
 
     PaymentInfo paymentInfo = getPaymentInfo(paymentID);
 
+    log.info(" XYZ ===============  BBVA FINAL " + paymentID + " ==================");
+    
+    commonFinalNotificacio(request, response, paymentID);
+    
+    
+    log.info(" XYZ ---------------(End of FINAL " + paymentID + ")-------------------");
+
+    response.sendRedirect(paymentInfo.getReturnUrl());
+
+  }
+
+  protected void commonFinalNotificacio(HttpServletRequest request,
+      HttpServletResponse response,
+      Long paymentID) throws UnsupportedEncodingException, Exception {
+    
+    
+    PaymentStatus status = getPaymentStatus(paymentID);
+    
+    if (status == null) {
+      log.error("Status with paymentID = " + paymentID + " is nULL" , new Exception());
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
+    }
+    
+    if (status.getStatus() != PaymentStatus.STATUS_INPROGRESS) {
+      
+      log.info(" XYZ IIINNNFFFOOO  Ja s'ha assignat valor de Status pel paymentID = "
+        + paymentID + ": " + status.getStatus());
+      
+      return;
+    }
+    
     
     //  XYZ TODO Eliminar
     Map<String, String[]> parameters = request.getParameterMap();
 
     if (parameters.size() == 0) {
-      log.info("PagamentID[" + paymentID + "] = >> SENSE PARAMETRES");
+      log.info("XYZ PagamentID[" + paymentID + "] = >> SENSE PARAMETRES");
     } else {
 
-      log.info("LLISTA PARAMETRES PAYMENTID=" + paymentID);
+      log.info("XYZ LLISTA PARAMETRES PAYMENTID=" + paymentID);
 
       for (String parameter : parameters.keySet()) {
         String[] values = parameters.get(parameter);
@@ -188,7 +255,7 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
     String codigoRespuestaStr = apiMacSha256.getParameter("Ds_Response");
     
 
-    PaymentStatus status = getPaymentStatus(paymentID);
+   
     
     if (codigoRespuestaStr == null || codigoRespuestaStr.trim().length() == 0) {
       status.setStatus(PaymentStatus.STATUS_ERROR);
@@ -223,9 +290,6 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
       }
       
     }
-
-    response.sendRedirect(paymentInfo.getReturnUrl());
-
   }
 
   // --------------------------------------------------------------------------
@@ -250,6 +314,7 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
 
     
     final String returnURL = absoluteAddress  + paymentID + "/" + FINAL ;
+    final String notificacioURL = absoluteAddress  + paymentID + "/" + NOTIFICACIO ;
 
     
     String paymentAmount = String.valueOf((int) (paymentInfo.getAmount() * 100));
@@ -271,7 +336,7 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
     apiMacSha256.setParameter("DS_MERCHANT_CURRENCY", currencyCode);
     apiMacSha256.setParameter("DS_MERCHANT_TRANSACTIONTYPE", "0");
     apiMacSha256.setParameter("DS_MERCHANT_TERMINAL", terminal);
-    apiMacSha256.setParameter("DS_MERCHANT_MERCHANTURL", paymentInfo.getSellerUrl());
+    apiMacSha256.setParameter("DS_MERCHANT_MERCHANTURL", notificacioURL ); // paymentInfo.getSellerUrl()
     apiMacSha256.setParameter("DS_MERCHANT_MERCHANTNAME", paymentInfo.getSellerName());
     apiMacSha256.setParameter("DS_MERCHANT_PRODUCTDESCRIPTION", paymentInfo.getDescriptionProduct());
     apiMacSha256.setParameter("DS_MERCHANT_TITULAR", paymentInfo.getShopperName());
@@ -287,7 +352,7 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
     System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_CURRENCY\"," +  currencyCode+");");
     System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_TRANSACTIONTYPE\"," +  "0"+");");
     System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_TERMINAL\"," + terminal+");");
-    System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_MERCHANTURL\"," +  paymentInfo.getSellerUrl()+");");
+    System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_MERCHANTURL\"," + notificacioURL); //  paymentInfo.getSellerUrl()+");");
     System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_MERCHANTNAME\"," +  paymentInfo.getSellerName()+");");
     System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_PRODUCTDESCRIPTION\"," +  paymentInfo.getDescriptionProduct()+");");
     System.out.println("apiMacSha256.setParameter(\"DS_MERCHANT_TITULAR\"," +  paymentInfo.getShopperName()+");");
@@ -336,16 +401,17 @@ public class BBVAPaymentWebPlugin extends AbstractPaymentWeb {
 
     // Set correct character encoding
     response.setCharacterEncoding("UTF-8");
+    
+    String type = "text";
 
     String html = "<!DOCTYPE html>\n" + "<html>\n" + "<body>\n"
         + " <form id=\"formPagament\"  action=\"" + getPropertyRequired(URL) + "\" method=\"POST\" >\n"
         // ------------
-        + "     <input type=\"text\" name=\"Ds_SignatureVersion\" value=\"HMAC_SHA256_V1\" /> <br/>\n"
-
+        + "     <input type=\"" + type + "\" name=\"Ds_SignatureVersion\" value=\"HMAC_SHA256_V1\" /> <br/>\n"
         // --------------
-        + "     <input type=\"text\" name=\"Ds_MerchantParameters\" value=\"" + params + "\" /> <br/>\n"
+        + "     <input type=\"" + type + "\" name=\"Ds_MerchantParameters\" value=\"" + params + "\" /> <br/>\n"
         // ------------------
-        + "    <input type=\"text\" name=\"Ds_Signature\" value=\"" + signature + "\" /> <br/>\n"
+        + "     <input type=\"" + type + "\" name=\"Ds_Signature\" value=\"" + signature + "\" /> <br/>\n"
 
 
         // TODO ELIMINAR Substituir per javascript amb submit
