@@ -38,7 +38,7 @@
       </snapshots>
     </repository>
 
-     <!-- REQUERUIM  MMS Computing & Alfresco  -->
+     <!-- REQUERIM  MMS Computing & Alfresco  -->
      <repository>
        <id>github-governib-maven-repos</id>
        <name>GitHub GovernIB Maven Repository</name>
