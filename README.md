@@ -1,6 +1,6 @@
 
 
-# ![Logo](https://github.com/GovernIB/pluginsib/blob/binaris/projectinfo_Attachments/icon.jpg) Repositori de Plugins per les Aplicacions del KitAnibal  (pluginsib)
+# ![Logo](https://github.com/GovernIB/maven/raw/binaris/pluginsib/projectinfo_Attachments/icon.jpg) Repositori de Plugins per les Aplicacions del KitAnibal  (pluginsib)
 
 **Descripció**
 
@@ -32,7 +32,7 @@ Repositori de Plugins per les Aplicacions del KitAnibal i qualsevol aplicació q
 
 **Captures de pantalla**
 
-![Exportació de dades a cvs,xls, ods, ...](https://raw.githubusercontent.com/GovernIB/pluginsib/binaris/projectinfo_Attachments/screenshots/exportdata1.png)
+![Exportació de dades a cvs,xls, ods, ...](https://github.com/GovernIB/maven/raw/binaris/pluginsib/projectinfo_Attachments/screenshots/exportdata1.png)
 <br/>Exportació de dades a cvs,xls, ods, ...
  
 
