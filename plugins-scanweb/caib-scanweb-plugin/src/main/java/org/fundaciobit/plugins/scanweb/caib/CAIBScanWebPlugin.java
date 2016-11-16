@@ -595,14 +595,18 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
   
       out.println("  function getHostPort() {");
       
-      String urlBase = getWSUrlBase();
       String hostport;
+      hostport = "location.protocol + '//' + location.host"; // location.host conte ip i port
+      /*
+      String urlBase = getWSUrlBase();
+      
       if (urlBase == null) {
         hostport = "location.protocol + '//' + location.host"; // location.host conte ip i port
       } else {
         URL url = new URL(urlBase);
         hostport = "'" + url.getProtocol()+ "://" + url.getHost() + ":" + url.getPort() + "'";
       }
+      */
       
 
       if (debug) {
@@ -666,6 +670,9 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
       generateFooter(out);
     
     } catch(Exception e) {
+      
+      log.error("Error en indexPage(); " + e.getMessage(), e);
+      
       // TODO traduir
       String msg = "s'ha produit un error precessant la pàgina index.html:" + e.getMessage();
       
