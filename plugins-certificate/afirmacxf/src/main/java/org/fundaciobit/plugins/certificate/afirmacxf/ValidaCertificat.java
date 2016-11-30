@@ -13,11 +13,13 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.ws.BindingProvider;
 
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.frontend.ClientProxy;
+import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.log4j.Logger;
-
 import org.fundaciobit.plugins.certificate.InformacioCertificat;
 import org.fundaciobit.plugins.certificate.ResultatValidacio;
-
 import org.fundaciobit.plugins.certificate.afirmacxf.validarcertificadoapi.InfoCertificadoInfo;
 import org.fundaciobit.plugins.certificate.afirmacxf.validarcertificadoapi.InfoCertificadoInfo.Campo;
 import org.fundaciobit.plugins.certificate.afirmacxf.validarcertificadoapi.MensajeSalida;
@@ -268,8 +270,19 @@ public class ValidaCertificat {
     }
     
     if (api == null) {
+
       ValidacionService service = new ValidacionService(new java.net.URL(getEndPoint() + "?wsdl"));
       api = service.getValidarCertificado();
+      
+      // @firma no suporta. Veure https://github.com/GovernIB/pluginsib/issues/3
+      Client client =  ClientProxy.getClient(api); 
+      {
+          HTTPConduit conduit = (HTTPConduit) client.getConduit();
+          HTTPClientPolicy policy = new HTTPClientPolicy();
+          policy.setAllowChunking(false);
+          conduit.setClient(policy);
+      }        
+      
     }
 
     Map<String, Object> reqContext = ((BindingProvider) api).getRequestContext();
