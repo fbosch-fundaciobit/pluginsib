@@ -1269,6 +1269,15 @@ public class CAIBScanWebPlugin extends AbstractScanWebPlugin {
     }
     
   }
+ 
+ 
+ public void addMeta(List<Metadata> metadatas, String key, Long value) {
+   
+   if (value != null) {
+     metadatas.add(new Metadata(key, value));     
+   }
+   
+ }
   
   
   

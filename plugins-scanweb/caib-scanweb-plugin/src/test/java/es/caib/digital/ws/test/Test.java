@@ -79,11 +79,11 @@ public class Test extends TestUtils {
     datosDoc.setNombre("test.pdf");
     datosDoc.setExtension(".pdf");
 
-    String id = String.valueOf(System.currentTimeMillis());
+    long id = System.currentTimeMillis();
 
     InformacionDocumento infodoc = new InformacionDocumento();
     infodoc.setIdDocTemporal(id);
-    infodoc.setIdEntidad("21");
+    infodoc.setIdEntidad(21L);
     infodoc.setIdTipoFormatoDocEntrada("TD01");
 
     MetadatosFirmaElectronica mfe = new MetadatosFirmaElectronica();
@@ -98,7 +98,7 @@ public class Test extends TestUtils {
     metadatos.setNombreFormato("application/pdf");
 
     EniMetadata enimetadata = new EniMetadata();
-    enimetadata.setIdentificador(id);
+    enimetadata.setIdentificador(String.valueOf(id));
     enimetadata.setEstadoElaboracion(new EniEstadoElaboracion());
 
 
