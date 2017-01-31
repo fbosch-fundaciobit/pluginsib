@@ -124,33 +124,33 @@ public class JusticiaCSVGeneratorPlugin extends AbstractPluginProperties impleme
 
   protected String getMACAddress() {
     if (macAddress == null) {
-      InetAddress ip;
-      try {
+      synchronized (MAC_ADDRESS_SYNC) {
+        InetAddress ip;
+        try {
 
-        ip = InetAddress.getLocalHost();
-        if (logger.isDebugEnabled()) {
-          logger.debug("Current IP address : " + ip.getHostAddress());
+          ip = InetAddress.getLocalHost();
+          if (logger.isDebugEnabled()) {
+            logger.debug("Current IP address : " + ip.getHostAddress());
+          }
+
+          NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+
+          byte[] mac = network.getHardwareAddress();
+
+          StringBuilder sb = new StringBuilder();
+          for (int i = 0; i < mac.length; i++) {
+            sb.append(String.format("%02X", mac[i]));
+          }
+
+          if (logger.isDebugEnabled()) {
+            logger.debug("Current MAC address : " + sb.toString());
+          }
+
+          macAddress = sb.toString();
+
+        } catch (Exception e) {
+          getMACAddressNative();
         }
-
-        NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-
-        byte[] mac = network.getHardwareAddress();
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < mac.length; i++) {
-          sb.append(String.format("%02X", mac[i]));
-        }
-
-        if (logger.isDebugEnabled()) {
-          logger.debug("Current MAC address : " + sb.toString());
-        }
-
-        macAddress = sb.toString();
-
-      } catch (Exception e) {
-
-        getMACAddressNative();
-
       }
     }
 
@@ -158,72 +158,73 @@ public class JusticiaCSVGeneratorPlugin extends AbstractPluginProperties impleme
 
   }
 
+  public static final String MAC_ADDRESS_SYNC = "MAC_ADDRESS_SYNC";
+
   protected String getMACAddressNative() {
 
     if (macAddress == null) {
-      synchronized (macAddress) {
-        {
 
-          Process p = null;
-          BufferedReader in = null;
+      {
 
-          try {
-            String osname = System.getProperty("os.name", "");
+        Process p = null;
+        BufferedReader in = null;
 
-            if (osname.startsWith("Windows")) {
-              p = Runtime.getRuntime().exec(new String[] { "ipconfig", "/all" }, null);
+        try {
+          String osname = System.getProperty("os.name", "");
+
+          if (osname.startsWith("Windows")) {
+            p = Runtime.getRuntime().exec(new String[] { "ipconfig", "/all" }, null);
+          }
+          // Solaris code must appear before the generic code
+          else if (osname.startsWith("Solaris") || osname.startsWith("SunOS")) {
+            String hostName = getFirstLineOfCommand("uname", "-n");
+            if (hostName != null) {
+              p = Runtime.getRuntime().exec(new String[] { "/usr/sbin/arp", hostName }, null);
             }
-            // Solaris code must appear before the generic code
-            else if (osname.startsWith("Solaris") || osname.startsWith("SunOS")) {
-              String hostName = getFirstLineOfCommand("uname", "-n");
-              if (hostName != null) {
-                p = Runtime.getRuntime()
-                    .exec(new String[] { "/usr/sbin/arp", hostName }, null);
-              }
-            } else if (new File("/usr/sbin/lanscan").exists()) {
-              p = Runtime.getRuntime().exec(new String[] { "/usr/sbin/lanscan" }, null);
-            } else if (new File("/sbin/ifconfig").exists()) {
-              p = Runtime.getRuntime().exec(new String[] { "/sbin/ifconfig", "-a" }, null);
-            }
+          } else if (new File("/usr/sbin/lanscan").exists()) {
+            p = Runtime.getRuntime().exec(new String[] { "/usr/sbin/lanscan" }, null);
+          } else if (new File("/sbin/ifconfig").exists()) {
+            p = Runtime.getRuntime().exec(new String[] { "/sbin/ifconfig", "-a" }, null);
+          }
 
-            if (p != null) {
-              in = new BufferedReader(new InputStreamReader(p.getInputStream()), 128);
-              String l = null;
-              while ((l = in.readLine()) != null) {
-                macAddress = parse(l);
-                if (macAddress != null /* && Hex.parseShort(macAddress)!=0xff */) {
-                  break;
-                }
+          if (p != null) {
+            in = new BufferedReader(new InputStreamReader(p.getInputStream()), 128);
+            String l = null;
+            while ((l = in.readLine()) != null) {
+              macAddress = parse(l);
+              if (macAddress != null /* && Hex.parseShort(macAddress)!=0xff */) {
+                break;
               }
             }
-          } catch (SecurityException ex) {
-            // Ignore it.
-          } catch (IOException ex) {
-            // Ignore it.
-          } finally {
-            if (p != null) {
-              if (in != null) {
-                try {
-                  in.close();
-                } catch (IOException ex) {
-                  // Ignore it.
-                }
-              }
+          }
+        } catch (SecurityException ex) {
+          // Ignore it.
+        } catch (IOException ex) {
+          // Ignore it.
+        } finally {
+          if (p != null) {
+            if (in != null) {
               try {
-                p.getErrorStream().close();
+                in.close();
               } catch (IOException ex) {
                 // Ignore it.
               }
-              try {
-                p.getOutputStream().close();
-              } catch (IOException ex) {
-                // Ignore it.
-              }
-              p.destroy();
             }
+            try {
+              p.getErrorStream().close();
+            } catch (IOException ex) {
+              // Ignore it.
+            }
+            try {
+              p.getOutputStream().close();
+            } catch (IOException ex) {
+              // Ignore it.
+            }
+            p.destroy();
           }
         }
       }
+
     }
 
     logger.debug("Direccion MAC: " + macAddress);
