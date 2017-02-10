@@ -66,6 +66,16 @@ public class TestAlfrescoBaseCustody extends TestDocumentCustody {
       TestAlfrescoBaseCustody test = new TestAlfrescoBaseCustody();
       boolean deleteOnFinish = false;
       test.testDocumentCustody(documentCustodyPlugin, deleteOnFinish);
+      
+      
+      // Que passa quan intentam esborrar 
+      String custodyID = "13221341235415"; // No existeix
+      documentCustodyPlugin.deleteDocument(custodyID);
+      
+      documentCustodyPlugin.deleteCustody(custodyID);
+      documentCustodyPlugin.getSignatureInfoOnly(custodyID);
+      
+      System.out.println(" --- FINAL  ---");
 
     } catch (Exception e) {
       e.printStackTrace();
