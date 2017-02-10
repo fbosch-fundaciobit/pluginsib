@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.fundaciobit.plugins.documentcustody.api.AbstractDocumentCustodyPlugin;
 import org.fundaciobit.plugins.documentcustody.api.CustodyException;
 import org.fundaciobit.plugins.documentcustody.api.NotSupportedCustodyException;
@@ -101,8 +102,10 @@ public class AlfrescoBaseDocumentCustodyPlugin extends AbstractDocumentCustodyPl
         path = relativePath.substring(0,pos);
       }
       
-      System.out.println("FinalName = ]" + fileFinalName + "[");
-      System.out.println("PATH = ]" + path + "[");
+      if (log.isDebugEnabled()) {
+        log.debug("FinalName = ]" + fileFinalName + "[");
+        log.debug("PATH = ]" + path + "[");
+      }
       
       Map<String, Object> properties = new HashMap<String, Object>();
       properties.put(PropertyIds.OBJECT_TYPE_ID, OpenCmisAlfrescoHelper.CMIS_DOCUMENT_TYPE);
@@ -113,7 +116,9 @@ public class AlfrescoBaseDocumentCustodyPlugin extends AbstractDocumentCustodyPl
         
        openCmisAlfrescoHelper.crearDocument(data, fileFinalName, path, properties, custodyID);
 
-        log.debug("Pujat Document a Alfresco: "+ relativePath);
+       if (log.isDebugEnabled()) {
+         log.debug("Pujat Document a Alfresco: "+ relativePath);
+       }
 
       } catch (Exception ex) {
       final String msg = "No s'ha pogut guardar el document amb id="+custodyID;
@@ -127,9 +132,16 @@ public class AlfrescoBaseDocumentCustodyPlugin extends AbstractDocumentCustodyPl
   @Override
   protected byte[] readFile(String custodyID, String relativePath) throws Exception {
     
-    Document document = openCmisAlfrescoHelper.getDocument(relativePath, custodyID);
-    
-    return OpenCmisAlfrescoHelper.getCmisObjectContent(document);
+    try {
+      Document document = openCmisAlfrescoHelper.getDocument(relativePath, custodyID);
+      
+      return OpenCmisAlfrescoHelper.getCmisObjectContent(document);
+    } catch (CmisObjectNotFoundException onfe) {
+      if (log.isDebugEnabled()) {
+        log.debug("El document "+ relativePath + "/" + custodyID +" no existeix.");
+      }
+      return null;
+    }
     
   }
 
