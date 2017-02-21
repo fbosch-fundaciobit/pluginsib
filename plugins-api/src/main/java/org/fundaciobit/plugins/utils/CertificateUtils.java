@@ -276,6 +276,11 @@ public class CertificateUtils {
             nif = cadena.substring(iniciNif);
           }
         }
+      } else {
+        // Nous certificats FNMT el NIF comença per "IDCES-"
+        if (nif.startsWith("IDCES-")) {
+          nif = nif.substring("IDCES-".length());
+        }
       }
     } else {
       nif = null;

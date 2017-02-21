@@ -9,4 +9,4 @@
        (3.2) scanweb-plugins\target\scanweb_plugins.ear
 (4) Copiar fitxers de configuració
        (4.1) scanweb-properties-service.xml (s'ha d'adaptar la ruta a plugins.properties)
-       (4.2) plugins.properties
+       (4.2) plugins.properties (s'ha d'adaptar la configuracio)
