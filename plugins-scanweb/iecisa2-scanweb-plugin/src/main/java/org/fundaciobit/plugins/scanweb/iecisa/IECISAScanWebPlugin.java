@@ -151,7 +151,7 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
   }
 
   protected static final Set<String> SUPPORTED_FLAG = Collections
-      .unmodifiableSet(new HashSet<String>(Arrays.asList(FLAG_NON_SIGNED)));
+      .unmodifiableSet(new HashSet<String>(Arrays.asList(FLAG_NON_SIGNED, FLAG_SIGNED)));
 
   protected static final List<Set<String>> SUPPORTED_FLAGS = Collections
       .unmodifiableList(new ArrayList<Set<String>>(Arrays.asList(SUPPORTED_FLAG)));
