@@ -1,10 +1,17 @@
 package org.fundaciobit.plugins.scanweb.iecisa;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -18,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.fundaciobit.plugins.scanweb.api.AbstractScanWebPlugin;
@@ -26,7 +34,24 @@ import org.fundaciobit.plugins.scanweb.api.ScanWebMode;
 import org.fundaciobit.plugins.scanweb.api.ScanWebStatus;
 import org.fundaciobit.plugins.scanweb.api.ScannedPlainFile;
 import org.fundaciobit.plugins.scanweb.api.ScannedDocument;
+import org.fundaciobit.plugins.scanweb.api.ScannedSignedFile;
+import org.fundaciobit.plugins.signature.api.CommonInfoSignature;
+import org.fundaciobit.plugins.signature.api.FileInfoSignature;
+import org.fundaciobit.plugins.signature.api.ITimeStampGenerator;
+import org.fundaciobit.plugins.signature.api.PdfVisibleSignature;
+import org.fundaciobit.plugins.signature.api.PolicyInfoSignature;
+import org.fundaciobit.plugins.signature.api.SecureVerificationCodeStampInfo;
+import org.fundaciobit.plugins.signature.api.SignaturesSet;
+import org.fundaciobit.plugins.signature.api.SignaturesTableHeader;
+import org.fundaciobit.plugins.signature.api.StatusSignature;
+import org.fundaciobit.plugins.signature.api.StatusSignaturesSet;
+import org.fundaciobit.plugins.signatureserver.miniappletinserver.MiniAppletInServerSignatureServerPlugin;
+import org.fundaciobit.plugins.signatureserver.miniappletinserver.MiniAppletInServerSignatureServerPlugin.InfoCertificate;
 import org.fundaciobit.plugins.utils.Metadata;
+import org.fundaciobit.plugins.utils.PublicCertificatePrivateKeyPair;
+
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
 
 /**
  * 
@@ -60,22 +85,43 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
   public IECISAScanWebPlugin(String propertyKeyBase) {
     super(propertyKeyBase);
   }
-
- 
-  
-  public boolean isShowInModal() {
-    return "true".equals(getProperty(PROPERTY_BASE + "showInModal"));
-  }
   
   
   public boolean isDebug() {
     return "true".equals(getProperty(PROPERTY_BASE + "debug"));
   }
   
+  public boolean forceJNLP() {
+    return "true".equals(getProperty(PROPERTY_BASE + "forcejnlp"));
+  }
+  
+  public boolean forceSign() {
+    return "true".equals(getProperty(PROPERTY_BASE + "forcesign"));
+  }
+  
+  public String getKeyStore() throws Exception {
+    return getPropertyRequired(PROPERTY_BASE + "sign.keystore");
+  }
+  
+  public String getKeyStoreAlias() throws Exception {
+    return getPropertyRequired(PROPERTY_BASE + "sign.alias");
+  }
+  
+  public String getKeyStorePassword() throws Exception {
+    return getPropertyRequired(PROPERTY_BASE + "sign.password");
+  }
+  
+  public String getKeyStoreCertPassword() throws Exception {
+    return getPropertyRequired(PROPERTY_BASE + "sign.certpassword");
+  }
+  
+  public String getAsunto() throws Exception {
+    return getPropertyRequired(PROPERTY_BASE + "sign.asunto");
+  }
 
   @Override
   public String getName(Locale locale) {
-    return "IECISA ScanWeb";
+    return "Applet/JNLP ScanWeb";
   }
 
 
@@ -233,6 +279,17 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
       ScanWebConfig fullInfo, Locale languageUI) {
 
     boolean debug = isDebug();
+    
+    String browser=request.getHeader("user-agent");
+
+    
+    
+    final boolean isIE = (browser != null ) && (browser.toLowerCase().indexOf("msie") != -1 || browser.indexOf("rv:11.0") != -1);
+    
+    if (debug) {
+      log.info(" BROWSER= " + browser);
+      log.info(" IS INTERNET EXPLORER = " + isIE);
+    }
 
     PrintWriter out;
     out = generateHeader(request, response, absolutePluginRequestPath,
@@ -276,85 +333,114 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
     // ------------------  APPLET O BOTO DE CARREGA D'APPLET
     
     String dstyle = debug? "border-style:double double double double;":"";
+    out.println("<div style=\"" + dstyle + "\">");
+    out.println("<center>");
     
+    boolean forceJNLP = forceJNLP();
 
-    out.println("<script src=\"https://www.java.com/js/deployJava.js\"></script>\n"
-        + "<div style=\"" + dstyle + "\">");
-    
-    out.println("<center>"
-        + "<script>\n"
+    if (forceJNLP || !isIE ) { // JNLP
+
+      out.println(
+          "<script>\n\n"
+        + "  function downloadJNLP() {\n"
+        + "     location.href=\"" + relativePluginRequestPath   + JNLP + "\";\n"
+        + "     ocultar('botojnlp');\n"
+        + "     mostrar('missatgejnlp');\n"
+        + "  }\n"
+        + "\n\n"       
+        + " function mostrar(id) {\n"
+        + "    document.getElementById(id).style.display = 'block';\n"
+        + "};\n"
         + "\n"
+        + " function ocultar(id){\n"
+        + "   document.getElementById(id).style.display = 'none';\n"
+        + " };\n"
+        + "\n"
+        + "</script>");
+
+      //+ "    document.write('<br/><br/><input type=\"button\" value=\"" + getTraduccio("pitja", languageUI) + "\" onclick=\"downloadJNLP()\" />');\n"
+      out.println("  <div id=\"missatgejnlp\" style=\"display: none;\" >");
+      out.println("    <br/><br/><h4> S´està descarregant un arxiu jnlp.");
+      out.println("     L´ha d´executar per obrir l´aplicació d´escaneig ... </h4><br/>");
+      out.println("  </div>\n");
+      
+      out.println("  <div id=\"botojnlp\" >");
+      out.println("    <input type=\"button\" class=\"btn btn-primary\" value=\"" + getTraduccio("pitja", languageUI) + "\" onclick=\"downloadJNLP();\" /><br/>");
+      //+ "     setTimeout(downloadJNLP, 1000);\n" // directament obrim el JNLP
+      out.println("  </div>");  
+    
+    } else {
+      // -----------  APPLET --------------------------
+      out.println("<script src=\"https://www.java.com/js/deployJava.js\"></script>\n");
+      
+      out.println(
+          "<script>\n\n"
+      + "   var attributes = {\n"
+      + "    id:'iecisa_scan',\n"
+      + "    code:'es.ieci.tecdoc.fwktd.applets.scan.applet.IdocApplet',\n"
+      + "    archive:'"
+      + absolutePluginRequestPath
+      + "applet/plugin-scanweb-iecisascanweb-applet.jar',\n"
+      + "    width: " + getWidth() + ",\n"        
+      + "    height: " + HEIGHT  + "\n"
+      + "   };\n"
+      + "   var parameters = {\n"
+      + "    servlet:'" + absolutePluginRequestPath + UPLOAD_SCAN_FILE_PAGE + "',\n"
+      + "    fileFormName:'" + UPLOAD_SCANNED_FILE_PARAMETER + "'\n"
+      + "   } ;\n"
+      + "   deployJava.runApplet(attributes, parameters, '1.6');");
+      out.println("</script>");
+    }
+
+    out.println("</center></div>");
+   
+        
+    
         //+ "    var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;\n"
-        + "    // Firefox 1.0+\n"
-        + "    var isFirefox = typeof InstallTrigger !== 'undefined';\n"
+        //+ "    // Firefox 1.0+\n"
+        //+ "    var isFirefox = typeof InstallTrigger !== 'undefined';\n"
         //+ "    // At least Safari 3+: \"[object HTMLElementConstructor]\"\n"
         //+ "    var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;\n"
         //+ "    // Internet Explorer 6-11\n"
         //+ "    var isIE = false || !!document.documentMode;\n"
         //+ "    // Edge 20+\n"
         //+ "    var isEdge = !isIE && !!window.StyleMedia;\n"
-        + "    // Chrome 1+\n"
-        + "    var isChrome = !!window.chrome && !!window.chrome.webstore;\n"
+        //+ "    // Chrome 1+\n"
+        //+ "    var isChrome = !!window.chrome && !!window.chrome.webstore;\n"
         //+ "    // Blink engine detection\n"
         //+ "    var isBlink = (isChrome || isOpera) && !!window.CSS;\n"
-        + "\n"
+        //+ "\n"
         // + "    var home;\n"
         // +
         // "    home = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '"
         // + context + "';\n"
-        + "\n"
-        + "   function escanejarAmbFinestra() {\n"
-        + "    var scan;       \n"
-        + "    scan = document.getElementById('iecisa_scan');\n"
-        + "    var result;\n"
-        + "    result = scan.showInWindow();\n"
-        + "    if (result) {\n"
-        + "      alert(\"" + getTraduccio("error.nofinestra", languageUI)+ "\" + result);\n"
-        + "    } else {\n" 
-        + "      // OK\n"
-        + "    }\n"
-        + "  }\n"
-        + "\n"
-        + "  function downloadJNLP() {\n"
-        + "     location.href=\"" + relativePluginRequestPath   + JNLP
-        + "\";\n"
-        + "  }\n"
+//        + "\n"
+//        + "   function escanejarAmbFinestra() {\n"
+//        + "    var scan;       \n"
+//        + "    scan = document.getElementById('iecisa_scan');\n"
+//        + "    var result;\n"
+//        + "    result = scan.showInWindow();\n"
+//        + "    if (result) {\n"
+//        + "      alert(\"" + getTraduccio("error.nofinestra", languageUI)+ "\" + result);\n"
+//        + "    } else {\n" 
+//        + "      // OK\n"
+//        + "    }\n"
+//        + "  }\n"
 
-        + "\n\n\n"
+
+        //+ "\n\n\n"
         // + "   alert('IS CROME? ' + isChrome);"
-        + "  if (isFirefox && " + isShowInModal() + ") {\n"
-        + "    document.write('<input type=\"button\" class=\"btn btn-primary\" value=\"" + getTraduccio("pitja", languageUI) + "\" onclick=\"escanejarAmbFinestra();\" /><br/>');\n"
-        + "  }\n"
-        + "\n\n"
-        
-        
-        + "  if (!isChrome) {\n"
-        + "  var attributes = {\n"
-        + "    id:'iecisa_scan',\n"
-        + "    code:'es.ieci.tecdoc.fwktd.applets.scan.applet.IdocApplet',\n"
-        + "    archive:'"
-        + absolutePluginRequestPath
-        + "applet/plugin-scanweb-iecisascanweb-applet.jar',\n"
-        + "    width: (isFirefox && " + isShowInModal() + ")? 1 : " + getWidth() + ",\n"        
-        + "    height: (isFirefox && " + isShowInModal() + ")? 1 : " + HEIGHT  + "\n"
-        + "  };\n"
-        + "  var parameters = {\n"
-        + "    servlet:'" + absolutePluginRequestPath + UPLOAD_SCAN_FILE_PAGE + "',\n"
-        + "    fileFormName:'" + UPLOAD_SCANNED_FILE_PARAMETER
-        + "'\n"
-        + "  } ;\n"
-        + "  deployJava.runApplet(attributes, parameters, '1.6');\n"
-        + "  }; // Final Chrome\n"
-        + "\n\n"
+//        + "  if (!isIE) {\n"
+//        + "    document.write('<input type=\"button\" class=\"btn btn-primary\" value=\"" + getTraduccio("pitja", languageUI) + "\" onclick=\"escanejarAmbFinestra();\" /><br/>');\n"
+//        + "  }\n"
+//        + "\n\n"
+//
+//        + "  if (!isIE) {\n"
+//
+//        + "  }\n");
 
-        + "  if (isChrome) {\n"
-        //+ "    document.write('<br/><br/><input type=\"button\" value=\"" + getTraduccio("pitja", languageUI) + "\" onclick=\"downloadJNLP()\" />');\n"
-        + "     document.write('<br/><br/><h4> S´està descarregant un arxiu jnlp."
-        + " L´ha d´executar per obrir l´aplicació d´escaneig ... </h4><br/>');\n"
-        + "     setTimeout(downloadJNLP, 1000);\n" // directament obrim el JNLP
-        + "  }\n");
-
-     if ((fullInfo.getMode() == ScanWebMode.SYNCHRONOUS))  { 
+     if ((fullInfo.getMode() == ScanWebMode.SYNCHRONOUS))  {
+       out.println("<script>\n\n");
        out.println("  function finalScanProcess() {");
        out.println("    if (document.getElementById(\"escanejats\").innerHTML.indexOf(\"ajax\") !=-1) {");
        out.println("      if (!confirm('" + getTraduccio("noenviats", languageUI) +  "')) {");
@@ -363,11 +449,10 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
        out.println("    };");
        out.println("    location.href=\"" + relativePluginRequestPath   + FINALPAGE + "\";");
        out.println("  }\n");
+       out.println("</script>");
      }
      
-    out.println("</script>");
-
-    out.println("</center></div>");
+    
         
     out.println("  </td></tr>");
     out.println("</table>");
@@ -457,7 +542,6 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
       try {
         response.sendError(HttpServletResponse.SC_NOT_MODIFIED);
       } catch (IOException e1) {
-        // TODO Auto-generated catch block
         e1.printStackTrace();
       }
       
@@ -626,6 +710,27 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
       mime = "application/pdf";
     }
     
+    ScannedPlainFile singleScanFile = new ScannedPlainFile(name, mime, data);
+    
+    ScannedSignedFile scannedSignedFile = null;
+    
+    if (forceSign() || fullInfo.getFlags().contains(FLAG_SIGNED)) {
+      
+      
+      try {
+        scannedSignedFile = signFile(fullInfo, languageUI, singleScanFile);
+        
+        singleScanFile = null;
+        
+      } catch (Exception e) {
+
+        log.error(" Error firmant document: " + e.getMessage(), e);
+        return;
+      }
+      
+    }
+
+    
     final Date date = new Date(System.currentTimeMillis());
     
     List<Metadata> metadatas = new ArrayList<Metadata>();
@@ -636,12 +741,12 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
     metadatas.add(new Metadata("FechaCaptura", date));
     metadatas.add(new Metadata("VersionNTI", "http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e"));
     
-
-    ScannedPlainFile singleScanFile = new ScannedPlainFile(name, mime, data);
+    
+   
 
     ScannedDocument scannedDoc = new ScannedDocument();
     scannedDoc.setMetadatas(metadatas);
-    scannedDoc.setScannedSignedFile(null);
+    scannedDoc.setScannedSignedFile(scannedSignedFile);
     scannedDoc.setScanDate(date);
     scannedDoc.setScannedPlainFile(singleScanFile);
 
@@ -649,5 +754,213 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
     fullInfo.getScannedFiles().add(scannedDoc);
   }
 
+  public static final  String username = "scanweb"; // configuracio
+  
+  
+  public MiniAppletInServerSignatureServerPlugin plugin = null;
+  
+  
+  
+  protected ScannedSignedFile signFile(ScanWebConfig fullInfo, Locale languageUI,
+      ScannedPlainFile singleScanFile) throws Exception {
+    
+    
+
+      
+      final String filtreCertificats = "";
+      
+      
+      final String asuntoFirma = getAsunto();
+      // TODO es necessari?
+      String localizacion = "localizacion";
+
+     
+      final  String administrationID = null; // No te sentit en API Firma En Servidor
+      PolicyInfoSignature policyInfoSignature = new PolicyInfoSignature();
+      policyInfoSignature.setPolicyIdentifier("2.16.724.1.3.1.1.2.1.9");
+      policyInfoSignature.setPolicyIdentifierHash("G7roucf600+f03r/o0bAOQ6WAs0=");
+      policyInfoSignature.setPolicyIdentifierHashAlgorithm("http://www.w3.org/2000/09/xmldsig#sha1");
+      policyInfoSignature.setPolicyUrlDocument("https://sede.060.gob.es/politica_de_firma_anexo_1.pdf");
+      
+      CommonInfoSignature commonInfoSignature = new CommonInfoSignature(languageUI.getLanguage(),
+          filtreCertificats, username, administrationID, policyInfoSignature);
+
+      int signNumber = 1;
+      String languageSign = languageUI.getLanguage();
+      String signType = FileInfoSignature.SIGN_TYPE_PADES;
+      int signMode = FileInfoSignature.SIGN_MODE_IMPLICIT;
+      boolean userRequiresTimeStamp = false;
+      final String signID = String.valueOf(System.currentTimeMillis());
+      
+      
+      
+      
+//      PdfReader reader = new PdfReader(new ByteArrayInputStream(singleScanFile.getData()));
+      /*
+      File sourcePre = File.createTempFile("ScanWebIECISASourceFile", "pdf");
+      FileOutputStream sourceOS = new FileOutputStream(sourcePre);
+      //convertirPdfToPdfa(reader, sourceOS);
+      FileUtils.writeByteArrayToFile(sourcePre, singleScanFile.getData());
+      //** falta alguna cosa !!!!
+     //reader.close();
+      sourceOS.flush();
+      sourceOS.close();
+      */
+      
+      
+      // 6.- Afegir propietats inicials
+      InputStream input3 = new ByteArrayInputStream(singleScanFile.getData()); //output2.toByteArray());
+      
+      File source = File.createTempFile("DigitalSourceFile", "pdf");
+      
+      //InputStream input3 = new FileInputStream(sourcePre);
+      
+      PdfReader reader = new PdfReader(input3);
+      FileOutputStream sourceFOS = new FileOutputStream(source);
+      PdfStamper stamper3 = new PdfStamper(reader, sourceFOS);
+     
+      Map<String, String> info = reader.getInfo();
+      info.put("IECISA_Scan_Web.version", "2.0.0");
+      stamper3.setMoreInfo(info);
+      stamper3.close();
+      
+      input3.close();
+      sourceFOS.close();
+      reader.close();
+
+
+      
+      //FileUtils.writeByteArrayToFile(source, bytesDocumento);
+      String name = singleScanFile.getName();
+      
+      
+      final String signerEmail = null;
+
+
+      // TODO S'hauria d'obtenir de propietat
+      String signAlgorithm = FileInfoSignature.SIGN_ALGORITHM_SHA1;
+
+      int signaturesTableLocation = FileInfoSignature.SIGNATURESTABLELOCATION_WITHOUT;
+      final PdfVisibleSignature pdfInfoSignature = null;
+
+      final ITimeStampGenerator timeStampGenerator = null;
+
+      // Valors per defcte
+      final SignaturesTableHeader signaturesTableHeader = null;
+      final SecureVerificationCodeStampInfo csvStampInfo = null;
+
+      FileInfoSignature fileInfo = new FileInfoSignature(signID, source,
+          FileInfoSignature.PDF_MIME_TYPE, name, asuntoFirma, 
+          localizacion , signerEmail, signNumber,
+          languageSign, signType, signAlgorithm, signMode, signaturesTableLocation,
+          signaturesTableHeader, pdfInfoSignature, csvStampInfo, userRequiresTimeStamp,
+          timeStampGenerator);
+
+      final String signaturesSetID = String.valueOf(System.currentTimeMillis());
+      SignaturesSet signaturesSet = new SignaturesSet(signaturesSetID, commonInfoSignature,
+          new FileInfoSignature[] { fileInfo });
+
+      final String timestampUrlBase = null;
+      
+      
+      if (plugin == null) {
+        plugin = new MiniAppletInServerSignatureServerPlugin();
+        
+        String passwordks = getKeyStorePassword();
+        
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        File ksFile = new File(getKeyStore());
+        ks.load(new FileInputStream(ksFile),passwordks.toCharArray()); 
+
+        String alias = getKeyStoreAlias();
+        String passwordCertificado =getKeyStoreCertPassword();
+  
+        //Obtener la clave privada
+        PrivateKey key = (PrivateKey)ks.getKey(alias, passwordCertificado.toCharArray()); 
+            
+        
+        
+        PublicCertificatePrivateKeyPair publicCertificatePrivateKeyPair;
+        publicCertificatePrivateKeyPair = new PublicCertificatePrivateKeyPair(
+            (X509Certificate)ks.getCertificate(alias), key);
+        
+        
+        DigitalInfoCertificate infoCertificate = new DigitalInfoCertificate(ksFile, publicCertificatePrivateKeyPair);
+        plugin.putInfoCertificate(username, infoCertificate);
+      
+      }
+      try {
+        signaturesSet = plugin.signDocuments(signaturesSet, timestampUrlBase);
+      } finally {
+        source.delete();
+      }
+      
+      
+      StatusSignaturesSet sss = signaturesSet.getStatusSignaturesSet();
+
+      if (sss.getStatus() != StatusSignaturesSet.STATUS_FINAL_OK) {
+        System.err.println("Error General MSG = " + sss.getErrorMsg());
+        if (sss.getErrorException() != null) {
+          sss.getErrorException().printStackTrace();
+        }
+        throw new Exception(sss.getErrorMsg());
+      } else {
+        FileInfoSignature fis = signaturesSet.getFileInfoSignatureArray()[0];
+        StatusSignature status = fis.getStatusSignature();
+        if (status.getStatus() != StatusSignaturesSet.STATUS_FINAL_OK) {
+          if (status.getErrorException() != null) {
+            status.getErrorException().printStackTrace();
+          }
+          System.err.println("Error Firma 1. MSG = " + status.getErrorMsg());
+          throw new Exception(status.getErrorMsg());
+        } else {
+          File dest = status.getSignedData();
+          
+          byte[] output;
+          output = FileUtils.readFileToByteArray(dest);
+
+          if (!dest.delete()) {
+            dest.deleteOnExit();
+          }
+          
+          return new ScannedSignedFile(name, output, ScannedSignedFile.PADES_SIGNATURE);
+
+        }
+      }
+    
+  }
+  
+  
+  
+  private class DigitalInfoCertificate implements InfoCertificate {
+    
+    final File f;
+    
+    final PublicCertificatePrivateKeyPair publicCertificatePrivateKeyPair;
+
+    
+    /**
+     * @param f
+     * @param publicCertificatePrivateKeyPair
+     */
+    public DigitalInfoCertificate(File f,
+        PublicCertificatePrivateKeyPair publicCertificatePrivateKeyPair) {
+      super();
+      this.f = f;
+      this.publicCertificatePrivateKeyPair = publicCertificatePrivateKeyPair;
+    }
+
+    public File getKeyStoreFile() {
+      return f;
+    }
+
+    public PublicCertificatePrivateKeyPair getPublicCertificatePrivateKeyPair(
+        InfoCertificate cinfo) throws Exception {
+
+      return this.publicCertificatePrivateKeyPair;
+    }
+    
+  }
+  
 
 }

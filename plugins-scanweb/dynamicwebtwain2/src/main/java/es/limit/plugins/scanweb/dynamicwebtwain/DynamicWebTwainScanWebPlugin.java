@@ -1,10 +1,11 @@
 package es.limit.plugins.scanweb.dynamicwebtwain;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -57,19 +58,18 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
   }
 	
 
+  public boolean isTrial() throws Exception {
+    return "true".equals(getPropertyRequired(PROPERTY_BASE + "trial"));
+  }
+  
+  public String getProductKey() throws Exception {
+    return getPropertyRequired(PROPERTY_BASE + "productkey");
+  }
 
 	private String getDynamicWebTwainProperty(String name) {
 		return getProperty(PROPERTY_BASE + name);
 	}
 	
-
-
-	
-	// TODO Substituir per getProperty()
-	protected String getDynamicWebTwainProperty(String name, String defaultValue) {
-		return getProperty(PROPERTY_BASE + name, defaultValue);
-	}
-
 
 	/**
 	 * @param propertyKeyBase
@@ -102,6 +102,8 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
       String relativePluginRequestPath, HttpServletRequest request, 
       ScanWebConfig config) throws Exception {
 
+    config.setScannedFiles(new ArrayList<ScannedDocument>());
+    
     putTransaction(config);
     config.getStatus().setStatus(ScanWebStatus.STATUS_IN_PROGRESS);
 
@@ -218,6 +220,10 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
         indexPage(absolutePluginRequestPath, relativePluginRequestPath, scanWebID, query,
             request, response, fullInfo, languageUI);
 
+      } else if (query.startsWith("scanner/dynamsoft.webtwain.config.js")) {
+        retornarDynamsoftWebtwainConfig(absolutePluginRequestPath, relativePluginRequestPath,
+            scanWebID, query, request, response, languageUI);
+      
       } else if (query.startsWith("scanner")) {
 
         // RECURSOS
@@ -299,7 +305,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
 
     out.println();
     out.println("  var myTimer;");
-    out.println("  myTimer = setInterval(function () {closeWhenSign()}, 20000);");
+    //out.println("  myTimer = setInterval(function () {closeWhenSign()}, 20000);");
     out.println();
     out.println("  function closeWhenSign() {");
     out.println("    var request;");
@@ -312,14 +318,14 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
     out.println("    request.send();"); 
     out.println();
     out.println("    if ((request.status + '') == '" + HttpServletResponse.SC_OK + "') {");
-    out.println("      clearTimeout(myTimer);");
+    out.println("      if (myTimer != undefined) { clearTimeout(myTimer);}");
     out.println("      myTimer = setInterval(function () {closeWhenSign()}, 4000);");
     out.println("      document.getElementById(\"escanejats\").innerHTML = '" + getTraduccio("docspujats", languageUI) + ":' + request.responseText;");
     out.println("    } else if ((request.status + '') == '" + HttpServletResponse.SC_REQUEST_TIMEOUT + "') {"); // 
-    out.println("      clearTimeout(myTimer);");
+    out.println("      if (myTimer != undefined) { clearTimeout(myTimer); }");
     out.println("      window.location.href = '" + fullInfo.getUrlFinal() + "';");
     out.println("    } else {");
-    out.println("      clearTimeout(myTimer);");
+    out.println("      if (myTimer != undefined) { clearTimeout(myTimer); }");
     out.println("      myTimer = setInterval(function () {closeWhenSign()}, 4000);");
     out.println("    }");
     out.println("  }");
@@ -412,7 +418,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
     //bufferOutput.append(  "     var CurrentPath = '/" + getDynamicWebTwainProperty("applicationPath", "regweb") + "';\n" );
     //bufferOutput.append(  "     var strActionPage = CurrentPath + '/" + getDynamicWebTwainProperty("guardarScanPath", "anexo/guardarScan") + "/" + scanWebID + "';\n" ); 
     
-   out.print(  "     var strActionPage = '/" + relativePluginRequestPath + UPLOAD_PAGE + "';\n" );
+   out.print(  "     var strActionPage = '" + relativePluginRequestPath + UPLOAD_PAGE + "';\n" );
     
    out.print(  "     DWObject.IfSSL = false; // Set whether SSL is used\n" );
     
@@ -457,9 +463,10 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
      out.print(  "     }\n");
      out.print(  "   }\n");
     }else{
-     out.print(  "     UploadScan();\n");
+     out.print(  "   UploadScan();\n");
     }
     
+    out.print(  "    closeWhenSign();\n");  
    out.print(  " };\n");
     
    out.print(  "</script>");
@@ -588,6 +595,74 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
 
   }
 
+
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // --------------- CONFIG /scanner/dynamsoft.webtwain.config.js ------------
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+
+  // TODO fer cache
+  protected void retornarDynamsoftWebtwainConfig(String absolutePluginRequestPath,
+      String relativePluginRequestPath, long scanWebID, String query,
+      HttpServletRequest request, HttpServletResponse response, Locale languageUI) {
+    char[] contingut = null;
+    String mime = getMimeType(query);
+    query = query.replace('\\', '/');
+
+    query = query.startsWith("/") ? query : ('/' + query);
+
+    try {
+
+      InputStream input = getClass().getResourceAsStream(query);
+
+      if (input != null) {
+
+        contingut = IOUtils.toCharArray(input);
+        
+        String contingutStr = new String(contingut);
+        
+//        String relativePath = relativePluginRequestPath;
+//        
+//        if (relativePath.endsWith("/")) {
+//          relativePath = relativePath.substring(0, relativePath.length() -1);
+//        }
+
+        contingutStr = contingutStr.replace("X_PATH_X", relativePluginRequestPath + "scanner");
+        contingutStr = contingutStr.replace("X_TRIAL_X", String.valueOf(isTrial()));
+        contingutStr = contingutStr.replace("X_DEBUG_X", String.valueOf(isDebug()));
+        contingutStr = contingutStr.replace("X_PRODUCTKEY_X", getProductKey());
+        
+        
+        
+
+        int pos = query.lastIndexOf('/');
+        String resourcename = pos == -1 ? query : query.substring(pos + 1);
+        
+        Writer out = response.getWriter();
+        
+
+        response.setContentType(mime);
+        response.setHeader("Content-Disposition", "inline; filename=\"" + resourcename + "\"");
+        response.setContentLength(contingut.length);
+
+
+        out.write(contingutStr);
+        out.flush();
+
+        return;
+      }
+    } catch (Exception e) {
+      log.error("Error llegint recurs " + query, e);
+    }
+
+    // ERROR
+
+    String titol = "No trob el recurs " + query;
+    requestNotFoundError(titol, absolutePluginRequestPath, relativePluginRequestPath, query,
+        String.valueOf(scanWebID), request, response, languageUI);
+  }
+  
   
 
   // -------------------------------------------------------------------------
@@ -712,6 +787,8 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
     
     
     List<ScannedDocument> list = fullInfo.getScannedFiles();
+    
+    log.info(" SCANID[" + fullInfo.getScanWebID()  + "].LIST.SIZE() = " + list.size());  
     
     try {
     if (list.size() == 0) {

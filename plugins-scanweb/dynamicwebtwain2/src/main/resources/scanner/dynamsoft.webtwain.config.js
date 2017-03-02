@@ -1,4 +1,4 @@
-﻿//
+//
 // Dynamsoft JavaScript Library for Basic Initiation of Dynamic Web TWAIN
 // More info on DWT: http://www.dynamsoft.com/Products/WebTWAIN_Overview.aspx
 //
@@ -11,15 +11,15 @@ var Dynamsoft = Dynamsoft || { WebTwainEnv: {} };
 
 Dynamsoft.WebTwainEnv.AutoLoad = true;
 ///
-Dynamsoft.WebTwainEnv.Containers = [{ContainerId:'dwtcontrolContainer', Width:338, Height:440}];
+Dynamsoft.WebTwainEnv.Containers = [{ContainerId:'dwtcontrolContainer', Width:338, Height:400}];
 ///
-Dynamsoft.WebTwainEnv.ProductKey = '******';
+Dynamsoft.WebTwainEnv.ProductKey = 'X_PRODUCTKEY_X';
 ///
-Dynamsoft.WebTwainEnv.Trial = false;
+Dynamsoft.WebTwainEnv.Trial = X_TRIAL_X;
 ///
-Dynamsoft.WebTwainEnv.Debug = false; // only for debugger output
+Dynamsoft.WebTwainEnv.Debug = X_DEBUG_X; // only for debugger output
 ///
-Dynamsoft.WebTwainEnv.ResourcesPath = '/regweb/anexo/scanwebresource';
+Dynamsoft.WebTwainEnv.ResourcesPath = 'X_PATH_X';
 
 /// All callbacks are defined in the dynamsoft.webtwain.install.js file, you can customize them.
 
