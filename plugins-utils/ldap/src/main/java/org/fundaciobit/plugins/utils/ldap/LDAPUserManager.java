@@ -452,21 +452,25 @@ public class LDAPUserManager implements LDAPConstants, Serializable {
         List<String> roles = new ArrayList<String>();
         String[] members = ldapUser.getMemberOf();
         
-        String prefix = ldapProperties.getProperty(PREFIX_ROLE_MATCH_MEMBEROF);
-        String suffix = ldapProperties.getProperty(SUFFIX_ROLE_MATCH_MEMBEROF);
+        if (members != null) {
         
-        for (String memberOf : members) {
-          try {
-            
-            if (memberOf.startsWith(prefix) && memberOf.endsWith(suffix)) {
-              String role = memberOf.substring(prefix.length(), memberOf.length() - suffix.length());        
-              roles.add(role);
+          String prefix = ldapProperties.getProperty(PREFIX_ROLE_MATCH_MEMBEROF);
+          String suffix = ldapProperties.getProperty(SUFFIX_ROLE_MATCH_MEMBEROF);
+          
+          for (String memberOf : members) {
+            try {
+              
+              if (memberOf.startsWith(prefix) && memberOf.endsWith(suffix)) {
+                String role = memberOf.substring(prefix.length(), memberOf.length() - suffix.length());        
+                roles.add(role);
+              }
+            } catch (Exception e) {
+              e.printStackTrace(System.err);
             }
-          } catch (Exception e) {
-            e.printStackTrace(System.err);
           }
-        }
-        
+ 
+        } // Final de if
+
         return roles;
     }
 
