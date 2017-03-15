@@ -16,6 +16,7 @@
   <modules>	
     <module>ldap</module>
     <module>plugins-webutils</module>
+    <module>cxf</module>
     <!--
 	   <module>discoverplugins</module>
 	   -->

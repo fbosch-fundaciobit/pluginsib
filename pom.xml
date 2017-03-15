@@ -20,6 +20,7 @@
     <module>plugins-scanweb</module>
     <module>plugins-timestamp</module>
     <module>plugins-userinformation</module>
+    <module>plugins-validatesignature</module>
     <module>loginmodule-jboss</module>
   </modules>
 

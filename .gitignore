@@ -20,3 +20,17 @@ target
 /plugins-certificate/afirma/passwords.txt
 /plugins-certificate/afirmacxf/test.log
 /plugins-scanweb/caib-scanweb-plugin/testapi.properties
+/plugins-validatesignature/afirmacxf/autofirma.pdf
+/plugins-validatesignature/afirmacxf/config/plugin.properties
+/plugins-validatesignature/afirmacxf/duesfirmes.pdf
+/plugins-validatesignature/afirmacxf/esborrar.txt
+/plugins-validatesignature/afirmacxf/hola_firmat.pdf
+/plugins-validatesignature/afirmacxf/miniapplet_empleat_public.pdf
+/plugins-validatesignature/afirmacxf/miniapplet_epes_segelltemps_afirma.pdf
+/plugins-validatesignature/afirmacxf/miniapplet_epes_segelltemps_catcert.pdf
+/plugins-validatesignature/afirmacxf/pades_ltv.pdf
+/plugins-validatesignature/afirmacxf/peticioOK.pdf
+/plugins-validatesignature/afirmacxf/setpath.bat
+/plugins-certificate/afirma/src/test/java/org/fundaciobit/plugins/checkcertificate/NoCommitar.java
+/plugins-certificate/afirma/src/test/java/org/fundaciobit/plugins/checkcertificate/configDGIDT.txt
+/plugins-certificate/afirmacxf/src/test/java/org/fundaciobit/plugins/certificate/afirmacxf/test/NoCommitar.java
