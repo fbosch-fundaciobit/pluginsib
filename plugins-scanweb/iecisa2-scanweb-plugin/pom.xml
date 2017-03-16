@@ -4,7 +4,7 @@
 
   <groupId>org.fundaciobit.plugins</groupId>
   <artifactId>plugin-scanweb-iecisascanweb-plugin</artifactId>
-  <version>2.0.0</version>
+  <version>2.0.1</version>
 
   <name>FundacioBit Plugins - Scan Web - IECISA - Plugin v2</name>
 

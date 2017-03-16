@@ -150,16 +150,22 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
     return SUPPORTED_SCAN_TYPES;
   }
 
-  protected static final Set<String> SUPPORTED_FLAG = Collections
-      .unmodifiableSet(new HashSet<String>(Arrays.asList(FLAG_NON_SIGNED, FLAG_SIGNED)));
+  protected static final Set<String> SUPPORTED_FLAG_1 = Collections
+      .unmodifiableSet(new HashSet<String>(Arrays.asList(FLAG_NON_SIGNED)));
+  
+  protected static final Set<String> SUPPORTED_FLAG_2 = Collections
+      .unmodifiableSet(new HashSet<String>(Arrays.asList(FLAG_SIGNED)));
 
   protected static final List<Set<String>> SUPPORTED_FLAGS = Collections
-      .unmodifiableList(new ArrayList<Set<String>>(Arrays.asList(SUPPORTED_FLAG)));
+      .unmodifiableList(new ArrayList<Set<String>>(Arrays.asList(SUPPORTED_FLAG_1, SUPPORTED_FLAG_2)));
+  
+  protected static final List<Set<String>> SUPPORTED_FLAGS_ONLYSIGN = Collections
+      .unmodifiableList(new ArrayList<Set<String>>(Arrays.asList(SUPPORTED_FLAG_2)));
 
   @Override
   public List<Set<String>> getSupportedFlagsByScanType(String scanType) {
     if (SCANTYPE_PDF.equals(scanType)) {
-      return SUPPORTED_FLAGS;
+      return forceSign()? SUPPORTED_FLAGS_ONLYSIGN : SUPPORTED_FLAGS;
     }
     return null;
   }
@@ -772,7 +778,7 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
       
       final String asuntoFirma = getAsunto();
       // TODO es necessari?
-      String localizacion = "localizacion";
+      String localizacion = null; // "localizacion";
 
      
       final  String administrationID = null; // No te sentit en API Firma En Servidor
