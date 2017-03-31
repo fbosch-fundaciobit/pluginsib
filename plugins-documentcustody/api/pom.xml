@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.fundaciobit.plugins</groupId>
   <artifactId>plugin-documentcustody-api</artifactId>
-  <version>2.0.0</version>
+  <version>3.0.0</version>
   <packaging>jar</packaging>
 
   <name>FundacioBit Plugins - Document Custody - API</name>
@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.fundaciobit.plugins</groupId>
     <artifactId>plugins-documentcustody</artifactId>
-    <version>2.0.0</version>
+    <version>3.0.0</version>
   </parent>
 
   <url>http://maven.apache.org</url>
@@ -23,6 +23,12 @@
       <artifactId>plugins-api</artifactId>
       <version>1.0.0</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+      <version>2.3.23</version>
     </dependency>
 
   </dependencies>

@@ -32,8 +32,9 @@ import org.fundaciobit.plugins.utils.MetadataType;
  * Implementació del plugin de custodia documental que guarda dins Alfresco.
  *  Si es defineix una URL base d'un servidor web, llavors es pot fer
  * que retorni la URL de validació.
- * 
- * @author anadal
+ *
+ *  @author Limit
+ *  @author anadal (Adapta a DocumentCustody 2.0.0 i 3.0.0)
  */
 public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin {
 
@@ -46,6 +47,16 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   public AlfrescoDocumentCustodyPlugin() {
     super();
   }
+  
+  /**
+   * @param propertyKeyBase
+   * @param properties
+   */
+  public AlfrescoDocumentCustodyPlugin(String propertyKeyBase) {
+    super(propertyKeyBase);
+  }
+
+  
 
   /**
    * @param propertyKeyBase
@@ -180,7 +191,8 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   }
 
   @Override
-  public void saveDocument(String custodyID, String custodyParameters, DocumentCustody document) throws CustodyException, NotSupportedCustodyException {
+  public void saveDocument(String custodyID, Map<String, Object> custodyParameters,
+      DocumentCustody document) throws CustodyException, NotSupportedCustodyException {
 	
 		  try {
 			
@@ -288,7 +300,8 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   }
   
   @Override
-  public void saveSignature(String custodyID, String custodyParameters, SignatureCustody document) throws CustodyException {
+  public void saveSignature(String custodyID, Map<String, Object> custodyParameters, 
+      SignatureCustody document) throws CustodyException {
 	  
 	  try {
 			
@@ -423,7 +436,8 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   }
   
   @Override
-  public void addMetadata(String custodyID, Metadata metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException {
+  public void addMetadata(String custodyID, Metadata metadata,
+      Map<String, Object> custodyParameters) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException {
 	  
 	  if (custodyID!=null && !"".equals(custodyID) && metadata!=null) {
 		  
@@ -464,7 +478,8 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   }
   
   @Override
-  public void updateMetadata(String custodyID, Metadata[] metadata) throws CustodyException, NotSupportedCustodyException, MetadataFormatException {
+  public void updateMetadata(String custodyID, Metadata[] metadata,
+      Map<String, Object> custodyParameters) throws CustodyException, NotSupportedCustodyException, MetadataFormatException {
 	  
 	  if (custodyID!=null && !"".equals(custodyID) && metadata!=null) {
 		  
@@ -681,6 +696,29 @@ public class AlfrescoDocumentCustodyPlugin extends AbstractDocumentCustodyPlugin
   @Override
   protected String getPropertyBase() {
     return ALFRESCO_PROPERTY_BASE;
+  }
+
+  @Override
+  protected void writeFileCreateParentDir(String custodyID, String relativePath, byte[] data)
+      throws Exception {
+    // TODO Auto-generated method stub    
+  }
+
+  @Override
+  protected long lengthFile(String custodyID, String relativePath) throws Exception {
+    try {
+      Document document = OpenCmisAlfrescoHelper.getDocument(cmisSession, relativePath, custodyID);
+      if (document == null) {
+        return -1;
+      } else {
+        return document.getContentStreamLength();
+      }
+    } catch (Throwable th) {
+      String msg = "No pot determinar si existeix fitxer en el següent path = " + relativePath
+          + ": " + th.getMessage();
+      log.error(msg, th);
+      throw new Exception(msg, th);
+    }
   }
 
 }

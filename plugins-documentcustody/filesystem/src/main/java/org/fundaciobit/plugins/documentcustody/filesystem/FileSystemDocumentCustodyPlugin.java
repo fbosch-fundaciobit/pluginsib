@@ -20,6 +20,8 @@ public class FileSystemDocumentCustodyPlugin extends AbstractDocumentCustodyPlug
 
   public static final String FILESYSTEM_PROPERTY_BASE = DOCUMENTCUSTODY_BASE_PROPERTY + "filesystem.";
 
+  public static final String FILESYSTEM_PROPERTY_BASEDIR = FILESYSTEM_PROPERTY_BASE + "basedir";
+
   /**
    * 
    */
@@ -50,7 +52,7 @@ public class FileSystemDocumentCustodyPlugin extends AbstractDocumentCustodyPlug
 
   
   private String getBaseDir() {
-    return getProperty(FILESYSTEM_PROPERTY_BASE + "basedir");
+    return getProperty(FILESYSTEM_PROPERTY_BASEDIR );
   }
 
 
@@ -65,6 +67,7 @@ public class FileSystemDocumentCustodyPlugin extends AbstractDocumentCustodyPlug
   @Override
   protected void deleteFile(String custodyID, String... relativePaths) {
     for (String path : relativePaths) {
+      
       deleteFile(path);
     }
   }
@@ -75,6 +78,7 @@ public class FileSystemDocumentCustodyPlugin extends AbstractDocumentCustodyPlug
     File f = new File(getBaseDir(), relativePath);
     if (f.exists()) {
       if (!f.delete()) {
+        log.warn("No s'ha pogut esborrar fitxer " + f.getAbsolutePath(), new Exception());
         f.deleteOnExit();
       }
     }
@@ -87,6 +91,18 @@ public class FileSystemDocumentCustodyPlugin extends AbstractDocumentCustodyPlug
     FileOutputStream fos = new FileOutputStream(new File(getBaseDir(), relativePath));
     fos.write(data);
     fos.close();
+  }
+  
+  @Override
+  protected void writeFileCreateParentDir(String custodyID, String relativePath, byte[] data)
+      throws Exception {
+    File f = new File(getBaseDir(), relativePath);
+    File parent = f.getParentFile(); 
+    if (!parent.exists()) {
+      parent.mkdirs();
+    }
+    writeFile(custodyID, relativePath, data);
+    
   }
   
   @Override
@@ -106,6 +122,15 @@ public class FileSystemDocumentCustodyPlugin extends AbstractDocumentCustodyPlug
     }
     fis.close();
     return baos.toByteArray();
+  }
+
+  @Override
+  protected long lengthFile(String custodyID, String relativePath) throws Exception {
+    File file = new File(getBaseDir(), relativePath);
+    if (!file.exists()) {
+      return -1;
+    }
+    return file.length();
   }
 
 }

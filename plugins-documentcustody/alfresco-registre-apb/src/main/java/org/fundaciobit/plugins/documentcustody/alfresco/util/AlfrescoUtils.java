@@ -1,7 +1,5 @@
 package org.fundaciobit.plugins.documentcustody.alfresco.util;
 
-import java.beans.XMLDecoder;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,6 +21,11 @@ import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.commons.io.IOUtils;
 import org.fundaciobit.plugins.documentcustody.api.CustodyException;
 
+/**
+ * 
+ * @author anadal (Adapta a DocumentCustody 3.0.0)
+ *
+ */
 public class AlfrescoUtils {
 
 	public static File bytesTofile(byte[] bFile, String fileName) {
@@ -115,8 +118,8 @@ public class AlfrescoUtils {
 		return out;
 	}
 	
-	public static List<Object> decodificaStringToObject(String registreXML) throws UnsupportedEncodingException {
-    	
+	public static List<Object> decodificaStringToObject(Map<String,Object> custodyParameters) throws UnsupportedEncodingException {
+   /*
 		ByteArrayInputStream stream=new ByteArrayInputStream(registreXML.getBytes("UTF-8"));
     	XMLDecoder xmlDec=new XMLDecoder(stream);
     	List<Object> out = new ArrayList<Object>();
@@ -134,6 +137,14 @@ public class AlfrescoUtils {
 
     	xmlDec.close();
     	return out;
+    	*/
+	  
+	  List<Object> out = new ArrayList<Object>();
+	  out.add(custodyParameters.get("registro"));
+	  out.add(custodyParameters.get("anexo"));
+	  
+	  return out;
+	  
 	}
 	
 	public static String getPathFromRegistreObject(Object object) throws UnsupportedEncodingException, IllegalAccessException, ParseException, CustodyException{

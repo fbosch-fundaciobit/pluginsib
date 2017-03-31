@@ -34,3 +34,5 @@ target
 /plugins-certificate/afirma/src/test/java/org/fundaciobit/plugins/checkcertificate/NoCommitar.java
 /plugins-certificate/afirma/src/test/java/org/fundaciobit/plugins/checkcertificate/configDGIDT.txt
 /plugins-certificate/afirmacxf/src/test/java/org/fundaciobit/plugins/certificate/afirmacxf/test/NoCommitar.java
+/plugins-documentcustody/filesystem/testReposWithFolder
+/plugins-documentcustody/filesystem/testAutomaticMetadatas

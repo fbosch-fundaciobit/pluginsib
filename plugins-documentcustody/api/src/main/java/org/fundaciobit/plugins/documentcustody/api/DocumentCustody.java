@@ -13,6 +13,15 @@ public class DocumentCustody extends AnnexCustody {
 
   /**
    * @param name
+   * @param mime
+   * @param length
+   */
+  public DocumentCustody(String name, String mime, long length) {
+    super(name, mime, length);
+  }
+
+  /**
+   * @param name
    * @param mimeType
    * @param data
    */

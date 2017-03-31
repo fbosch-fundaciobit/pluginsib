@@ -1,7 +1,7 @@
 package org.fundaciobit.plugins.documentcustody.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.fundaciobit.plugins.IPlugin;
 import org.fundaciobit.plugins.utils.Metadata;
@@ -30,7 +30,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @return 
    * @throws Exception
    */
-  String reserveCustodyID(String custodyParameters) throws CustodyException;
+  String reserveCustodyID(Map<String, Object> parameters) throws CustodyException;
   
   /**
   *
@@ -38,7 +38,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
   * @return
   * @throws Exception
   */
- String getValidationUrl(String custodyID) throws CustodyException;
+ String getValidationUrl(String custodyID, Map<String, Object> parameters) throws CustodyException;
  
  /**
   * Retorna un valor a partir de l'identificador de reserva que es pot
@@ -47,7 +47,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
   * @return
   * @throws Exception
   */
-  String getSpecialValue(String custodyID) throws CustodyException;
+  String getSpecialValue(String custodyID, Map<String, Object> parameters) throws CustodyException;
   
   /**
    * 
@@ -71,7 +71,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @param document
    * @throws Exception
    */
-  void saveAll(String custodyID, String custodyParameters,
+  void saveAll(String custodyID, Map<String, Object> parameters,
       DocumentCustody document,  SignatureCustody signatureCustody,
       Metadata[] metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
   
@@ -90,7 +90,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @param document
    * @throws Exception
    */
-  void saveDocument(String custodyID, String custodyParameters,
+  void saveDocument(String custodyID, Map<String, Object> parameters,
       DocumentCustody document) throws CustodyException, NotSupportedCustodyException;
   
   /**
@@ -142,7 +142,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
   /**
    * 
    */
-  void saveSignature(String custodyID, String custodyParameters,
+  void saveSignature(String custodyID, Map<String, Object> parameters,
       SignatureCustody signatureCustody) throws CustodyException, NotSupportedCustodyException;
 
 
@@ -205,7 +205,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @return AnnexID
    * @throws CustodyException
    */
-  String addAnnex(String custodyID, AnnexCustody annex) throws CustodyException,  NotSupportedCustodyException;
+  String addAnnex(String custodyID, AnnexCustody annex, Map<String, Object> parameters) throws CustodyException,  NotSupportedCustodyException;
   
   /**
    * 
@@ -259,7 +259,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @return
    * @throws CustodyException
    */
-  ArrayList<String> getAllAnnexes(String custodyID) throws CustodyException;
+  List<String> getAllAnnexes(String custodyID) throws CustodyException;
 
   
   boolean supportsAnnexes();
@@ -280,7 +280,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @throws CustodyException
    * @throws NotSupportedCustodyException
    */ 
-  void addMetadata(String custodyID, Metadata metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
+  void addMetadata(String custodyID, Metadata metadata, Map<String, Object> parameters) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
 
   /**
    * Afegeix noves Metadades al sistema. Si les claus d'aquestes ja exeisteixen llavors s'afegeix un nou valor a la clau. 
@@ -289,7 +289,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @throws CustodyException
    * @throws NotSupportedCustodyException
    */
-  void addMetadata(String custodyID, Metadata[] metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
+  void addMetadata(String custodyID, Metadata[] metadata, Map<String, Object> parameters) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
   
   /**
    * Afegeix o actualitza una Metadada al sistema. Si no existeix l'afegeix.
@@ -303,7 +303,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @throws CustodyException
    * @throws NotSupportedCustodyException
    */
-  void updateMetadata(String custodyID, Metadata metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
+  void updateMetadata(String custodyID, Metadata metadata, Map<String, Object> parameters) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
   
   /**
    * Afegeix o actualitza noves Metadades al sistema. Si no existeixen les afegeix.
@@ -315,7 +315,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @throws CustodyException
    * @throws NotSupportedCustodyException
    */
-  void updateMetadata(String custodyID, Metadata[] metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
+  void updateMetadata(String custodyID, Metadata[] metadata,Map<String, Object> parameters) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException;
   
   /**
    * 
@@ -323,7 +323,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @return
    * @throws NotSupportedCustodyException
    */
-  HashMap<String, ArrayList<Metadata>> getAllMetadata(String custodyID) throws  CustodyException,NotSupportedCustodyException;
+  Map<String, List<Metadata>> getAllMetadata(String custodyID) throws  CustodyException,NotSupportedCustodyException;
   
   /**
    * 
@@ -331,7 +331,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @return
    * @throws NotSupportedCustodyException
    */
-  ArrayList<Metadata> getMetadata(String custodyID, String key) throws CustodyException, NotSupportedCustodyException;
+  List<Metadata> getMetadata(String custodyID, String key) throws CustodyException, NotSupportedCustodyException;
   
   /**
    * 
@@ -363,9 +363,9 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @return
    * @throws CustodyException
    */
-  ArrayList<Metadata> deleteMetadata(String custodyID, String key) throws CustodyException;
-  
-  
+  List<Metadata> deleteMetadata(String custodyID, String key) throws CustodyException;
+
+
   /**
    * 
    * @param custodyID
@@ -373,7 +373,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @return
    * @throws CustodyException
    */
-  ArrayList<Metadata> deleteMetadata(String custodyID, String[] keys) throws CustodyException;
+  List<Metadata> deleteMetadata(String custodyID, String[] keys) throws CustodyException;
   
   
   boolean supportsDeleteMetadata();

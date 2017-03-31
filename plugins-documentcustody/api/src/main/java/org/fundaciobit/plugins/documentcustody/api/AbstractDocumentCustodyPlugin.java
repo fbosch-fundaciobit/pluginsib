@@ -5,23 +5,34 @@ import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.fundaciobit.plugins.utils.AbstractPluginProperties;
+import org.fundaciobit.plugins.utils.Base64;
 import org.fundaciobit.plugins.utils.Metadata;
 import org.fundaciobit.plugins.utils.MetadataFormatException;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+
 /**
- * Implementacio genèrica de DocumentCustody. Només s'han d'implementar 5 mètodes:
+ * Implementacio genèrica de DocumentCustody. Només s'han d'implementar 6 mètodes:
  *    - deleteFile(String custodyID, String ... relativePaths);
  *    - existsFile(String custodyID, String relativePath);
  *    - writeFile(String custodyID, String relativePath, byte[] data) throws Exception;
  *    - byte[] readFile(String custodyID, String relativePath) throws Exception;
+ *    - long lengthFile(String custodyID, String relativePath) throws Exception;
  *    - String getPropertyBase();
  *
  * @author anadal
@@ -33,6 +44,20 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   protected final Logger log = Logger.getLogger(getClass());
   
   private String prefix = null;
+
+  public static final String ABSTRACT_PREFIX = "prefix";
+  
+  public static final String ABSTRACT_BASE_URL = "baseurl";
+  
+  public static final String ABSTRACT_BASE_URL_EXPRESSION_LANGUAGE = "baseurl_expressionlanguage";
+  
+  public static final String ABSTRACT_HASH_PASSWORD = "hash.password";
+
+  public static final String ABSTRACT_HASH_ALGORITHM= "hash.algorithm";
+  
+  public static final String ABSTRACT_FOLDER_EXPRESSION_LANGUAGE = "folder_expressionlanguage";
+  
+  public static final String ABSTRACT_GENERATEUNIQUE_CUSTODYID_EXPRESSION_LANGUAGE = "generate_custodyid_expressionlanguage";
 
   /**
    * 
@@ -56,49 +81,83 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
     super(propertyKeyBase);
   }
 
-  private final String getCustodyDocumentName(String custodyID) {
-    return CUSTODY_PREFIX() + custodyID + ".DOC";
+  private final String getCustodyDocumentName(String custodyID, Map<String,Object> custodyParameters) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyParameters) + custodyID + ".DOC";
   }
   
-  private final String getCustodyDocumentInfoName(String custodyID) {
-    return CUSTODY_PREFIX() + custodyID + ".DOCINFO";
-  }
-
-  private final String getCustodySignatureName(String custodyID) {
-    return CUSTODY_PREFIX() + custodyID + ".SIGN";
-  }
-
-  private final String getCustodySignatureInfoName(String custodyID) {
-    return CUSTODY_PREFIX() +  custodyID + ".SIGNINFO";
-  }
-  
-  
-  private final String getCustodyAnnexName(String annexID) {
-    return CUSTODY_PREFIX() + annexID + ".ANNEX";
-  }
 
 
-  private final String getCustodyAnnexInfoName(String annexID) {
-    return CUSTODY_PREFIX() + annexID + ".ANNEXINFO";
+  private final String getCustodyDocumentInfoName(String custodyID, Map<String,Object> custodyParameters) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyParameters) + custodyID + ".DOCINFO";
+  }
+
+  private final String getCustodySignatureName(String custodyID, Map<String,Object> custodyParameters) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyParameters) + custodyID + ".SIGN";
+  }
+
+  private final String getCustodySignatureInfoName(String custodyID, Map<String,Object> custodyParameters) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyParameters) +  custodyID + ".SIGNINFO";
   }
   
-  private final String getCustodyAnnexListName(String custodyID) {
-    return CUSTODY_PREFIX() + custodyID + ".ANNEXLIST";
+  
+  private final String getCustodyAnnexName(String annexID, Map<String,Object> custodyParameters) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyParameters) + annexID + ".ANNEX";
+  }
+
+
+  private final String getCustodyAnnexInfoName(String annexID, Map<String,Object> custodyParameters) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyParameters) + annexID + ".ANNEXINFO";
   }
   
-  private final String getCustodyMetadataInfoName(String custodyID) {
-    return CUSTODY_PREFIX() + custodyID + ".METAINFO";
+ 
+  private final String getCustodyMetadataInfoName(String custodyID, Map<String,Object> custodyParameters) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyParameters) + custodyID + ".METAINFO";
   }
   
+  
+  // USING ONLY CUSTODY
+  private final String getCustodyDocumentName2(String custodyID) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyID) + custodyID + ".DOC";
+  }
+  
+    private final String getCustodyDocumentInfoName2(String custodyID) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyID) + custodyID + ".DOCINFO";
+  }
+
+  private final String getCustodySignatureName2(String custodyID) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyID) + custodyID + ".SIGN";
+  }
+
+  private final String getCustodySignatureInfoName2(String custodyID) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyID) +  custodyID + ".SIGNINFO";
+  }
+  
+  
+  private final String getCustodyAnnexName2(String custodyID, String annexID) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyID) + annexID + ".ANNEX";
+  }
+
+
+  private final String getCustodyAnnexInfoName2(String custodyID, String annexID) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyID) + annexID + ".ANNEXINFO";
+  }
+  
+  private final String getCustodyAnnexListName2(String custodyID) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyID) + custodyID + ".ANNEXLIST";
+  }
+  
+  private final String getCustodyMetadataInfoName2(String custodyID) throws CustodyException {
+    return CUSTODY_PREFIX_AND_FOLDER(custodyID) + custodyID + ".METAINFO";
+  }
+
   
   private final String getCustodyHashesFile() {
     return CUSTODY_PREFIX() + "HASH__FILE.properties";
   }
 
-
   protected String CUSTODY_PREFIX() {
     if (prefix == null) {
-      String pfix = getProperty(getPropertyBase() + "prefix");
+      String pfix = getProperty(getPropertyBase() + ABSTRACT_PREFIX);
       if (pfix == null || pfix.trim().length() == 0) {
         pfix = "";
       } else {
@@ -112,21 +171,38 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
     return prefix; 
   }
 
+  protected String CUSTODY_PREFIX_AND_FOLDER(Map<String,Object> custodyParameters) throws CustodyException { // ) { //
+    String pfix = CUSTODY_PREFIX();
+    
+    String realFolder = REALFOLDER(custodyParameters);
+    
+    return realFolder + pfix; 
+  }
+  
+  
+  protected String CUSTODY_PREFIX_AND_FOLDER(String custodyID) throws CustodyException { // ) { //
+    String pfix = CUSTODY_PREFIX();
+    
+    String realFolder = getRealFolderFromCustodyID(custodyID);
+    
+    return realFolder + pfix; 
+  }
+  
 
-  protected String getURLBase() {
-    return getProperty(getPropertyBase() + "baseurl");
+  protected String REALFOLDER(Map<String, Object> custodyParameters) throws CustodyException {
+    String folder = getProperty(getPropertyBase() + ABSTRACT_FOLDER_EXPRESSION_LANGUAGE);
+    String realFolder;
+    if (folder == null || folder.trim().length() == 0) {
+      realFolder = "";  
+    } else {
+      realFolder = processExpressionLanguage(folder, custodyParameters);
+    }
+    return realFolder;
   }
-  
-  protected String getHashPassword() {
-    return getProperty(getPropertyBase() + "hash.password","");
-  }
-  
-  /**
-   * Valid values       MD2, MD5, SHA,SHA-256,SHA-384,SHA-512
-   * @return
-   */
-  protected String getHashAlgorithm() {
-    return getProperty(getPropertyBase() + "hash.algorithm","MD5");
+
+  // TODO 
+  private String getURLBase() {
+    return getProperty(getPropertyBase() + ABSTRACT_BASE_URL);
   }
   
   
@@ -138,20 +214,22 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
 
 
   @Override
-  public synchronized String reserveCustodyID(String parameters) throws CustodyException {
+  public synchronized String reserveCustodyID(Map<String, Object> custodyParameters) throws CustodyException {
     
-    final String custodyID = String.valueOf(System.nanoTime());
-    try {
-      Thread.sleep(50);
-    } catch (InterruptedException e1) {
+    final String custodyID;
+    
+    String custodyIdEL = getProperty(getPropertyBase() + ABSTRACT_GENERATEUNIQUE_CUSTODYID_EXPRESSION_LANGUAGE);
+    if (custodyIdEL == null || custodyIdEL.trim().length() == 0 ) {
+       custodyID = generateUniqueCustodyID(custodyParameters);
+    } else {
+       custodyID = processExpressionLanguage(custodyIdEL, custodyParameters);
     }
-    
-    
+
 
     // Inicialitza Fitxers de HASH si la URL conté el sistema de HASH
     String baseUrl = getURLBase();
     if (baseUrl != null && baseUrl.indexOf("{2}") != -1) {
-       String hash = generateHash(custodyID, getHashAlgorithm(), getHashPassword());
+       String hash = generateHash(custodyID);
        
        try {
          Properties props = new Properties();
@@ -174,7 +252,96 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
 
     }
     
+    
+    String realFolder = REALFOLDER(custodyParameters);
+    if (realFolder != null && realFolder.trim().length() != 0) {
+    
+       String path = getCachePath(custodyID);
+
+       try {
+         writeFileCreateParentDir(custodyID, path, realFolder.getBytes());
+       } catch(Exception e) {
+         throw new CustodyException("Error guardant Cache de " + path, e);
+       }
+       
+       
+       try {
+         //writeFile(custodyID, path, realFolder.getBytes());
+         final String touchPath =  realFolder + "touch"; 
+         writeFileCreateParentDir(custodyID, touchPath,
+            "this file is temporal and if you see this, then there is an but".getBytes());
+         deleteFile(custodyID, touchPath);
+         
+       } catch(Exception e) {
+         throw new CustodyException("Error guardant Cache de .", e);
+       }
+          
+    }
+    
+    updateAutomaticMetadatas(custodyID, custodyParameters);
+
     return custodyID;
+  }
+
+
+  protected String generateUniqueCustodyID(Map<String, Object> custodyParameters) throws CustodyException {
+    // NOTA: S'afegiex nanoTime per quan hi ha un canvi d'hora
+    String id = String.valueOf(System.currentTimeMillis() + "" + System.nanoTime());
+         
+    try { Thread.sleep(50); } catch(Exception e) { }         
+         
+    return id;
+  }
+  
+  
+  
+  protected String getRealFolderFromCustodyID(String custodyID) throws CustodyException {
+  
+    String folder = getProperty(getPropertyBase() + ABSTRACT_FOLDER_EXPRESSION_LANGUAGE);
+    
+    if (folder == null || folder.trim().length() == 0) {
+      return "";
+    } else {
+  
+  
+       // Indicar al sistema la ubicació del fitxer
+       String path = getCachePath(custodyID);
+       
+       
+       try {
+         byte[] realFolder = readFile(custodyID, path);
+         if (realFolder == null) {
+           return "";
+         } else {
+           return new String(realFolder);
+         }
+       } catch(Exception e) {
+         throw new CustodyException("Error guardant Cache de .", e);
+       }
+  
+    }
+  }
+
+  protected String getCachePath(String custodyID) {
+    String  b64 = Base64.encode(custodyID);
+     
+     String dir1,dir2;
+     if (b64.length() < 2) {
+        dir1 = "0";
+        dir2 = "0";
+     } else {
+        b64 = b64.replace('=', ' ').trim();
+        dir1 = "" + b64.charAt(b64.length() - 1);
+        dir2 = "" + b64.charAt(b64.length() - 2);
+     }
+
+     String path = getCacheFolderName() + "/" + dir1 + "/" + dir2 + "/" + custodyID;
+    return path;
+  }
+  
+  
+  public String getCacheFolderName() {
+     return ".cachefolder";
   }
   
   
@@ -201,7 +368,26 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
     this.deleteSignature(custodyID);
 
     this.deleteDocument(custodyID);
+
+    // TODO  Esborrar directori pare si tenim folder i esta buit????
+    // Per ara no podem esborrar ja que no se si hi ha altres documents al mateix directori
+    // Fins i tot pot existir el document electrònic però que no tengui cap arxiu relacionat.
     
+    
+    // Esborrar cache
+    String folder = getProperty(getPropertyBase() + ABSTRACT_FOLDER_EXPRESSION_LANGUAGE);
+    
+    if (folder == null || folder.trim().length() == 0) {
+      // OK No fer res.
+    } else {
+      String path = getCachePath(custodyID);
+      try {
+        deleteFile(custodyID, path);
+      } catch (Exception e) {
+        log.warn("Error desconegur esborrant fitxer amb path=" + path
+           + "(custodyID=" + custodyID + ")");
+      }
+    }
   }
 
   /**
@@ -216,27 +402,53 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
    */
   @SuppressWarnings("deprecation")
   @Override
-  public String getValidationUrl(String custodyID) throws CustodyException {
+  public String getValidationUrl(String custodyID, Map<String, Object> parameters) throws CustodyException {
 
     String baseUrl = getURLBase();
-    if (baseUrl == null) {
-      return null;
-    }
-    // {0} => custodyID
-    // {1} => URLEncode(custodyID)
-    final String urlEncoded = URLEncoder.encode(custodyID);
-    
-    // {2} => Hash(custodyID)
-    final String hash;
-    if (baseUrl.indexOf("{2}") == -1) {
-      hash = "";
-    } else {
-      hash = generateHash(custodyID, getHashAlgorithm(), getHashPassword());
-    }
+    if (baseUrl != null) {
 
-    return MessageFormat.format(baseUrl, custodyID,urlEncoded, hash);
+      // {0} => custodyID
+      // {1} => URLEncode(custodyID)
+      final String urlEncoded = URLEncoder.encode(custodyID);
+      
+      // {2} => Hash(custodyID)
+      final String hash;
+      if (baseUrl.indexOf("{2}") == -1) {
+        hash = "";
+      } else {
+        hash = generateHash(custodyID);
+      }
+  
+      return MessageFormat.format(baseUrl, custodyID,urlEncoded, hash);
+    } else {
+         
+      baseUrl = getProperty(getPropertyBase() + ABSTRACT_BASE_URL_EXPRESSION_LANGUAGE);
+      
+      try {
+        return processExpressionLanguage(baseUrl, parameters);
+      } catch (Exception e) {
+        String msg = "No s'ha pogut processar la EL " + baseUrl + ": " + e.getMessage();
+        log.error(msg, e);
+        // TODO Translate
+        throw new CustodyException(msg, e);
+      }
+    }
 
   }
+  
+  
+  
+  public String generateHash(String data) {
+
+    String hashPassword = getProperty(getPropertyBase() + ABSTRACT_HASH_PASSWORD,"");
+
+    //  Valid values       MD2, MD5, SHA,SHA-256,SHA-384,SHA-512
+    String algo =  getProperty(getPropertyBase() +  ABSTRACT_HASH_ALGORITHM,"MD5");
+
+    return generateHash(data, algo, hashPassword);
+
+  }
+  
   
   
   public static String generateHash(String data, String algorithm, String salt) {
@@ -255,9 +467,45 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
 }
 
   
+  public static String processExpressionLanguage(String plantilla,
+      Map<String, Object> custodyParameters) throws CustodyException {
+    return processExpressionLanguage(plantilla, custodyParameters, null);
+  }
+  
+  public static String processExpressionLanguage(String plantilla,
+      Map<String, Object> custodyParameters,  Locale locale) throws CustodyException {
+    try {
+    if (custodyParameters == null) {
+      custodyParameters = new  HashMap<String, Object>();
+    }
+    
+    Configuration configuration;
+
+    configuration = new Configuration(Configuration.VERSION_2_3_23);
+    configuration.setDefaultEncoding("UTF-8");
+    if (locale!= null) {
+      configuration.setLocale(locale);
+    }
+    Template template;
+    template = new Template("exampleTemplate", new StringReader(plantilla),
+        configuration);
+
+    Writer out = new StringWriter();
+    template.process(custodyParameters, out);
+    
+    String res = out.toString();
+    return res;
+    } catch(Exception e) {
+      final String msg = "No s'ha pogut processar l'Expression Language " + plantilla 
+        + ":" + e.getMessage();
+      throw new CustodyException(msg, e);
+    }
+  }
+  
+  
 
   @Override
-  public String getSpecialValue(String custodyID) throws CustodyException {
+  public String getSpecialValue(String custodyID, Map<String, Object> parameters) throws CustodyException {
     return custodyID;
   }
   
@@ -271,7 +519,7 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
    * @throws Exception
    */
   @Override
-  public void saveAll(String custodyID, String custodyParameters,
+  public void saveAll(String custodyID, Map<String, Object> custodyParameters,
       DocumentCustody document,  SignatureCustody signature,
       Metadata[] metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException {
     
@@ -282,9 +530,9 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
     if (signature != null) {
       saveSignature(custodyID, custodyParameters, signature);
     }
-    
+
     if (metadata != null) {
-      addMetadata(custodyID, metadata);
+      addMetadata(custodyID, metadata, custodyParameters);
     }
     
   }
@@ -300,14 +548,14 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
 
 
   @Override
-  public void saveDocument(String custodyID, String custodyParameters, DocumentCustody document)
+  public void saveDocument(String custodyID, Map<String, Object> custodyParameters, DocumentCustody document)
       throws CustodyException, NotSupportedCustodyException {
 
     String infoPath;
     String docPath;
 
-    infoPath = getCustodyDocumentInfoName(custodyID);
-    docPath = getCustodyDocumentName(custodyID);
+    infoPath = getCustodyDocumentInfoName(custodyID, custodyParameters);
+    docPath = getCustodyDocumentName(custodyID, custodyParameters);
 
     try {
       
@@ -321,6 +569,8 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       DocumentCustody clone = new DocumentCustody(document);
       clone.setData(null);
       writeObject(custodyID, infoPath, clone);
+      
+      updateAutomaticMetadatas(custodyID, custodyParameters);
 
     } catch (Exception ex) {
       final String msg = "No s'ha pogut custodiar el document";
@@ -347,7 +597,7 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
    */
   public void deleteDocument(String custodyID) throws CustodyException, NotSupportedCustodyException {
     deleteFile(custodyID, 
-        getCustodyDocumentName(custodyID), getCustodyDocumentInfoName(custodyID));
+        getCustodyDocumentName2(custodyID), getCustodyDocumentInfoName2(custodyID));
     
   }
   
@@ -360,8 +610,8 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       return null;
     }
 
-    String docPath = getCustodyDocumentName(custodyID);
-    String infoPath = getCustodyDocumentInfoName(custodyID);
+    String docPath = getCustodyDocumentName2(custodyID);
+    String infoPath = getCustodyDocumentInfoName2(custodyID);
     return (DocumentCustody) getDocOrSign(custodyID, docPath, infoPath);
   }
   
@@ -373,8 +623,13 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       return null;
     }
 
-    String infoPath = getCustodyDocumentInfoName(custodyID);
-    return (DocumentCustody) getDocOrSignOnlyInfo(custodyID, infoPath);
+    String infoPath = getCustodyDocumentInfoName2(custodyID);
+    DocumentCustody dc = (DocumentCustody) getDocOrSignOnlyInfo(custodyID, infoPath);
+    
+    String docPath = getCustodyDocumentName2(custodyID);
+    checkSize(custodyID, dc, infoPath,  docPath);
+    
+    return dc;
   }
 
 
@@ -398,14 +653,14 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   
   
   @Override
-  public void saveSignature(String custodyID, String custodyParameters,
+  public void saveSignature(String custodyID, Map<String, Object> custodyParameters,
       SignatureCustody document) throws CustodyException {
 
     String infoPath;
     String docPath;
 
-    infoPath = getCustodySignatureInfoName(custodyID);
-    docPath = getCustodySignatureName(custodyID);
+    infoPath = getCustodySignatureInfoName(custodyID, custodyParameters);
+    docPath = getCustodySignatureName(custodyID, custodyParameters);
 
     try {
       
@@ -417,6 +672,8 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       SignatureCustody clone = new SignatureCustody(document);
       clone.setData(null);
       writeObject(custodyID, infoPath, clone);
+      
+      updateAutomaticMetadatas(custodyID, custodyParameters);
 
     } catch (Exception ex) {
       final String msg = "No s'ha pogut custodiar la firma del document";
@@ -435,7 +692,7 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   
   @Override
   public void deleteSignature(String custodyID) throws CustodyException, NotSupportedCustodyException {
-    deleteFile(custodyID, getCustodySignatureName(custodyID), getCustodySignatureInfoName(custodyID));
+    deleteFile(custodyID, getCustodySignatureName2(custodyID), getCustodySignatureInfoName2(custodyID));
   }
   
 
@@ -446,9 +703,9 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       return null;
     }
 
-    String docPath = getCustodySignatureName(custodyID);
-    String infoPath = getCustodySignatureInfoName(custodyID);
-    return (SignatureCustody) getDocOrSign(custodyID, docPath, infoPath);
+    String signPath = getCustodySignatureName2(custodyID);
+    String infoPath = getCustodySignatureInfoName2(custodyID);
+    return (SignatureCustody) getDocOrSign(custodyID, signPath, infoPath);
   }
   
   
@@ -457,8 +714,11 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
     if (custodyID == null) {
       return null;
     }
-    String infoPath = getCustodySignatureInfoName(custodyID);
-    return (SignatureCustody) getDocOrSignOnlyInfo(custodyID, infoPath);
+    String infoPath = getCustodySignatureInfoName2(custodyID);
+    SignatureCustody sc = (SignatureCustody) getDocOrSignOnlyInfo(custodyID, infoPath);
+    String signPath = getCustodySignatureName2(custodyID);
+    checkSize(custodyID, sc, infoPath, signPath);
+    return sc;
   }
 
 
@@ -501,7 +761,7 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
    * @throws CustodyException
    */
   @Override
-  public synchronized String addAnnex(String custodyID, AnnexCustody annex) throws CustodyException,
+  public synchronized String addAnnex(String custodyID, AnnexCustody annex, Map<String, Object> custodyParameters) throws CustodyException,
       NotSupportedCustodyException {
     
     final String annexID = custodyID + "_" + System.nanoTime();
@@ -513,8 +773,8 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
     String infoPath;
     String docPath;
 
-    infoPath = getCustodyAnnexInfoName(annexID);
-    docPath = getCustodyAnnexName(annexID);
+    infoPath = getCustodyAnnexInfoName(annexID, custodyParameters);
+    docPath = getCustodyAnnexName(annexID, custodyParameters);
 
     try {
       
@@ -528,10 +788,11 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       writeObject(custodyID, infoPath, clone);
       
 
-      ArrayList<String> annexIDs = getAllAnnexes(custodyID);
+      List<String> annexIDs = getAllAnnexes(custodyID);
       annexIDs.add(annexID);
-      writeObject(custodyID, getCustodyAnnexListName(custodyID), annexIDs );
+      writeObject(custodyID, getCustodyAnnexListName2(custodyID), annexIDs );
       
+      updateAutomaticMetadatas(custodyID, custodyParameters);
 
     } catch (Exception ex) {
       final String msg = "No s'ha pogut guardar un annexe del document";
@@ -553,16 +814,16 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   public void deleteAllAnnexes(String custodyID) throws CustodyException,
       NotSupportedCustodyException {
     
-    ArrayList<String> annexIDs = getAllAnnexes(custodyID);
+    List<String> annexIDs = getAllAnnexes(custodyID);
     
     ArrayList<String> paths = new ArrayList<String>();
     
     for (String annexID : annexIDs) {
-      paths.add(getCustodyAnnexName(annexID));
-      paths.add(getCustodyAnnexInfoName(annexID));
+      paths.add(getCustodyAnnexName2(custodyID, annexID));
+      paths.add(getCustodyAnnexInfoName2(custodyID, annexID));
     }
 
-    paths.add(getCustodyAnnexListName(custodyID));
+    paths.add(getCustodyAnnexListName2(custodyID));
     
     deleteFile(custodyID, paths.toArray(new String[paths.size()]));
 
@@ -572,11 +833,11 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   @Override
   public void deleteAnnex(String custodyID, String annexID) 
       throws CustodyException, NotSupportedCustodyException {
-    deleteFile(custodyID, getCustodyAnnexName(annexID), getCustodyAnnexInfoName(annexID));
+    deleteFile(custodyID, getCustodyAnnexName2(custodyID, annexID), getCustodyAnnexInfoName2(custodyID, annexID));
 
-    ArrayList<String> annexIDs = getAllAnnexes(custodyID);
+    List<String> annexIDs = getAllAnnexes(custodyID);
     annexIDs.remove(annexID);
-    String listPath = getCustodyAnnexListName(custodyID);
+    String listPath = getCustodyAnnexListName2(custodyID);
     writeObject(custodyID, listPath, annexIDs);
 
   }
@@ -584,12 +845,12 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   
 
   @Override
-  public ArrayList<String> getAllAnnexes(String custodyID) throws CustodyException {
+  public List<String> getAllAnnexes(String custodyID) throws CustodyException {
     
-    String listPath = getCustodyAnnexListName(custodyID);
+    String listPath = getCustodyAnnexListName2(custodyID);
   
     if (existsFile(custodyID, listPath)) {
-      ArrayList<String> annexIDs = (ArrayList<String>)readObject(custodyID, listPath);
+      List<String> annexIDs = (List<String>)readObject(custodyID, listPath);
       return annexIDs; 
     } else {
       return new ArrayList<String>();
@@ -627,8 +888,8 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
         return null;
       }
 
-      String docPath = getCustodyAnnexName(annexID);
-      String infoPath = getCustodyAnnexInfoName(annexID);
+      String docPath = getCustodyAnnexName2(custodyID, annexID);
+      String infoPath = getCustodyAnnexInfoName2(custodyID, annexID);
       return (AnnexCustody) getDocOrSign(custodyID, docPath, infoPath);
 
   }
@@ -641,14 +902,16 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       return null;
     }
 
-    String infoPath = getCustodyAnnexInfoName(annexID);
-    return (AnnexCustody) getDocOrSignOnlyInfo(custodyID, infoPath);
+    String infoPath = getCustodyAnnexInfoName2(custodyID, annexID);
+    AnnexCustody annex = (AnnexCustody) getDocOrSignOnlyInfo(custodyID, infoPath);
+    
+     String annexPath = getCustodyAnnexName2(custodyID, annexID);;
+    checkSize(custodyID, annex, infoPath, annexPath);
+    
+    return annex;
   }
   
-  
 
-  
-  
   
 
   @Override
@@ -676,25 +939,91 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   }
   
   
+  public static final String ABSTRACT_AUTOMATIC_METADATA_ITEMS = "automaticmetadata_items";
+  
+  public static final String ABSTRACT_AUTOMATIC_METADATA = "automatic_metadata";
+  
+  
+  
+  protected List<Metadata> updateAutomaticMetadatas(String custodyID, Map<String, Object> custodyParameters) throws CustodyException {
+    List<Metadata> list = null;
+  
+    String itemsStr = getProperty(getPropertyBase() + ABSTRACT_AUTOMATIC_METADATA_ITEMS);
+
+    if (supportsMetadata() && itemsStr != null && itemsStr.trim().length() != 0) {
+
+      String[] items = itemsStr.split(",");
+
+      list = new ArrayList<Metadata>(); 
+
+      for (int i = 0; i < items.length; i++) {
+        String item = items[i].trim();
+        String metadata = getPropertyBase() + ABSTRACT_AUTOMATIC_METADATA + "." + item + ".name";
+        try {
+          String name = getPropertyRequired(metadata);
+
+          metadata = getPropertyBase() + ABSTRACT_AUTOMATIC_METADATA + "." + item + ".valueEL";
+
+          String valueEL = getPropertyRequired(metadata);
+          try {
+            String value = processExpressionLanguage(valueEL, custodyParameters);  
+            if (value != null) {
+              list.add(new Metadata(name, value));
+            }
+          } catch (Exception e) {
+            log.debug("Error processant el valor de " + valueEL);
+          }
+
+        } catch (Exception e) {
+          final String msg = "Error intentant obtenir el nom de la metadada "
+              + metadata + ": " + e.getMessage();
+          log.error(msg, e);
+          throw new CustodyException(msg, e);
+        }
+      }
+      
+      
+      if (list.size() != 0) {
+        try {
+          updateMetadata(custodyID, list.toArray(new Metadata[list.size()]), custodyParameters);
+        } catch (Exception e) {
+          final String msg = "Error guardant les metadades automàtiques: " + e.getMessage();
+          log.error(msg, e);
+          throw new CustodyException(msg, e);
+        }
+      }
+    }
+    
+    
+    
+    
+    
+    return list;
+  }
+  
+  
+  
   @Override
-  public void addMetadata(String custodyID, Metadata metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException {
+  public void addMetadata(String custodyID, Metadata metadata, Map<String, Object> custodyParameters) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException {
     
     if (metadata != null) {
       Metadata.checkMetadata(metadata);
-      HashMap<String, ArrayList<Metadata>> metas = readMetadataInfo(custodyID);
-      ArrayList<Metadata> list = metas.get(metadata.getKey());
+      Map<String, List<Metadata>> metas = readMetadataInfo(custodyID);
+      List<Metadata> list = metas.get(metadata.getKey());
       if (list == null) {
         list = new ArrayList<Metadata>();
         metas.put(metadata.getKey(), list);
       }
       list.add(metadata);
-      writeMetadataInfo(custodyID, metas);
+      // writeMetadataInfo(custodyID, metas, custodyParameters);
+      final String path = getCustodyMetadataInfoName(custodyID, custodyParameters); // 
+      writeObject(custodyID, path, metas);
     }
             
   }
   
   @Override
-  public void addMetadata(String custodyID, Metadata[] metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException {
+  public void addMetadata(String custodyID, Metadata[] metadata, Map<String, Object> custodyParameters) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException {
     if (metadata != null) {
       // TODO Optimitzar
       for (int i = 0; i < metadata.length; i++) {
@@ -703,7 +1032,7 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
         };
       }
       for (int i = 0; i < metadata.length; i++) {
-        addMetadata(custodyID, metadata[i]);
+        addMetadata(custodyID, metadata[i], custodyParameters);
       }
     }
   }
@@ -711,53 +1040,56 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   
 
   @Override
-  public void updateMetadata(String custodyID, Metadata metadata) throws CustodyException,
+  public void updateMetadata(String custodyID, Metadata metadata, Map<String, Object> custodyParameters) throws CustodyException,
       NotSupportedCustodyException, MetadataFormatException {
     
     if (metadata != null && metadata.getKey() != null) {
       deleteMetadata(custodyID, metadata.getKey() );
     }
-    addMetadata(custodyID, metadata);
+    addMetadata(custodyID, metadata, custodyParameters);
   }
 
   @Override
-  public void updateMetadata(String custodyID, Metadata[] metadata) throws CustodyException,
+  public void updateMetadata(String custodyID, Metadata[] metadata, Map<String, Object> custodyParameters) throws CustodyException,
       NotSupportedCustodyException, MetadataFormatException {
     if (metadata != null) {
       for (Metadata m : metadata) {
-        updateMetadata(custodyID, m);
+        updateMetadata(custodyID, m, custodyParameters);
       } 
     }
   }
 
   @Override
-  public ArrayList<Metadata> deleteMetadata(String custodyID, String[] keys)
+  public List<Metadata> deleteMetadata(String custodyID, String[] keys)
       throws CustodyException {
+    // TODO OPTIMITZAR
     ArrayList<Metadata> borrades = new ArrayList<Metadata>();
-    if (keys == null) {
-      
+    if (keys != null && keys.length != 0) {
+      for (int i = 0; i < keys.length; i++) {
+        borrades.addAll(deleteMetadata(custodyID, keys[i]));
+      }
     }
     return borrades;
   }
 
   
   @Override  
-  public HashMap<String, ArrayList<Metadata>> getAllMetadata(String custodyID) throws NotSupportedCustodyException, CustodyException {
+  public Map<String, List<Metadata>> getAllMetadata(String custodyID) throws NotSupportedCustodyException, CustodyException {
 
-    HashMap<String, ArrayList<Metadata>> all = readMetadataInfo(custodyID);
+    Map<String, List<Metadata>> all = readMetadataInfo(custodyID);
 
-    return all;
+    return (Map<String, List<Metadata>>)all;
   }
   
   @Override  
-  public ArrayList<Metadata> getMetadata(String custodyID, String key) throws CustodyException, NotSupportedCustodyException {
+  public List<Metadata> getMetadata(String custodyID, String key) throws CustodyException, NotSupportedCustodyException {
     return readMetadataInfo(custodyID).get(key);
   }
   
   @Override
   public Metadata getOnlyOneMetadata(String custodyID, String key) throws CustodyException,
       NotSupportedCustodyException {
-    ArrayList<Metadata> list = getMetadata(custodyID, key);
+    List<Metadata> list = getMetadata(custodyID, key);
     if (list == null || list.size() == 0) {
       return null;
     }
@@ -768,18 +1100,20 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   @Override
   public void deleteAllMetadata(String custodyID) throws CustodyException {
 
-    deleteFile(custodyID, getCustodyMetadataInfoName(custodyID));
+    deleteFile(custodyID, getCustodyMetadataInfoName2(custodyID));
 
   }
   
   @Override
-  public ArrayList<Metadata> deleteMetadata(String custodyID, String key) throws CustodyException {
+  public List<Metadata> deleteMetadata(String custodyID, String key) throws CustodyException {
 
-    HashMap<String, ArrayList<Metadata>> metas = readMetadataInfo(custodyID);
+    Map<String, List<Metadata>> metas = readMetadataInfo(custodyID);
     
-    ArrayList<Metadata> borrades = metas.remove(key);
+    List<Metadata> borrades = metas.remove(key);
     
-    writeMetadataInfo(custodyID, metas);
+    // writeMetadataInfo(custodyID, metas);
+    final String path = getCustodyMetadataInfoName2(custodyID); // , parameters
+    writeObject(custodyID, path, metas);
     
     return borrades;
     
@@ -789,29 +1123,17 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
    * 
    * @return
    */
-  protected HashMap<String, ArrayList<Metadata>> readMetadataInfo(String custodyID) throws CustodyException {
-    final String path = getCustodyMetadataInfoName(custodyID);
+  protected Map<String, List<Metadata>> readMetadataInfo(String custodyID) throws CustodyException {
+    final String path = getCustodyMetadataInfoName2(custodyID);
 
     if (existsFile(custodyID, path)) {
-      return (HashMap<String, ArrayList<Metadata>>)readObject(custodyID, path);
+      return (Map<String, List<Metadata>>)readObject(custodyID, path);
     } else {
-      return new HashMap<String, ArrayList<Metadata>>();
+      return new HashMap<String, List<Metadata>>();
     }
   }
   
-  /**
-   * 
-   * @param custodyID
-   * @param metas
-   * @throws CustodyException
-   */
-  protected void writeMetadataInfo(String custodyID, HashMap<String, ArrayList<Metadata>> metas) throws CustodyException {
-    final String path = getCustodyMetadataInfoName(custodyID);
-    writeObject(custodyID, path, metas);
-  }
-  
-  
-  
+ 
   
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -831,6 +1153,7 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       AnnexCustody dc = getDocOrSignOnlyInfo(custodyID, infoPath);
       
       if (dc != null ) {
+        checkSize(custodyID, dc, infoPath, docPath);
         byte[] data = readFile(custodyID, docPath);
         dc.setData(data);
       }
@@ -846,11 +1169,30 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   }
 
   
+  
+  
+  protected void checkSize(String custodyID, AnnexCustody dc, String infoPath, String filePath) throws CustodyException {
+    if (dc != null && dc.getLength() < 0) {
+      try {
+        long len = lengthFile(custodyID, filePath);
+        dc.setLength(len);
+        
+        writeObject(custodyID, infoPath, dc);
+      } catch (Exception ex) {
+        final String msg = "No s'ha pogut actualitzar la informació de tamany del document " + filePath;
+        log.error(msg, ex);
+        throw new CustodyException(msg, ex);
+      }
+      
+    }
+  }
+  
+  
+  
   protected AnnexCustody getDocOrSignOnlyInfo(String custodyID, String infoPath)
       throws CustodyException {
     
     AnnexCustody dc = (AnnexCustody) readObject(custodyID, infoPath);
-    
     return dc;
     
   }
@@ -897,8 +1239,7 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   
   // Implementar 
   protected abstract void deleteFile(String custodyID, String ... relativePaths);
-  
-  
+
   // Implementar
   protected abstract boolean existsFile(String custodyID, String relativePath);
   
@@ -906,11 +1247,15 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   protected abstract void writeFile(String custodyID, String relativePath, byte[] data) throws Exception;
   
   // Implementar
+  protected abstract void writeFileCreateParentDir(String custodyID, String relativePath, byte[] data) throws Exception;
+  
+  // Implementar
   protected abstract byte[] readFile(String custodyID, String relativePath) throws Exception;
   
   // Implementar
   protected abstract String getPropertyBase();
-
- 
   
+  // implementar
+  protected abstract long lengthFile(String custodyID, String relativePath) throws Exception;
+
 }

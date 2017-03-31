@@ -1,17 +1,19 @@
 package org.fundaciobit.plugins.documentcustody.alfresco;
 
+import java.beans.XMLDecoder;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.io.IOUtils;
 import org.fundaciobit.plugins.documentcustody.api.DocumentCustody;
 import org.fundaciobit.plugins.documentcustody.api.IDocumentCustodyPlugin;
 import org.fundaciobit.plugins.utils.PluginsManager;
 
 /**
- * 
- * @author anadal
+ * @author Limit
+ * @author anadal (Adaptar a DocumentCustody 3.0.0)
  *
  */
 public class TestAlfrescoApbCustody {
@@ -46,9 +48,37 @@ public class TestAlfrescoApbCustody {
         System.out.println(" No trob fitxer registre.xml");
         return;
       }
+      //ByteArrayInputStream stream=new ByteArrayInputStream(registreXML.getBytes("UTF-8"));
+      XMLDecoder xmlDec=new XMLDecoder(is);
+      //List<Object> out = new ArrayList<Object>();
+      
+      Map<String, Object> custodyParameters = new HashMap<String, Object>();
+      
+      boolean seguentObjecte = true;
+      int count = 0; 
+      while (seguentObjecte) {
+        try {
+          Object object=xmlDec.readObject();
+          
+          String name;
+          if (count == 0) {
+            name = "registro";
+          } else if (count == 1) {
+            name = "anexo";
+          } else {
+            name = "object_" + count;
+          }
+          count++;
+          custodyParameters.put(name, object);
+        }catch (Exception objExc) {
+          seguentObjecte = false;
+        }
+      }
+
+      xmlDec.close();
 
       
-      String custodyParameters = IOUtils.toString(is, "utf-8");
+      //String custodyParameters = IOUtils.toString(is, "utf-8");
       
       String custodyID = documentCustodyPlugin.reserveCustodyID(custodyParameters);
       

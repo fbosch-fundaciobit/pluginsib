@@ -10,7 +10,9 @@ public class AnnexCustody {
   protected String name;
 
   protected byte[] data;
-  
+
+  protected long length = -1;
+
   protected String mime;
 
   /**
@@ -19,7 +21,7 @@ public class AnnexCustody {
   public AnnexCustody() {
     super();
   }
-  
+
   /**
    * @param name
    * @param data
@@ -28,8 +30,8 @@ public class AnnexCustody {
     super();
     this.name = name;
     this.data = data;
+    this.length = data.length;
   }
-  
 
   /**
    * @param name
@@ -41,10 +43,21 @@ public class AnnexCustody {
     this.name = name;
     this.mime = mime;
     this.data = data;
+    this.length = data.length;
   }
 
+  /**
+   * @param name
+   * @param mime
+   * @param length
+   */
+  public AnnexCustody(String name, String mime, long length) {
+    super();
+    this.name = name;
+    this.mime = mime;
+    this.length = length;
+  }
 
-  
   /**
    * @param name
    * @param data
@@ -54,6 +67,7 @@ public class AnnexCustody {
     this.name = annexCustody.name;
     this.data = annexCustody.data;
     this.mime = annexCustody.mime;
+    this.length = annexCustody.length;
   }
 
   public String getName() {
@@ -79,7 +93,13 @@ public class AnnexCustody {
   public void setMime(String mime) {
     this.mime = mime;
   }
-  
-  
-  
+
+  public long getLength() {
+    return length;
+  }
+
+  public void setLength(long length) {
+    this.length = length;
+  }
+
 }

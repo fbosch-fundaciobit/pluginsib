@@ -1068,15 +1068,12 @@ public class MetadataConstants {
   
   
   public static final Map<String, MetadataConstant> getAllMetadatasInfo() {
-    
     synchronized (metadataInfoMap) {
       if (metadatasList == null) {
         internalCompute();
       }
     }
-
     return metadataInfoMap;
-    
   }
   
   
