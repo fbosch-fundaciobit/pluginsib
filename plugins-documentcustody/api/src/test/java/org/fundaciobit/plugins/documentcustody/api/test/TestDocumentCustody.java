@@ -71,6 +71,7 @@ public abstract class TestDocumentCustody {
     DocumentCustody doc = new DocumentCustody();
     doc.setName("holacaracola.txt");
     doc.setData("holacaracola".getBytes());
+    doc.setMime("text/plain");
 
     documentCustodyPlugin.saveDocument(custodyID, custodyParameters, doc);
 
@@ -89,6 +90,7 @@ public abstract class TestDocumentCustody {
     signatureCustody.setData("firma dades".getBytes());
     signatureCustody.setName("firma.xml");
     signatureCustody.setSignatureType(SignatureCustody.XADES_SIGNATURE);
+    signatureCustody.setMime("text/xml");
 
     documentCustodyPlugin.saveSignature(custodyID, custodyParameters, signatureCustody);
 
@@ -101,6 +103,8 @@ public abstract class TestDocumentCustody {
     }
 
     // ANNEXES
+    
+    if (documentCustodyPlugin.supportsAnnexes()) {
 
     AnnexCustody annexCustody = new AnnexCustody();
 
@@ -115,9 +119,10 @@ public abstract class TestDocumentCustody {
     List<String> annexes = documentCustodyPlugin.getAllAnnexes(custodyID);
 
     Assert.assertEquals(2, annexes.size());
+    }
 
     // Metadata
-    if (checkMetadata) {
+    if (documentCustodyPlugin.supportsMetadata() &&  checkMetadata) {
       String key = "k1";
       documentCustodyPlugin.addMetadata(custodyID, new Metadata(key, "value11",
           MetadataType.STRING), custodyParameters);

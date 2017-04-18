@@ -187,5 +187,26 @@ public class Metadata implements Serializable {
     
   }
   
+  
+  @Override
+  public boolean equals(Object obj) {
+    if (obj != null && obj instanceof Metadata) {
+      Metadata m = (Metadata)obj;
+      return compare(this.key, m.key) && compare(this.value, m.value);
+    }
+
+    return false;
+  }
+  
+  
+  private static boolean compare(String str1, String str2) {
+    return (str1 == null ? str2 == null : str1.equals(str2));
+  }
+  
+  
+  @Override
+  public String toString() {
+    return this.key + " = " + this.value;
+  }
 
 }

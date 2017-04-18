@@ -139,6 +139,38 @@ public class MetadataConstants {
 
   }
   
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // ---------------------  Tipo eni:docBase --------------------------
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  
+  /**
+   * Código de la aplicación de trámite que generó el documento.
+   */
+  public static final String ENI_APP_TRAMITE_DOC = "eni:app_tramite_doc";
+  
+  
+  public static final MetadataConstant _ENI_APP_TRAMITE_DOC = new MetadataConstant(ENI_APP_TRAMITE_DOC,
+      MetadataType.STRING, "Código de la aplicación de trámite que generó el documento.");
+
+  
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // ---------------------  Tipo eni:expediente --------------------------
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  
+  /**
+   * Código de la aplicación de trámite que generó el expediente.
+   */
+  public static final String ENI_APP_TRAMITE_EXP = "eni:app_tramite_exp";
+  
+  
+  public static final MetadataConstant _ENI_APP_TRAMITE_EXP = new MetadataConstant(ENI_APP_TRAMITE_EXP,
+      MetadataType.STRING, "Código de la aplicación de trámite que generó el expediente.");
+
+  
   
   // -------------------------------------------------------------------------
   // -------------------------------------------------------------------------
@@ -405,7 +437,7 @@ public class MetadataConstants {
   /**
    * Requerido solo para documentos en formato electrónico (“soporte” =Digital).
    */
-  public static final String ENI_EXTENSION_FORMATO = "eni:extensión_formato";
+  public static final String ENI_EXTENSION_FORMATO = "eni:extension_formato";
   
   public static final MetadataConstant _ENI_EXTENSION_FORMATO = new MetadataConstant(
       ENI_EXTENSION_FORMATO,   MetadataType.STRING,

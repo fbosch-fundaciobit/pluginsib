@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
@@ -59,6 +60,12 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   
   public static final String ABSTRACT_GENERATEUNIQUE_CUSTODYID_EXPRESSION_LANGUAGE = "generate_custodyid_expressionlanguage";
 
+  public static final String ABSTRACT_SPECIALVALUE_EXPRESSION_LANGUAGE = "specialvalue_expressionlanguage";
+  
+  public static final String ABSTRACT_AUTOMATIC_METADATA_ITEMS = "automaticmetadata_items";
+  
+  public static final String ABSTRACT_AUTOMATIC_METADATA = "automatic_metadata";
+  
   /**
    * 
    */
@@ -278,7 +285,9 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
           
     }
     
-    updateAutomaticMetadatas(custodyID, custodyParameters);
+    // Pot ser que depengui de dades de fitxer o signatura
+    final boolean ignoreErrors = true;
+    updateAutomaticMetadatas(custodyID, custodyParameters, ignoreErrors);
 
     return custodyID;
   }
@@ -400,40 +409,64 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
    *     // {1} => URLEncode(custodyID)
    *     // {2} => Hash(custodyID)
    */
-  @SuppressWarnings("deprecation")
   @Override
   public String getValidationUrl(String custodyID, Map<String, Object> parameters) throws CustodyException {
 
     String baseUrl = getURLBase();
-    if (baseUrl != null) {
+    String baseUrlEL = getProperty(getPropertyBase() + ABSTRACT_BASE_URL_EXPRESSION_LANGUAGE);
+    
+    String hashPassword = getProperty(getPropertyBase() + ABSTRACT_HASH_PASSWORD,"");
 
-      // {0} => custodyID
-      // {1} => URLEncode(custodyID)
-      final String urlEncoded = URLEncoder.encode(custodyID);
-      
-      // {2} => Hash(custodyID)
-      final String hash;
-      if (baseUrl.indexOf("{2}") == -1) {
-        hash = "";
-      } else {
-        hash = generateHash(custodyID);
-      }
-  
-      return MessageFormat.format(baseUrl, custodyID,urlEncoded, hash);
-    } else {
-         
-      baseUrl = getProperty(getPropertyBase() + ABSTRACT_BASE_URL_EXPRESSION_LANGUAGE);
-      
-      try {
-        return processExpressionLanguage(baseUrl, parameters);
-      } catch (Exception e) {
-        String msg = "No s'ha pogut processar la EL " + baseUrl + ": " + e.getMessage();
-        log.error(msg, e);
-        // TODO Translate
-        throw new CustodyException(msg, e);
-      }
+    //  Valid values       MD2, MD5, SHA,SHA-256,SHA-384,SHA-512
+    String hashAlgorithm =  getProperty(getPropertyBase() +  ABSTRACT_HASH_ALGORITHM,"MD5");
+    
+    return getValidationUrlStatic(custodyID, parameters, baseUrl, baseUrlEL,
+        hashAlgorithm, hashPassword, log);
+    
+
+  }
+
+  public static String getValidationUrlStatic(String custodyID, Map<String, Object> parameters,
+      String baseUrl, String baseUrlEL, String hashAlgorithm, String hashPassword,
+      Logger log ) throws CustodyException {
+    // {0} => custodyID
+    // {1} => URLEncode(custodyID)
+    String urlEncoded;
+    try {
+      urlEncoded = URLEncoder.encode(custodyID, "UTF-8");
+    } catch (UnsupportedEncodingException e1) {
+      urlEncoded = custodyID;
     }
+    // {2} => Hash(custodyID)
+    final String hash = generateHash(custodyID, hashAlgorithm, hashPassword);
+    
+    
+    if (baseUrl != null) {
+      return MessageFormat.format(baseUrl, custodyID,urlEncoded, hash);
+    } 
 
+    
+    if (baseUrlEL == null) {
+      return null;
+    }
+    
+    try {
+      Map<String, Object> parameters2 = new HashMap<String, Object>();
+
+      parameters2.put("validationUrl_custodyID", custodyID);
+      parameters2.put("validationUrl_custodyID_URLEncode", urlEncoded);
+      parameters2.put("validationUrl_custodyID_Hash", hash);
+
+      if (parameters != null) {
+        parameters2.putAll(parameters);
+      }
+      return processExpressionLanguage(baseUrlEL, parameters2);
+    } catch (Exception e) {
+      String msg = "No s'ha pogut processar la EL " + baseUrl + ": " + e.getMessage();
+      log.error(msg, e);
+      // TODO Translate
+      throw new CustodyException(msg, e);
+    }
   }
   
   
@@ -443,9 +476,9 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
     String hashPassword = getProperty(getPropertyBase() + ABSTRACT_HASH_PASSWORD,"");
 
     //  Valid values       MD2, MD5, SHA,SHA-256,SHA-384,SHA-512
-    String algo =  getProperty(getPropertyBase() +  ABSTRACT_HASH_ALGORITHM,"MD5");
+    String hashAlgorithm =  getProperty(getPropertyBase() +  ABSTRACT_HASH_ALGORITHM,"MD5");
 
-    return generateHash(data, algo, hashPassword);
+    return generateHash(data, hashAlgorithm, hashPassword);
 
   }
   
@@ -505,8 +538,14 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   
 
   @Override
-  public String getSpecialValue(String custodyID, Map<String, Object> parameters) throws CustodyException {
-    return custodyID;
+  public String getSpecialValue(String custodyID, Map<String, Object> custodyParameters) throws CustodyException {
+    
+    String specialValue = getProperty(getPropertyBase() + ABSTRACT_SPECIALVALUE_EXPRESSION_LANGUAGE);
+    if (specialValue == null || specialValue.trim().length() == 0) {
+      return custodyID;
+    } else {
+      return processExpressionLanguage(specialValue, custodyParameters);
+    }
   }
   
 
@@ -570,7 +609,8 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       clone.setData(null);
       writeObject(custodyID, infoPath, clone);
       
-      updateAutomaticMetadatas(custodyID, custodyParameters);
+      final boolean ignoreErrors = false;
+      updateAutomaticMetadatas(custodyID, custodyParameters, ignoreErrors);
 
     } catch (Exception ex) {
       final String msg = "No s'ha pogut custodiar el document";
@@ -673,7 +713,8 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       clone.setData(null);
       writeObject(custodyID, infoPath, clone);
       
-      updateAutomaticMetadatas(custodyID, custodyParameters);
+      final boolean ignoreErrors = false;
+      updateAutomaticMetadatas(custodyID, custodyParameters, ignoreErrors);
 
     } catch (Exception ex) {
       final String msg = "No s'ha pogut custodiar la firma del document";
@@ -792,7 +833,8 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       annexIDs.add(annexID);
       writeObject(custodyID, getCustodyAnnexListName2(custodyID), annexIDs );
       
-      updateAutomaticMetadatas(custodyID, custodyParameters);
+      final boolean ignoreErrors = false;
+      updateAutomaticMetadatas(custodyID, custodyParameters, ignoreErrors);
 
     } catch (Exception ex) {
       final String msg = "No s'ha pogut guardar un annexe del document";
@@ -939,51 +981,23 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   }
   
   
-  public static final String ABSTRACT_AUTOMATIC_METADATA_ITEMS = "automaticmetadata_items";
-  
-  public static final String ABSTRACT_AUTOMATIC_METADATA = "automatic_metadata";
-  
-  
-  
-  protected List<Metadata> updateAutomaticMetadatas(String custodyID, Map<String, Object> custodyParameters) throws CustodyException {
-    List<Metadata> list = null;
-  
-    String itemsStr = getProperty(getPropertyBase() + ABSTRACT_AUTOMATIC_METADATA_ITEMS);
+  /**
+   * 
+   * @param custodyID
+   * @param custodyParameters
+   * @return
+   * @throws CustodyException
+   */
+  protected List<Metadata> updateAutomaticMetadatas(String custodyID,
+      Map<String, Object> custodyParameters, boolean ignoreErrors) throws CustodyException {
 
-    if (supportsMetadata() && itemsStr != null && itemsStr.trim().length() != 0) {
-
-      String[] items = itemsStr.split(",");
-
-      list = new ArrayList<Metadata>(); 
-
-      for (int i = 0; i < items.length; i++) {
-        String item = items[i].trim();
-        String metadata = getPropertyBase() + ABSTRACT_AUTOMATIC_METADATA + "." + item + ".name";
-        try {
-          String name = getPropertyRequired(metadata);
-
-          metadata = getPropertyBase() + ABSTRACT_AUTOMATIC_METADATA + "." + item + ".valueEL";
-
-          String valueEL = getPropertyRequired(metadata);
-          try {
-            String value = processExpressionLanguage(valueEL, custodyParameters);  
-            if (value != null) {
-              list.add(new Metadata(name, value));
-            }
-          } catch (Exception e) {
-            log.debug("Error processant el valor de " + valueEL);
-          }
-
-        } catch (Exception e) {
-          final String msg = "Error intentant obtenir el nom de la metadada "
-              + metadata + ": " + e.getMessage();
-          log.error(msg, e);
-          throw new CustodyException(msg, e);
-        }
-      }
+    if (supportsMetadata()) {
+      final String propertyBase = getPropertyBase();
+    
+      List<Metadata> list = recollectAutomaticMetadatas(this, custodyParameters, 
+          propertyBase, ignoreErrors);
       
-      
-      if (list.size() != 0) {
+      if (list != null && list.size() != 0) {
         try {
           updateMetadata(custodyID, list.toArray(new Metadata[list.size()]), custodyParameters);
         } catch (Exception e) {
@@ -992,15 +1006,68 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
           throw new CustodyException(msg, e);
         }
       }
+      
+      return list;
+      
+    } else {
+      return null;
     }
-    
-    
-    
-    
-    
+  }
+
+  /**
+   * 
+   * @param documentCustody
+   * @param custodyParameters
+   * @param propertyBase
+   * @return
+   * @throws CustodyException
+   */
+  public static List<Metadata> recollectAutomaticMetadatas(
+      AbstractPluginProperties pluginProperties, Map<String, Object> custodyParameters,
+      String propertyBase, boolean ignoreErrors) throws CustodyException {
+
+    List<Metadata> list = null;
+    String itemsStr = pluginProperties.getProperty(propertyBase + ABSTRACT_AUTOMATIC_METADATA_ITEMS);
+
+    if (itemsStr != null && itemsStr.trim().length() != 0) {
+
+      String[] items = itemsStr.split(",");
+
+      list = new ArrayList<Metadata>(); 
+
+      for (int i = 0; i < items.length; i++) {
+        String item = items[i].trim();
+        String metadata = propertyBase + ABSTRACT_AUTOMATIC_METADATA + "." + item + ".name";
+        try {
+          String name = pluginProperties.getPropertyRequired(metadata);
+
+          metadata = propertyBase + ABSTRACT_AUTOMATIC_METADATA + "." + item + ".valueEL";
+
+          String valueEL =  pluginProperties.getPropertyRequired(metadata);
+          try {
+            String value = processExpressionLanguage(valueEL, custodyParameters);  
+            if (value != null) {
+              list.add(new Metadata(name, value));
+            }
+          } catch (Exception e) {
+            if (!ignoreErrors) {
+              throw new CustodyException("AutmaticMetadatas::Error processant el valor de "
+                  + valueEL + "(item = " + item + ")");
+            }
+          }
+        } catch (CustodyException ce) {
+          throw ce;
+        } catch (Exception e) {
+          if (!ignoreErrors) {
+            final String msg = "Error intentant obtenir el nom de la metadada "
+              + metadata + " o el seu valor: " + e.getMessage();
+            throw new CustodyException(msg, e);
+          }
+        }
+      }
+    }
     return list;
   }
-  
   
   
   @Override
