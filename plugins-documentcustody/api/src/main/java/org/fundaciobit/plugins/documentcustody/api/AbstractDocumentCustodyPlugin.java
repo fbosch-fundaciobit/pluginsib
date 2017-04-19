@@ -562,16 +562,20 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
       DocumentCustody document,  SignatureCustody signature,
       Metadata[] metadata) throws CustodyException,  NotSupportedCustodyException, MetadataFormatException {
     
-    if (document != null) {
+    if (document == null) {
+      deleteDocument(custodyID);
+    } else {
       saveDocument(custodyID, custodyParameters, document);
     }
     
-    if (signature != null) {
+    if (signature == null) {
+      deleteSignature(custodyID);
+    } else {
       saveSignature(custodyID, custodyParameters, signature);
     }
 
-    if (metadata != null) {
-      addMetadata(custodyID, metadata, custodyParameters);
+    if (metadata != null && metadata.length != 0) {
+      updateMetadata(custodyID, metadata, custodyParameters);
     }
     
   }
@@ -587,6 +591,7 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
 
 
   @Override
+  @Deprecated
   public void saveDocument(String custodyID, Map<String, Object> custodyParameters, DocumentCustody document)
       throws CustodyException, NotSupportedCustodyException {
 
@@ -693,6 +698,7 @@ public abstract class AbstractDocumentCustodyPlugin extends AbstractPluginProper
   
   
   @Override
+  @Deprecated
   public void saveSignature(String custodyID, Map<String, Object> custodyParameters,
       SignatureCustody document) throws CustodyException {
 

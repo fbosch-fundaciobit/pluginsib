@@ -90,6 +90,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @param document
    * @throws Exception
    */
+  @Deprecated
   void saveDocument(String custodyID, Map<String, Object> parameters,
       DocumentCustody document) throws CustodyException, NotSupportedCustodyException;
   
@@ -101,6 +102,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    * @throws CustodyException
    * @throws NotSupportedCustodyException
    */
+  @Deprecated
   void deleteDocument(String custodyID) throws CustodyException, NotSupportedCustodyException;
   
   /**
@@ -142,6 +144,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
   /**
    * 
    */
+  @Deprecated
   void saveSignature(String custodyID, Map<String, Object> parameters,
       SignatureCustody signatureCustody) throws CustodyException, NotSupportedCustodyException;
 
@@ -173,7 +176,7 @@ public interface IDocumentCustodyPlugin extends IPlugin {
    */
   SignatureCustody getSignatureInfoOnly(String custodyID) throws CustodyException;
   
-  
+  @Deprecated
   void deleteSignature(String custodyID) throws CustodyException, NotSupportedCustodyException;
   
   boolean supportsDeleteSignature();

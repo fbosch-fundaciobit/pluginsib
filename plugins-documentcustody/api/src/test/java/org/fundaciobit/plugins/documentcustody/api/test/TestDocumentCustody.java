@@ -57,6 +57,7 @@ public abstract class TestDocumentCustody {
    * @throws NotSupportedCustodyException
    * @throws MetadataFormatException
    */
+  @SuppressWarnings("deprecation")
   protected InfoExecutionTest internalTestGeneralDocumentCustody(
       Properties specificProperties, Map<String, Object> custodyParameters,
       boolean deleteOnFinish, boolean checkMetadata) throws CustodyException,
