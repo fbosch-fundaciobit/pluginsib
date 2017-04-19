@@ -1030,7 +1030,7 @@ public class ActionsImagesF {
                 System.out.println("");
             }
             inStream.close();
-            mensaje("Información", "Documento enviado correctamente");
+            mensaje("Información", "Documento enviado correctamente 2");
         }
         catch (IOException ioEx) {
             mensaje("Información", "Fallo en el envío");

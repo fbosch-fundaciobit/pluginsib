@@ -99,6 +99,10 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
     return "true".equals(getProperty(PROPERTY_BASE + "forcesign"));
   }
   
+  public boolean closeWindowWhenFinish() {
+    return "true".equals(getProperty(PROPERTY_BASE + "closewindowwhenfinish"));
+  }
+  
   public String getKeyStore() throws Exception {
     return getPropertyRequired(PROPERTY_BASE + "sign.keystore");
   }
@@ -615,8 +619,9 @@ public class IECISAScanWebPlugin extends AbstractScanWebPlugin {
     out.println("    </security>");
     out.println("    <resources>");
     out.println("        <j2se version=\"1.6+\" java-vm-args=\"-Xmx1024m\" />");
-
     out.println("        <jar href=\"" + appletUrl + "\" main=\"true\" />");
+    out.println("        <property name=\"isJNLP\" value=\"true\"/>");
+    out.println("        <property name=\"closeWhenUpload\" value=\"" + closeWindowWhenFinish() + "\"/>");
     out.println("    </resources>");
     out.println("    <applet-desc");
     out.println("      documentBase=\"" + appletUrlBase + "\"");

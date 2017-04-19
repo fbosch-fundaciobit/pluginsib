@@ -1097,6 +1097,16 @@ public class ActionsImagesGeneric {
                 System.out.println("");
             }
             inStream.close();
+            
+            
+            if ("true".equals(System.getProperty("isJNLP"))
+                && ("true".equals(System.getProperty("closeWhenUpload"))) ) {
+              if (!file.delete()) {
+                file.deleteOnExit();
+              }
+              System.exit(0);
+            } 
+            
             mensaje("Información", "Documento enviado correctamente");
           
         }
