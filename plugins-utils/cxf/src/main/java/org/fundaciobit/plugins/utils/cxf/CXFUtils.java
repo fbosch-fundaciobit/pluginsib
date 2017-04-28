@@ -69,14 +69,11 @@ public class CXFUtils {
 
       Document doc = db.parse(is);
 
-      String message = doc.getDocumentElement().getTextContent();
-      System.out.println(message);
+      doc.getDocumentElement().getTextContent();
+      
       return true;
     } catch (Throwable e1) {
-      // handle ParserConfigurationException
-      // XYZ ZZZ log.debug
-      // e1.printStackTrace();
-
+      // handle ParserConfigurationException   
       return false;
     }
 

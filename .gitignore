@@ -36,3 +36,4 @@ target
 /plugins-certificate/afirmacxf/src/test/java/org/fundaciobit/plugins/certificate/afirmacxf/test/NoCommitar.java
 /plugins-documentcustody/filesystem/testReposWithFolder
 /plugins-documentcustody/filesystem/testAutomaticMetadatas
+/plugins-validatesignature/afirmacxf/run.bat

@@ -1,0 +1,87 @@
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="Signature-BEJDCAEHDHDJD1"><ds:SignedInfo Id="SignedInfo-BEJDCAEHDHDJD1"><ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><ds:Reference Id="SignedProperties-Reference-BEJDCAEHDHDJD1" Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties-BEJDCAEHDHDJD1"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>/b0gGQV9kz/+iCzMxJvETEmj7mw=</ds:DigestValue></ds:Reference><ds:Reference Id="SignedDataObject-Reference-BEJDCAEHDHDJD1" URI="#SignedDataObject-BEJDCAEHDHDJD1"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>v52O6ZOAVw5Q2fq9YZsX4+Fal6U=</ds:DigestValue></ds:Reference><ds:Reference URI="#keyInfo-BEJDCAEHDHDJD1"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>BqCh8EbelQzDMZXBxgU+1KW/Zls=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="SignatureValue-BEJDCAEHDHDJD1">I10odp9lRWqp0Xb6mskgVitjJ8AvDvop1w9VQE3uNaYTkM0LDxOpuuTlffgIENAL
+yuClXT88sQ2jnzf9z1BWTrHzxHYbtetEHRgskq/CQccLd0q79mwpzx6rNKJsvOMl
+V9iuP8V0DMLdO5cJdDTBiv5U+8AFFjX0hwS+xjTXVYmh2ZmOjvXZiOXdi3rbov3P
+td6IvNVq+pRDyjPv41KhSbvQZrW5gixARB1sLujAPCBEmmPD4IjUMkvgksv7vRJn
+z/ecq18G1fKBzX1kub/wb6qrZvUnuaN+POt4ace3jJ7YBA59AaqVWGpZziWDIo5k
+2NOsKS9m8a7EBQl23sGWGQ==</ds:SignatureValue><ds:KeyInfo Id="keyInfo-BEJDCAEHDHDJD1"><ds:KeyValue><ds:RSAKeyValue><ds:Modulus>1ojWw6Roolt3uZWxQK+AQjm6E3jzU/c9IuSkRHy9/RVT/OGwLH06a6zrYWPu1z8P
+bCjvtbvgICMlXCXjro2UE1wXeDLlm/UO0J3kgK7sajiWV74iNnnkUexDwaaUmjBg
+5cPIJ54c63Gd3bVGGHkEBr4SeOgadve7fd0xb9vutrFTdFPgYDM0LjfGqnAQL6xM
+Vo6OMKq2BL9H6GaiDMoQGwGmY3vie8sCvFWrY4Suftbh4tU0tB3eYICIS9y+CWHO
+n7RdRq3NUuJAq7xLY/WtOiyVWQKj6Shi1OJ3jKh6bL0zEU5v3baWQQyhT5K4s2xV
+S9/DAHwLtYV1r5xHIuFrzw==</ds:Modulus><ds:Exponent>AQAB</ds:Exponent></ds:RSAKeyValue></ds:KeyValue><ds:X509Data><ds:X509Certificate>MIIEzjCCA7agAwIBAgIBBDANBgkqhkiG9w0BAQUFADCBuTELMAkGA1UEBhMCRVMx
+EjAQBgNVBAgTCUFuZGFsdWNpYTEQMA4GA1UEBxMHU2V2aWxsYTEgMB4GA1UEChMX
+Umljb2ggU3BhaW4gSVQgU2VydmljZXMxJzAlBgNVBAsTHkRlcGFydGFtZW50byBG
+aXJtYSBFbGVjdHJvbmljYTEUMBIGA1UEAxMLQWZpcm1hU3ViQ0ExIzAhBgkqhkiG
+9w0BCQEWFGFmaXJtYXN1YmNhQHJpY29oLmVzMB4XDTE1MTEwOTEzMzUwMFoXDTIw
+MTEwOTEzMzUwMFowgeUxCzAJBgNVBAYTAkVTMRIwEAYDVQQIEwlBbmRhbHVjaWEx
+EDAOBgNVBAcTB1NldmlsbGExIDAeBgNVBAoTF1JpY29oIFNwYWluIElUIFNlcnZp
+Y2VzMScwJQYDVQQLEx5EZXBhcnRhbWVudG8gRmlybWEgRWxlY3Ryb25pY2ExFTAT
+BgNVBAMTDFNlcnZlclNpZ25lcjEkMCIGCSqGSIb3DQEJARYVc2VydmVyc2lnbmVy
+QHJpY29oLmVzMSgwJgYDVQQMEx9TZWxsbyBkZWwgRGVwYXJ0YW1lbnRvIGRlIEZp
+cm1hMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1ojWw6Roolt3uZWx
+QK+AQjm6E3jzU/c9IuSkRHy9/RVT/OGwLH06a6zrYWPu1z8PbCjvtbvgICMlXCXj
+ro2UE1wXeDLlm/UO0J3kgK7sajiWV74iNnnkUexDwaaUmjBg5cPIJ54c63Gd3bVG
+GHkEBr4SeOgadve7fd0xb9vutrFTdFPgYDM0LjfGqnAQL6xMVo6OMKq2BL9H6Gai
+DMoQGwGmY3vie8sCvFWrY4Suftbh4tU0tB3eYICIS9y+CWHOn7RdRq3NUuJAq7xL
+Y/WtOiyVWQKj6Shi1OJ3jKh6bL0zEU5v3baWQQyhT5K4s2xVS9/DAHwLtYV1r5xH
+IuFrzwIDAQABo4GyMIGvMAwGA1UdEwEB/wQCMAAwHQYDVR0OBBYEFIjJW0PO5kpe
+v3AnpedoTPasp+4WMAsGA1UdDwQEAwIBxjARBglghkgBhvhCAQEEBAMCAAcwQAYJ
+YIZIAYb4QgEIBDMWMWh0dHA6Ly9yaWNvaC5lcy9hZmlybWFjYS9hZmlybWFzdWJj
+YS9zZXJ2ZXJzaWduZXIwHgYJYIZIAYb4QgENBBEWD3hjYSBjZXJ0aWZpY2F0ZTAN
+BgkqhkiG9w0BAQUFAAOCAQEABWnIMTz9T8u5Huu4xlM0XQ/K6qMD0Opth1khMK9i
+utnPBWqMr7qWG5FT5IPmpj0KwF1KBaBXu6ufBEt8gND39NfRc235APJ5joVjJ78s
+3au45r094oesGCmVsLfsNRPtYozyc2MWVbkuEtul/9v27e5ZcnJiQjRvtMJ0ZDCh
+cAUs8DWcMCt5l4HiBa8NNxRnfwrnoiv23g6OwweaCgFYeuEOWDykoyEPMmCcXl7u
+DkIO03DVnMdaEjC42C6YVZbnZWpfXt2w6apk4zrN96S8Yf95LqZCpLrocY4UF376
+YbRxIxjO7M4A91PIFKd6YgscpYNJJS8n1WPAHqKbVT8o5g==</ds:X509Certificate><ds:X509IssuerSerial><ds:X509IssuerName>EMAIL=afirmasubca@ricoh.es,CN=AfirmaSubCA,OU=Departamento Firma Electronica,O=Ricoh Spain IT Services,L=Sevilla,ST=Andalucia,C=ES</ds:X509IssuerName><ds:X509SerialNumber>4</ds:X509SerialNumber></ds:X509IssuerSerial></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature-BEJDCAEHDHDJD1"><xades:SignedProperties Id="SignedProperties-BEJDCAEHDHDJD1"><xades:SignedSignatureProperties><xades:SigningTime>2017-04-26T13:05:37+02:00</xades:SigningTime><xades:SigningCertificate><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>NjQOLgqFt8rfePwxjHj1yYR9gfw=</ds:DigestValue></xades:CertDigest><xades:IssuerSerial><ds:X509IssuerName>EMAIL=afirmasubca@ricoh.es,CN=AfirmaSubCA,OU=Departamento Firma Electronica,O=Ricoh Spain IT Services,L=Sevilla,ST=Andalucia,C=ES</ds:X509IssuerName><ds:X509SerialNumber>4</ds:X509SerialNumber></xades:IssuerSerial></xades:Cert></xades:SigningCertificate></xades:SignedSignatureProperties></xades:SignedProperties><UnsignedProperties xmlns="http://uri.etsi.org/01903/v1.3.2#"><UnsignedSignatureProperties><SignatureTimeStamp Id="Signature-BEJDCAEHDHDJD1-SignatureTimeStamp"><CanonicalizationMethod xmlns="http://www.w3.org/2000/09/xmldsig#" Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/><EncapsulatedTimeStamp Encoding="http://uri.etsi.org/01903/v1.2.2#DER">MIIHyAYJKoZIhvcNAQcCoIIHuTCCB7UCAQMxCzAJBgUrDgMCGgUAMGsGCyqGSIb3
+DQEJEAEEoFwEWjBYAgEBBgkrBoENolwKAgEwITAJBgUrDgMCGgUABBRWZQJOOUDU
+LKhNdmIWtMlqjCw/lQIGAVup8B2KGA8yMDE3MDQyNjExMDUzN1owCQIBCoABAYEB
+AQIBZKCCBLowggS2MIIDnqADAgECAgEDMA0GCSqGSIb3DQEBBQUAMIG5MQswCQYD
+VQQGEwJFUzESMBAGA1UECBMJQW5kYWx1Y2lhMRAwDgYDVQQHEwdTZXZpbGxhMSAw
+HgYDVQQKExdSaWNvaCBTcGFpbiBJVCBTZXJ2aWNlczEnMCUGA1UECxMeRGVwYXJ0
+YW1lbnRvIEZpcm1hIEVsZWN0cm9uaWNhMRQwEgYDVQQDEwtBZmlybWFTdWJDQTEj
+MCEGCSqGSIb3DQEJARYUYWZpcm1hc3ViY2FAcmljb2guZXMwHhcNMTUxMTA5MTMy
+NTAwWhcNMjAxMTA5MTMyNTAwWjCBtTELMAkGA1UEBhMCRVMxEjAQBgNVBAgTCUFu
+ZGFsdWNpYTEQMA4GA1UEBxMHU2V2aWxsYTEgMB4GA1UEChMXUmljb2ggU3BhaW4g
+SVQgU2VydmljZXMxJzAlBgNVBAsTHkRlcGFydGFtZW50byBGaXJtYSBFbGVjdHJv
+bmljYTESMBAGA1UEAxMJVHNhU2VydmVyMSEwHwYJKoZIhvcNAQkBFhJ0c2FzZXJ2
+ZXJAcmljb2guZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDQIqVo
+tNTOqJ8O10lCFgs/VOPqR91ba7xXlWWe4H0qOqcKzmUXp9dElwI1IXVBa06bfhpW
+Ec2I0YyOLh2x8MymBm5/DEsZ/DSTci4QWTkNF/ujOYtopKOm2WHEltHekgsdjKsS
+LRB8j0lzGAd5Ivq45KJgSGFF4Wl2zNRQuhEWkiM5JUbMEeGQs2rQfNAi3xLqs+Tq
+t4eAgHkVwcFN4GSjlHxPeAW0IezbbeFqqTWsTIDHeErXuW2R4YeAWHZOmowqw0FE
+P6E/o1qxi61uRc8cPoJz2kI7sINDCZLdY24FV2HQLAXLL0GWd8VrRwxpkx6s/z00
+CJ13hfth+ULMSfuxAgMBAAGjgcowgccwDAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQU
+Ai8MtexaHM+WogkJV0FEoekUJR8wCwYDVR0PBAQDAgHGMBYGA1UdJQEB/wQMMAoG
+CCsGAQUFBwMIMBEGCWCGSAGG+EIBAQQEAwIABzBABglghkgBhvhCAQgEMxYxaHR0
+cDovL3JpY29oLmVzL2FmaXJtYWNhL2FmaXJtYXN1YmNhL3RpbWVzdGFtcGluZzAe
+BglghkgBhvhCAQ0EERYPeGNhIGNlcnRpZmljYXRlMA0GCSqGSIb3DQEBBQUAA4IB
+AQDCXaddXJ8HTknyAICN0Wk4/+/C3TJF609o++D1c/m8F5MA5r8QQoa1h0Di3xMZ
+vgAIxPuK9jdrEJgwNhDe7YsM1ZbaLrc2LDyajOOwxlFz1LHAZ7yLOwFSxz7QPQzF
+a9+CRLOKWsqN1G5dE/8rn98sB/wvwjf8+ijktEhgCZNLtxV45Lie5n+zgjjgQmJL
+LFTFXee24wf1zjC2saqXALHw5MS+L79S6brAFlqapC1uKhMpR8uwlMVpoD3IuWZa
+Hxp60l6ajz2Q/3YFgru/VwcyQE3n1m0xJTdDe3RGf1Ci6qNQ7Mnm5u3c4Seq50Zo
++oLtnRG0jQ8AGFMEvfgLahwNMYICdjCCAnICAQEwgb8wgbkxCzAJBgNVBAYTAkVT
+MRIwEAYDVQQIEwlBbmRhbHVjaWExEDAOBgNVBAcTB1NldmlsbGExIDAeBgNVBAoT
+F1JpY29oIFNwYWluIElUIFNlcnZpY2VzMScwJQYDVQQLEx5EZXBhcnRhbWVudG8g
+RmlybWEgRWxlY3Ryb25pY2ExFDASBgNVBAMTC0FmaXJtYVN1YkNBMSMwIQYJKoZI
+hvcNAQkBFhRhZmlybWFzdWJjYUByaWNvaC5lcwIBAzAJBgUrDgMCGgUAoIGMMBoG
+CSqGSIb3DQEJAzENBgsqhkiG9w0BCRABBDAcBgkqhkiG9w0BCQUxDxcNMTcwNDI2
+MTEwNTM3WjAjBgkqhkiG9w0BCQQxFgQUgDeSIbY3kin3h2m2jeivQMYT9YEwKwYL
+KoZIhvcNAQkQAgwxHDAaMBgwFgQUdVYqPHPCRhzWa+Ad6zw4JmA3IzgwDQYJKoZI
+hvcNAQEBBQAEggEAuE7EB686sz8yoNzSOkv8dJzH6YOvZ2uPeHm1BnIDot3eDoZ0
+YxjPu1Axtosi5ncenZkJ8RORJ+NOI8sJwOCZtzdcUWpXwowBAp3NzB/9pv2Wax/B
+Ddmn2qTQCFOF5SURagry1ScUu3+ml7mgA7Q7ZoaeXWPlas7zAMAVN5PCSt5R7CvX
+RU4Z7TDU5PMzIfykbqVzhNuqhmRUABK/GmhNw9fmcx5M/ipsT0xACQTXH7ISNkI0
+Z1exKp/9E+dEDOP8VdCKbB5xbVnH04gadsjVoSiznCjMifqQM4PrDo4XgtHhg7ET
+ouvofFMy4d1Li+DxXAXuH7GB8lmD63398Ezrgw==</EncapsulatedTimeStamp></SignatureTimeStamp></UnsignedSignatureProperties></UnsignedProperties></xades:QualifyingProperties></ds:Object><ds:Object Id="SignedDataObject-BEJDCAEHDHDJD1">&lt;?xml version="1.0"?&gt;
+&lt;catalog&gt;
+  &lt;book id="bk101"&gt;
+    &lt;author&gt;Gambardella, Matthew&lt;/author&gt;
+    &lt;title&gt;XML Developer's Guide&lt;/title&gt;
+    &lt;genre&gt;Computer&lt;/genre&gt;
+    &lt;price&gt;44.95&lt;/price&gt;
+    &lt;publish_date&gt;2000-10-01&lt;/publish_date&gt;
+    &lt;description&gt;An in-depth look at creating applications with XML.&lt;/description&gt;
+  &lt;/book&gt;
+&lt;/catalog&gt;</ds:Object></ds:Signature>

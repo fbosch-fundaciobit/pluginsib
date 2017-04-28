@@ -1,9 +1,7 @@
 package org.fundaciobit.plugins.validatesignature.api;
 
 import java.text.SimpleDateFormat;
-
 import java.util.List;
-
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -15,7 +13,7 @@ import org.fundaciobit.plugins.utils.AbstractPluginProperties;
  *
  */
 public abstract class AbstractValidateSignaturePlugin extends AbstractPluginProperties
-    implements IValidateSignaturePlugin {
+    implements IValidateSignaturePlugin, ValidateSignatureConstants {
 
   protected Logger log = Logger.getLogger(this.getClass());
 
@@ -42,14 +40,58 @@ public abstract class AbstractValidateSignaturePlugin extends AbstractPluginProp
   }
 
   @Override
-  public boolean filter() {
-    // XYZ ZZZ
-    return true;
+  public boolean filter(ValidateSignatureRequest vsr) {
 
+    SignatureRequestedInformation required = vsr.getSignatureRequestedInformation();
+    SignatureRequestedInformation supported = getSupportedSignatureRequestedInformation();
+
+    if (!checkRequiredSupported(required.getReturnSignatureTypeFormatProfile(),
+        supported.getReturnSignatureTypeFormatProfile())) {
+      return false;
+    }
+    if (!checkRequiredSupported(required.getValidateCertificateRevocation(),
+        supported.getValidateCertificateRevocation())) {
+      return false;
+    }
+    if (!checkRequiredSupported(required.getReturnCertificateInfo(),
+        supported.getReturnCertificateInfo())) {
+      return false;
+    }
+    if (!checkRequiredSupported(required.getReturnValidationChecks(),
+        supported.getReturnValidationChecks())) {
+      return false;
+    }
+    if (!checkRequiredSupported(required.getReturnCertificates(),
+        supported.getReturnCertificates())) {
+      return false;
+    }
+    if (!checkRequiredSupported(required.getReturnTimeStampInfo(),
+        supported.getReturnTimeStampInfo())) {
+      return false;
+    }
+
+    return true;
   }
 
-  // TODO XYZ ZZZ MOURE A AbstractValidateSignaturePLugin
-  public static void printSignatureInfo(SignatureInfo vs) {
+  protected boolean checkRequiredSupported(Boolean required, Boolean supported) {
+    if (required == null || required == false) {
+      return true;
+    } else {
+      // required == true
+      if (supported == null) {
+        // Suposarem que si que es retornarà
+        return true;
+      } else {
+        return supported.booleanValue();
+      }
+    }
+  }
+
+  /**
+   * 
+   * @param vs
+   */
+  public static void printSignatureInfo(ValidateSignatureResponse vs) {
     System.out.println(" **************************************** ");
     System.out.println();
     System.out.println();
@@ -65,13 +107,15 @@ public abstract class AbstractValidateSignaturePlugin extends AbstractPluginProp
       System.out.println(" statusMsg = " + status.getErrorMsg());
     }
 
-    System.out.println(" vs.getFormat() = " + vs.getFormat());
+    System.out.println(" vs.getSignType() = " + vs.getSignType());
+    System.out.println(" vs.getSignFormat() = " + vs.getSignFormat());
+    System.out.println(" vs.getSignProfile() = " + vs.getSignProfile());
 
-    DetailInfo[] diList = vs.getDetailInfo();
+    SignatureDetailInfo[] diList = vs.getSignatureDetailInfo();
     if (diList != null) {
       for (int i = 0; i < diList.length; i++) {
 
-        DetailInfo di = diList[i];
+        SignatureDetailInfo di = diList[i];
 
         System.out.println(" ================ SIGN[" + i + "] ===============");
 
@@ -164,7 +208,7 @@ public abstract class AbstractValidateSignaturePlugin extends AbstractPluginProp
     }
   }
 
-  public static String printChecks(List<Check> details, String title) {
+  public static String printChecks(List<SignatureCheck> details, String title) {
 
     if (details == null || details.size() == 0) {
       return "";
@@ -172,7 +216,7 @@ public abstract class AbstractValidateSignaturePlugin extends AbstractPluginProp
 
     StringBuffer str = new StringBuffer(title + "\n");
     int d = 0;
-    for (Check detail : details) {
+    for (SignatureCheck detail : details) {
 
       str.append(d + ".- Check " + detail.getName() + "");
       if (detail.getType() != null) {

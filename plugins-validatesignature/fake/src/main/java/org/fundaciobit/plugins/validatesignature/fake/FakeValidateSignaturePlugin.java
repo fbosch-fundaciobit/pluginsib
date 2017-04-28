@@ -4,8 +4,9 @@ import java.util.Properties;
 
 import org.fundaciobit.plugins.validatesignature.api.AbstractValidateSignaturePlugin;
 import org.fundaciobit.plugins.validatesignature.api.IValidateSignaturePlugin;
-import org.fundaciobit.plugins.validatesignature.api.SignatureInfo;
+import org.fundaciobit.plugins.validatesignature.api.SignatureRequestedInformation;
 import org.fundaciobit.plugins.validatesignature.api.ValidateSignatureRequest;
+import org.fundaciobit.plugins.validatesignature.api.ValidateSignatureResponse;
 import org.fundaciobit.plugins.validatesignature.api.ValidationStatus;
 
 /**
@@ -38,13 +39,25 @@ public class FakeValidateSignaturePlugin extends AbstractValidateSignaturePlugin
     super(propertyKeyBase);
   }
 
+
+
   @Override
-  public SignatureInfo validateSignature(ValidateSignatureRequest validationRequest)
+  public SignatureRequestedInformation getSupportedSignatureRequestedInformation() {
+    SignatureRequestedInformation sri = new SignatureRequestedInformation();
+    return sri;
+  }
+
+  @Override
+  public SignatureRequestedInformation getSupportedSignatureRequestedInformationBySignatureType(
+      String signType) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ValidateSignatureResponse validateSignature(ValidateSignatureRequest validationRequest)
       throws Exception {
-
-    SignatureInfo si = new SignatureInfo();
-
-    si.setFormat(UNKNOWN);
+    ValidateSignatureResponse si = new ValidateSignatureResponse();
 
     ValidationStatus validationStatus = new ValidationStatus();
 

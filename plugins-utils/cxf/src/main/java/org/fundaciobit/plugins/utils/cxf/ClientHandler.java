@@ -13,7 +13,6 @@ import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 public abstract class ClientHandler {
 
   public final void addSecureHeader(Object api) {
-    // XYZ ZZZ Moure a Part COMU
     // @firma no suporta. Veure https://github.com/GovernIB/pluginsib/issues/3
     Client client = ClientProxy.getClient(api);
     {

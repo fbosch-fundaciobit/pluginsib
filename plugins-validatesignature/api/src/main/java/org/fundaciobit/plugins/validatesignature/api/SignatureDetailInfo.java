@@ -8,7 +8,7 @@ import java.util.List;
  * @author anadal
  *
  */
-public class DetailInfo {
+public class SignatureDetailInfo {
 
   public static final String SIGN_ALGORITHM_SHA1 = "SHA-1";
   public static final String SIGN_ALGORITHM_SHA256 = "SHA-256";
@@ -24,11 +24,11 @@ public class DetailInfo {
   /**
    * 
    */
-  protected List<Check> validChecks;
+  protected List<SignatureCheck> validChecks;
 
-  protected List<Check> invalidChecks;
+  protected List<SignatureCheck> invalidChecks;
 
-  protected List<Check> indeterminateChecks;
+  protected List<SignatureCheck> indeterminateChecks;
 
   /**
    * En firmes EPES retorna l'identificaor de la política de firma
@@ -77,27 +77,27 @@ public class DetailInfo {
     this.policyIdentifier = policyIdentifier;
   }
 
-  public List<Check> getValidChecks() {
+  public List<SignatureCheck> getValidChecks() {
     return validChecks;
   }
 
-  public void setValidChecks(List<Check> validChecks) {
+  public void setValidChecks(List<SignatureCheck> validChecks) {
     this.validChecks = validChecks;
   }
 
-  public List<Check> getInvalidChecks() {
+  public List<SignatureCheck> getInvalidChecks() {
     return invalidChecks;
   }
 
-  public void setInvalidChecks(List<Check> invalidChecks) {
+  public void setInvalidChecks(List<SignatureCheck> invalidChecks) {
     this.invalidChecks = invalidChecks;
   }
 
-  public List<Check> getIndeterminateChecks() {
+  public List<SignatureCheck> getIndeterminateChecks() {
     return indeterminateChecks;
   }
 
-  public void setIndeterminateChecks(List<Check> indeterminateChecks) {
+  public void setIndeterminateChecks(List<SignatureCheck> indeterminateChecks) {
     this.indeterminateChecks = indeterminateChecks;
   }
 

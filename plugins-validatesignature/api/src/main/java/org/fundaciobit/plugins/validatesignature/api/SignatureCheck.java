@@ -5,7 +5,7 @@ package org.fundaciobit.plugins.validatesignature.api;
  * @author anadal
  *
  */
-public class Check {
+public class SignatureCheck {
 
   protected String name;
 
@@ -14,7 +14,7 @@ public class Check {
   /**
    * 
    */
-  public Check() {
+  public SignatureCheck() {
     super();
   }
 
@@ -22,7 +22,7 @@ public class Check {
    * @param name
    * @param type
    */
-  public Check(String name, String type) {
+  public SignatureCheck(String name, String type) {
     super();
     this.name = name;
     this.type = type;
