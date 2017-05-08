@@ -392,7 +392,7 @@ public class IntegraValidateSignaturePlugin extends AbstractValidateSignaturePlu
     }
 
     if (isImplicit) {
-      // "CAdES attached/implicit signature"; // XYZ ZZZ
+      // "CAdES attached/implicit signature";
       return ValidateSignatureResponse.SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED;
     } else {
       // "CAdES detached/explicit signature"

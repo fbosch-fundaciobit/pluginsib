@@ -1,5 +1,8 @@
 package org.fundaciobit.plugins.validatesignature.api.test;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import junit.framework.Assert;
 
 import org.fundaciobit.plugins.utils.FileUtils;
@@ -17,8 +20,13 @@ import org.fundaciobit.plugins.validatesignature.api.ValidateSignatureResponse;
 public abstract class AbstractTestValidateSignature implements ValidateSignatureConstants {
 
   public abstract IValidateSignaturePlugin instantiatePlugin() throws Exception;
+  
+  public static final Map<String, String[]> TESTS_VALIDA_FIRMA;
+  
+  static {
+  
 
-  public static final String[][] FIRMA_DOCUMENT = new String[][] {
+    String[][] FIRMA_DOCUMENT = new String[][] {
       // MOLT IMPORTANT !!!!! NOUS ELEMENTS S'HAN D'AFEGIR AL FINAL !!!!!!
 
       { "sensefirmar.pdf", null, null, null, null },
@@ -68,10 +76,7 @@ public abstract class AbstractTestValidateSignature implements ValidateSignature
       // OK
       { "afirma/sample_xades_attached_firmat.xml", null, SIGNTYPE_XAdES, SIGNPROFILE_BES,
           SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED },
-          
- 
-      
-
+        
   /* ERROR ATTACHED i ES DETACHED pero crec que es la generació de la firma */
   /*
    * { "afirma/foto.jpg_cades_attached.csig", null, SIGNTYPE_CAdES,
@@ -81,8 +86,6 @@ public abstract class AbstractTestValidateSignature implements ValidateSignature
    * SIGNPROFILE_BES, SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED },
    */
 
- 
-    
    { "afirma/sample_xades_detached_firmat.xml", "afirma/sample.xml",
    SIGNTYPE_XAdES, SIGNPROFILE_BES,
    SIGNFORMAT_EXPLICIT_DETACHED },
@@ -91,26 +94,68 @@ public abstract class AbstractTestValidateSignature implements ValidateSignature
       
 
   };
-
-  public String[][] getTests() {
-    return FIRMA_DOCUMENT;
+   
+    TESTS_VALIDA_FIRMA = new TreeMap<String, String[]>();
+    
+    
+    for (int i = 0; i < FIRMA_DOCUMENT.length; i++) {
+      TESTS_VALIDA_FIRMA.put(FIRMA_DOCUMENT[i][0], FIRMA_DOCUMENT[i]);
+    }
+    
+    
   }
 
-  public void internalCheckTestBasicResults(SignatureValidationTestResult result, int i)
+  public Map<String, String[]> getTests() {
+    return TESTS_VALIDA_FIRMA;
+  }
+
+  public String internalCheckTestBasicResults(SignatureValidationTestResult result, String key,
+      boolean throwException)
       throws Exception {
 
-    Assert.assertNotNull("SignatureValidationTestResult es null", result);
+    if (throwException) {
+      Assert.assertNotNull("SignatureValidationTestResult es null", result);
+  
+      ValidateSignatureResponse response = result.getValidateSignatureResponse();
+  
+      Assert.assertEquals("Tipus de firma diferent en test " + key, result.getExpectedSignType(),
+          response.getSignType());
+  
+      Assert.assertEquals("Format de firma diferent en test " + key,
+          result.getExpectedSignFormat(), response.getSignFormat());
+  
+      Assert.assertEquals("Perfil de firma diferent en test " + key,
+          result.getExpectedSignProfile(), response.getSignProfile());
+    } else {
+      
+      if (result == null) {
+        return "SignatureValidationTestResult es null";
+      }
+      
+      ValidateSignatureResponse response = result.getValidateSignatureResponse();
+  
+      if (!compareStr(result.getExpectedSignType(),
+          response.getSignType())) {
+        return "Tipus de firma diferent en test " + key + "(Expected:" +result.getExpectedSignType() + " | " +
+            response.getSignType() + ")";
+      }
 
-    ValidateSignatureResponse response = result.getValidateSignatureResponse();
+  
+      if (!compareStr(result.getExpectedSignFormat(), response.getSignFormat())) {
+        return "Format de firma diferent en test " + key + "(Expected: " 
+          + result.getExpectedSignFormat() + " | "
+            + response.getSignFormat() ;
+      }
 
-    Assert.assertEquals("Tipus de firma diferent en test " + i, result.getExpectedSignType(),
-        response.getSignType());
-
-    Assert.assertEquals("Format de firma diferent en test " + i,
-        result.getExpectedSignFormat(), response.getSignFormat());
-
-    Assert.assertEquals("Perfil de firma diferent en test " + i,
-        result.getExpectedSignProfile(), response.getSignProfile());
+  
+      if (!compareStr(result.getExpectedSignProfile(), response.getSignProfile())) {
+        return "Perfil de firma diferent en test " + key + "(Expected:" + result.getExpectedSignProfile() + " | " + response.getSignProfile();
+      }
+      
+    }
+    
+    
+    return null;
 
   };
 
@@ -118,41 +163,44 @@ public abstract class AbstractTestValidateSignature implements ValidateSignature
     return (str1 == null ? str2 == null : str1.equals(str2));
   }
 
-  public SignatureValidationTestResult[] internalTestBasic() throws Exception {
+  public Map<String,SignatureValidationTestResult> internalTestBasic(boolean checkResults) throws Exception {
 
     IValidateSignaturePlugin plugin = instantiatePlugin();
 
-    String[][] tests = getTests();
+    Map<String, String[]> tests = getTests();
+    
+   
 
-    SignatureValidationTestResult[] responses = new SignatureValidationTestResult[tests.length];
+    Map<String,SignatureValidationTestResult> responses = new TreeMap<String, SignatureValidationTestResult>();
 
-    for (int i = 0; i < tests.length; i++) {
+    
+    for (String key : tests.keySet()) {
+      
+      String[] params = tests.get(key);
 
       // long start = System.currentTimeMillis();
-      System.out.println(" ==== TEST[" + i + "] [F=" + tests[i][0] + "][D=" + tests[i][1]
+      System.out.println(" ==== TEST[" + key + "] [F=" + params[0] + "][D=" + params[1]
           + "]");
 
-      ClassLoader classLoader = getClass().getClassLoader();
+      
 
-      byte[] signature = FileUtils.toByteArray(classLoader.getResource(
-          "signatures/" + tests[i][0]).openStream());
+      byte[] signature = getResource("signatures/" + params[0]);
 
       // FileUtils.readResource(this.getClass(),"signatures/" +
       // tests[i][0]));
       byte[] document;
-      if (tests[i][1] == null) {
+      if (params[1] == null) {
         document = null;
       } else {
-        document = FileUtils.toByteArray(classLoader.getResource("signatures/" + tests[i][1])
-            .openStream());
+        document = getResource("signatures/" + params[1]);
         // FileUtils.toByteArray(FileUtils.readResource(this.getClass(),
         // "signatures/" + tests[i][1]));
       }
 
-      SignatureValidationTestResult result = new SignatureValidationTestResult(tests[i][0],
-          tests[i][1], signature, document, tests[i][2], tests[i][3], tests[i][4]);
+      SignatureValidationTestResult result = new SignatureValidationTestResult(params[0],
+          params[1], signature, document, params[2], params[3], params[4]);
 
-      responses[i] = result;
+      responses.put(key, result);
 
       try {
 
@@ -186,21 +234,22 @@ public abstract class AbstractTestValidateSignature implements ValidateSignature
         result.setException(th);
       }
 
-      internalCheckTestBasicResults(result, i);
-
-      // AbstractValidateSignaturePlugin.printSignatureInfo(vs);
-
-      // Elapsed Time = 4022 ms
-      // Elapsed Time = 1501 ms
-      // Elapsed Time = 1365 ms
-      // Elapsed Time = 1351 ms
-      // System.err.println( " Elapsed Time = " + (System.currentTimeMillis()-
-      // start) +" ms");
+      if (checkResults) {
+        internalCheckTestBasicResults(result, key, true);
+      }
 
     }
 
     return responses;
 
+  }
+  
+  
+  public byte[] getResource(String path) throws Exception {
+    ClassLoader classLoader = getClass().getClassLoader();
+    
+    byte[] data = FileUtils.toByteArray(classLoader.getResourceAsStream(path));
+    return data;
   }
 
 }
