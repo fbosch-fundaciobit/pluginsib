@@ -1,14 +1,16 @@
 
 # --------------------------------------------------
-# Específiques  ArxiuDigitalCAIBDocumentCustodyPlugin 
+# Específiques org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.ArxiuDigitalCAIBDocumentCustodyPlugin 
 
-# Requerit. Exemple Expedient_${.now?string[\"yyyyMMddHHmmss\"]}
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.nom_expedient_EL=Registre_<#if registro.origen??>S<#else>E</#if>_${registro.numeroRegistro?c}
+# Requerit. Nom d el'expedient. Important: Ha de ser únic
+# Exemple 1 Expedient_${.now?string[\"yyyyMMddHHmmss\"]}
+# Exemple 2 Registre_<#if registro.origen??>S<#else>E</#if>_${registro.libro.codigo}_${.now?string[\"yyyy\"]}_${registro.numeroRegistro?c}  
+es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.nom_expedient_EL=Registre_<#if registro.origen??>S<#else>E</#if>_${.now?string[\"yyyy\"]}_${registro.numeroRegistro?c}
 
 # Opcional. Nom de la carpeta dins de l'expedient.
 # Si carpeta no està definida llavors custodyID = {uuid_expedient}
 # Si carpeta està definida llavors custodyID =  {uuid_expedient}#{uuid_carpeta}.
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.nom_carpeta_EL=Anexo_${anexo.id}
+es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.nom_carpeta_EL=Anexo_${anexo.id?c}
 
 # Opcional. Per defecte sempre es crea Draft
 # es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.createDraft=false
@@ -55,7 +57,7 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.organs_EL=A04013511
 # ADMINISTRACION=1 //  CIUDADANO=0
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.origen_document_EL=${anexo.origenCiudadanoAdmin}
 
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.data_creacio_EL =<#setting time_zone='UTC'>${.now?string[\"yyyy-MM-dd'T'HH:mm:ss.sss'Z'\"]}
+es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.data_creacio_EL=<#setting time_zone='UTC'>${.now?string[\"yyyy-MM-dd'T'HH:mm:ss.sss'Z'\"]}
 
 
 # =================  METADADES OBLIGATORIES EXPEDIENT ========================
@@ -86,7 +88,7 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.hash.algorithm=MD5
 
 # Opcional. Servei Millorat per generar la URL de Custodia emprant EL.
 # Variables addicionals: csv, validationUrl_custodyID, validationUrl_custodyID_URLEncode i validationUrl_custodyID_Hash   
-# es.caib.portafib.plugins.documentcustody.arxiudigitalcaib.baseurl_EL=http://portafib.fundaciobit.org/custody/${registre.url}
+# es.caib.portafib.plugins.documentcustody.arxiudigitalcaib.baseurl_EL=http://regweb3.fundaciobit.org/custody/${registro.url}
 
 # Opcional. Si no definit retorna el custodyID
 # Variables addicionals: csv
@@ -120,17 +122,17 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_meta
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.2.valueEL=${registro.origen}
 
 # REGISTRE
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.3.name=eni:tipo_asiento_registral
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.3.valueEL=${registro.???????????}
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.3.name=eni:tipo_asiento_registral
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.3.valueEL=${registro.???????????}
 
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.4.name=eni:codigo_oficina_registro
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.4.valueEL=${registro.???????????????}
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.4.name=eni:codigo_oficina_registro
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.4.valueEL=${registro.???????????????}
 
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.5.name=eni:eni:fecha_asiento_registral
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.5.valueEL=<#setting time_zone='UTC'>${registro.fecha?string[\\"yyyy-MM-dd'T'HH:mm:ss.sss'Z'\\"]}
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.5.name=eni:eni:fecha_asiento_registral
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.5.valueEL=<#setting time_zone='UTC'>${registro.fecha?string[\\"yyyy-MM-dd'T'HH:mm:ss.sss'Z'\\"]}
 
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.6.name=eni:numero_asiento_registral
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.6.valueEL=${registro.numeroRegistro}
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.6.name=eni:numero_asiento_registral
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.6.valueEL=${registro.numeroRegistro}
 
 
 

@@ -220,7 +220,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   }
 
   public String getPropertyDataCreacioEL() throws Exception {
-    return getPropertyRequired(ARXIUDIGITALCAIB_PROPERTY_BASE + "data_creacio_EL");
+    return getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "data_creacio_EL");
   }
 
   public String getPropertyEstatElaboracioEL() throws Exception {
@@ -332,6 +332,10 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
       FiltroBusquedaFacilExpedientes filtrosRequeridos = new FiltroBusquedaFacilExpedientes();
       filtrosRequeridos.setName(nomExpedient);
+      filtrosRequeridos.setAppName(getPropertyCodiAplicacio());      
+      String serieDocumental = processEL(getPropertySerieDocumentalEL(), custodyParameters);
+      filtrosRequeridos.setDocSeries(serieDocumental);
+            
       ResultadoBusqueda<Expediente> res = api.busquedaFacilExpedientes(filtrosRequeridos,
           null, 1);
       String carpetaID = null;
@@ -340,11 +344,51 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         throw new CustodyException("Error Consultant si Expedient " + nomExpedient
             + " existeix: " + res.getCodigoResultado() + "-" + res.getMsjResultado());
       }
+      
 
-      List<Expediente> llista = res.getListaResultado();
+
+      List<Expediente> llista2 = res.getListaResultado();
+      
+      
+      Expediente expedientCercat = null;
+      if (llista2.size() == 0) {
+        expedientCercat = null;
+      } else {
+        // TODO XYZ ZZZ la cerca es fa del nom parescut al fitper, per exemple si cerques
+        // "Registre_20" et pot trobar Registre_20, Registre_200, Registre_202, ... 
+        int countTrobats = 0;
+        for (Expediente expediente : llista2) {
+          if (nomExpedient.equals(expediente.getName())) {
+            countTrobats++;
+            if (countTrobats > 1) {
+              log.error(" S'ha trobat coincidencia multiple " + expediente.getName() + " (" 
+                + expediente.getId() + ") per la cerca de nomExpedient " + nomExpedient + ")");
+            } else { 
+              expedientCercat = expediente;
+            }
+          }
+        }
+        
+        if(countTrobats == 0) {
+          expedientCercat=null;
+        } else if (countTrobats == 1) {
+          // expedientCercat ja conté el valor
+        } else if (countTrobats > 1) {
+            // Hi ha multiple instancies que s'ajusten. No se quin triar
+            String msg = "S'ha trobat coincidencia multiple " + expedientCercat.getName() + " (" 
+                + expedientCercat.getId() + ") per la cerca de nomExpedient " + nomExpedient 
+                + "). Veure logs per la resta de coincidències.";
+            log.error(msg);
+            throw new CustodyException(msg);
+        }
+      }
+
+      
+      
+      
       //log.info("Creacio Expedient::Llistat.SIZE: " + llista.size());
       String expedientID;
-      if (llista.size() == 0) {
+      if (expedientCercat == null) {
         // Cream l'expedient
         Map<String, Object> llistaMetadades = getMetadadesPerExpedient(custodyParameters);
 
@@ -368,16 +412,18 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         }
 
       } else {
+        
 
-        Expediente e = llista.get(0);
-        expedientID = e.getId();
+          
+        expedientID = expedientCercat.getId();
+
         if (debug) {
           log.info("Creacio Expedient:: JA EXISTEIX: " + expedientID);
         }
 
         if (nomCarpeta != null) {
 
-          List<Nodo> nodos = e.getChilds();
+          List<Nodo> nodos = expedientCercat.getChilds();
           if (nodos == null || nodos.size() == 0) {
             if (debug) {
               log.info("Creacio Expedient:: Fills Expedients:  NO EN TE !!!!!");
@@ -1516,13 +1562,16 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     // Date fecha = new SimpleDateFormat("dd/MM/yyyy").parse("04/04/2017");
     // String fechaCreacio = UtilidadesFechas.convertirDeDate_A_ISO8601(fecha);
     String templateDataCreacio = getPropertyDataCreacioEL();
+    String dataCreacio;
     if (templateDataCreacio == null) {
-      String fechaCreacio = UtilidadesFechas.fechaActualEnISO8601();
-      llistaMetadades.put(MetadataConstants.ENI_FECHA_INICIO, fechaCreacio);
+      dataCreacio = UtilidadesFechas.fechaActualEnISO8601();      
     } else {
-      String dataCreacio = processEL(templateDataCreacio, custodyParameters);
-      llistaMetadades.put(MetadataConstants.ENI_FECHA_INICIO, dataCreacio);
+      dataCreacio = processEL(templateDataCreacio, custodyParameters);
     }
+    if (isDebug()) {
+      log.info("DataCreacio: " + dataCreacio);
+    }
+    llistaMetadades.put(MetadataConstants.ENI_FECHA_INICIO, dataCreacio);
 
     return llistaMetadades;
   }
@@ -1546,20 +1595,38 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         cabecera.setPasswordSeguridad(getPropertyLoginPassword());
         cabecera.setOrganizacion(getPropertyOrganitzacio());
 
+        boolean debug = isDebug(); 
+        
         // info login
         // + Ciutadà
-        cabecera.setNombreSolicitante(
-            processOptionalProperty("SolicitantNom", getPropertySolicitantNomEL(), custodyParameters));
-        cabecera.setDocumentoSolicitante(
-            processOptionalProperty("SolicitantIdentificadorAdministratiu",
-                getPropertySolicitantIdentificadorAdministratiuEL(), custodyParameters));
+        String ciutadaNom =  processOptionalProperty("SolicitantNom", 
+            getPropertySolicitantNomEL(), custodyParameters);
+        if (debug) {
+          log.info(" LOGIN [ciutadaNom] = " + ciutadaNom);
+        }
+        
+        cabecera.setNombreSolicitante(ciutadaNom);
+        String ciutadaNIF = processOptionalProperty("SolicitantIdentificadorAdministratiu",
+                getPropertySolicitantIdentificadorAdministratiuEL(), custodyParameters);
+        cabecera.setDocumentoSolicitante(ciutadaNIF);
+        if (debug) {
+          log.info(" LOGIN [ciutadaNIF] = " + ciutadaNIF);
+        }
 
         // + Funcionari o usuari de l'aplicació
-        cabecera.setNombreUsuario(
-            processOptionalProperty("UsuariUsername", getPropertyUsuariUsernameEL(), custodyParameters));
-        cabecera.setDocumentoUsuario(
-            processOptionalProperty("UsuariIdentificadorAdministratiu",
-                getPropertyUsuariIdentificadorAdministratiuEL(), custodyParameters));
+        String funcionariUsername = processOptionalProperty("UsuariUsername", 
+            getPropertyUsuariUsernameEL(), custodyParameters);
+        cabecera.setNombreUsuario(funcionariUsername);
+        if (debug) {
+          log.info(" LOGIN [funcionariUsername] = " + funcionariUsername);
+        }
+        
+        String funcionariNIF = processOptionalProperty("UsuariIdentificadorAdministratiu",
+            getPropertyUsuariIdentificadorAdministratiuEL(), custodyParameters);
+        cabecera.setDocumentoUsuario(funcionariNIF);
+        if (debug) {
+          log.info(" LOGIN [funcionariNIF] = " + funcionariNIF);
+        }
 
         //  + info peticio
         cabecera.setNombreProcedimiento(

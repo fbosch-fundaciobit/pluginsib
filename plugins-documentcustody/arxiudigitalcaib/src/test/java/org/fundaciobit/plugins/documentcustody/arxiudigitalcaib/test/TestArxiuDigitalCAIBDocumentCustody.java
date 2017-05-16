@@ -190,8 +190,32 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     // XYZ ZZZ Descomentar documentCustodyPlugin.deleteCustody(custodyID);
 
   }
-
+  
+  
+  
   public void testSimpleDoc() throws Exception {
+
+    // = true significa que no es sobre escriu
+    // = false es sobreescriu sobre el mateix fitxer
+    final boolean reservarCadaVegada =  true;
+
+    final TipusGuardat tipusGuardat =  TipusGuardat.SAVEALL;
+    
+        System.out.println();
+        System.out.println(" =========================================");
+        System.out.println("   -------- reservarCadaVegada = " + reservarCadaVegada);
+        System.out.println("   -------- tipusGuardat = " + tipusGuardat);
+        System.out.println(" =========================================");
+        System.out.println();
+        testSimpleDocConfigurable(reservarCadaVegada, tipusGuardat, false);
+      
+    
+
+  }
+  
+  
+
+  public void testSimpleDocFull() throws Exception {
 
     // = true significa que no es sobre escriu
     // = false es sobreescriu sobre el mateix fitxer
@@ -210,13 +234,14 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
         System.out.println("   -------- tipusGuardat[t] = " + tipusGuardat[t]);
         System.out.println(" =========================================");
         System.out.println();
-        testSimpleDocConfigurable(reservarCadaVegada[r], tipusGuardat[t]);
+        testSimpleDocConfigurable(reservarCadaVegada[r], tipusGuardat[t], true);
       }
     }
 
   }
 
-  public void testSimpleDocConfigurable(boolean reservarCadaVegada, TipusGuardat tipusGuardat)
+  public void testSimpleDocConfigurable(boolean reservarCadaVegada, TipusGuardat tipusGuardat,
+      boolean deleteOnFinish)
       throws Exception {
 
     Properties specificProperties = new Properties();
@@ -455,7 +480,9 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
      * System.out.println("Tamany byte[] = " + data.length);
      */
 
-    // XYZ ZZZ Descomentar documentCustodyPlugin.deleteCustody(custodyID);
+    if (!deleteOnFinish) {
+      documentCustodyPlugin.deleteCustody(custodyID);
+    }
 
   }
 
