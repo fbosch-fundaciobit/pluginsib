@@ -780,14 +780,12 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
     if (type != null) {
       pluginType = localSignType2PluginSignType.get(type); 
       signatureInfo.setSignType(pluginType);
-
+      
       if (pluginType != null) {
         // Cercarem el format: implicit(attached), explicit (detached)
         String signFormat = getSignFormat(pluginType, signData);
-        
         signatureInfo.setSignFormat(signFormat);
       }
-      
     }
     
     if (profile != null) {

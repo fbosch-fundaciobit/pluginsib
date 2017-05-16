@@ -23,6 +23,7 @@ public class SignatureValidationTestResult {
 
   final String expectedSignFormat;
 
+  final boolean expectedError;
 
   ValidateSignatureResponse validateSignatureResponse;
 
@@ -39,7 +40,7 @@ public class SignatureValidationTestResult {
    */
   public SignatureValidationTestResult(String signatureName, String documentName,
       byte[] signature, byte[] document, String expectedSignType, 
-      String expectedSignProfile, String expectedSignFormat) {
+      String expectedSignProfile, String expectedSignFormat, boolean expectedError) {
     super();
     this.signatureName = signatureName;
     this.documentName = documentName;
@@ -48,6 +49,7 @@ public class SignatureValidationTestResult {
     this.expectedSignType = expectedSignType;
     this.expectedSignFormat = expectedSignFormat;
     this.expectedSignProfile = expectedSignProfile;
+    this.expectedError = expectedError;
   }
 
   public ValidateSignatureResponse getValidateSignatureResponse() {
@@ -93,5 +95,11 @@ public class SignatureValidationTestResult {
   public String getExpectedSignProfile() {
     return expectedSignProfile;
   }
+
+  public boolean isExpectedError() {
+    return expectedError;
+  }
+  
+  
 
 }

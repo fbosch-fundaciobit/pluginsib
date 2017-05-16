@@ -5,7 +5,6 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import org.fundaciobit.plugins.validatesignature.api.IValidateSignaturePlugin;
-import org.fundaciobit.plugins.validatesignature.api.ValidateSignatureResponse;
 import org.fundaciobit.plugins.validatesignature.api.test.AbstractTestValidateSignature;
 import org.fundaciobit.plugins.validatesignature.api.test.SignatureValidationTestResult;
 import org.fundaciobit.plugins.validatesignature.integra.IntegraValidateSignaturePlugin;
@@ -36,20 +35,20 @@ public class TestIntegra extends AbstractTestValidateSignature {
       
       // TODO Com solucionar Això !!!!
       // ERROR Com és lògic no és un LTV
-      //FIRMA_DOCUMENT[2][3] = ValidateSignatureResponse.SIGNPROFILE_PADES_LTV;
-      tests.get("peticioOK.pdf")[3] = ValidateSignatureResponse.SIGNPROFILE_PADES_LTV;
+      // FIRMA_DOCUMENT[2][3] = ValidateSignatureResponse.SIGNPROFILE_PADES_LTV;
+      // tests.get("peticioOK.pdf")[3] = ValidateSignatureResponse.SIGNPROFILE_PADES_LTV;
       
       // WARN És EPES + SegellDetemps 
       //FIRMA_DOCUMENT[6][3] = ValidateSignatureResponse.SIGNPROFILE_EPES;
-      tests.get("miniapplet_epes_segelltemps_catcert.pdf")[3] = ValidateSignatureResponse.SIGNPROFILE_EPES;
+      //tests.get("miniapplet_epes_segelltemps_catcert.pdf")[3] = ValidateSignatureResponse.SIGNPROFILE_EPES;
       
       // WARN És EPES + SegellDetemps 
       //FIRMA_DOCUMENT[7][3] = ValidateSignatureResponse.SIGNPROFILE_EPES;
-      tests.get("miniapplet_epes_segelltemps_afirma.pdf")[3] = ValidateSignatureResponse.SIGNPROFILE_EPES;
+      //tests.get("miniapplet_epes_segelltemps_afirma.pdf")[3] = ValidateSignatureResponse.SIGNPROFILE_EPES;
       
       
       // ERROR
-      tests.get("miniapplet_empleat_public.pdf")[3] = ValidateSignatureResponse.SIGNPROFILE_EPES;
+      //tests.get("miniapplet_empleat_public.pdf")[3] = ValidateSignatureResponse.SIGNPROFILE_EPES;
       
       
       //FIRMA_DOCUMENT[8][3] = ValidateSignatureResponse.SIGNPROFILE_EPES; // ERROR

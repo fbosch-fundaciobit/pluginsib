@@ -38,48 +38,22 @@ public class TestAfirmaCXF extends AbstractTestValidateSignature {
       Map<String, String[]> tests = new TreeMap<String, String[]>(super.getTests());
 
       // Error de firma no vàlida: El formato de la firma no es válido
-      /*
-       * [20] = { "afirma/sample_xades_detached_firmat.xml",
-       * "afirma/sample.xml", SIGNTYPE_XAdES, SIGNPROFILE_BES,
-       * SIGNFORMAT_EXPLICIT_DETACHED },
-       */
+ 
       
        String[] FIRMA_DOCUMENT = tests.get("afirma/sample_xades_detached_firmat.xml");
-       
-       FIRMA_DOCUMENT[2] = null;
-       FIRMA_DOCUMENT[3] = null;
-       FIRMA_DOCUMENT[4] = null;
+       FIRMA_DOCUMENT[5] = "ERROR";
       
 
       // Error de firma no vàlida: El formato de la firma no es válido
-      /*
-       * [21] = { "afirma/sample_xades_detached_epes_firmat.xml",
-       * "afirma/sample.xml", SIGNTYPE_XAdES, SIGNPROFILE_EPES,
-       * SIGNFORMAT_EXPLICIT_DETACHED },
-       */
-
-        FIRMA_DOCUMENT =
-        tests.get("afirma/sample_xades_detached_epes_firmat.xml");
-        FIRMA_DOCUMENT[2] = null;
-        FIRMA_DOCUMENT[3] = null;
-        FIRMA_DOCUMENT[4] = null;
-        
-        // TEST[miniapplet_epes_segelltemps_afirma.pdf] => ERROR :
-        // Perfil de firma diferent en test miniapplet_epes_segelltemps_afirma.pdf(Expected:AdES-T | AdES-EPES
-        //FIRMA_DOCUMENT = tests.get("miniapplet_epes_segelltemps_afirma.pdf");
-        //FIRMA_DOCUMENT[3] = SIGNPROFILE_EPES;
-        
-        // TEST[miniapplet_epes_segelltemps_catcert.pdf] => ERROR :
-        // Perfil de firma diferent en test miniapplet_epes_segelltemps_catcert.pdf(Expected:AdES-T | AdES-EPES
-        // FIRMA_DOCUMENT = tests.get("miniapplet_epes_segelltemps_catcert.pdf");
-        // FIRMA_DOCUMENT[3] = SIGNPROFILE_EPES;
-       
-        // TEST[peticioOK.pdf] => ERROR :
-        // Perfil de firma diferent en test peticioOK.pdf(Expected:AdES-BES | PAdES-LTV
-        // FIRMA_DOCUMENT = tests.get("peticioOK.pdf");
-        // FIRMA_DOCUMENT[3] = SIGNPROFILE_PADES_LTV;
+      FIRMA_DOCUMENT = tests.get("afirma/sample_xades_detached_epes_firmat.xml");
+      FIRMA_DOCUMENT[5] = "ERROR";
 
       currentTests = tests;
+      
+      //currentTests = new TreeMap<String, String[]>();
+      //currentTests.put("afirma/sample_xades_detached_epes_firmat.xml",  tests.get("afirma/sample_xades_detached_epes_firmat.xml"));
+      
+      
     }
     return currentTests;
   }

@@ -11,6 +11,7 @@ import org.fundaciobit.plugins.validatesignature.api.SignatureRequestedInformati
 import org.fundaciobit.plugins.validatesignature.api.ValidateSignatureConstants;
 import org.fundaciobit.plugins.validatesignature.api.ValidateSignatureRequest;
 import org.fundaciobit.plugins.validatesignature.api.ValidateSignatureResponse;
+import org.fundaciobit.plugins.validatesignature.api.ValidationStatus;
 
 /**
  * 
@@ -29,68 +30,71 @@ public abstract class AbstractTestValidateSignature implements ValidateSignature
     String[][] FIRMA_DOCUMENT = new String[][] {
       // MOLT IMPORTANT !!!!! NOUS ELEMENTS S'HAN D'AFEGIR AL FINAL !!!!!!
 
-      { "sensefirmar.pdf", null, null, null, null },
+      { "sensefirmar.pdf", null, null, null, null , "ERROR" },
       { "autofirma.pdf", null, SIGNTYPE_PAdES, SIGNPROFILE_PADES_BASIC,
-          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED , null },
       { "peticioOK.pdf", null, SIGNTYPE_PAdES, SIGNPROFILE_BES,
-          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED , null },
       { "pades_ltv.pdf", null, SIGNTYPE_PAdES, SIGNPROFILE_PADES_LTV,
-          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED , null },
       { "hola_firmat.pdf", null, SIGNTYPE_PAdES, SIGNPROFILE_BES,
-          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED , null },
       { "duesfirmes.pdf", null, SIGNTYPE_PAdES, SIGNPROFILE_BES,
-          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED },
-      { "miniapplet_epes_segelltemps_catcert.pdf", null, SIGNTYPE_PAdES, SIGNPROFILE_T,
-          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED },
-      { "miniapplet_epes_segelltemps_afirma.pdf", null, SIGNTYPE_PAdES, SIGNPROFILE_T,
-          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED , null },
+      { "miniapplet_epes_segelltemps_catcert.pdf", null, SIGNTYPE_PAdES, SIGNPROFILE_EPES, //SIGNPROFILE_T,
+          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED , null },
+      { "miniapplet_epes_segelltemps_afirma.pdf", null, SIGNTYPE_PAdES, SIGNPROFILE_EPES, //SIGNPROFILE_T,
+          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED , null },
       { "miniapplet_empleat_public.pdf", null, SIGNTYPE_PAdES, SIGNPROFILE_EPES,
-          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED , null },
       { "foto.cades.detached.csig", "foto.jpg", SIGNTYPE_CAdES, SIGNPROFILE_BES,
-          SIGNFORMAT_EXPLICIT_DETACHED },
+          SIGNFORMAT_EXPLICIT_DETACHED , null },
       { "foto.jpg.csig", null, SIGNTYPE_CAdES, SIGNPROFILE_BES,
-          SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED , null },
       { "foto_xades_attached.xml", null, SIGNTYPE_XAdES, SIGNPROFILE_BES,
-          SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED , null },
       { "sample_xml_firmat_xades_attached.xml", null, SIGNTYPE_XAdES, SIGNPROFILE_BES,
-          SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED , null },
       { "orve_firma.csig", "orve_doc.pdf", SIGNTYPE_CAdES, SIGNPROFILE_EPES,
-          SIGNFORMAT_EXPLICIT_DETACHED },
+          SIGNFORMAT_EXPLICIT_DETACHED , null },
       { "pades_epes.pdf", null, SIGNTYPE_PAdES, SIGNPROFILE_EPES,
-          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED , null },
+          
+      { "openoffice.odt", null, SIGNTYPE_ODF, null,
+            SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED , null },
 
       // Firmes amb @firma FEDERAT
 
       // OK
       { "afirma/foto.jpg_cades_detached.csig", "afirma/foto.jpg", SIGNTYPE_CAdES,
-          SIGNPROFILE_BES, SIGNFORMAT_EXPLICIT_DETACHED },
+          SIGNPROFILE_BES, SIGNFORMAT_EXPLICIT_DETACHED , null },
       // OK
       { "afirma/foto.jpg_cades_detached_ts.csig", "afirma/foto.jpg", SIGNTYPE_CAdES,
-          SIGNPROFILE_T, SIGNFORMAT_EXPLICIT_DETACHED },
+          SIGNPROFILE_T, SIGNFORMAT_EXPLICIT_DETACHED , null },
       // OK
       { "afirma/foto.jpg_cades_detached_epes.csig", "afirma/foto.jpg", SIGNTYPE_CAdES,
-          SIGNPROFILE_EPES, SIGNFORMAT_EXPLICIT_DETACHED },
+          SIGNPROFILE_EPES, SIGNFORMAT_EXPLICIT_DETACHED, null },
       // OK
       { "afirma/sample_xades_attached_firmat_ts.xml", null, SIGNTYPE_XAdES, SIGNPROFILE_T,
-          SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED , null },
       // OK
       { "afirma/sample_xades_attached_firmat.xml", null, SIGNTYPE_XAdES, SIGNPROFILE_BES,
-          SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED },
+          SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED , null },
         
   /* ERROR ATTACHED i ES DETACHED pero crec que es la generació de la firma */
   /*
    * { "afirma/foto.jpg_cades_attached.csig", null, SIGNTYPE_CAdES,
-   * SIGNPROFILE_BES, SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED },
+   * SIGNPROFILE_BES, SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED , null },
    * 
    * { "afirma/foto.jpg_cades_attached_ts.csig", null, SIGNTYPE_CAdES,
-   * SIGNPROFILE_BES, SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED },
+   * SIGNPROFILE_BES, SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED , null },
    */
 
    { "afirma/sample_xades_detached_firmat.xml", "afirma/sample.xml",
    SIGNTYPE_XAdES, SIGNPROFILE_BES,
-   SIGNFORMAT_EXPLICIT_DETACHED },
+   SIGNFORMAT_EXPLICIT_DETACHED , null },
     { "afirma/sample_xades_detached_epes_firmat.xml", "afirma/sample.xml", SIGNTYPE_XAdES,
-      SIGNPROFILE_EPES, SIGNFORMAT_EXPLICIT_DETACHED },
+      SIGNPROFILE_EPES, SIGNFORMAT_EXPLICIT_DETACHED, null },
       
 
   };
@@ -114,9 +118,32 @@ public abstract class AbstractTestValidateSignature implements ValidateSignature
       throws Exception {
 
     if (throwException) {
+      
       Assert.assertNotNull("SignatureValidationTestResult es null", result);
-  
+
       ValidateSignatureResponse response = result.getValidateSignatureResponse();
+      
+      int status = response.getValidationStatus().getStatus();
+      
+      if (result.isExpectedError()) {
+        
+        if (status == ValidationStatus.SIGNATURE_VALID) {
+          throw new Exception("S'esperava un error, però l'execució del test ha funcionat.");
+        } else {
+          return null; // OK
+        }
+        
+      }
+      
+      
+      if (response.getSignType() == null && response.getSignFormat() == null
+          && response.getSignProfile() == null) {
+        if (status != ValidationStatus.SIGNATURE_VALID) {
+          throw new Exception("La cridada al Validator/Informador de Firmes ha retornat un error: " 
+              + response.getValidationStatus().getErrorMsg());
+        }
+      }
+      
   
       Assert.assertEquals("Tipus de firma diferent en test " + key, result.getExpectedSignType(),
           response.getSignType());
@@ -126,6 +153,9 @@ public abstract class AbstractTestValidateSignature implements ValidateSignature
   
       Assert.assertEquals("Perfil de firma diferent en test " + key,
           result.getExpectedSignProfile(), response.getSignProfile());
+      
+
+      
     } else {
       
       if (result == null) {
@@ -133,7 +163,29 @@ public abstract class AbstractTestValidateSignature implements ValidateSignature
       }
       
       ValidateSignatureResponse response = result.getValidateSignatureResponse();
-  
+      
+      int status = response.getValidationStatus().getStatus();
+      
+      if (result.isExpectedError()) {
+        
+      
+        if(status == ValidationStatus.SIGNATURE_VALID) {
+           return "S'esperava un error, però l'execució del test ha funcionat."; // ERROR
+        } else {
+           return null; // OK;
+        }
+        
+      }
+      
+      
+      if (response.getSignType() == null && response.getSignFormat() == null
+          && response.getSignProfile() == null) {
+        if (status != ValidationStatus.SIGNATURE_VALID) {
+          return "La cridada al Validator/Informador de Firmes ha retornat un error: " 
+            + response.getValidationStatus().getErrorMsg();
+        }
+      }
+
       if (!compareStr(result.getExpectedSignType(),
           response.getSignType())) {
         return "Tipus de firma diferent en test " + key + "(Expected:" +result.getExpectedSignType() + " | " +
@@ -198,7 +250,8 @@ public abstract class AbstractTestValidateSignature implements ValidateSignature
       }
 
       SignatureValidationTestResult result = new SignatureValidationTestResult(params[0],
-          params[1], signature, document, params[2], params[3], params[4]);
+          params[1], signature, document, params[2], params[3], params[4], 
+          (params[5] == null? false: true));
 
       responses.put(key, result);
 
