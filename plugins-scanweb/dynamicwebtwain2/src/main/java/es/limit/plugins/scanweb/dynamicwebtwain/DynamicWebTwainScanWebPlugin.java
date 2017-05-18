@@ -3,9 +3,11 @@ package es.limit.plugins.scanweb.dynamicwebtwain;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.security.KeyStore;
@@ -104,6 +106,31 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
 	private String getDynamicWebTwainProperty(String name) {
 		return getProperty(PROPERTY_BASE + name);
 	}
+	
+	File resourcesPath = null;
+	
+  public File getResourcesPath() throws Exception {
+    
+    if (resourcesPath == null) {
+       String resourcesPathStr =  getPropertyRequired(PROPERTY_BASE + "resourcespath");
+       
+       File tmp = new File(resourcesPathStr);
+       
+       if (!tmp.exists()) {
+         throw new Exception("No existeix la carpeta " + tmp.getAbsolutePath());
+       }
+      
+       if (!tmp.isDirectory()) {
+         throw new Exception("La ruta " + tmp.getAbsolutePath() + " no apunta a una carpeta.");
+       }
+       
+       resourcesPath = tmp;
+      
+    }
+    
+    
+    return resourcesPath;
+  }
 	
 
   public boolean forceSign() {
@@ -298,7 +325,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
         } else {
               
           // RECURSOS SCANNER
-          retornarRecursLocal(absolutePluginRequestPath, relativePluginRequestPath, scanWebID,
+          retornarRecursDesdeDirectori(absolutePluginRequestPath, relativePluginRequestPath, scanWebID,
             query, request, response, languageUI);
         }
         
@@ -678,28 +705,16 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
   protected void retornarDynamsoftWebtwainConfig(String absolutePluginRequestPath,
       String relativePluginRequestPath, long scanWebID, String query,
       HttpServletRequest request, HttpServletResponse response, Locale languageUI) {
-    char[] contingut = null;
+    
     String mime = getMimeType(query);
     query = query.replace('\\', '/');
 
-    query = query.startsWith("/") ? query : ('/' + query);
-
     try {
 
-      InputStream input = getClass().getResourceAsStream(query);
-
-      if (input != null) {
-
-        contingut = IOUtils.toCharArray(input);
+      byte[] contingut = getRecursDesdeFitxer(query);
         
         String contingutStr = new String(contingut);
         
-//        String relativePath = relativePluginRequestPath;
-//        
-//        if (relativePath.endsWith("/")) {
-//          relativePath = relativePath.substring(0, relativePath.length() -1);
-//        }
-
         contingutStr = contingutStr.replace("X_PATH_X", relativePluginRequestPath + SCANNER_RESOURCES + "/" + getDWTVersion());
         contingutStr = contingutStr.replace("X_TRIAL_X", String.valueOf(isTrial()));
         contingutStr = contingutStr.replace("X_DEBUG_X", String.valueOf(isDebug()));
@@ -720,7 +735,7 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
         out.flush();
 
         return;
-      }
+      
     } catch (Exception e) {
       log.error("Error llegint recurs " + query, e);
     }
@@ -1089,6 +1104,79 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
   }
   
   
+  protected void retornarRecursDesdeDirectori(String absolutePluginRequestPath,
+      String relativePluginRequestPath, long scanWebID, String query,
+      HttpServletRequest request, HttpServletResponse response, Locale languageUI) {
+    
+    String mime = getMimeType(query);
+    query = query.replace('\\', '/');
+
+    query = query.startsWith("/") ? query : ('/' + query);
+
+
+    
+    try {
+      
+      byte[] contingut = getRecursDesdeFitxer(query);
+
+      int pos = query.lastIndexOf('/');
+      String resourcename = pos == -1 ? query : query.substring(pos + 1);
+      
+      OutputStream out = response.getOutputStream();
+      
+
+      response.setContentType(mime);
+      response.setHeader("Content-Disposition", "inline; filename=\"" + resourcename + "\"");
+      response.setContentLength(contingut.length);
+
+
+      out.write(contingut);
+      out.flush();
+
+        return;
+      
+    } catch (Exception e) {
+      log.error("Error llegint recurs " + query, e);
+    }
+
+    // ERROR
+
+    String titol = "No trob el recurs " + query;
+    requestNotFoundError(titol, absolutePluginRequestPath, relativePluginRequestPath, query,
+        String.valueOf(scanWebID), request, response, languageUI);
+  }
+
+  protected byte[] getRecursDesdeFitxer(String query) throws Exception, FileNotFoundException,
+      IOException {
+    byte[] contingut;
+    InputStream input = null;
+    
+    query = query.startsWith("/") ? query.substring(1) : query;
+
+    try {
+
+      File base = getResourcesPath();
+      File f = new File(base, query);
+
+      if (!f.exists()) {
+        throw new Exception("S'ha requerit el recurs " + query
+            + " però no es troba en la ruta " + f.getAbsolutePath());
+      }
+
+      input = new FileInputStream(f);
+
+      contingut = IOUtils.toByteArray(input);
+      return contingut;
+
+    } finally {
+      if (input != null) {
+        try {
+          input.close();
+        } catch (IOException e) {
+        }
+      }
+    }
+  }
   
   private class DigitalInfoCertificate implements InfoCertificate {
     
