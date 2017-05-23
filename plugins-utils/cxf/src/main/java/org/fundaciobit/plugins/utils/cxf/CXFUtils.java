@@ -5,6 +5,7 @@ import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.fundaciobit.plugins.utils.AbstractPluginProperties;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -77,6 +78,33 @@ public class CXFUtils {
       return false;
     }
 
+  }
+  
+
+  public static ClientHandler getClientHandler(AbstractPluginProperties properties, 
+      String basePath) throws Exception {
+    
+    final ClientHandler clientHandler;
+    String username = properties.getProperty(basePath + "authorization.username");
+
+    if (username != null && username.trim().length() != 0) {
+      String password = properties.getProperty(basePath + "authorization.password");
+
+      clientHandler = new ClientHandlerUsernamePassword(username, password);
+
+    } else {
+
+      String keystoreLocation = properties.getPropertyRequired(basePath + "authorization.ks.path");
+
+      String keystoreType = properties.getPropertyRequired(basePath + "authorization.ks.type");
+      String keystorePassword = properties.getPropertyRequired(basePath + "authorization.ks.password");
+      String keystoreCertAlias = properties.getPropertyRequired(basePath + "authorization.ks.cert.alias");
+      String keystoreCertPassword = properties.getPropertyRequired(basePath + "authorization.ks.cert.password");
+
+      clientHandler = new ClientHandlerCertificate(keystoreLocation, keystoreType,
+          keystorePassword, keystoreCertAlias, keystoreCertPassword);
+    }
+    return clientHandler;
   }
 
 }
