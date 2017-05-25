@@ -83,11 +83,11 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
       
       //tester.testInternalMetadata();
       
-      //tester.test3Combinacions();
+      tester.test3Combinacions();
      
       //tester.testSimpleDoc();
 
-      tester.testFull();
+      // tester.testFull();
 
       //tester.testMetadades();
 
