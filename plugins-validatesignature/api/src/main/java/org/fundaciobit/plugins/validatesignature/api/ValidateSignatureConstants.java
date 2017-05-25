@@ -91,7 +91,7 @@ public interface ValidateSignatureConstants {
    * AdES-XL1:Si se ha tomado como base para su generación una firma con formato
    * AdES-X1(formatopordefecto).
    */
-  public static final String SIGNPROFILE_XL1 = "AdES-XL";
+  public static final String SIGNPROFILE_XL1 = "AdES-XL1";
 
   /**
    * AdES-XL2: Si se ha tomado como base para sugeneración una firma con formato
