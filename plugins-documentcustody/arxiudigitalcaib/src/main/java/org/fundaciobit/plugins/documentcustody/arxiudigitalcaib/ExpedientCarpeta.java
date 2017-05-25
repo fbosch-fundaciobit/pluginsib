@@ -20,5 +20,19 @@ public class ExpedientCarpeta {
     this.expedientID = expedientID;
     this.carpetaID = carpetaID;
   }
+  
+  
+  @Override
+  public String toString() {
+    
+    StringBuffer sb = new StringBuffer("E: " + expedientID);
+    
+    if (carpetaID != null) {
+      sb.append(" | C: " + carpetaID);
+    }
+    
+    return sb.toString();
+  }
+  
 
 }

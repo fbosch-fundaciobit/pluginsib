@@ -50,6 +50,9 @@ public class Anexo implements Serializable {
   // SIR
   private Boolean firmaValida; // Indicará si la firma es vàlida o no
   private Boolean justificante; // Indica si el anexo es justificante.
+  
+
+  private String signProfile;
 
   public Anexo() {
   }
@@ -68,7 +71,7 @@ public class Anexo implements Serializable {
    */
   public Anexo(Long id, String titulo, TipoDocumental tipoDocumental, Long validezDocumento,
       Long tipoDocumento, RegistroDetalle registroDetalle, String observaciones,
-      Integer origenCiudadanoAdmin, Date fechaCaptura, int modoFirma) {
+      Integer origenCiudadanoAdmin, Date fechaCaptura, int modoFirma, String signProfile) {
     super();
     this.id = id;
     this.titulo = titulo;
@@ -80,6 +83,7 @@ public class Anexo implements Serializable {
     this.origenCiudadanoAdmin = origenCiudadanoAdmin;
     this.fechaCaptura = fechaCaptura;
     this.modoFirma = modoFirma;
+    this.signProfile= signProfile;
   }
 
   public Long getId() {
@@ -232,6 +236,14 @@ public class Anexo implements Serializable {
 
   public void setJustificante(Boolean justificante) {
     this.justificante = justificante;
+  }
+
+  public String getSignProfile() {
+    return signProfile;
+  }
+
+  public void setSignProfile(String signProfile) {
+    this.signProfile = signProfile;
   }
 
 }

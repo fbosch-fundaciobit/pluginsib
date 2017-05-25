@@ -10,12 +10,12 @@ import org.fundaciobit.plugins.IPlugin;
  */
 public abstract class AbstractPluginProperties implements IPlugin {
 
-  public final String propertyKeyBase;
+  private final String propertyKeyBase;
 
   /**
    * If properties is null then access to System.getProperties()
    */
-  public final Properties properties;
+  private final Properties properties;
 
   /**
    * @param propertyKeyBase
@@ -71,6 +71,15 @@ public abstract class AbstractPluginProperties implements IPlugin {
           + " is required but it has not defined in the Properties");
     }
     return value;
+  }
+  
+  
+  public final Properties getPluginProperties() {
+    return this.properties;
+  }
+
+  public final String getPropertyKeyBase() {
+    return propertyKeyBase;
   }
 
 }

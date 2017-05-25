@@ -1,14 +1,16 @@
 package org.fundaciobit.plugins.documentcustody.arxiudigitalcaib;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -62,13 +64,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
   public static final String FORMATO_UTF8 = "UTF-8";
 
-  public static final String NOM_DOCUMENT_ELECTRONIC = "DOCUMENT_ELECTRONIC_CAIB";
-
-  public static final String NOM_INFO_DOCUMENT_ELECTRONIC = "INFO_DOCUMENT_ELECTRONIC_CAIB.properties";
-
-  public static final String NOM_METADADES = "METADADES.properties";
-
-  public static final String FILE_INFO_CSV = "csv";
+  public static final String NOM_CSV_DOCUMENT_ELECTRONIC = ".CVS_DOCUMENT_ELECTRONIC_CAIB.txt";
 
   public static final String FILE_INFO_NOM = "nom";
   public static final String FILE_INFO_TAMANY = "tamany";
@@ -87,33 +83,37 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
   public static final String FILE_INFO_BASE_FIRMA = "firma.";
 
+  public static final String FILE_INFO_BASE_METADATA = "metadata.";
+
   public static final String ARXIUDIGITALCAIB_PROPERTY_BASE = DOCUMENTCUSTODY_BASE_PROPERTY
       + "arxiudigitalcaib.";
-  
+
   public static final Map<String, TiposFirma> TIPOFIRMA_SIMPLE = new HashMap<String, TiposFirma>();
-  
+
   public static final Map<String, TiposFirma> TIPOFIRMA_COMPLEXE = new HashMap<String, TiposFirma>();
-  
+
   public static final Map<String, FormatosFichero> FORMATS_BY_EXTENSION = new HashMap<String, FormatosFichero>();
-  
-  
+
   static {
-    
+
     TIPOFIRMA_SIMPLE.put(SignatureCustody.PADES_SIGNATURE, TiposFirma.PADES);
 
     /**
-     * true if signature contains original document (attached).
-     * false if signature does not contain original document (dettached).
-     * null can not obtain this information or is not necessary
+     * true if signature contains original document (attached). false if
+     * signature does not contain original document (dettached). null can not
+     * obtain this information or is not necessary
      */
-    
-    TIPOFIRMA_COMPLEXE.put(SignatureCustody.CADES_SIGNATURE + "_null" ,  TiposFirma.CADES_ATTACHED);
-    TIPOFIRMA_COMPLEXE.put(SignatureCustody.CADES_SIGNATURE + "_true" ,  TiposFirma.CADES_ATTACHED);
-    TIPOFIRMA_COMPLEXE.put(SignatureCustody.CADES_SIGNATURE + "_false" ,  TiposFirma.CADES_DETACHED);
-    
-    TIPOFIRMA_COMPLEXE.put(SignatureCustody.XADES_SIGNATURE + "_true" , TiposFirma.XADES_ENVELOPED);
 
-    
+    TIPOFIRMA_COMPLEXE.put(SignatureCustody.CADES_SIGNATURE + "_null",
+        TiposFirma.CADES_ATTACHED);
+    TIPOFIRMA_COMPLEXE.put(SignatureCustody.CADES_SIGNATURE + "_true",
+        TiposFirma.CADES_ATTACHED);
+    TIPOFIRMA_COMPLEXE.put(SignatureCustody.CADES_SIGNATURE + "_false",
+        TiposFirma.CADES_DETACHED);
+
+    TIPOFIRMA_COMPLEXE.put(SignatureCustody.XADES_SIGNATURE + "_true",
+        TiposFirma.XADES_ENVELOPED);
+
     FORMATS_BY_EXTENSION.put("wfs", FormatosFichero.WFS);
     FORMATS_BY_EXTENSION.put("wms", FormatosFichero.WMS);
     FORMATS_BY_EXTENSION.put("gzip", FormatosFichero.GZIP);
@@ -130,7 +130,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     FORMATS_BY_EXTENSION.put("oasis12", FormatosFichero.OASIS12);
     FORMATS_BY_EXTENSION.put("soxml", FormatosFichero.SOXML);
     FORMATS_BY_EXTENSION.put("pdf", FormatosFichero.PDF);
-    //FORMATS_BY_EXTENSION.put("pdfa", FormatosFichero.PDFA);
+    // FORMATS_BY_EXTENSION.put("pdfa", FormatosFichero.PDFA);
     FORMATS_BY_EXTENSION.put("png", FormatosFichero.PNG);
     FORMATS_BY_EXTENSION.put("rtf", FormatosFichero.RTF);
     FORMATS_BY_EXTENSION.put("svg", FormatosFichero.SVG);
@@ -141,10 +141,8 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     FORMATS_BY_EXTENSION.put("ogg", FormatosFichero.OGG);
     FORMATS_BY_EXTENSION.put("mp4v", FormatosFichero.MP4V);
     FORMATS_BY_EXTENSION.put("webm", FormatosFichero.WEBM);
-    
-    
-  }
 
+  }
 
   // ----------------------------------------------------------------------------
   // ---------------------------- CONSTRUCTORS -----------------------------
@@ -191,19 +189,32 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   public String getPropertySerieDocumentalEL() throws Exception {
     return getPropertyRequired(ARXIUDIGITALCAIB_PROPERTY_BASE + "serie_documental_EL");
   }
-  
+
   public boolean isPropertyCreateDraft() {
     String valueStr = getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "createDraft");
     if (valueStr == null || valueStr.trim().length() == 0) {
       return true;
     }
-    
+
     if ("false".equals(valueStr.toLowerCase())) {
       return false;
     } else {
       return true;
     }
   }
+  
+  
+  public boolean isPropertyTancarExpedient() {
+    String valueStr = getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "tancarExpedient");
+    if (valueStr != null && "true".equals(valueStr.toLowerCase())) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
+  
+  
 
   /**
    * Separats per comma
@@ -230,6 +241,11 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   public String getPropertyTipusDocumentalEL() throws Exception {
     return getPropertyRequired(ARXIUDIGITALCAIB_PROPERTY_BASE + "tipus_documental_EL");
   }
+  
+  public String getPropertyPerfilFirmaEL() throws Exception {
+    return getPropertyRequired(ARXIUDIGITALCAIB_PROPERTY_BASE + "perfil_firma_EL");
+  }
+
 
   /**
    * ADMINISTRACION ("1"), CIUDADANO ("0");
@@ -261,7 +277,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     return getPropertyRequired(ARXIUDIGITALCAIB_PROPERTY_BASE + "connexio.login.password");
   }
 
-  // Ciutada - Nom.  Opcional
+  // Ciutada - Nom. Opcional
   public String getPropertySolicitantNomEL() throws Exception {
     return getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "connexio.solicitant.nom_EL");
   }
@@ -297,16 +313,16 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       return "true".equals(ignoreStr.trim());
     }
   }
-  
+
   private Boolean isDebugValue = null;
-  
+
   public boolean isDebug() {
     if (isDebugValue == null) {
-      isDebugValue = log.isDebugEnabled() || "true".equals(getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "debug"));
+      isDebugValue = log.isDebugEnabled()
+          || "true".equals(getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "debug"));
     }
     return isDebugValue;
   }
-  
 
   // ----------------------------------------------------------------------------
   // ----------------------- METODES PRINCIPALS -------------------------------
@@ -316,7 +332,8 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   public String reserveCustodyID(Map<String, Object> custodyParameters)
       throws CustodyException {
     // Crearem una estructura
-    // EXPEDIENT => CARPETA => DOCUMENTS
+    // EXPEDIENT => CARPETA => DOCUMENT o
+    // EXPEDIENT => DOCUMENT 
     final boolean debug = isDebug();
     try {
       final String nomExpedient = processEL(getPropertyNomExpedientEL(), custodyParameters);
@@ -328,65 +345,70 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         log.info("NomCarpeta: " + nomCarpeta);
       }
 
+      //String uuidCSVFile = null;
+      //String carpetaID = null;
+
       ApiArchivoDigital api = getApiArxiu(custodyParameters);
-
-      FiltroBusquedaFacilExpedientes filtrosRequeridos = new FiltroBusquedaFacilExpedientes();
-      filtrosRequeridos.setName(nomExpedient);
-      filtrosRequeridos.setAppName(getPropertyCodiAplicacio());      
-      String serieDocumental = processEL(getPropertySerieDocumentalEL(), custodyParameters);
-      filtrosRequeridos.setDocSeries(serieDocumental);
-            
-      ResultadoBusqueda<Expediente> res = api.busquedaFacilExpedientes(filtrosRequeridos,
-          null, 1);
-      String carpetaID = null;
-
-      if (hiHaErrorEnCerca(res.getCodigoResultado())) {
-        throw new CustodyException("Error Consultant si Expedient " + nomExpedient
-            + " existeix: " + res.getCodigoResultado() + "-" + res.getMsjResultado());
-      }
       
-
-
-      List<Expediente> llista2 = res.getListaResultado();
-      
-      
+      // Només miram si existeix l'expedient si tenim CARPETES
       Expediente expedientCercat = null;
-      if (llista2.size() == 0) {
-        expedientCercat = null;
-      } else {
-        // TODO XYZ ZZZ la cerca es fa del nom parescut al fitper, per exemple si cerques
-        // "Registre_20" et pot trobar Registre_20, Registre_200, Registre_202, ... 
-        int countTrobats = 0;
-        for (Expediente expediente : llista2) {
-          if (nomExpedient.equals(expediente.getName())) {
-            countTrobats++;
-            if (countTrobats > 1) {
-              log.error(" S'ha trobat coincidencia multiple " + expediente.getName() + " (" 
-                + expediente.getId() + ") per la cerca de nomExpedient " + nomExpedient + ")");
-            } else { 
-              expedientCercat = expediente;
+      if (nomCarpeta != null) {
+
+        FiltroBusquedaFacilExpedientes filtrosRequeridos = new FiltroBusquedaFacilExpedientes();
+        filtrosRequeridos.setName(nomExpedient);
+        filtrosRequeridos.setAppName(getPropertyCodiAplicacio());
+        String serieDocumental = processEL(getPropertySerieDocumentalEL(), custodyParameters);
+        filtrosRequeridos.setDocSeries(serieDocumental);
+  
+        ResultadoBusqueda<Expediente> res = api.busquedaFacilExpedientes(filtrosRequeridos,
+            null, 1);
+        
+  
+        if (hiHaErrorEnCerca(res.getCodigoResultado())) {
+          throw new CustodyException("Error Consultant si Expedient " + nomExpedient
+              + " existeix: " + res.getCodigoResultado() + "-" + res.getMsjResultado());
+        }
+  
+        List<Expediente> llista2 = res.getListaResultado();
+  
+        
+        if (llista2.size() == 0) {
+          expedientCercat = null;
+        } else {
+          // TODO XYZ ZZZ la cerca es fa del nom parescut al fitper, per exemple
+          // si cerques
+          // "Registre_20" et pot trobar Registre_20, Registre_200, Registre_202,
+          // ...
+          int countTrobats = 0;
+          for (Expediente expediente : llista2) {
+            if (nomExpedient.equals(expediente.getName())) {
+              countTrobats++;
+              if (countTrobats > 1) {
+                log.error(" S'ha trobat coincidencia multiple " + expediente.getName() + " ("
+                    + expediente.getId() + ") per la cerca de nomExpedient " + nomExpedient
+                    + ")");
+              } else {
+                expedientCercat = expediente;
+              }
             }
           }
-        }
-        
-        if(countTrobats == 0) {
-          expedientCercat=null;
-        } else if (countTrobats == 1) {
-          // expedientCercat ja conté el valor
-        } else if (countTrobats > 1) {
+  
+          if (countTrobats == 0) {
+            expedientCercat = null;
+          } else if (countTrobats == 1) {
+            // expedientCercat ja conté el valor
+          } else if (countTrobats > 1) {
             // Hi ha multiple instancies que s'ajusten. No se quin triar
-            String msg = "S'ha trobat coincidencia multiple " + expedientCercat.getName() + " (" 
-                + expedientCercat.getId() + ") per la cerca de nomExpedient " + nomExpedient 
+            String msg = "S'ha trobat coincidencia multiple " + expedientCercat.getName() + " ("
+                + expedientCercat.getId() + ") per la cerca de nomExpedient " + nomExpedient
                 + "). Veure logs per la resta de coincidències.";
             log.error(msg);
             throw new CustodyException(msg);
+          }
         }
       }
 
-      
-      
-      
-      //log.info("Creacio Expedient::Llistat.SIZE: " + llista.size());
+      // log.info("Creacio Expedient::Llistat.SIZE: " + llista.size());
       String expedientID;
       if (expedientCercat == null) {
         // Cream l'expedient
@@ -400,9 +422,18 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
         Resultado<Expediente> resultado = api.crearExpediente(miExpediente, true);
 
-        if (hiHaError(resultado.getCodigoResultado())) {
-          throw new CustodyException("Error creant expedient " + nomExpedient + ": "
-              + res.getCodigoResultado() + "-" + res.getMsjResultado());
+        String codErr = resultado.getCodigoResultado();
+        if (hiHaError(codErr)) {
+          
+          if ("COD_021".equals(codErr) 
+              && resultado.getMsjResultado().startsWith("Duplicate child name not allowed")) {
+            throw new CustodyException("Error creant expedient " + nomExpedient + ": "
+               + "Ja existeix un expedient amb aquest nom (la propietat de "
+               + "configuracio nom_expedient_EL ha de generar noms únics)");
+          } else {
+            throw new CustodyException("Error creant expedient " + nomExpedient + ": "
+              + resultado.getCodigoResultado() + "-" + resultado.getMsjResultado());
+          }
         }
 
         expedientID = resultado.getElementoDevuelto().getId();
@@ -412,9 +443,9 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         }
 
       } else {
-        
 
-          
+        // Expedient Ja Existeix
+
         expedientID = expedientCercat.getId();
 
         if (debug) {
@@ -426,27 +457,36 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           List<Nodo> nodos = expedientCercat.getChilds();
           if (nodos == null || nodos.size() == 0) {
             if (debug) {
-              log.info("Creacio Expedient:: Fills Expedients:  NO EN TE !!!!!");
+              log.info("Creacio Expedient:: Fills Expedients:  NO EN TE (OK)!!!!!");
             }
           } else {
             for (Nodo nodo : nodos) {
               // TiposObjetoSGD.DIRECTORIO
               if (debug) {
-                log.info("Creacio Expedient:: Fills Expedients: " + nodo.getName()
-                  + " [" + nodo.getType().getValue() + "]");
+                log.info("Creacio Expedient:: Fills Expedients: " + nodo.getName() + " ["
+                    + nodo.getType().getValue() + "]");
               }
               if (nomCarpeta.equals(nodo.getName())
                   && TiposObjetoSGD.DIRECTORIO.equals(nodo.getType())) {
-                carpetaID = nodo.getId();
-                break;
+                
+                throw new CustodyException("S'ha intentat crear una carpeta  " + nomCarpeta 
+                    + " en l'expedient " + nomExpedient + " però aquesta carpeta ja existeix."
+                    +" La propietat de configuracio nom_carpeta_EL ha de generar"
+                    + " noms únics per expedient.");
+                
+                // XYZ ZZZ carpetaID = nodo.getId();
               }
-
+              /*
+              if (NOM_CSV_DOCUMENT_ELECTRONIC.equals(nodo.getName())
+                  && TiposObjetoSGD.DOCUMENTO.equals(nodo.getType())) {
+                uuidCSVFile = nodo.getId();
+              }
+              */
             }
           }
         }
 
       }
-
 
       // (3) === CREAM CARPETA
 
@@ -459,7 +499,9 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         custodyID = expedientID;
       } else {
 
-        if (carpetaID == null) {
+          //if (carpetaID != null)   {
+           
+          //}
 
           Resultado<Directorio> carpeta = api.crearDirectorio(nomCarpeta, expedientID);
 
@@ -470,18 +512,46 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
           Directorio directorio = carpeta.getElementoDevuelto();
 
-          carpetaID = directorio.getId();
+          String carpetaID = directorio.getId();
           if (debug) {
             log.info("Creacio Carpeta:: CREAT: " + carpetaID);
           }
-
-        } else {
+/*
+        } 
+        
+        else {
           // TODO Això és correcte ????? Hauria de ser únic per cada petició
           // TODO fer proves llançant error aquí
           if (debug) {
             log.info("Creacio Carpeta:: JA EXISTEIX: " + carpetaID);
           }
+
+          Resultado<Directorio> carpeta = api.obtenerDirectorio(carpetaID);
+
+          // TODO XYZ ZZZ Checks
+
+          List<Nodo> nodos = carpeta.getElementoDevuelto().getChilds();
+          if (nodos == null || nodos.size() == 0) {
+            if (debug) {
+              log.info("Creacio Carpeta:: NO EN TE FITXERS !!!!!");
+            }
+          } else {
+            for (Nodo nodo : nodos) {
+              // TiposObjetoSGD.DIRECTORIO
+              if (debug) {
+                log.info("Creacio Carpeta:: Fill Carpeta: " + nodo.getName() + " ["
+                    + nodo.getType().getValue() + "]");
+              }
+
+              if (NOM_CSV_DOCUMENT_ELECTRONIC.equals(nodo.getName())
+                  && TiposObjetoSGD.DOCUMENTO.equals(nodo.getType())) {
+                uuidCSVFile = nodo.getId();
+              }
+            }
+          }
+           
         }
+      */
 
         // Retornam Expedient#Carpeta
         custodyID = expedientID + SEPARATOR_EXPEDIENT_CARPETA + carpetaID;
@@ -493,13 +563,11 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       if (debug) {
         log.info("CODI SEGUR GENERAT = " + csv);
       }
-      Properties properties = new Properties();
-      properties.setProperty(FILE_INFO_CSV, csv);
 
-      createSimpleDoc(api, NOM_INFO_DOCUMENT_ELECTRONIC, properties, custodyID, null);
-
-      // Crear fitxer buit de METADADES
-      createSimpleDoc(api, NOM_METADADES, new Properties(), custodyID, null);
+      // Cream fitxer draft temporal amb informació del CSV
+      // XYZ ZZZ
+      String uuidCSVFile = null;
+      createSimpleDocCSV(api, NOM_CSV_DOCUMENT_ELECTRONIC, csv, custodyID, uuidCSVFile);
 
       return custodyID;
 
@@ -568,13 +636,11 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         ResultadoSimple rs = api.eliminarDirectorio(ec.carpetaID);
 
         if (hiHaError(rs.getCodigoResultado())) {
-
-          log.warn("Error Esborrant Carpeta " + ec.carpetaID + ": "
-              + rs.getCodigoResultado() + "-" + rs.getMsjResultado());
-
+          log.warn("Error Esborrant Carpeta " + ec.carpetaID + ": " + rs.getCodigoResultado()
+              + "-" + rs.getMsjResultado());
         }
 
-        // TODO  Eliminar expedient quan aquest no tengui fills ?????
+        // TODO Eliminar expedient quan aquest no tengui fills ?????
       }
     } catch (Exception e) {
       throw new CustodyException("Error esborrant expedient amb uuid " + ec.expedientID + ": "
@@ -593,180 +659,311 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       DocumentCustody documentCustody, SignatureCustody signatureCustody, Metadata[] metadata)
       throws CustodyException, NotSupportedCustodyException, MetadataFormatException {
 
-    final boolean overWriteDocument = true;
-    final boolean overWriteSignature = true;
-    final boolean overWriteMetadata = true;
-    createUpdateAll(custodyID, custodyParameters, documentCustody, overWriteDocument,
-        signatureCustody, overWriteSignature, metadata, overWriteMetadata);
+    createUpdateAll(custodyID, custodyParameters, documentCustody, signatureCustody, metadata);
   }
 
   protected void createUpdateAll(String custodyID, Map<String, Object> custodyParameters,
-      DocumentCustody documentCustody, boolean overWriteDocument,
-      SignatureCustody signatureCustody, boolean overWriteSignature, Metadata[] metadatas,
-      boolean overWriteMetadatas) throws CustodyException {
+      DocumentCustody documentCustody, SignatureCustody signatureCustody, Metadata[] metadatas)
+      throws CustodyException {
+
+    // boolean overWriteDocument, boolean overWriteSignature, boolean
+    // overWriteMetadatas
+
     final boolean debug = isDebug();
+    
+    // CHECKS 
+    final String nomFitxerDocument; 
+    if (documentCustody != null) {
+      if (signatureCustody == null) {
+        
+        
+        if (!isPropertyCreateDraft()) {
+          //   TODO TRADUIR
+          throw new CustodyException("No podem guardar un document pla en mode NO BORRADOR (NO DRAFT)");
+        }
+      } 
+      // ONLY FILE && DETACHED
+      nomFitxerDocument  = documentCustody.getName();
+    } else {
+      // ATTACHED
+      nomFitxerDocument = signatureCustody.getName();
+    }
+    
+    // CHECK
+    if (NOM_CSV_DOCUMENT_ELECTRONIC.equals(nomFitxerDocument)) {
+      // TODO
+      throw new CustodyException("El nom de fitxer " + NOM_CSV_DOCUMENT_ELECTRONIC 
+          + " no està permés. Canvii el nom del fitxer i torni a intentar-ho");
+    }
+    
+
+    if (isPropertyTancarExpedient() && isPropertyCreateDraft()) {
+      // Son Incompatibles
+      throw new CustodyException("La combinació de crear borradors (creatDraft) i de "
+          + "tancar expedient (tancarExpedient) són incompatibles."); 
+    }
+    
+    
     try {
 
-      // Miram si el Document Electrònic Existeix
-
+      // 1.- Miram si el Document Electrònic Existeix
       ExpedientCarpeta ec = decodeCustodyID(custodyID);
 
       ApiArchivoDigital apiArxiu = getApiArxiu(custodyParameters);
 
-      // Cercam si hi ha un document
+      // 1.1.- Cercam si hi ha l'expedient
       Resultado<Expediente> expedient = apiArxiu.obtenerExpediente(ec.expedientID);
-      // TODO Falta Checks
+
+      if (hiHaError(expedient.getCodigoResultado())) {
+        // Checks
+        throw new CustodyException("Error llegint expedient amb uuid " + ec.expedientID + "("
+            + expedient.getCodigoResultado() + ":" + expedient.getMsjResultado() + ")",
+            new Exception());
+      }
+
+      // 1.2.- Cercam Fitxers dins la Carpeta (si en té) o directament dins
+      // l'expedient
       Map<String, Nodo> nodosByName;
       nodosByName = getNodosByCustodyID(apiArxiu, ec, expedient);
 
+      // 1.3.- Cercam o el document o el fitxer CSV
       String documentElectronicID = null;
-      Nodo nodo = nodosByName.get(NOM_DOCUMENT_ELECTRONIC);
-      if (nodo != null && TiposObjetoSGD.DOCUMENTO.equals(nodo.getType())) {
-        documentElectronicID = nodo.getId();
+      String csv = null;
+      Nodo nodoCSV = null;
+      {
+        FilesInfo filesInfo = getFileInfo(ec, nodosByName);
+
+        if (filesInfo.nodoDocumentElectronic != null) {
+          documentElectronicID = filesInfo.nodoDocumentElectronic.getId();
+        } else {
+          csv = readSimpleDocCSV(apiArxiu, filesInfo.nodoCSV.getId());
+          nodoCSV = filesInfo.nodoCSV;
+        }
       }
 
-      // Recuperar INFO DOCUMENTS (Sempre ha d'existir ja que es crea en
-      // reserveCustodyID()
-      Nodo nodoInfo = nodosByName.get(NOM_INFO_DOCUMENT_ELECTRONIC);
-
-      Properties infoDocSign = readPropertiesFromSimpleDoc(apiArxiu, nodoInfo.getId());
-
       // =================================== INICIALITZACIO
-      Documento doc;
+      Properties metasAndInfo;
+      Documento documento;
+
+      final Map<String, Object> generatedMetadataCollection = getMetadadesPerDocument(
+          custodyParameters, signatureCustody);
+
       Map<String, Object> metadataCollection;
       if (documentElectronicID == null) {
 
-        // CREAR DOCUMENT
+        // CREAR DOCUMENT-ElECTRONIC
+        metasAndInfo = new Properties();
 
-        doc = new Documento();
+        documento = new Documento();
         // String idNuevoDocumento = SENSE_VALOR;
 
         // Configuració paràmetres document
         List<Aspectos> aspects = new ArrayList<Aspectos>();
         aspects.add(Aspectos.INTEROPERABLE);
         aspects.add(Aspectos.TRANSFERIBLE);
-        doc.setId(null);
-        doc.setName(NOM_DOCUMENT_ELECTRONIC);
-        doc.setAspects(aspects);
+        
+        
+        documento.setId(null);
+        documento.setAspects(aspects);
 
-        doc.setEncoding(FORMATO_UTF8);
+        documento.setEncoding(FORMATO_UTF8);
 
-        // **** metadades per document i per signature
-        metadataCollection = getMetadadesPerDocument(custodyParameters, signatureCustody);
+        metadataCollection = new HashMap<String, Object>();
+        metadataCollection.putAll(generatedMetadataCollection);
 
-        // EL CSV s'ha generat en la reserva i s'ha de guardat en 
+        // EL CSV s'ha generat en la reserva i s'ha de guardat en
         // el fitxer de INFO. S'ha de recuperar del fitxer de Informacio.
-        String csv = infoDocSign.getProperty(FILE_INFO_CSV);
-
         if (debug) {
           log.info("CODI SEGUR RECUPERAT = " + csv);
         }
         metadataCollection.put(MetadataConstants.ENI_CSV, csv);
-        // TODO XYZ ZZZ  QUE és AIXÒ !!!!!
+        // TODO XYZ ZZZ QUE és AIXÒ !!!!!
         // metadataCollection.put(MetadatosDocumento.DEF_CSV, "Sense definir");
 
-        doc.setMetadataCollection(metadataCollection);
+        documento.setMetadataCollection(metadataCollection);
 
       } else {
 
-        // ACTUALITZAR DOCUMENT
+        // ACTUALITZAR DOCUMENT-ELECTRONIC
+
+        // Per que hem de treure tot el document. Amb la informació de
+        // eni:description n'hi ha suficient ?
+        // No ja que per ara hem de suportar el saveDocument i el saveSignature,
+        // cosa
+        // que fa que s'hagin d'actualitzar signatura i document respectivament.
         final boolean retrieveContent = true;
-        // TODO Comprovar resultat operació
-        doc = apiArxiu.obtenerDocumento(documentElectronicID, retrieveContent)
-            .getElementoDevuelto();
 
-        metadataCollection = doc.getMetadataCollection();
+        Resultado<Documento> docRes = apiArxiu.obtenerDocumento(documentElectronicID,
+            retrieveContent);
 
-        if (custodyParameters != null) {
-          Map<String, Object> newMetadataCollection = getMetadadesPerDocument(
-              custodyParameters, signatureCustody);
-
-          metadataCollection.putAll(newMetadataCollection);
-
+        // Comprovar resultat operació
+        if (hiHaError(docRes.getCodigoResultado())) {
+          throw new CustodyException("Error llegint document amb uuid " + documentElectronicID
+              + "(" + docRes.getCodigoResultado() + ":" + docRes.getMsjResultado() + ")",
+              new Exception());
         }
+
+        documento = docRes.getElementoDevuelto();
+
+        metadataCollection = documento.getMetadataCollection();
+
+        String metasAndInfoStr = (String) metadataCollection
+            .get(MetadataConstants.ENI_DESCRIPCION);
+
+        metasAndInfo = stringToProperties(metasAndInfoStr);
+
+        // XYZ ZZZ if (custodyParameters != null)
+        // Actualitzam amb les metadades amb les metadades generades
+        metadataCollection.putAll(generatedMetadataCollection);
 
       }
 
       // ======================== CODI COMU
-
       if (debug) {
         for (String key : metadataCollection.keySet()) {
           log.info("Metadata Document [" + key + "] => " + metadataCollection.get(key));
         }
       }
 
-      if (overWriteDocument) {
-        if (documentCustody == null) {
+      
+      if (documentCustody == null) {
 
-          doc.setContent(null);
-          doc.setMimetype(null);
+        metasAndInfo.remove(FILE_INFO_BASE_DOCUMENT + FILE_INFO_NOM);
+        metasAndInfo.remove(FILE_INFO_BASE_DOCUMENT + FILE_INFO_TAMANY);
+        metasAndInfo.remove(FILE_INFO_BASE_DOCUMENT + FILE_INFO_MIME);
 
-          infoDocSign.remove(FILE_INFO_BASE_DOCUMENT + FILE_INFO_NOM);
-          infoDocSign.remove(FILE_INFO_BASE_DOCUMENT + FILE_INFO_TAMANY);
-          infoDocSign.remove(FILE_INFO_BASE_DOCUMENT + FILE_INFO_MIME);
+      } else {
+        byte[] data = documentCustody.getData();
+        String mimetype = documentCustody.getMime();
 
-        } else {
-          byte[] data = documentCustody.getData();
-          String contenidoDocumento = Base64.encode(data);
-          doc.setContent(contenidoDocumento);
-          String mimetype = documentCustody.getMime(); 
-          doc.setMimetype(mimetype);
-
-          infoDocSign.setProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_NOM,
-              documentCustody.getName());
-          infoDocSign.setProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_TAMANY,
-              String.valueOf(data.length));
-          if (mimetype == null) {
-            throw new CustodyException("No s'ha definit el mime type del DocumentCustody");
-          }
-          infoDocSign.setProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_MIME, mimetype);
+        metasAndInfo.setProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_NOM,
+            documentCustody.getName());
+        metasAndInfo.setProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_TAMANY,
+            String.valueOf(data.length));
+        if (mimetype == null) {
+          throw new CustodyException("No s'ha definit el mime type del DocumentCustody");
         }
+        metasAndInfo.setProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_MIME, mimetype);
       }
+      
 
-      if (overWriteSignature) {
-        if (signatureCustody == null) {
-          doc.setListaFirmas(new ArrayList<FirmaDocumento>());
+      
+      if (signatureCustody == null) {
 
-          infoDocSign.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_NOM);
-          infoDocSign.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_TAMANY);
-          infoDocSign.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_MIME);
+        metasAndInfo.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_NOM);
+        metasAndInfo.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_TAMANY);
+        metasAndInfo.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_MIME);
 
-          infoDocSign.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_SIGNATURE_ATTACHED_DOCUMENT);
-          infoDocSign.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_SIGNATURE_TYPE);
+        metasAndInfo.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_SIGNATURE_ATTACHED_DOCUMENT);
+        metasAndInfo.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_SIGNATURE_TYPE);
 
+      } else {
+
+        final byte[] data = signatureCustody.getData();
+        String mimeType = signatureCustody.getMime();
+        
+        documento.getAspects().add(Aspectos.FIRMADO);
+        
+        metasAndInfo.setProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_NOM,
+            signatureCustody.getName());
+        metasAndInfo.setProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_TAMANY,
+            String.valueOf(data.length));
+        if (mimeType == null) {
+          throw new CustodyException("No s'ha definit el mime type del SignatureCustody");
+        }
+        metasAndInfo.setProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_MIME, mimeType);
+
+        if (signatureCustody.getAttachedDocument() == null) {
+          metasAndInfo.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_SIGNATURE_ATTACHED_DOCUMENT);
         } else {
+          metasAndInfo.setProperty(FILE_INFO_BASE_FIRMA
+              + FILE_INFO_SIGNATURE_ATTACHED_DOCUMENT,
+              String.valueOf(signatureCustody.getAttachedDocument()));
+        }
+        metasAndInfo.setProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_SIGNATURE_TYPE,
+            signatureCustody.getSignatureType());
+      }
+      
 
-          FirmaDocumento firma = new FirmaDocumento();
-          final byte[] data = signatureCustody.getData();
-          firma.setContent(Base64.encode(data));
-          firma.setEncoding(FORMATO_UTF8);
+      // Guardar/actualitzar metadades
+      if (metadatas != null) {
 
-          String mimeType = signatureCustody.getMime();
-          
-          firma.setMimetype(mimeType);
+        for (Metadata metadata : metadatas) {
 
-          doc.setListaFirmas(Arrays.asList(firma));
-
-          infoDocSign.setProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_NOM,
-              signatureCustody.getName());
-          infoDocSign.setProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_TAMANY,
-              String.valueOf(data.length));
-          if (mimeType == null) {
-            throw new CustodyException("No s'ha definit el mime type del SignatureCustody");
-          }
-          infoDocSign.setProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_MIME, mimeType);
-
-          if (signatureCustody.getAttachedDocument() == null) {
-            infoDocSign.remove(FILE_INFO_BASE_FIRMA + FILE_INFO_SIGNATURE_ATTACHED_DOCUMENT);
+          String key = metadata.getKey();
+          if (key.startsWith("eni:") || key.startsWith("gdib:")) {
+            // Metadades eni: o gdib: es guarden com Metadata del Document
+            // NOTA: No s'actualitzaran les metadades generades
+            if (generatedMetadataCollection.containsKey(key) || MetadataConstants.ENI_DESCRIPCION.equals(key) ) {
+              // Es generada i no la podem sobreescriure
+              log.warn("La metadada [" + key + "] no es pot guardar ja que és generada pel Sistema");
+            } else {
+              metadataCollection.put(key, metadata.getValue());
+            }
           } else {
-            infoDocSign.setProperty(FILE_INFO_BASE_FIRMA
-                + FILE_INFO_SIGNATURE_ATTACHED_DOCUMENT,
-                String.valueOf(signatureCustody.getAttachedDocument()));
+            // Processar metadades no eni o gdib: es guarden dins
+            // "eni:description"
+            metasAndInfo.put(FILE_INFO_BASE_METADATA + key, metadata.getValue());
           }
-          infoDocSign.setProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_SIGNATURE_TYPE,
-              signatureCustody.getSignatureType());
         }
       }
+
+      // Ara es guarden info del document i signatura més les metadades
+      documento.getMetadataCollection().put(MetadataConstants.ENI_DESCRIPCION,
+          URLEncoder.encode(propertiesToString(metasAndInfo), "UTF-8"));
+
+      // ============================= MUNTAR DOCUMENTO
+
+      // Muntar Documento segons especificació de l'arxiu Digital CAIB
+      // Si la firma electrónica es implícita (tipos de firma: “TF02”, “TF03”,
+      // “TF05” y “TF06”), es decir, contenido del documento y firma electrónica
+      // coinciden, no es requerido aportar la firma electrónica del documento,
+      // bastaría con informar el contenido del mismo.
+
+      // Muntar document segons l'anterior
+      
+      documento.setName(nomFitxerDocument);
+      
+      if (documentCustody != null && signatureCustody != null) {
+        // DETACHED
+
+        // FILE
+        byte[] dataFile = documentCustody.getData();
+        documento.setContent(Base64.encode(dataFile));
+        documento.setMimetype(documentCustody.getMime());
+
+        // SIGNATURE
+        FirmaDocumento firma = new FirmaDocumento();
+        final byte[] dataSign = signatureCustody.getData();
+        firma.setContent(Base64.encode(dataSign));
+        firma.setEncoding(FORMATO_UTF8);
+        firma.setMimetype(signatureCustody.getMime());
+
+        documento.setListaFirmas(Arrays.asList(firma));
+
+      } else {
+
+        // ONLY FILE && ATTACHED
+
+        // FILE if ONLY FILE or SIGNATURE if ATTACHED
+        byte[] dataFile;
+        String mime;
+
+        if (signatureCustody != null) {
+          dataFile = signatureCustody.getData();
+          mime = signatureCustody.getMime();
+        } else {
+          dataFile = documentCustody.getData();
+          mime = documentCustody.getMime();
+        }
+
+        documento.setContent(Base64.encode(dataFile));
+        documento.setMimetype(mime);
+
+        documento.setListaFirmas(new ArrayList<FirmaDocumento>());
+
+      }
+
 
       // ============================= GUARDAR o ACTUALITZAR
       if (documentElectronicID == null) {
@@ -774,43 +971,40 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         // CREAR DOCUMENT
 
         // Lo creamos en el Archivo
-
         String uuidDestino = (ec.carpetaID == null) ? ec.expedientID : ec.carpetaID;
         final boolean retrieveContent = false;
 
         final ResultData rd;
         final String uuid;
         if (isPropertyCreateDraft()) {
-          
-          CreateDraftDocumentResult result = apiArxiu.crearDraftDocument(uuidDestino, doc,
-              retrieveContent);
-          
+
+          CreateDraftDocumentResult result = apiArxiu.crearDraftDocument(uuidDestino,
+              documento, retrieveContent);
+
           rd = result.getCreateDraftDocumentResult().getResult();
-          
+
           final String errorCodi = rd.getCode();
           if (hiHaError(errorCodi)) {
             throw new CustodyException("Error creant Document Draft amb id " + custodyID + "("
                 + errorCodi + " - " + rd.getDescription() + ")");
           }
-          
-          uuid = result.getCreateDraftDocumentResult().getResParam().getId();
-          
-        } else {
-           CreateDocumentResult result = apiArxiu.crearDocumento(uuidDestino, doc,
-               retrieveContent);
-           rd = result.getCreateDocumentResult().getResult();
-           
-           final String errorCodi = rd.getCode();
-           if (hiHaError(errorCodi)) {
-             throw new CustodyException("Error creant Document Draft amb id " + custodyID + "("
-                 + errorCodi + " - " + rd.getDescription() + ")");
-           }
-           
-           uuid = result.getCreateDocumentResult().getResParam().getId();
-        }
 
-        
-        
+          uuid = result.getCreateDraftDocumentResult().getResParam().getId();
+
+        } else {
+          
+          CreateDocumentResult result = apiArxiu.crearDocumento(uuidDestino, documento,
+              retrieveContent);
+          rd = result.getCreateDocumentResult().getResult();
+
+          final String errorCodi = rd.getCode();
+          if (hiHaError(errorCodi)) {
+            throw new CustodyException("Error creant Document Final amb id " + custodyID + "("
+                + errorCodi + " - " + rd.getDescription() + ")");
+          }
+
+          uuid = result.getCreateDocumentResult().getResParam().getId();
+        }
 
         if (debug) {
           log.info("Creat nou Document amb ID = " + uuid);
@@ -823,33 +1017,45 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           log.info("ACTUALITZAR DOCUMENT AMB UUID = " + documentElectronicID);
         }
 
-        doc.setId(documentElectronicID);
-        doc.getAspects().remove(Aspectos.BORRADOR);
-        ResultadoSimple rs = apiArxiu.actualizarDocumento(doc);
+        documento.setId(documentElectronicID);
+        documento.getAspects().remove(Aspectos.BORRADOR);
+
+        ResultadoSimple rs = apiArxiu.actualizarDocumento(documento);
 
         if (hiHaError(rs.getCodigoResultado())) {
           throw new CustodyException("Error actualitzant Document amb id " + custodyID
-              + "(" + rs.getCodigoResultado() + " - " + rs.getMsjResultado() + ")");
+              + "[uuid:" + documentElectronicID + "]" + "(" + rs.getCodigoResultado() + " - "
+              + rs.getMsjResultado() + ")");
         }
 
       }
 
-      // Guardar Informació del Documents:
-      createSimpleDoc(apiArxiu, NOM_INFO_DOCUMENT_ELECTRONIC, infoDocSign, custodyID,
-          nodoInfo.getId());
-
-      // Guardar/actualitzar metadades
-      if (overWriteMetadatas) {
-        updateMetadata(custodyID, metadatas, custodyParameters);
+      // Esborrar fitxer temporal que conté CSV
+      if (nodoCSV != null) {
+        ResultadoSimple res = apiArxiu.eliminarDocumento(nodoCSV.getId());
+        if (hiHaError(res.getCodigoResultado())) {
+          log.warn("Error esborrant fitxer temporal de CSV amb uuid " + nodoCSV.getId() + "("
+              + res.getCodigoResultado() + ": " + res.getMsjResultado() + ")", new Exception());
+        }
       }
 
       if (debug) {
+        Thread.sleep(1500);
         Map<String, Nodo> nodosByName2 = getNodosByCustodyID(apiArxiu, ec, expedient);
         for (String key : nodosByName2.keySet()) {
-          log.info("FITXERS A LA CARPETA[" + key + "] = "
-              + nodosByName2.get(key).getId());
+          log.info("FITXERS A LA CARPETA[" + key + "] = " + nodosByName2.get(key).getId());
         }
       }
+      
+      if (isPropertyTancarExpedient()) {
+         Resultado<String> res = apiArxiu.cerrarExpediente(ec.expedientID);
+         if (hiHaError(res.getCodigoResultado())) {
+           // TODO que feim, llaçam excepció o warning
+           log.error("No s'ha pogut tancar l'expedient amb uuid " + ec.expedientID + ": " 
+             + res.getCodigoResultado() + " - " + res.getMsjResultado(), new Exception() );
+         }
+      }
+      
 
     } catch (CustodyException e) {
       throw e;
@@ -859,103 +1065,146 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     }
   }
 
+  protected FilesInfo getFileInfo(ExpedientCarpeta ec, Map<String, Nodo> nodosByName)
+      throws CustodyException {
+    
+    // Cercarem entre totes els nodes un que és digui NOM_CSV_DOCUMENT_ELECTRONIC
+    if (nodosByName.size() == 0) {
+      throw new CustodyException("Aquest Expedient/Carpeta ("
+          + ec.toString() + ") no conté cap fitxer.", new Exception());
+    }
+    
+    if (nodosByName.size() != 1) {
+      
+      StringBuffer nodes = new StringBuffer();
+      for (Nodo n : nodosByName.values()) {
+        if (nodes.length() != 0) {
+          nodes.append(", ");
+        }
+        nodes.append(n.getName() + "(" + n.getId() + ")");
+      }
+      
+      throw new CustodyException("Aquest Expedient/Carpeta ("
+          + ec.toString() + ") conté multiples fitxers: " + nodes.toString(), new Exception());
+    }
+    
+    Nodo nodoCSV = nodosByName.get(NOM_CSV_DOCUMENT_ELECTRONIC);
+
+    if (nodoCSV != null && TiposObjetoSGD.DOCUMENTO.equals(nodoCSV.getType())) {
+      return new FilesInfo(null, nodoCSV);
+    }
+    
+    String key = nodosByName.keySet().iterator().next();
+
+
+    Nodo nodo = nodosByName.get(key); // NOM_DOCUMENT_ELECTRONIC);
+    
+    if (TiposObjetoSGD.DOCUMENTO.equals(nodo.getType())) {
+      return new FilesInfo(nodo, null);
+    } else {
+
+      StringBuffer nodes = new StringBuffer();
+      for (Nodo n : nodosByName.values()) {
+        if (nodes.length() != 0) {
+          nodes.append(", ");
+        }
+        nodes.append(n.getName() + "(" + n.getId() + ")");
+      }
+      throw new CustodyException("No s'ha trobat cap document electrònoc ni fitxer de csv en "
+          + "aquest Expedient/Carpeta (" + ec.toString() + "): " + nodes.toString(),
+          new Exception());
+    }
+  }
+
   // ----------------------------------------------------------------------------
   // ---------------------------- D O C U M E N T ------------------------------
   // ----------------------------------------------------------------------------
 
   @Override
+  @Deprecated
   public void saveDocument(String custodyID, Map<String, Object> custodyParameters,
       DocumentCustody documentCustody) throws CustodyException, NotSupportedCustodyException {
 
-    final boolean overWriteDocument = true;
-    final boolean overWriteSignature = false;
-    final boolean overWriteMetadatas = false;
-    final SignatureCustody signatureCustody = null;
-    final Metadata[] metadatas = null;
-    createUpdateAll(custodyID, custodyParameters, documentCustody, overWriteDocument,
-        signatureCustody, overWriteSignature, metadatas, overWriteMetadatas);
+    throw new NotSupportedCustodyException();
 
+    /*
+     * 
+     * final boolean overWriteDocument = true; final boolean overWriteSignature
+     * = false; final boolean overWriteMetadatas = false; final SignatureCustody
+     * signatureCustody = null; final Metadata[] metadatas = null;
+     * createUpdateAll(custodyID, custodyParameters, documentCustody,
+     * overWriteDocument, signatureCustody, overWriteSignature, metadatas,
+     * overWriteMetadatas);
+     */
   }
 
   @Override
+  @Deprecated
   public void deleteDocument(String custodyID) throws CustodyException,
       NotSupportedCustodyException {
-    final boolean overWriteDocument = true;
-    final boolean overWriteSignature = false;
-    final boolean overWriteMetadatas = false;
-    final SignatureCustody signatureCustody = null;
-    final DocumentCustody documentCustody = null;
-    final Metadata[] metadatas = null;
-    // No s'utilitza
-    final Map<String, Object> custodyParameters = null;
-    createUpdateAll(custodyID, custodyParameters, documentCustody, overWriteDocument,
-        signatureCustody, overWriteSignature, metadatas, overWriteMetadatas);
 
+    throw new NotSupportedCustodyException();
+
+    /*
+     * 
+     * final boolean overWriteDocument = true; final boolean overWriteSignature
+     * = false; final boolean overWriteMetadatas = false; final SignatureCustody
+     * signatureCustody = null; final DocumentCustody documentCustody = null;
+     * final Metadata[] metadatas = null; // No s'utilitza final Map<String,
+     * Object> custodyParameters = null; createUpdateAll(custodyID,
+     * custodyParameters, documentCustody, overWriteDocument, signatureCustody,
+     * overWriteSignature, metadatas, overWriteMetadatas);
+     */
   }
 
   @Override
   public byte[] getDocument(String custodyID) throws CustodyException {
 
-    try {
-      ApiArchivoDigital apiArxiu = getApiArxiu(null);
+    final boolean retrieveData = true;
+    DocumentCustody dc = internalGetDocument(custodyID, retrieveData);
+    return (dc == null) ? null : dc.getData();
 
-      Map<String, Nodo> nodos = getNodosByCustodyID(apiArxiu, custodyID);
-
-      Nodo nodo = nodos.get(NOM_DOCUMENT_ELECTRONIC);
-
-      String uuid = nodo.getId();
-
-      Resultado<Documento> documento = apiArxiu.obtenerDocumento(uuid, true);
-
-      // TODO validar codis d'error
-      Documento doc = documento.getElementoDevuelto();
-      String dataB64 = doc.getContent();
-
-      if (dataB64 == null) {
-        return null;
-      } else {
-        return Base64.decode(dataB64);
-      }
-
-    } catch (CustodyException ce) {
-      throw ce;
-    } catch (Exception e) {
-      throw new CustodyException(
-          "Error intentant obtenir contingut del Document amb custodyID " + custodyID + ": "
-              + e.getMessage(), e);
-    }
   }
 
   @Override
   public DocumentCustody getDocumentInfo(String custodyID) throws CustodyException {
 
-    DocumentCustody doc = getDocumentInfoOnly(custodyID);
-
-    if (doc == null) {
-      return null;
-    }
-
-    doc.setData(getDocument(custodyID));
-
-    return doc;
+    final boolean retrieveData = true;
+    return internalGetDocument(custodyID, retrieveData);
 
   }
 
   @Override
   public DocumentCustody getDocumentInfoOnly(String custodyID) throws CustodyException {
+    final boolean retrieveData = false;
+    return internalGetDocument(custodyID, retrieveData);
+  }
+
+  protected DocumentCustody internalGetDocument(String custodyID, boolean retrieveContent)
+      throws CustodyException {
 
     try {
+  
       ApiArchivoDigital apiArxiu = getApiArxiu(null);
 
       Map<String, Nodo> nodos = getNodosByCustodyID(apiArxiu, custodyID);
+      
+      FilesInfo fileInfo = getFileInfo(decodeCustodyID(custodyID), nodos);
+      
+      Nodo nodo = fileInfo.nodoDocumentElectronic;
+      
+      // No s'ha guardat cap document electrònic
+      if (nodo == null) {
+        return null;
+      }
 
-      Nodo nodo = nodos.get(NOM_INFO_DOCUMENT_ELECTRONIC);
 
-      String uuid = nodo.getId();
+      FullInfoDocumentElectronic fullInfo;
+      fullInfo = getFullInfoOfDocumentElectronic(apiArxiu, nodo.getId(), retrieveContent);
 
-      Properties prop = readPropertiesFromSimpleDoc(apiArxiu, uuid);
+      Properties p = fullInfo.infoAndMetas;
 
-      String nom = prop.getProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_NOM);
+      String nom = p.getProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_NOM);
 
       if (nom == null) {
         return null;
@@ -963,13 +1212,19 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
       DocumentCustody doc = new DocumentCustody();
       doc.setName(nom);
-      doc.setLength(Long.parseLong(prop
-          .getProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_TAMANY)));
-      doc.setMime(prop.getProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_MIME));
+      doc.setLength(Long.parseLong(p.getProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_TAMANY)));
+      doc.setMime(p.getProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_MIME));
+
+      if (retrieveContent) {
+        Documento documento = fullInfo.documento;
+        byte[] data = Base64.decode(documento.getContent());
+        doc.setData(data);
+        doc.setLength(data.length);
+      }
 
       return doc;
 
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new CustodyException(
           "Error intentant obtenir contingut del Document amb custodyID " + custodyID + ": "
               + e.getMessage(), e);
@@ -987,104 +1242,72 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   // ----------------------------------------------------------------------------
 
   @Override
+  @Deprecated
   public void saveSignature(String custodyID, Map<String, Object> custodyParameters,
       SignatureCustody signatureCustody) throws CustodyException, NotSupportedCustodyException {
 
-    final boolean overWriteDocument = false;
-    final boolean overWriteSignature = true;
-    final boolean overWriteMetadatas = false;
-    final DocumentCustody documentCustody = null;
-    final Metadata[] metadatas = null;
-    createUpdateAll(custodyID, custodyParameters, documentCustody, overWriteDocument,
-        signatureCustody, overWriteSignature, metadatas, overWriteMetadatas);
+    throw new NotSupportedCustodyException();
+
+    /*
+     * final boolean overWriteDocument = false; final boolean overWriteSignature
+     * = true; final boolean overWriteMetadatas = false; final DocumentCustody
+     * documentCustody = null; final Metadata[] metadatas = null;
+     * createUpdateAll(custodyID, custodyParameters, documentCustody,
+     * overWriteDocument, signatureCustody, overWriteSignature, metadatas,
+     * overWriteMetadatas);
+     */
 
   }
 
   @Override
   public byte[] getSignature(String custodyID) throws CustodyException {
-    
-    final boolean debug = isDebug();
-    
-    try {
-      ApiArchivoDigital apiArxiu = getApiArxiu(null);
 
-      Map<String, Nodo> nodos = getNodosByCustodyID(apiArxiu, custodyID);
+    boolean retrieveContent = true;
+    SignatureCustody sc = internalGetSignature(custodyID, retrieveContent);
 
-      Nodo nodo = nodos.get(NOM_DOCUMENT_ELECTRONIC);
+    return (sc == null) ? null : sc.getData();
 
-      String uuid = nodo.getId();
-
-      Resultado<Documento> documento = apiArxiu.obtenerDocumento(uuid, true);
-
-      // TODO  Check Values
-      Documento doc = documento.getElementoDevuelto();
-
-      List<FirmaDocumento> listFirmes = doc.getListaFirmas();
-
-      if (listFirmes == null || listFirmes.size() == 0) {
-        return null;
-      }
-
-      FirmaDocumento firma = listFirmes.get(0); // TODO Quina firma recollir: la
-                                                // darrera ????
-
-      String dataB64 = firma.getContent();
-
-      if (debug) {
-        log.info("firma.getMimetype() = " + firma.getMimetype());
-        log.info("firma.getEncoding() = " + firma.getEncoding());
-        log.info("firma.getBinarytype().getValue() = " + firma.getBinarytype().getValue());
-      }
-
-      if (dataB64 == null) {
-        if (debug) {
-          log.info("firma.getContent() = NULL");
-        }
-        return null;
-      } else {
-        if (debug) {
-          log.info("firma.getContent().length = " + dataB64.length());
-        }
-        return Base64.decode(dataB64);
-      }
-
-    } catch (Exception e) {
-      throw new CustodyException(
-          "Error intentant obtenir contingut de la Firma amb custodyID " + custodyID + ": "
-              + e.getMessage(), e);
-    }
   }
 
   @Override
   public SignatureCustody getSignatureInfo(String custodyID) throws CustodyException {
-    SignatureCustody sign = getSignatureInfoOnly(custodyID);
 
-    if (sign == null) {
-      return null;
-    }
-
-    sign.setData(getSignature(custodyID));
-
-    // TODO  Check if data is null
-
-    return sign;
+    boolean retrieveContent = true;
+    return internalGetSignature(custodyID, retrieveContent);
   }
 
   @Override
   public SignatureCustody getSignatureInfoOnly(String custodyID) throws CustodyException {
+    boolean retrieveContent = false;
+    return internalGetSignature(custodyID, retrieveContent);
+
+  }
+
+  public SignatureCustody internalGetSignature(String custodyID, boolean retrieveContent)
+      throws CustodyException {
     try {
       ApiArchivoDigital apiArxiu = getApiArxiu(null);
 
-      Map<String, Nodo> nodos = getNodosByCustodyID(apiArxiu, custodyID);
+      Map<String, Nodo> nodosByName = getNodosByCustodyID(apiArxiu, custodyID);
 
-      Nodo nodo = nodos.get(NOM_INFO_DOCUMENT_ELECTRONIC);
+      FilesInfo filesInfo = getFileInfo(decodeCustodyID(custodyID), nodosByName);
+      
+      Nodo nodo = filesInfo.nodoDocumentElectronic; // NOM_DOCUMENT_ELECTRONIC);
+
+      if (nodo == null) {
+        return null;
+      }
 
       String uuid = nodo.getId();
 
-      Properties prop = readPropertiesFromSimpleDoc(apiArxiu, uuid);
+      FullInfoDocumentElectronic fullInfo;
+      fullInfo = getFullInfoOfDocumentElectronic(apiArxiu, uuid, retrieveContent);
 
-      // TODO  Check Values
-      String nom = prop.getProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_NOM);
+      // Check Values
+
+      Properties p = fullInfo.infoAndMetas;
+
+      String nom = p.getProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_NOM);
 
       if (nom == null) {
         return null;
@@ -1092,10 +1315,10 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
       SignatureCustody sign = new SignatureCustody();
       sign.setName(nom);
-      sign.setLength(Long.parseLong(prop.getProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_TAMANY)));
-      sign.setMime(prop.getProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_MIME));
+      sign.setLength(Long.parseLong(p.getProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_TAMANY)));
+      sign.setMime(p.getProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_MIME));
 
-      String attached = prop.getProperty(FILE_INFO_BASE_FIRMA
+      String attached = p.getProperty(FILE_INFO_BASE_FIRMA
           + FILE_INFO_SIGNATURE_ATTACHED_DOCUMENT);
       if (attached == null) {
         sign.setAttachedDocument(null);
@@ -1103,11 +1326,28 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         sign.setAttachedDocument(Boolean.parseBoolean(attached));
       }
 
-      sign.setSignatureType(prop.getProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_SIGNATURE_TYPE));
+      sign.setSignatureType(p.getProperty(FILE_INFO_BASE_FIRMA + FILE_INFO_SIGNATURE_TYPE));
+
+      if (retrieveContent) {
+        //
+        String nomFile = p.getProperty(FILE_INFO_BASE_DOCUMENT + FILE_INFO_NOM);
+        byte[] data;
+        if (nomFile == null) {
+          // ATTACHED => Dins content trobarem la firma
+          data = Base64.decode(fullInfo.documento.getContent());
+          sign.setData(data);
+        } else {
+          // DETACHED => Dins ListaFirmas trobarem la firma
+          FirmaDocumento firma = fullInfo.documento.getListaFirmas().get(0);
+          data = Base64.decode(firma.getContent());
+          sign.setData(data);
+        }
+        sign.setLength(data.length);
+      }
 
       return sign;
 
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new CustodyException(
           "Error intentant obtenir contingut del Document amb custodyID " + custodyID + ": "
               + e.getMessage(), e);
@@ -1116,18 +1356,21 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   }
 
   @Override
+  @Deprecated
   public void deleteSignature(String custodyID) throws CustodyException,
       NotSupportedCustodyException {
-    final boolean overWriteDocument = false;
-    final boolean overWriteSignature = true;
-    final boolean overWriteMetadatas = false;
-    final SignatureCustody signatureCustody = null;
-    final DocumentCustody documentCustody = null;
-    final Metadata[] metadatas = null;
-    // No s'utilitza
-    final Map<String, Object> custodyParameters = null;
-    createUpdateAll(custodyID, custodyParameters, documentCustody, overWriteDocument,
-        signatureCustody, overWriteSignature, metadatas, overWriteMetadatas);
+
+    throw new NotSupportedCustodyException();
+
+    /*
+     * final boolean overWriteDocument = false; final boolean overWriteSignature
+     * = true; final boolean overWriteMetadatas = false; final SignatureCustody
+     * signatureCustody = null; final DocumentCustody documentCustody = null;
+     * final Metadata[] metadatas = null; // No s'utilitza final Map<String,
+     * Object> custodyParameters = null; createUpdateAll(custodyID,
+     * custodyParameters, documentCustody, overWriteDocument, signatureCustody,
+     * overWriteSignature, metadatas, overWriteMetadatas);
+     */
 
   }
 
@@ -1135,7 +1378,6 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   public boolean supportsDeleteSignature() {
     return true;
   }
-
 
   @Override
   public String[] getSupportedSignatureTypes() {
@@ -1157,7 +1399,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
   @Override
   public boolean supportsMetadata() {
-    return true;
+    return false;
   }
 
   @Override
@@ -1182,39 +1424,52 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       Map<String, Object> custodyParameters) throws CustodyException,
       NotSupportedCustodyException, MetadataFormatException {
 
-    ApiArchivoDigital apiArxiu = getApiArxiu(custodyParameters);
-
-    new MetadataAction(apiArxiu, custodyID) {
-      @Override
-      public boolean modificarMetadades(Properties metadades) throws Exception {
-        metadades.setProperty(metadata.getKey(), metadata.getValue());
-        return true;
-      }
-    }.doAction();
+    updateMetadata(custodyID, new Metadata[] { metadata }, custodyParameters);
 
   }
 
   @Override
-  public void updateMetadata(String custodyID, final Metadata[] metadataList,
+  public void updateMetadata(String custodyID, final Metadata[] metadatas,
       Map<String, Object> custodyParameters) throws CustodyException,
       NotSupportedCustodyException, MetadataFormatException {
 
-    ApiArchivoDigital apiArxiu = getApiArxiu(custodyParameters);
+    if (true) {
+      throw new NotSupportedCustodyException(); // XYZ ZZZ
+    }
 
-    new MetadataAction(apiArxiu, custodyID) {
+    /*
+     * ApiArchivoDigital apiArxiu = getApiArxiu(custodyParameters);
+     * 
+     * apiArxiu.obtenerDocumento(arg0, arg1)
+     * 
+     * Map<String, List<Metadata>> map = internalGetAllMetadatas(custodyID,
+     * custodyParameters);
+     * 
+     * // mesclam metadades de APIDocumentCustody for (Metadata metadata :
+     * metadataList) { String key = metadata.getKey(); if
+     * (key.startsWith("eni:") || key.startsWith("gdib:")) { if () }
+     */
+    /*
+     * DocumentCustody documentCustody = null; SignatureCustody signatureCustody
+     * = null;
+     * 
+     * final boolean overWriteDocument = false; final boolean overWriteSignature
+     * = false; final boolean overWriteMetadatas = true;
+     * 
+     * 
+     * createUpdateAll(custodyID, custodyParameters, documentCustody,
+     * overWriteDocument, signatureCustody, overWriteSignature, metadatas,
+     * overWriteMetadatas);
+     */
 
-      @Override
-      public boolean modificarMetadades(Properties metadades) throws Exception {
-        if (metadataList != null && metadataList.length != 0) {
-          for (Metadata meta : metadataList) {
-            metadades.setProperty(meta.getKey(), meta.getValue());
-          }
-          return true;
-        } else {
-          return false;
-        }
-      }
-    }.doAction();
+    /*
+     * new MetadataAction(apiArxiu, custodyID) {
+     * 
+     * @Override public boolean modificarMetadades(Properties metadades) throws
+     * Exception { if (metadataList != null && metadataList.length != 0) { for
+     * (Metadata meta : metadataList) { metadades.setProperty(meta.getKey(),
+     * meta.getValue()); } return true; } else { return false; } } }.doAction();
+     */
 
   }
 
@@ -1222,46 +1477,131 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   public Map<String, List<Metadata>> getAllMetadata(String custodyID) throws CustodyException,
       NotSupportedCustodyException {
 
-    // TODO S'ha de gestionar multipes valors associats a un única clau
-    ApiArchivoDigital apiArxiu = getApiArxiu(null);
-    Properties properties = new MetadataAction(apiArxiu, custodyID) {
-      @Override
-      public boolean modificarMetadades(Properties metadades) throws Exception {
-        return false;
+    Map<String, List<Metadata>> map = internalGetAllMetadatas(custodyID, null);
+
+    return map;
+
+    /*
+     * // TODO S'ha de gestionar multipes valors associats a un única clau
+     * ApiArchivoDigital apiArxiu = getApiArxiu(null); Properties properties =
+     * new MetadataAction(apiArxiu, custodyID) {
+     * 
+     * @Override public boolean modificarMetadades(Properties metadades) throws
+     * Exception { return false; } }.doAction();
+     * 
+     * Map<String, List<Metadata>> result = new HashMap<String,
+     * List<Metadata>>();
+     * 
+     * for (Object keyObj : properties.keySet()) { String key = (String) keyObj;
+     * List<Metadata> list = new ArrayList<Metadata>(); list.add(new
+     * Metadata(key, properties.getProperty(key))); result.put(key, list); }
+     * return result;
+     */
+  }
+
+  /**
+   * Si el document existeix llegim les metadades
+   * 
+   * @return
+   */
+  protected Map<String, List<Metadata>> internalGetAllMetadatas(String custodyID,
+      Map<String, Object> custodyParameters) throws CustodyException {
+    ApiArchivoDigital apiArxiu = getApiArxiu(custodyParameters);
+
+    try {
+      Map<String, Nodo> nodosByName = getNodosByCustodyID(apiArxiu, custodyID);
+
+      ExpedientCarpeta ec = decodeCustodyID(custodyID);
+
+      FilesInfo filesInfo = getFileInfo(ec, nodosByName);
+
+      Map<String, List<Metadata>> map = new HashMap<String, List<Metadata>>();
+
+      if (filesInfo.nodoDocumentElectronic != null) {
+        // String uuid = filesInfo.nodoDocumentElectronic.getId();
+
+        // Properties prop = getPropertiesFromCAIBDocument_(apiArxiu, uuid);
+
+        // Afegir metadades ENI i GDIB
+        Nodo nodoDocElec = filesInfo.nodoDocumentElectronic;
+        Map<String, Object> metadataDocs = null;
+
+        Resultado<Documento> res = apiArxiu.obtenerDocumento(nodoDocElec.getId(), false);
+        metadataDocs = res.getElementoDevuelto().getMetadataCollection();
+
+        String descInfo = (String) metadataDocs.get(MetadataConstants.ENI_DESCRIPCION);
+
+        Properties prop = stringToProperties(descInfo);
+
+        // Només extreure Metadades
+        for (Entry<Object, Object> entry : prop.entrySet()) {
+          String key = (String) entry.getKey();
+
+          if (key.startsWith(FILE_INFO_BASE_METADATA)) {
+            key = key.substring(FILE_INFO_BASE_METADATA.length() + 1);
+
+            log.info("NEW KEY = " + key);
+
+            map.put(key, Arrays.asList(new Metadata(key, (String) entry.getValue())));
+
+          }
+
+        }
+
+        // metadades del document Electrònic
+
+        for (String key : metadataDocs.keySet()) {
+          if (!key.equals(MetadataConstants.ENI_DESCRIPCION)) {
+            Object value = metadataDocs.get(key);
+
+            map.put(key, Arrays.asList(new Metadata(key, String.valueOf(value))));
+          }
+        }
+
+      } else {
+        String csv = null;
+        csv = readSimpleDocCSV(apiArxiu, filesInfo.nodoCSV.getId());
+
+        final String key = MetadataConstants.ENI_CSV;
+
+        map.put(key, Arrays.asList(new Metadata(key, csv)));
+
       }
-    }.doAction();
 
-    Map<String, List<Metadata>> result = new HashMap<String, List<Metadata>>();
+      return map;
 
-    for (Object keyObj : properties.keySet()) {
-      String key = (String) keyObj;
-      List<Metadata> list = new ArrayList<Metadata>();
-      list.add(new Metadata(key, properties.getProperty(key)));
-      result.put(key, list);
+    } catch (CustodyException ce) {
+      throw ce;
+    } catch (Exception e) {
+      throw new CustodyException("Error intentant obtenir les metadades de " + custodyID
+          + ": " + e.getMessage(), e);
     }
-    return result;
+
   }
 
   @Override
   public List<Metadata> getMetadata(String custodyID, String key) throws CustodyException,
       NotSupportedCustodyException {
+
+    Map<String, List<Metadata>> map = internalGetAllMetadatas(custodyID, null);
+
+    return map.get(key);
+
     // TODO S'ha de gestionar multipes valors associats a un única clau
-    ApiArchivoDigital apiArxiu = getApiArxiu(null);
-    Properties properties = new MetadataAction(apiArxiu, custodyID) {
-      @Override
-      public boolean modificarMetadades(Properties metadades) throws Exception {
-        return false;
-      }
-    }.doAction();
-
-    List<Metadata> list = new ArrayList<Metadata>();
-    String value = properties.getProperty(key);
-
-    if (value != null) {
-      list.add(new Metadata(key, value));
-    }
-
-    return list;
+    /*
+     * ApiArchivoDigital apiArxiu = getApiArxiu(null); Properties properties =
+     * new MetadataAction(apiArxiu, custodyID) {
+     * 
+     * @Override public boolean modificarMetadades(Properties metadades) throws
+     * Exception { return false; } }.doAction();
+     * 
+     * List<Metadata> list = new ArrayList<Metadata>(); String value =
+     * properties.getProperty(key);
+     * 
+     * if (value != null) { list.add(new Metadata(key, value)); }
+     * 
+     * return list;
+     */
   }
 
   @Override
@@ -1277,14 +1617,14 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
   @Override
   public void deleteAllMetadata(String custodyID) throws CustodyException {
-    ApiArchivoDigital apiArxiu = getApiArxiu(null);
-    new MetadataAction(apiArxiu, custodyID) {
-      @Override
-      public boolean modificarMetadades(Properties metadades) throws Exception {
-        metadades.clear();
-        return true;
-      }
-    }.doAction();
+
+    /*
+     * ApiArchivoDigital apiArxiu = getApiArxiu(null); new
+     * MetadataAction(apiArxiu, custodyID) {
+     * 
+     * @Override public boolean modificarMetadades(Properties metadades) throws
+     * Exception { metadades.clear(); return true; } }.doAction();
+     */
 
   }
 
@@ -1292,59 +1632,47 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   public List<Metadata> deleteMetadata(String custodyID, final String key)
       throws CustodyException {
 
-    ApiArchivoDigital apiArxiu = getApiArxiu(null);
+    throw new CustodyException("NotSupported"); // XYZ ZZZ
 
-    MetadataAction m = new MetadataAction(apiArxiu, custodyID) {
-      @Override
-      public boolean modificarMetadades(Properties metadades) throws Exception {
-        Object obj = metadades.remove(key);
-        if (obj == null) {
-          return false;
-        } else {
-          this.outputParameter = obj;
-          return true;
-        }
-      }
-    };
-    m.doAction();
-    List<Metadata> list = new ArrayList<Metadata>();
-    if (m.outputParameter != null) {
-      list.add(new Metadata(key, (String) m.outputParameter));
-    }
-
-    return list;
+    /*
+     * ApiArchivoDigital apiArxiu = getApiArxiu(null);
+     * 
+     * MetadataAction m = new MetadataAction(apiArxiu, custodyID) {
+     * 
+     * @Override public boolean modificarMetadades(Properties metadades) throws
+     * Exception { Object obj = metadades.remove(key); if (obj == null) { return
+     * false; } else { this.outputParameter = obj; return true; } } };
+     * m.doAction(); List<Metadata> list = new ArrayList<Metadata>(); if
+     * (m.outputParameter != null) { list.add(new Metadata(key, (String)
+     * m.outputParameter)); }
+     * 
+     * return list;
+     */
   }
 
   @Override
   public List<Metadata> deleteMetadata(String custodyID, final String[] keys)
       throws CustodyException {
 
-    ApiArchivoDigital apiArxiu = getApiArxiu(null);
+    throw new CustodyException("NotSupported"); // XYZ ZZZ
 
-    MetadataAction m = new MetadataAction(apiArxiu, custodyID) {
-      @Override
-      public boolean modificarMetadades(Properties metadades) throws Exception {
-
-        List<Metadata> list = new ArrayList<Metadata>();
-        for (String key : keys) {
-          Object obj = metadades.remove(key);
-          if (obj != null) {
-            list.add(new Metadata(key, (String) obj));
-          }
-        }
-
-        this.outputParameter = list;
-        if (list.isEmpty()) {
-          return false;
-        } else {
-          return true;
-        }
-      }
-    };
-    m.doAction();
-
-    return (List<Metadata>) m.outputParameter;
-
+    /*
+     * ApiArchivoDigital apiArxiu = getApiArxiu(null);
+     * 
+     * MetadataAction m = new MetadataAction(apiArxiu, custodyID) {
+     * 
+     * @Override public boolean modificarMetadades(Properties metadades) throws
+     * Exception {
+     * 
+     * List<Metadata> list = new ArrayList<Metadata>(); for (String key : keys)
+     * { Object obj = metadades.remove(key); if (obj != null) { list.add(new
+     * Metadata(key, (String) obj)); } }
+     * 
+     * this.outputParameter = list; if (list.isEmpty()) { return false; } else {
+     * return true; } } }; m.doAction();
+     * 
+     * return (List<Metadata>) m.outputParameter;
+     */
   }
 
   @Override
@@ -1457,11 +1785,11 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     additionalMetas = recollectAutomaticMetadatas(custodyParameters, "expedient");
 
     if (additionalMetas != null) {
-      final boolean debug = isDebug(); 
+      final boolean debug = isDebug();
       for (Metadata metadata : additionalMetas) {
         if (debug) {
           log.info("MetasExpedient::Afegint metadata addicional [" + metadata.getKey()
-            + "] => " + metadata.getValue());
+              + "] => " + metadata.getValue());
         }
         llistaMetadades.put(metadata.getKey(), metadata.getValue());
       }
@@ -1471,7 +1799,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   }
 
   protected Map<String, Object> getMetadadesPerDocument(Map<String, Object> custodyParameters,
-     SignatureCustody signatureCustody) throws CustodyException, Exception {
+      SignatureCustody signatureCustody) throws CustodyException, Exception {
 
     Map<String, Object> llistaMetadades = getMetadadesComuns(custodyParameters);
 
@@ -1483,6 +1811,8 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         llistaMetadades.put(metadata.getKey(), metadata.getValue());
       }
     }
+    
+    final boolean debug = isDebug();
 
     // MetadatosDocumento.CODIGO_APLICACION_TRAMITE
     String codigoAplicacion = getPropertyCodiAplicacio();
@@ -1490,51 +1820,67 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
     // MetadatosDocumento.ESTADO_ELABORACION : EE01,EE02, EE03, EE04, EE99
     String estadoElaboracion = processEL(getPropertyEstatElaboracioEL(), custodyParameters);
+    if(debug) {
+      log.info("getMetadadesPerDocument()::ESTADO_ELABORACION = ]" + estadoElaboracion + "[");
+    }
     llistaMetadades.put(MetadataConstants.ENI_ESTADO_ELABORACION, estadoElaboracion);
 
     // (MetadatosDocumento.TIPO_DOC_ENI: TD01, TD02, TD03, ...
     String tipoDocEni = processEL(getPropertyTipusDocumentalEL(), custodyParameters);
+    if(debug) {
+      log.info("getMetadadesPerDocument()::TIPO_DOC_ENI = ]" + tipoDocEni + "[");
+    }
     llistaMetadades.put(MetadataConstants.ENI_TIPO_DOCUMENTAL, tipoDocEni);
 
-   
     if (signatureCustody != null) {
       String fileName = signatureCustody.getName();
-    
+
       int i = fileName.lastIndexOf('.');
       String extensio = null;
       if (i != -1) {
-        extensio = fileName.substring(i+1).toLowerCase();        
+        extensio = fileName.substring(i + 1).toLowerCase();
       }
-      
+
       if (extensio != null) {
-        
+        if(debug) {
+          log.info("getMetadadesPerDocument()::ENI_EXTENSION_FORMATO = ]" + extensio + "[");
+        }
         llistaMetadades.put(MetadataConstants.ENI_EXTENSION_FORMATO, extensio);
-        
-        
+
         FormatosFichero format = FORMATS_BY_EXTENSION.get(extensio);
-        
+
         if (format != null) {
-          llistaMetadades.put(MetadataConstants.ENI_NOMBRE_FORMATO, format);  
+          if(debug) {
+            log.info("getMetadadesPerDocument()::ENI_NOMBRE_FORMATO = ]" + format + "[");
+          }
+          llistaMetadades.put(MetadataConstants.ENI_NOMBRE_FORMATO, format);
         }
 
       }
- 
-      //  Afegir propietats associades al tipus de firma 
+
+      // Afegir propietats associades al tipus de firma
       String tipusFirma = signatureCustody.getSignatureType();
       TiposFirma tipo = TIPOFIRMA_SIMPLE.get(tipusFirma);
       if (tipo == null) {
-        tipo = TIPOFIRMA_COMPLEXE.get(tipusFirma + "_" + signatureCustody.getAttachedDocument());
+        tipo = TIPOFIRMA_COMPLEXE.get(tipusFirma + "_"
+            + signatureCustody.getAttachedDocument());
       }
       if (tipo != null) {
-        llistaMetadades.put(MetadataConstants.ENI_TIPO_FIRMA, tipo.getValue()); 
+        if(debug) {
+          log.info("getMetadadesPerDocument()::ENI_TIPO_FIRMA = ]" + tipo.getValue() + "[");
+        }
+        llistaMetadades.put(MetadataConstants.ENI_TIPO_FIRMA, tipo.getValue());
       }
-      
-      // TODO falta afegir propietats associades al Perfil de Firma
-      // Veure classe PerfilesFirma
-      // metadataCollection.put(MetadatosDocumento.PERFIL_FIRMA, ????)
-      
-      
-      
+
+      // Afegir propietats associades al Perfil de Firma
+      // (BASELINE B-Level,  EPES, T, C, X, XL, A, LTV,  BASELINE LT-Level,
+      // BASELINE LTA-Level, BASELINE T-LevelLTV)
+      String perfilFirma = processEL(getPropertyPerfilFirmaEL(), custodyParameters);
+      if (debug) {
+        log.info("getMetadadesPerDocument()::PERFIL FIRMA = ]" + perfilFirma + "[");
+      }
+      llistaMetadades.put(MetadataConstants.ENI_PERFIL_FIRMA, perfilFirma);
+
     }
 
     return llistaMetadades;
@@ -1564,7 +1910,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     String templateDataCreacio = getPropertyDataCreacioEL();
     String dataCreacio;
     if (templateDataCreacio == null) {
-      dataCreacio = UtilidadesFechas.fechaActualEnISO8601();      
+      dataCreacio = UtilidadesFechas.fechaActualEnISO8601();
     } else {
       dataCreacio = processEL(templateDataCreacio, custodyParameters);
     }
@@ -1595,32 +1941,32 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         cabecera.setPasswordSeguridad(getPropertyLoginPassword());
         cabecera.setOrganizacion(getPropertyOrganitzacio());
 
-        boolean debug = isDebug(); 
-        
+        boolean debug = isDebug();
+
         // info login
         // + Ciutadà
-        String ciutadaNom =  processOptionalProperty("SolicitantNom", 
+        String ciutadaNom = processOptionalProperty("SolicitantNom",
             getPropertySolicitantNomEL(), custodyParameters);
         if (debug) {
           log.info(" LOGIN [ciutadaNom] = " + ciutadaNom);
         }
-        
+
         cabecera.setNombreSolicitante(ciutadaNom);
         String ciutadaNIF = processOptionalProperty("SolicitantIdentificadorAdministratiu",
-                getPropertySolicitantIdentificadorAdministratiuEL(), custodyParameters);
+            getPropertySolicitantIdentificadorAdministratiuEL(), custodyParameters);
         cabecera.setDocumentoSolicitante(ciutadaNIF);
         if (debug) {
           log.info(" LOGIN [ciutadaNIF] = " + ciutadaNIF);
         }
 
         // + Funcionari o usuari de l'aplicació
-        String funcionariUsername = processOptionalProperty("UsuariUsername", 
+        String funcionariUsername = processOptionalProperty("UsuariUsername",
             getPropertyUsuariUsernameEL(), custodyParameters);
         cabecera.setNombreUsuario(funcionariUsername);
         if (debug) {
           log.info(" LOGIN [funcionariUsername] = " + funcionariUsername);
         }
-        
+
         String funcionariNIF = processOptionalProperty("UsuariIdentificadorAdministratiu",
             getPropertyUsuariIdentificadorAdministratiuEL(), custodyParameters);
         cabecera.setDocumentoUsuario(funcionariNIF);
@@ -1628,10 +1974,9 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           log.info(" LOGIN [funcionariNIF] = " + funcionariNIF);
         }
 
-        //  + info peticio
-        cabecera.setNombreProcedimiento(
-            processOptionalProperty("NomProcediment", getPropertyNomProcedimentEL(), custodyParameters));
-      
+        // + info peticio
+        cabecera.setNombreProcedimiento(processOptionalProperty("NomProcediment",
+            getPropertyNomProcedimentEL(), custodyParameters));
 
         if (isPropertyIgnoreServerCeriticates()) {
           XTrustProvider.install();
@@ -1640,8 +1985,8 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         // String urlBase = DatosConexion.ENDPOINT_DEV;
 
         ApiArchivoDigital apiArxiu = new ApiArchivoDigital(getPropertyURL(), cabecera);
-        
-        // TODO 
+
+        // TODO
         apiArxiu.setTrazas(false);
 
         apiArxiuCache = apiArxiu;
@@ -1656,36 +2001,35 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           + e.getMessage(), e);
     }
   }
-  
-  
+
   /**
    * 
    * @param propertyValue
    * @param custodyParameters
    * @return
    */
-  private String processOptionalProperty(String titol, String propertyValue, Map<String, Object> custodyParameters) {
-    
+  private String processOptionalProperty(String titol, String propertyValue,
+      Map<String, Object> custodyParameters) {
+
     if (propertyValue == null || propertyValue.trim().length() == 0) {
       return propertyValue;
     }
-    if ( custodyParameters == null) {
+    if (custodyParameters == null) {
       custodyParameters = new HashMap<String, Object>();
     }
-    
+
     try {
-      return AbstractDocumentCustodyPlugin.processExpressionLanguage(propertyValue, custodyParameters);
+      return AbstractDocumentCustodyPlugin.processExpressionLanguage(propertyValue,
+          custodyParameters);
     } catch (CustodyException e) {
-      log.warn("S'ha intentat processar la propietat titulada " + titol + " amb valor "
-          + propertyValue + " però s'ha produït un error al fer el processament EL: "
-          + e.getMessage(), e );
+      log.warn(
+          "S'ha intentat processar la propietat titulada " + titol + " amb valor "
+              + propertyValue + " però s'ha produït un error al fer el processament EL: "
+              + e.getMessage(), e);
       return null;
     }
-    
-    
+
   }
-  
-  
 
   public ExpedientCarpeta decodeCustodyID(String custodyID) {
 
@@ -1719,10 +2063,10 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     String propertyBase = getPropertyBase() + prefix + ".";
 
     final boolean debug = isDebug();
-    
+
     if (debug) {
-       log.info("recollectAutomaticMetadatas::Metadata property Base: " + propertyBase);
-       log.info("recollectAutomaticMetadatas::" + propertyBase + "automaticmetadata_items = "
+      log.info("recollectAutomaticMetadatas::Metadata property Base: " + propertyBase);
+      log.info("recollectAutomaticMetadatas::" + propertyBase + "automaticmetadata_items = "
           + getProperty(propertyBase + "automaticmetadata_items"));
     }
     List<Metadata> list = AbstractDocumentCustodyPlugin.recollectAutomaticMetadatas(this,
@@ -1742,16 +2086,27 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
   }
 
-  public void createSimpleDoc(ApiArchivoDigital api, String nom, Properties properties,
-      String custodyID, String uuidDoc) throws IOException, CustodyException {
 
+  protected String propertiesToString(Properties prop) throws Exception {
     StringWriter writer = new StringWriter();
-    properties.list(new PrintWriter(writer));
-    createSimpleDoc(api, nom, writer.getBuffer().toString(), custodyID, uuidDoc);
-
+    prop.store(writer, "!!! NO MODIFICAR - DO NOT MODIFY !!!");
+    return writer.getBuffer().toString();
   }
 
-  public void createSimpleDoc(ApiArchivoDigital api, String nom, String content,
+  protected Properties stringToProperties(String str) throws IOException {
+    Properties prop = new Properties();
+    if (str == null || str.trim().length() == 0) {
+      log.warn("La propietat que conte informació de DocumentCustody, SignatureCustody"
+          + " i Metadades val null o està buida", new Exception());
+
+    } else {
+      String strOK = URLDecoder.decode(str, "UTF-8");
+      prop.load(new StringReader(strOK));
+    }
+    return prop;
+  }
+
+  public void createSimpleDocCSV(ApiArchivoDigital api, String nom, String content,
       String custodyID, String uuidDoc) throws IOException, CustodyException {
     Documento documento = new Documento();
 
@@ -1791,44 +2146,27 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
   }
 
-  protected Properties readPropertiesFromSimpleDoc(ApiArchivoDigital api, String uuidDoc)
-      throws IOException {
-    byte[] data = readSimpleDoc(api, uuidDoc);
 
-    if (data == null) {
-      return null;
-    } else {
-      Properties prop = new Properties();
-
-      prop.load(new ByteArrayInputStream(data));
-
-      return prop;
-    }
-
-  }
-
-  protected byte[] readSimpleDoc(ApiArchivoDigital api, String uuidDoc) throws IOException {
+  protected String readSimpleDocCSV(ApiArchivoDigital api, String uuidDoc) throws IOException {
 
     final boolean retrieveContent = true;
     Resultado<Documento> resultat = api.obtenerDocumento(uuidDoc, retrieveContent);
+
+    if (hiHaError(resultat.getCodigoResultado())) {
+      log.error("No s'ha pogut llegir fitxer de CSV amb uuid " + uuidDoc + "("
+          + resultat.getCodigoResultado() + ":" + resultat.getMsjResultado() + ")");
+      return null;
+    }
+
     // TODO Check errors
     Documento doc = resultat.getElementoDevuelto();
     if (doc == null) {
       return null;
     } else {
-      return Base64.decode(doc.getContent());
+      return new String(Base64.decode(doc.getContent()));
     }
   }
 
-  protected Properties byteArray2Properties(byte[] propertiesData) throws Exception {
-
-    Properties prop = new Properties();
-
-    prop.load(new ByteArrayInputStream(propertiesData));
-
-    return prop;
-
-  }
 
   protected Map<String, Nodo> getNodosByCustodyID(ApiArchivoDigital apiArxiu, String custodyID)
       throws IOException, CustodyException {
@@ -1839,14 +2177,23 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     List<Nodo> nodos;
     if (ec.carpetaID == null) {
       Resultado<Expediente> expedient = apiArxiu.obtenerExpediente(ec.expedientID);
+
+      if (hiHaError(expedient.getCodigoResultado())) {
+        throw new CustodyException(
+            "Error intentant obtenir informació de l'expedient amb uuid " + ec.expedientID
+                + ": " + expedient.getCodigoResultado() + "-" + expedient.getMsjResultado());
+      }
+
       nodos = expedient.getElementoDevuelto().getChilds();
     } else {
       // log.info("XYZ Llegim Carpeta amb uuid " + ec.carpetaID);
       Resultado<Directorio> dir = apiArxiu.obtenerDirectorio(ec.carpetaID);
-      // log.info("XYZ Llegim Carpeta : codi resultat " + dir.getCodigoResultado());
+      // log.info("XYZ Llegim Carpeta : codi resultat " +
+      // dir.getCodigoResultado());
       if (hiHaError(dir.getCodigoResultado())) {
-        throw new CustodyException("Error intentant obtenir inforació de la carpeta amb uuid "
-           + ec.carpetaID + ": " + dir.getCodigoResultado() + "-" + dir.getMsjResultado());
+        throw new CustodyException(
+            "Error intentant obtenir informació de la carpeta amb uuid " + ec.carpetaID + ": "
+                + dir.getCodigoResultado() + "-" + dir.getMsjResultado());
       }
 
       nodos = dir.getElementoDevuelto().getChilds();
@@ -1864,20 +2211,23 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   }
 
   protected Map<String, Nodo> getNodosByCustodyID(ApiArchivoDigital apiArxiu,
-      ExpedientCarpeta ec, Resultado<Expediente> expedient) throws IOException, CustodyException {
+      ExpedientCarpeta ec, Resultado<Expediente> expedient) throws IOException,
+      CustodyException {
     Map<String, Nodo> nodosByName;
     {
       List<Nodo> nodos;
       if (ec.carpetaID == null) {
         nodos = expedient.getElementoDevuelto().getChilds();
       } else {
-        //log.info("Llegim Carpeta amb uuid " + ec.carpetaID);
+        // log.info("Llegim Carpeta amb uuid " + ec.carpetaID);
         Resultado<Directorio> dir = apiArxiu.obtenerDirectorio(ec.carpetaID);
 
-        //log.info("Llegim Carpeta : codi resultat " + dir.getCodigoResultado());
+        // log.info("Llegim Carpeta : codi resultat " +
+        // dir.getCodigoResultado());
         if (hiHaError(dir.getCodigoResultado())) {
-          throw new CustodyException("Error intentant obtenir inforació de la carpeta amb uuid "
-             + ec.carpetaID + ": " + dir.getCodigoResultado() + "-" + dir.getMsjResultado());
+          throw new CustodyException(
+              "Error intentant obtenir inforació de la carpeta amb uuid " + ec.carpetaID
+                  + ": " + dir.getCodigoResultado() + "-" + dir.getMsjResultado());
         }
 
         nodos = dir.getElementoDevuelto().getChilds();
@@ -1894,22 +2244,133 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
   protected String getCSV(String custodyID, Map<String, Object> custodyParameters)
       throws CustodyException {
-    ApiArchivoDigital apiArxiu = getApiArxiu(custodyParameters);
 
     try {
-      Map<String, Nodo> nodos = getNodosByCustodyID(apiArxiu, custodyID);
+      Map<String, List<Metadata>> metas = internalGetAllMetadatas(custodyID, custodyParameters);
 
-      Nodo nodo = nodos.get(NOM_INFO_DOCUMENT_ELECTRONIC);
+      List<Metadata> list = metas.get(MetadataConstants.ENI_CSV);
 
-      String uuid = nodo.getId();
+      return list.get(0).getValue();
 
-      Properties prop = readPropertiesFromSimpleDoc(apiArxiu, uuid);
-
-      return prop.getProperty(FILE_INFO_CSV);
-
+    } catch (CustodyException ce) {
+      throw ce;
     } catch (Exception e) {
       throw new CustodyException("Error intentant obtenir el CSV de la custòdia amb id "
           + custodyID + ": " + e.getMessage(), e);
+    }
+
+  }
+
+  /*
+   * protected Properties getPropertiesFromCAIBDocument_All(ApiArchivoDigital
+   * apiArxiu, String uuid) throws Exception, CustodyException { final boolean
+   * custodyMetadatas = true; final boolean docElectronicMetadatas = true;
+   * 
+   * Properties prop = getPropertiesFromCAIBDocument(apiArxiu, uuid,
+   * custodyMetadatas, docElectronicMetadatas); return prop; }
+   * 
+   * 
+   * protected Properties getPropertiesFromCAIBDocument_Info(ApiArchivoDigital
+   * apiArxiu, String uuid, boolean retrieveData) throws Exception,
+   * CustodyException { final boolean custodyMetadatas = true; final boolean
+   * docElectronicMetadatas = false;
+   * 
+   * Properties prop = getPropertiesFromCAIBDocument(apiArxiu, uuid,
+   * custodyMetadatas, docElectronicMetadatas); return prop; }
+   */
+
+  protected FullInfoDocumentElectronic getFullInfoOfDocumentElectronic(
+      ApiArchivoDigital apiArxiu, String uuid, boolean retrieveContent)
+      throws CustodyException, IOException {
+    Resultado<Documento> doc = apiArxiu.obtenerDocumento(uuid, retrieveContent);
+
+    if (hiHaError(doc.getCodigoResultado())) {
+      throw new CustodyException(doc.getCodigoResultado() + ": " + doc.getMsjResultado());
+    }
+
+    Properties prop = new Properties();
+
+    // if (custodyMetadatas)
+    {
+
+      Map<String, Object> metas = doc.getElementoDevuelto().getMetadataCollection();
+
+      String infoAndMetasStr = (String) metas.get(MetadataConstants.ENI_DESCRIPCION);
+
+      prop = stringToProperties(infoAndMetasStr);
+
+    }
+
+    return new FullInfoDocumentElectronic(prop, doc.getElementoDevuelto());
+  }
+
+  protected Properties getMetadadesSenseEni(Properties metadades,
+      Map<String, Object> metadataDocs) {
+    Properties metadadesSenseEni = new Properties();
+    metadadesSenseEni.putAll(metadades);
+
+    // Eliminam les propietats ENI i GDIB del document
+    if (metadataDocs != null) {
+      for (String key : metadataDocs.keySet()) {
+        // Object value = metadataDocs.get(key);
+        metadadesSenseEni.remove(key);
+      }
+    }
+
+    // Eliminam les propietats ENI i GDIB afegides manualment
+    // List<String> keysEniGdibToDelete = new ArrayList<String>();
+    boolean debug = isDebug();
+
+    for (Object k : new ArrayList<Object>(metadadesSenseEni.keySet())) {
+      String key = (String) k;
+      if (key.startsWith("eni:") || key.startsWith("gdib:")) {
+        if (debug) {
+          log.warn("La metadada " + key + " no serà actualitzada !!!");
+        }
+        // keysEniGdibToDelete.add(key);
+        metadadesSenseEni.remove(k);
+      }
+    }
+    return metadadesSenseEni;
+  }
+
+  /**
+   * 
+   * @author anadal
+   *
+   */
+  public class FilesInfo {
+
+    public final Nodo nodoDocumentElectronic;
+
+    public final Nodo nodoCSV;
+
+    /**
+     * @param nodoDocumentElectronic
+     * @param nodoCSV
+     */
+    public FilesInfo(Nodo nodoDocumentElectronic, Nodo nodoCSV) {
+      super();
+      this.nodoDocumentElectronic = nodoDocumentElectronic;
+      this.nodoCSV = nodoCSV;
+    }
+
+  }
+
+  public class FullInfoDocumentElectronic {
+
+    public final Properties infoAndMetas;
+
+    public final Documento documento;
+
+    /**
+     * @param infoAndMetas
+     * @param documento
+     */
+    public FullInfoDocumentElectronic(Properties infoAndMetas, Documento documento) {
+      super();
+      this.infoAndMetas = infoAndMetas;
+      this.documento = documento;
     }
 
   }
@@ -1919,90 +2380,60 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
    * @author anadal
    *
    */
-  public abstract class MetadataAction {
-
-    protected final ApiArchivoDigital apiArxiu;
-
-    protected final String custodyID;
-
-    public Object outputParameter = null;
-
-    /**
-     * @param apiArxiu
-     * @param custodyID
-     */
-    public MetadataAction(ApiArchivoDigital apiArxiu, String custodyID) {
-      super();
-      this.apiArxiu = apiArxiu;
-      this.custodyID = custodyID;
-    }
-
-    public Properties doAction() throws CustodyException {
-
-      try {
-        Map<String, Nodo> nodosByName = getNodosByCustodyID(apiArxiu, custodyID);
-        Nodo nodoMetas = nodosByName.get(NOM_METADADES);
-        Properties metadades = readPropertiesFromSimpleDoc(apiArxiu, nodoMetas.getId());
-
-        // Afegir metadades ENI i GDIB
-        Nodo nodoDocElec = nodosByName.get(NOM_DOCUMENT_ELECTRONIC);
-        Map<String, Object> metadataDocs = null;
-        if (nodoDocElec != null) {
-          Resultado<Documento> res = apiArxiu.obtenerDocumento(nodoDocElec.getId(), false);
-          metadataDocs = res.getElementoDevuelto().getMetadataCollection();
-
-          for (String key : metadataDocs.keySet()) {
-            Object value = metadataDocs.get(key);
-            metadades.setProperty(key, String.valueOf(value));
-          }
-
-        }
-
-        // metadatas.setProperty(metadata.getKey(), metadata.getValue());
-        if (modificarMetadades(metadades)) {
-
-          Properties metadadesSenseEni = new Properties();
-          metadadesSenseEni.putAll(metadades);
-
-          // Eliminam les propietats ENI i GDIB del document
-          if (metadataDocs != null) {
-            for (String key : metadataDocs.keySet()) {
-              // Object value = metadataDocs.get(key);
-              metadadesSenseEni.remove(key);
-            }
-          }
-
-          // Eliminam les propietats ENI i GDIB afegides manualment
-          // List<String> keysEniGdibToDelete = new ArrayList<String>();
-
-          for (Object k : new ArrayList<Object>(metadadesSenseEni.keySet())) {
-            String key = (String) k;
-            if (key.startsWith("eni:") || key.startsWith("gdib:")) {
-              log.warn("La metadada " + key + " no serà actualitzada !!!");
-              // keysEniGdibToDelete.add(key);
-              metadadesSenseEni.remove(k);
-            }
-          }
-
-          // TODO Falta actualitzar metadades del document
-
-          // Actualitzam metadades
-          createSimpleDoc(apiArxiu, NOM_METADADES, metadadesSenseEni, custodyID,
-              nodoMetas.getId());
-
-        }
-
-        return metadades;
-
-      } catch (CustodyException ce) {
-        throw ce;
-      } catch (Exception e) {
-        throw new CustodyException("Error desconegut: " + e.getMessage(), e);
-      }
-    }
-
-    public abstract boolean modificarMetadades(Properties metadades) throws Exception;
-
-  }
+  /*
+   * public abstract class MetadataAction {
+   * 
+   * protected final ApiArchivoDigital apiArxiu;
+   * 
+   * protected final String custodyID;
+   * 
+   * public Object outputParameter = null;
+   * 
+   * 
+   * public MetadataAction(ApiArchivoDigital apiArxiu, String custodyID) {
+   * super(); this.apiArxiu = apiArxiu; this.custodyID = custodyID; }
+   * 
+   * public Properties doAction() throws CustodyException {
+   * 
+   * try { Map<String, Nodo> nodosByName = getNodosByCustodyID(apiArxiu,
+   * custodyID); Nodo nodoMetas = nodosByName.get(NOM_METADADES); Properties
+   * metadades = readPropertiesFromSimpleDoc(apiArxiu, nodoMetas.getId());
+   * 
+   * // Afegir metadades ENI i GDIB Nodo nodoDocElec =
+   * nodosByName.get(NOM_DOCUMENT_ELECTRONIC); Map<String, Object> metadataDocs
+   * = null; if (nodoDocElec != null) { Resultado<Documento> res =
+   * apiArxiu.obtenerDocumento(nodoDocElec.getId(), false); metadataDocs =
+   * res.getElementoDevuelto().getMetadataCollection();
+   * 
+   * for (String key : metadataDocs.keySet()) { Object value =
+   * metadataDocs.get(key); metadades.setProperty(key, String.valueOf(value)); }
+   * 
+   * }
+   * 
+   * // metadatas.setProperty(metadata.getKey(), metadata.getValue()); if
+   * (modificarMetadades(metadades)) {
+   * 
+   * Properties metadadesSenseEni = getMetadadesSenseEni(metadades,
+   * metadataDocs);
+   * 
+   * // TODO Falta actualitzar metadades del document
+   * 
+   * // Actualitzam metadades createSimpleDoc(apiArxiu, NOM_METADADES,
+   * metadadesSenseEni, custodyID, nodoMetas.getId());
+   * 
+   * }
+   * 
+   * return metadades;
+   * 
+   * } catch (CustodyException ce) { throw ce; } catch (Exception e) { throw new
+   * CustodyException("Error desconegut: " + e.getMessage(), e); } }
+   * 
+   * 
+   * 
+   * public abstract boolean modificarMetadades(Properties metadades) throws
+   * Exception;
+   * 
+   * }
+   */
 
 }

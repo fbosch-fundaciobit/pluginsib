@@ -1,5 +1,6 @@
 package org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
 
 import junit.framework.Assert;
 
@@ -34,6 +36,7 @@ import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test.beans.Usuar
 import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test.beans.UsuarioEntidad;
 import org.fundaciobit.plugins.utils.FileUtils;
 import org.fundaciobit.plugins.utils.Metadata;
+import org.fundaciobit.plugins.utils.MetadataConstants;
 import org.fundaciobit.plugins.utils.PluginsManager;
 
 import es.caib.arxiudigital.apirest.ApiArchivoDigital;
@@ -47,16 +50,53 @@ import es.caib.arxiudigital.apirest.facade.resultados.Resultado;
  */
 public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
 
+  /*
   public enum TipusGuardat {
     SAVEALL, DOCUMENT_PRIMER, FIRMA_PRIMER
   };
+  */
 
   public static final String packageBase = "es.caib.exemple.";
 
   public static final String propertyBase = packageBase
       + ArxiuDigitalCAIBDocumentCustodyPlugin.ARXIUDIGITALCAIB_PROPERTY_BASE;
 
-  SimpleDateFormat SDF = new SimpleDateFormat("yyyyMMdd");
+  SimpleDateFormat SDF = new SimpleDateFormat("MMdd");
+  
+  public static Scanner scan=new Scanner(System.in);
+
+  public static void waitForEnter() {
+       System.out.print("Press any key to continue . . ." );
+       scan.nextLine();
+  }
+  
+  
+  
+  
+  
+  public static void main(String[] args) {
+    try {
+
+      System.out.println(ArxiuDigitalCAIBDocumentCustodyPlugin.class.getCanonicalName());
+
+      TestArxiuDigitalCAIBDocumentCustody tester = new TestArxiuDigitalCAIBDocumentCustody();
+      
+      //tester.testInternalMetadata();
+      
+      //tester.test3Combinacions();
+     
+      //tester.testSimpleDoc();
+
+      tester.testFull();
+
+      //tester.testMetadades();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+  }
+  
 
   protected void compareDocument(String titol, AnnexCustody docSet, AnnexCustody docGet,
       boolean compareData) {
@@ -153,7 +193,7 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     signature2.setMime("application/pdf");
     signature2.setSignatureType(SignatureCustody.PADES_SIGNATURE);
 
-    documentCustodyPlugin.saveSignature(custodyID, custodyParameters, signature2);
+    documentCustodyPlugin.saveAll(custodyID, custodyParameters, document,  signature2, null);
     // documentCustodyPlugin.saveAll(custodyID, custodyParameters, document,
     // signature2, null);
 
@@ -199,15 +239,14 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     // = false es sobreescriu sobre el mateix fitxer
     final boolean reservarCadaVegada =  true;
 
-    final TipusGuardat tipusGuardat =  TipusGuardat.SAVEALL;
+    //final TipusGuardat tipusGuardat =  TipusGuardat.SAVEALL;
     
         System.out.println();
         System.out.println(" =========================================");
         System.out.println("   -------- reservarCadaVegada = " + reservarCadaVegada);
-        System.out.println("   -------- tipusGuardat = " + tipusGuardat);
         System.out.println(" =========================================");
         System.out.println();
-        testSimpleDocConfigurable(reservarCadaVegada, tipusGuardat, false);
+        testSimpleDocConfigurable(reservarCadaVegada, false);
       
     
 
@@ -221,26 +260,26 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     // = false es sobreescriu sobre el mateix fitxer
     final boolean[] reservarCadaVegada = {  false , true};
 
-    final TipusGuardat[] tipusGuardat = { TipusGuardat.SAVEALL, TipusGuardat.DOCUMENT_PRIMER,
-        TipusGuardat.FIRMA_PRIMER };
+    //final TipusGuardat[] tipusGuardat = { TipusGuardat.SAVEALL, TipusGuardat.DOCUMENT_PRIMER,
+    //    TipusGuardat.FIRMA_PRIMER };
 
     for (int r = 0; r < reservarCadaVegada.length; r++) {
 
-      for (int t = 0; t < tipusGuardat.length; t++) {
+      //for (int t = 0; t < tipusGuardat.length; t++) {
 
         System.out.println();
         System.out.println(" =========================================");
         System.out.println("   -------- reservarCadaVegada[r] = " + reservarCadaVegada[r]);
-        System.out.println("   -------- tipusGuardat[t] = " + tipusGuardat[t]);
+        //System.out.println("   -------- tipusGuardat[t] = " + tipusGuardat[t]);
         System.out.println(" =========================================");
         System.out.println();
-        testSimpleDocConfigurable(reservarCadaVegada[r], tipusGuardat[t], true);
-      }
+        testSimpleDocConfigurable(reservarCadaVegada[r],  true);
+      //}
     }
 
   }
 
-  public void testSimpleDocConfigurable(boolean reservarCadaVegada, TipusGuardat tipusGuardat,
+  public void testSimpleDocConfigurable(boolean reservarCadaVegada, 
       boolean deleteOnFinish)
       throws Exception {
 
@@ -379,6 +418,7 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
         custodyID = documentCustodyPlugin.reserveCustodyID(custodyParameters);
       }
 
+      sleep();
       System.out.println();
       System.out.println(" ---------  Test[" + i + "]  --------");
       System.out.println();
@@ -388,27 +428,27 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
       DocumentCustody doc = documents[i];
       SignatureCustody sign = signatures[i];
 
-      switch (tipusGuardat) {
-      case SAVEALL:
+      //switch (tipusGuardat) {
+      //case SAVEALL:
         documentCustodyPlugin.saveAll(custodyID, custodyParameters, doc, sign, metas);
-        break;
-      case DOCUMENT_PRIMER:
-        if (doc != null) {
-          documentCustodyPlugin.saveDocument(custodyID, custodyParameters, doc);
-        }
-        if (sign != null) {
-          documentCustodyPlugin.saveSignature(custodyID, custodyParameters, sign);
-        }
-        break;
-      case FIRMA_PRIMER:
-        if (sign != null) {
-          documentCustodyPlugin.saveSignature(custodyID, custodyParameters, sign);
-        }
-        if (doc != null) {
-          documentCustodyPlugin.saveDocument(custodyID, custodyParameters, doc);
-        }
-        break;
-      }
+//        break;
+//      case DOCUMENT_PRIMER:
+//        if (doc != null) {
+//          documentCustodyPlugin.saveDocument(custodyID, custodyParameters, doc);
+//        }
+//        if (sign != null) {
+//          documentCustodyPlugin.saveSignature(custodyID, custodyParameters, sign);
+//        }
+//        break;
+//      case FIRMA_PRIMER:
+//        if (sign != null) {
+//          documentCustodyPlugin.saveSignature(custodyID, custodyParameters, sign);
+//        }
+//        if (doc != null) {
+//          documentCustodyPlugin.saveDocument(custodyID, custodyParameters, doc);
+//        }
+//        break;
+//      }
 
       // ----------- DOCUMENT
       {
@@ -500,7 +540,7 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
 
     Anexo anexo = new Anexo(222L, "Titulo Anexo", tipoDocumental, validezDocumento,
         tipoDocumento, registro.getRegistroDetalle(), "Observacions de l'Anexo",
-        origenCiudadanoAdmin, fechaCaptura, modoFirma);
+        origenCiudadanoAdmin, fechaCaptura, modoFirma, "AdES-BES");
     return anexo;
   }
 
@@ -631,30 +671,329 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     return custodyParameters;
   }
 
-  public static void main(String[] args) {
-    try {
 
-      System.out.println(ArxiuDigitalCAIBDocumentCustodyPlugin.class.getCanonicalName());
-
-      TestArxiuDigitalCAIBDocumentCustody tester = new TestArxiuDigitalCAIBDocumentCustody();
-
-      // tester.testAutomaticMetadatas();
-
-      // tester.testFull();
-
-      tester.testSimpleDoc();
-
-      // tester.testMetadades();
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-  }
 
   @Override
   public String getPropertyBase() {
     return propertyBase;
+  }
+  
+  public void sleep() {
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  
+  
+  public void testInternalMetadata() throws Exception {
+    
+    Properties specificProperties = new Properties();
+    
+    //specificProperties.setProperty(getPropertyBase() + "createDraft", "false");
+    
+    //es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.
+    
+    IDocumentCustodyPlugin documentCustodyPlugin = instantiateDocumentCustodyPlugin(specificProperties);
+    ArxiuDigitalCAIBDocumentCustodyPlugin plugin;
+    plugin = (ArxiuDigitalCAIBDocumentCustodyPlugin) documentCustodyPlugin;
+    
+    System.out.println(" CREATE DRAFT = " + plugin.isPropertyCreateDraft());
+    
+
+    Map<String, Object> custodyParameters = createCustodyParameters();
+
+    String custodyID = plugin.reserveCustodyID(createCustodyParameters());
+    System.out.println(" CustodyID = " + custodyID);
+    
+    InputStream is2 = FileUtils.readResource(this.getClass(),
+        //"testarxiudigitalcaib/Firma2.pdf");
+        "testarxiudigitalcaib/test-signed-BES.pdf");
+        
+        
+    byte[] data2 = FileUtils.toByteArray(is2);
+
+    SignatureCustody signature2 = new SignatureCustody();
+    signature2.setName("Firma2.pdf");
+    signature2.setAttachedDocument(false);
+    signature2.setData(data2);
+    signature2.setLength(signature2.getData().length);
+    signature2.setMime("application/pdf");
+    signature2.setSignatureType(SignatureCustody.PADES_SIGNATURE);
+    
+    DocumentCustody documentCustody = null;
+    
+    
+    Map<String, List<Metadata>> metas = plugin.getAllMetadata(custodyID);
+     
+    for (String key : metas.keySet()) {
+      System.out.println("PRE[" + key + "] = " + metas.get(key).get(0).getValue());
+    }
+    
+ 
+    
+    Metadata[] metadata = null;
+
+    plugin.saveAll(custodyID, custodyParameters, documentCustody, signature2, metadata);
+    
+    System.out.println();
+    
+    byte[] dataSign = plugin.getSignature(custodyID);
+    SignatureCustody sign1 = plugin.getSignatureInfo(custodyID);
+    SignatureCustody sign2 = plugin.getSignatureInfoOnly(custodyID);
+
+    checkEmptyFile(plugin, custodyID);
+
+    checkSign(signature2, dataSign, sign1, sign2);
+
+    
+    metas = plugin.getAllMetadata(custodyID);
+    
+    for (String key : metas.keySet()) {
+      System.out.println("POST[" + key + "] = " + metas.get(key).get(0).getValue());
+    }
+    
+    
+    
+    // ApiArchivoDigital api = plugin.getApiArxiu(custodyParameters);
+    
+    // ExpedientCarpeta ec =  plugin.decodeCustodyID(custodyID);
+    
+    //System.out.println("TANCAR EXPEDIENT: " + ec.expedientID);
+    
+    //Resultado<String> res = api.cerrarExpediente(ec.expedientID);
+    
+    //System.out.println("Resultat tancar Expedient: " + res.getCodigoResultado() + ": " +
+    //    res.getMsjResultado());
+    
+    System.out.println("ESBORRAR EXPEDIENT");
+    //plugin.deleteCustody(custodyID);
+    
+  }
+  
+  
+  
+  public void test3Combinacions()
+      throws Exception {
+    
+    final boolean waitInput = true;
+    
+    Properties specificProperties = new Properties();
+    IDocumentCustodyPlugin documentCustodyPlugin = instantiateDocumentCustodyPlugin(specificProperties);
+    ArxiuDigitalCAIBDocumentCustodyPlugin plugin;
+    plugin = (ArxiuDigitalCAIBDocumentCustodyPlugin) documentCustodyPlugin;
+    
+
+    Map<String, Object> custodyParameters = createCustodyParameters();
+
+    final String custodyID = plugin.reserveCustodyID(createCustodyParameters());
+    System.out.println(" CustodyID = " + custodyID);
+    
+    // obtenir CSV
+    Metadata csv = plugin.getOnlyOneMetadata(custodyID, MetadataConstants.ENI_CSV);
+    System.out.println(" CSV = " + csv.getValue());
+    
+    // Obtenir file i no ha de fallar
+    checkEmptyFile(plugin, custodyID);
+
+    // Obtenir firma i no ha de fallar
+    checkEmptySignature(plugin, custodyID);
+    
+    
+    // compbinacions doc, sign i doc+sign
+
+    // ============ ONLY DOC
+    {
+      DocumentCustody documentCustody = new DocumentCustody();
+      documentCustody.setName("holacaracola.txt");
+      documentCustody.setData("holacaracola".getBytes());
+      documentCustody.setMime("text/plain");
+  
+      SignatureCustody signatureCustody = null;
+      
+      Metadata[] metadata = null;
+  
+      plugin.saveAll(custodyID, custodyParameters, documentCustody, signatureCustody, metadata);
+      
+      byte[] dataFile = plugin.getDocument(custodyID);
+      DocumentCustody file1 = plugin.getDocumentInfo(custodyID);
+      DocumentCustody file2 = plugin.getDocumentInfoOnly(custodyID);
+      
+      checkFile(documentCustody, dataFile, file1, file2);
+      
+      checkEmptySignature(plugin, custodyID);
+      
+
+  
+      //plugin.deleteCustody(custodyID);
+    }
+    
+    sleep();
+    if (waitInput) {
+      waitForEnter();
+    }
+    
+    
+    // ============  ONLY SIGN
+    {
+      // custodyID = plugin.reserveCustodyID(createCustodyParameters());
+      InputStream is2 = FileUtils.readResource(this.getClass(),
+          "testarxiudigitalcaib/Firma2.pdf");
+          //"testarxiudigitalcaib/test-signed-BES.pdf");
+          
+          
+      byte[] data2 = FileUtils.toByteArray(is2);
+
+      SignatureCustody signatureCustody = new SignatureCustody();
+      signatureCustody.setName("Firma2.pdf");
+      signatureCustody.setAttachedDocument(false);
+      signatureCustody.setData(data2);
+      signatureCustody.setLength(data2.length);
+      signatureCustody.setMime("application/pdf");
+      signatureCustody.setSignatureType(SignatureCustody.PADES_SIGNATURE);
+      
+      DocumentCustody documentCustody = null;
+
+      
+      Metadata[] metadata = null;
+  
+      plugin.saveAll(custodyID, custodyParameters, documentCustody, signatureCustody, metadata);
+      
+      
+      byte[] dataSign = plugin.getSignature(custodyID);
+      SignatureCustody sign1 = plugin.getSignatureInfo(custodyID);
+      SignatureCustody sign2 = plugin.getSignatureInfoOnly(custodyID);
+
+      checkEmptyFile(plugin, custodyID);
+
+      checkSign(signatureCustody, dataSign, sign1, sign2);
+  
+      // NO ESBORRAM I PROVAM L'ACTUALITZACIO
+      // plugin.deleteCustody(custodyID);
+    }
+    
+    if (waitInput) {
+      waitForEnter();
+    }
+    sleep();
+    
+    // ============  FILE & SIGN
+    {
+
+      
+      SignatureCustody signatureCustody = new SignatureCustody();
+      signatureCustody.setName("holacaracolaFIRMADETACHED.txt");
+      signatureCustody.setData("holacaracolaFIRMA".getBytes());
+      signatureCustody.setMime("text/plain");
+      signatureCustody.setAttachedDocument(true);
+      signatureCustody.setSignatureType(SignatureCustody.XADES_SIGNATURE);
+
+
+      DocumentCustody documentCustody = new DocumentCustody();
+      documentCustody.setName("holacaracolaofdetachedsign.txt");
+      documentCustody.setData("holacaracola".getBytes());
+      documentCustody.setMime("text/plain");
+
+      Metadata[] metadata = null;
+  
+      plugin.saveAll(custodyID, custodyParameters, documentCustody, signatureCustody, metadata);
+      
+      
+      // FILE
+      byte[] dataFile = plugin.getDocument(custodyID);
+      DocumentCustody file1 = plugin.getDocumentInfo(custodyID);
+      DocumentCustody file2 = plugin.getDocumentInfoOnly(custodyID);
+      
+      checkFile(documentCustody, dataFile, file1, file2);
+      
+      // SIGN
+      byte[] dataSign = plugin.getSignature(custodyID);
+      SignatureCustody sign1 = plugin.getSignatureInfo(custodyID);
+      SignatureCustody sign2 = plugin.getSignatureInfoOnly(custodyID);
+
+      checkSign(signatureCustody, dataSign, sign1, sign2);
+  
+      waitForEnter();
+      // XYZ ZZZ      
+      //plugin.deleteCustody(custodyID);
+    }
+    
+    
+
+  }
+
+  protected void checkEmptySignature(ArxiuDigitalCAIBDocumentCustodyPlugin plugin,
+      String custodyID) throws CustodyException {
+    byte[] dataSign = plugin.getSignature(custodyID);
+    SignatureCustody sign1 = plugin.getSignatureInfo(custodyID);
+    SignatureCustody sign2 = plugin.getSignatureInfoOnly(custodyID);
+    
+    Assert.assertNull(sign1);
+    Assert.assertNull(dataSign);
+    Assert.assertNull(sign2);
+  }
+
+  protected void checkEmptyFile(ArxiuDigitalCAIBDocumentCustodyPlugin plugin, String custodyID)
+      throws CustodyException {
+    byte[] dataFile = plugin.getDocument(custodyID);
+    DocumentCustody file1 = plugin.getDocumentInfo(custodyID);
+    DocumentCustody file2 = plugin.getDocumentInfoOnly(custodyID);
+    
+    
+    Assert.assertNull(file2);
+    Assert.assertNull(dataFile);
+    Assert.assertNull(file1);
+  }
+
+  
+  protected void checkSign(SignatureCustody original, byte[] dataFile, SignatureCustody file1, SignatureCustody file2) {
+    
+    checkFile(original, dataFile, file1, file2);
+
+    // Sign type
+    Assert.assertEquals(original.getSignatureType(), file1.getSignatureType());
+    Assert.assertEquals(original.getSignatureType(), file2.getSignatureType());
+    
+    // ATTACHED
+    Assert.assertEquals(original.getAttachedDocument(), file1.getAttachedDocument());
+    Assert.assertEquals(original.getAttachedDocument(), file2.getAttachedDocument());
+
+    
+  }
+    
+
+
+  protected void checkFile(AnnexCustody original, byte[] dataFile, AnnexCustody file1, AnnexCustody file2) {
+    
+    // NOM
+    Assert.assertEquals(original.getName(), file1.getName());
+    Assert.assertEquals(file1.getName(), file2.getName());
+
+
+    // TAMANY
+    Assert.assertEquals(original.getData().length, file1.getData().length);
+    Assert.assertEquals(file1.getData().length, dataFile.length);
+    
+    
+    // CONTINGUT
+    for (int i = 0; i < file1.getData().length; i++) {
+      byte val1 = file1.getData()[i];
+      byte val2 = dataFile[i];
+      
+      if (val1 != val2) {
+        Assert.fail("La posició " + i + " del  plugin.getDocument() i del"
+            + " plugin.getDocumentInfo() són diferents (" + Integer.toHexString((int)val2)
+            + " != " + Integer.toHexString((int)val1)  + ")");
+      }
+    }
+
+    System.out.println("file1.getData() = " + file1.getData().length);
+    System.out.println("dataFile = " + dataFile.length);
+    
+    // Infoonly
+    Assert.assertNull(file2.getData());
   }
 
 }
