@@ -15,6 +15,9 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.nom_carpeta_EL=Anexo_${
 # Opcional. Per defecte sempre es crea Draft
 # es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.createDraft=false
 
+# Opcional. Tanca l'expedient despres del primer guardat. Requereix "createDraft=false" 
+# es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.tancarExpedient=false
+
 # Opcional
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.debug=false
 
