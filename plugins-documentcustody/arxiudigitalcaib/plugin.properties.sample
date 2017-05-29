@@ -7,9 +7,9 @@
 # Exemple 2 Registre_<#if registro.origen??>S<#else>E</#if>_${registro.libro.codigo}_${.now?string[\"yyyy\"]}_${registro.numeroRegistro?string[\"0000000\"]}  
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.nom_expedient_EL=Registre_<#if registro.origen??>S<#else>E</#if>_${.now?string[\"yyyy\"]}_${registro.numeroRegistro?string[\"0000000\"]}
 
-# Opcional. Nom de la carpeta dins de l'expedient.  Important: Ha de ser únic per cada expedient
-# Si carpeta no està definida llavors custodyID = {uuid_expedient}
-# Si carpeta està definida llavors custodyID =  {uuid_expedient}#{uuid_carpeta}.
+# Opcional. Nom de la carpeta dins de l'expedient. 
+# Si carpeta no està definida llavors custodyID = {uuid_expedient}#{uuid_document}
+# Si carpeta està definida llavors custodyID =  {uuid_expedient}#{uuid_carpeta}#{uuid_document}.
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.nom_carpeta_EL=Anexo_${anexo.id?string[\"000\"]}
 
 # Opcional. Per defecte sempre es crea Draft
