@@ -24,7 +24,7 @@ import org.fundaciobit.plugins.documentcustody.api.IDocumentCustodyPlugin;
 import org.fundaciobit.plugins.documentcustody.api.SignatureCustody;
 import org.fundaciobit.plugins.documentcustody.api.test.TestDocumentCustody;
 import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.ArxiuDigitalCAIBDocumentCustodyPlugin;
-import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.ExpedientCarpeta;
+import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.ExpedientCarpetaDocument;
 import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test.beans.Anexo;
 import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test.beans.Interesado;
 import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test.beans.Oficina;
@@ -40,8 +40,13 @@ import org.fundaciobit.plugins.utils.MetadataConstants;
 import org.fundaciobit.plugins.utils.PluginsManager;
 
 import es.caib.arxiudigital.apirest.ApiArchivoDigital;
+import es.caib.arxiudigital.apirest.constantes.Aspectos;
+import es.caib.arxiudigital.apirest.facade.pojos.Documento;
 import es.caib.arxiudigital.apirest.facade.pojos.Expediente;
+import es.caib.arxiudigital.apirest.facade.pojos.FiltroBusquedaFacilExpedientes;
 import es.caib.arxiudigital.apirest.facade.resultados.Resultado;
+import es.caib.arxiudigital.apirest.facade.resultados.ResultadoBusqueda;
+import es.caib.arxiudigital.apirest.facade.resultados.ResultadoSimple;
 
 /**
  * 
@@ -49,12 +54,6 @@ import es.caib.arxiudigital.apirest.facade.resultados.Resultado;
  *
  */
 public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
-
-  /*
-  public enum TipusGuardat {
-    SAVEALL, DOCUMENT_PRIMER, FIRMA_PRIMER
-  };
-  */
 
   public static final String packageBase = "es.caib.exemple.";
 
@@ -82,7 +81,7 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
       TestArxiuDigitalCAIBDocumentCustody tester = new TestArxiuDigitalCAIBDocumentCustody();
       
       //tester.testInternalMetadata();
-      
+
       tester.test3Combinacions();
      
       //tester.testSimpleDoc();
@@ -96,6 +95,9 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     }
 
   }
+  
+  
+ 
   
 
   protected void compareDocument(String titol, AnnexCustody docSet, AnnexCustody docGet,
@@ -145,7 +147,7 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
       return;
     }
 
-    // XYZ ZZZ
+
     {
       File f = new File("expedient.txt");
       if (f.exists()) {
@@ -289,15 +291,6 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     plugin = (ArxiuDigitalCAIBDocumentCustodyPlugin) documentCustodyPlugin;
     ApiArchivoDigital api = plugin.getApiArxiu(null);
 
-    /*
-     * { String nom = "ADDITIONALINFO"; byte[] content = "PLATANO".getBytes();
-     * String uuidExp = "f2673b34-9369-4bdf-b58f-6768537bcca4";
-     * 
-     * createSimpleDoc(api, nom, content, uuidExp);
-     * 
-     * 
-     * } if (true) { return; }
-     */
 
     // XYZ ZZZ Eliminar
     {
@@ -334,7 +327,7 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
       fos.write(custodyID.getBytes());
       fos.close();
 
-      ExpedientCarpeta ec = plugin.decodeCustodyID(custodyID);
+      ExpedientCarpetaDocument ec = ExpedientCarpetaDocument.decodeCustodyID(custodyID);
 
       Resultado<Expediente> expedient = api.obtenerExpediente(ec.expedientID);
 
@@ -540,7 +533,7 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
 
     Anexo anexo = new Anexo(222L, "Titulo Anexo", tipoDocumental, validezDocumento,
         tipoDocumento, registro.getRegistroDetalle(), "Observacions de l'Anexo",
-        origenCiudadanoAdmin, fechaCaptura, modoFirma, "AdES-BES");
+        origenCiudadanoAdmin, fechaCaptura, modoFirma, "AdES-EPES");
     return anexo;
   }
 
@@ -731,8 +724,7 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     for (String key : metas.keySet()) {
       System.out.println("PRE[" + key + "] = " + metas.get(key).get(0).getValue());
     }
-    
- 
+
     
     Metadata[] metadata = null;
 
@@ -756,10 +748,39 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     }
     
     
+    Thread.sleep(3000);
     
-    // ApiArchivoDigital api = plugin.getApiArxiu(custodyParameters);
+    // ACTUALITZAR
+    ApiArchivoDigital api = plugin.getApiArxiu(custodyParameters);
     
-    // ExpedientCarpeta ec =  plugin.decodeCustodyID(custodyID);
+    ExpedientCarpetaDocument ecd =  ExpedientCarpetaDocument.decodeCustodyID(custodyID);
+    
+    
+    
+    /*
+    Documento docSet = new Documento();
+    docSet.setId(ecd.documentID);
+    
+    Map<String, Object> metadataCollection = new HashMap<String, Object>();
+    metadataCollection.put(MetadataConstants.ENI_IDIOMA, "es_es");
+    docSet.setMetadataCollection(metadataCollection);
+    
+    ResultadoSimple rs = api.actualizarDocumento(docSet);
+    */
+    
+    
+    Resultado<Documento> docGet = api.obtenerDocumento(ecd.documentID, false);
+    
+    docGet.getElementoDevuelto().getMetadataCollection().put(MetadataConstants.ENI_IDIOMA, "es_es");
+    
+    docGet.getElementoDevuelto().getAspects().remove(Aspectos.BORRADOR);
+    
+    ResultadoSimple rs = api.actualizarDocumento(docGet.getElementoDevuelto());
+    
+        
+    System.out.println("Resultat Actualitzar DOCUMENT: " + rs.getCodigoResultado() + ": " +
+            rs.getMsjResultado());
+    
     
     //System.out.println("TANCAR EXPEDIENT: " + ec.expedientID);
     
@@ -769,7 +790,7 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     //    res.getMsjResultado());
     
     System.out.println("ESBORRAR EXPEDIENT");
-    //plugin.deleteCustody(custodyID);
+    plugin.deleteCustody(custodyID);
     
   }
   
@@ -801,6 +822,12 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     // Obtenir firma i no ha de fallar
     checkEmptySignature(plugin, custodyID);
     
+    System.out.println(" Reserva Feta ");
+    
+    if (waitInput) {
+      waitForEnter();
+    }
+    
     
     // compbinacions doc, sign i doc+sign
 
@@ -830,9 +857,11 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
       //plugin.deleteCustody(custodyID);
     }
     
-    sleep();
+    
     if (waitInput) {
       waitForEnter();
+    } else {
+      sleep();
     }
     
     
@@ -876,8 +905,9 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     
     if (waitInput) {
       waitForEnter();
+    } else {
+      sleep();
     }
-    sleep();
     
     // ============  FILE & SIGN
     {
