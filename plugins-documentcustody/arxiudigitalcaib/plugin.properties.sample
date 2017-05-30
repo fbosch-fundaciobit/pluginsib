@@ -1,15 +1,15 @@
 
 # --------------------------------------------------
-# Específiques org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.ArxiuDigitalCAIBDocumentCustodyPlugin 
+# Específiques org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.ArxiuDigitalCAIBDocumentCustodyPlugin
 
-# Requerit. Nom d el'expedient. Important: Ha de ser únic
+# Requerit. Nom de l'expedient. Important: Ha de ser únic
 # Exemple 1 Expedient_${.now?string[\"yyyyMMddHHmmss\"]}
 # Exemple 2 Registre_<#if registro.origen??>S<#else>E</#if>_${registro.libro.codigo}_${.now?string[\"yyyy\"]}_${registro.numeroRegistro?string[\"0000000\"]}  
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.nom_expedient_EL=Registre_<#if registro.origen??>S<#else>E</#if>_${.now?string[\"yyyy\"]}_${registro.numeroRegistro?string[\"0000000\"]}
 
 # Opcional. Nom de la carpeta dins de l'expedient. 
 # Si carpeta no està definida llavors custodyID = {uuid_expedient}#{uuid_document}
-# Si carpeta està definida llavors custodyID =  {uuid_expedient}#{uuid_carpeta}#{uuid_document}.
+# Si carpeta està definida llavors custodyID =  {uuid_expedient}#{uuid_carpeta}#{uuid_document}
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.nom_carpeta_EL=Anexo_${anexo.id?string[\"000\"]}
 
 # Opcional. Per defecte sempre es crea Draft
@@ -24,15 +24,15 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.debug=false
 
 # =================  DADES CONNEXIO ========================
 
-# "https://sdesfiresb1.caib.es:9443";
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.connexio.url=https://afirmades.caib.es:4430/esb
+es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.connexio.login.username=USERNAME
+es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.connexio.login.password=PASSWORD
+
+
 
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.connexio.ignore_server_certificates=true
 
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.connexio.codi_aplicacio=Tests
-
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.connexio.login.username=USERNAME
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.connexio.login.password=PASSWORD
 
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.connexio.organitzacio=CAIB
 
@@ -50,7 +50,6 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.connexio.nom_procedimen
 
 
 # =================  METADADES OBLIGATORIES COMUNS ========================
-
 
 
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.serie_documental_EL=S0001
@@ -112,8 +111,6 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.expedient.automatic_met
 
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.expedient.automatic_metadata.2.name=eni:termino_punto_acceso
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.expedient.automatic_metadata.2.valueEL=Justificant
-
-
 
 
 # ----------------------------------------------
