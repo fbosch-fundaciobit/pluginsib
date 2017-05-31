@@ -37,3 +37,10 @@ target
 /plugins-documentcustody/filesystem/testReposWithFolder
 /plugins-documentcustody/filesystem/testAutomaticMetadatas
 /plugins-validatesignature/afirmacxf/run.bat
+/plugins-documentcustody/arxiudigitalcaib/alfresco_path.txt
+/plugins-documentcustody/arxiudigitalcaib/compil.bat
+/plugins-documentcustody/arxiudigitalcaib/connection.txt
+/plugins-documentcustody/arxiudigitalcaib/expedient.txt
+/plugins-documentcustody/arxiudigitalcaib/plugin.properties
+/plugins-userinformation/ldap/connection.properties
+/plugins-validatesignature/integra/run.bat
