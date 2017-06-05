@@ -629,8 +629,7 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
         GeneralConstants.DSS_AFIRMA_VERIFY_REQUEST, GeneralConstants.DSS_AFIRMA_VERIFY_METHOD,
         TransformersConstants.VERSION_10);
 
-    System.out.println("PRINT_XML: " + getProperty(PRINT_XML));
-    
+
     if (debug || "true".equals(getProperty(PRINT_XML))) {
       System.out.println("PRINT_XML: " + xmlOutput);
       
@@ -682,8 +681,16 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
         // XYZ ZZZ Traduir
         msg = "Informació de l'error no disponible";
       }
+      
+      // Error de Comunicacio o de Servidor
+      if (DSSConstants.ResultProcessIds.REQUESTER_ERROR.equals(major)
+          || DSSConstants.ResultProcessIds.RESPONDER_ERROR.equals(major)) {
+        throw new Exception(msg + "(" + major + ")");
+      }
+      
 
       if (DSSConstants.ResultProcessIds.INVALID_SIGNATURE.equals(major)) {
+
         status.setStatus(ValidationStatus.SIGNATURE_INVALID);
 
         String minor = verSigRes.getResult().getResultMinor();
@@ -694,7 +701,14 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
       } else {
         status.setStatus(ValidationStatus.SIGNATURE_ERROR);
 
-        msg = msg + " (" + major + ")";
+        String minor = verSigRes.getResult().getResultMinor();
+
+        if (minor == null) {
+          msg = msg + " (" + major + ")";
+        } else {
+          msg = msg + " (" + major + " | " + minor + ")";
+        }
+
       }
 
       status.setErrorMsg(msg);
