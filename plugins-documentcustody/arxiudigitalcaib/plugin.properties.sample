@@ -13,10 +13,10 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.nom_expedient_EL=Regist
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.nom_carpeta_EL=Anexo_${anexo.id?string[\"000\"]}
 
 # Opcional. Per defecte sempre es crea Draft
-# es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.createDraft=false
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.createDraft_EL=true
 
-# Opcional. Tanca l'expedient despres del primer guardat. Requereix "createDraft=false" 
-# es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.tancarExpedient=false
+# Opcional. Per defecte false. Tanca l'expedient despres del primer guardat. Requereix "createDraft=false" 
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.tancarExpedient_EL=false
 
 # Opcional
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.debug=false

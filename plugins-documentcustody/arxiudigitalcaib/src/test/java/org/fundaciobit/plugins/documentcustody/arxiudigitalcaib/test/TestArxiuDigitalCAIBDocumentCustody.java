@@ -43,9 +43,7 @@ import es.caib.arxiudigital.apirest.ApiArchivoDigital;
 import es.caib.arxiudigital.apirest.constantes.Aspectos;
 import es.caib.arxiudigital.apirest.facade.pojos.Documento;
 import es.caib.arxiudigital.apirest.facade.pojos.Expediente;
-import es.caib.arxiudigital.apirest.facade.pojos.FiltroBusquedaFacilExpedientes;
 import es.caib.arxiudigital.apirest.facade.resultados.Resultado;
-import es.caib.arxiudigital.apirest.facade.resultados.ResultadoBusqueda;
 import es.caib.arxiudigital.apirest.facade.resultados.ResultadoSimple;
 
 /**
@@ -693,10 +691,12 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     ArxiuDigitalCAIBDocumentCustodyPlugin plugin;
     plugin = (ArxiuDigitalCAIBDocumentCustodyPlugin) documentCustodyPlugin;
     
-    System.out.println(" CREATE DRAFT = " + plugin.isPropertyCreateDraft());
+    Map<String, Object> custodyParameters = createCustodyParameters();
+    
+    System.out.println(" CREATE DRAFT = " + plugin.isPropertyCreateDraft_EL(custodyParameters));
     
 
-    Map<String, Object> custodyParameters = createCustodyParameters();
+    
 
     String custodyID = plugin.reserveCustodyID(createCustodyParameters());
     System.out.println(" CustodyID = " + custodyID);

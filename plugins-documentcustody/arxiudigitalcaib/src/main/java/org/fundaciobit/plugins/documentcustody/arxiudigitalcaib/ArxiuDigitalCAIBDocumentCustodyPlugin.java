@@ -188,10 +188,17 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     return getPropertyRequired(ARXIUDIGITALCAIB_PROPERTY_BASE + "serie_documental_EL");
   }
 
-  public boolean isPropertyCreateDraft() {
-    String valueStr = getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "createDraft");
+  public boolean isPropertyCreateDraft_EL(Map<String, Object> custodyParameters)  {
+    
+    String valueStr = getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "createDraft_EL");
+    
     if (valueStr == null || valueStr.trim().length() == 0) {
       return true;
+    }
+    
+    valueStr = processOptionalProperty("CreateDraft_EL", valueStr, custodyParameters);
+    if (isDebug()) {
+      log.info("process(CreateDraft_EL)=[" + valueStr + "]");
     }
 
     if ("false".equals(valueStr.toLowerCase())) {
@@ -202,9 +209,21 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   }
   
   
-  public boolean isPropertyTancarExpedient() {
-    String valueStr = getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "tancarExpedient");
-    if (valueStr != null && "true".equals(valueStr.toLowerCase())) {
+  public boolean isPropertyTancarExpedient_EL(Map<String, Object> custodyParameters) {
+    String valueStr = getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "tancarExpedient_EL");
+    
+    
+    if (valueStr == null || valueStr.trim().length() == 0) {
+      return false;
+    }
+    
+    valueStr = processOptionalProperty("tancarExpedient_EL", valueStr, custodyParameters);
+
+    if (isDebug()) {
+      log.info("process(tancarExpedient_EL)=[" + valueStr + "]");
+    }
+    
+    if ("true".equals(valueStr.toLowerCase())) {
       return true;
     } else {
       return false;
@@ -634,7 +653,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       if (signatureCustody == null) {
         
         
-        if (!isPropertyCreateDraft()) {
+        if (!isPropertyCreateDraft_EL(custodyParameters)) {
           //   TODO TRADUIR
           throw new CustodyException("No podem guardar un document pla en mode NO BORRADOR (NO DRAFT)");
         }
@@ -646,7 +665,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       nomFitxerDocument = signatureCustody.getName();
     }
 
-    if (isPropertyTancarExpedient() && isPropertyCreateDraft()) {
+    if (isPropertyTancarExpedient_EL(custodyParameters) && isPropertyCreateDraft_EL(custodyParameters)) {
       // Son Incompatibles
       throw new CustodyException("La combinació de crear borradors (creatDraft) i de "
           + "tancar expedient (tancarExpedient) són incompatibles."); 
@@ -927,7 +946,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
         doc.getAspects().remove(Aspectos.BORRADOR);
         
-        if (isPropertyCreateDraft()) {
+        if (isPropertyCreateDraft_EL(custodyParameters)) {
 
           ResultadoSimple rd = apiArxiu.actualizarDocumento(doc);
 
@@ -996,7 +1015,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         }
       }
       
-      if (isPropertyTancarExpedient()) {
+      if (isPropertyTancarExpedient_EL(custodyParameters)) {
          Resultado<String> res = apiArxiu.cerrarExpediente(ecd.expedientID);
          if (hiHaError(res.getCodigoResultado())) {
            // TODO que feim, llaçam excepció o warning
@@ -1193,7 +1212,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
   @Override
   public boolean supportsDeleteDocument() {
-    return isPropertyCreateDraft();
+    return isPropertyCreateDraft_EL(null);
   }
 
   // ----------------------------------------------------------------------------
