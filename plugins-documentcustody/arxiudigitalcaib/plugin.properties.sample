@@ -87,8 +87,9 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.perfil_firma_EL=<#switc
 # Genèriques
 
 
-# Opcional. Configuració per generar Hash de la baseurl quan {2}
+# Opcional. Configuració per generar Hash de la baseurl quan s'usa ${validationUrl_custodyID_Hash}
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.hash.password=mypass
+# Opcional. Configuració per generar Hash de la baseurl quan s'usa ${validationUrl_custodyID_Hash}
 #  MD2, MD5, SHA,SHA-256,SHA-384,SHA-512
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.hash.algorithm=MD5
 

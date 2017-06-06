@@ -494,7 +494,7 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
       log.info("applicationID = " + applicationID);
     }
 
-    // Instanciamos un mapa con los par�metros de entrada
+    // Instanciamos un mapa con los paràmetros de entrada
     Map<String, Object> inParams = new HashMap<String, Object>();
 
     // OK
