@@ -189,31 +189,18 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
           SIGNPROFILE_T); 
 
       /**
-       * TODO XYZ ZZZ Constant DSSConstants.SignatureForm.LT_LEVEL
+       * TODO Constant DSSConstants.SignatureForm.LT_LEVEL
        *  Attribute that represents LT_LEVEL identifier form..
        */
       localSignProfile2PluginSignProfile.put("urn:afirma:dss:1.0:profile:XSS:AdES:forms:LT-Level",
-          SIGNPROFILE_T); 
-      // TODO XYZ ZZZ Per ara l'associam al tipus T 
-      // Número de la incidencia: 315761
-      // Número de seguimiento: 191372
-      // Se ha enviado un email a su dirección de correo: otae@fundaciobit.org
- 
+          SIGNPROFILE_XL); 
 
-      
       /**
-       * TODO XYZ ZZZ Constant DSSConstants.SignatureForm.LTA_LEVEL
+       * TODO Constant DSSConstants.SignatureForm.LTA_LEVEL
        *  Attribute that represents LT_LEVEL identifier form.
        */
       localSignProfile2PluginSignProfile.put("urn:afirma:dss:1.0:profile:XSS:AdES:forms:LTA-Level",
-          SIGNPROFILE_T); 
-      // TODO XYZ ZZZ Per ara l'associam al tipus T 
-      // Número de la incidencia: 315761
-      // Número de seguimiento: 191372
-      // Se ha enviado un email a su dirección de correo: otae@fundaciobit.org
- 
-     
-      
+          SIGNPROFILE_A); 
       
     
     localAlgorithm2PluginAlgorithm.put("http://www.w3.org/2000/09/xmldsig#sha1",
