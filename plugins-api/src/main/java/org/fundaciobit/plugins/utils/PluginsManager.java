@@ -36,11 +36,11 @@ public class PluginsManager {
   public static Object instancePluginByProperty(String propertyPlugin,
       String basePropertiesKey, java.util.Properties properties) {
     // Valor de la Clau
-    String className = System.getProperty(propertyPlugin);
+    String className = System.getProperty(propertyPlugin.trim());
     if (className == null || className.trim().length() == 0) {
       return null;
     }
-    return instancePluginByClassName(className, basePropertiesKey, properties);
+    return instancePluginByClassName(className.trim(), basePropertiesKey.trim(), properties);
   }
   
 
@@ -50,7 +50,7 @@ public class PluginsManager {
     log.info("Carregant classe " + className + " ...");
     Class<?> c;
     try {
-      c = Class.forName(className);
+      c = Class.forName(className.trim());
     } catch (Exception ex) {
       final String msg = "Error carregant la classe " + className 
         + " associada a un plugin:" + ex.getMessage();
@@ -82,12 +82,12 @@ public class PluginsManager {
         }
         pluginInstance = c.newInstance();
       } else {
-        if (properties == null && (basePropertiesKey == null || basePropertiesKey.length() == 0)) {
+        if (properties == null && (basePropertiesKey == null || basePropertiesKey.trim().length() == 0)) {
           log.debug("instancePluginByClassName => Instanciació simple");
           pluginInstance = c.newInstance();
         } else {
           try {
-            pluginInstance = c.getConstructor(String.class, Properties.class).newInstance(basePropertiesKey, properties);
+            pluginInstance = c.getConstructor(String.class, Properties.class).newInstance(basePropertiesKey.trim(), properties);
           } catch(NoSuchMethodException nsme) {
             log.error(nsme);
             pluginInstance = c.newInstance();
