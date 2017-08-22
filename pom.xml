@@ -22,6 +22,7 @@
     <module>plugins-userinformation</module>
     <module>plugins-validatesignature</module>
     <module>loginmodule-jboss</module>
+    <module>plugins-arxiu</module>
   </modules>
 
   <repositories>
