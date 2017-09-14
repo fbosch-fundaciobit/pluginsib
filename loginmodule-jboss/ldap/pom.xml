@@ -15,21 +15,19 @@
   </parent>
 
   <dependencies>
-	
+
     <dependency>
-	  <groupId>org.fundaciobit.plugins</groupId>
+      <groupId>org.fundaciobit.plugins</groupId>
       <artifactId>plugins-utils-ldap</artifactId>
       <version>1.0.0</version>
     </dependency>
-	
 
-  
-	<dependency>
-		<groupId>org.jboss.security</groupId>
-		<artifactId>jbosssx</artifactId>
-		<version>2.0.4.SP7</version>
-		<scope>provided</scope>
-	</dependency>
-	
+    <dependency>
+      <groupId>org.jboss.security</groupId>
+      <artifactId>jbosssx</artifactId>
+      <version>2.0.4.SP7</version>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 </project>
