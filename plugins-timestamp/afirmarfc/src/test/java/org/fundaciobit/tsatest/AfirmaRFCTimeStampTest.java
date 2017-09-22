@@ -65,10 +65,10 @@ public class AfirmaRFCTimeStampTest extends TestCase {
 
       byte[] fichero = new String("hola").getBytes();
 
-      System.out.println("\n\n*** INICIO RFC3161+HTTPS (Port 8443) == DIRECT ***");
-      
       /*
-      byte[] direct = afirmaRFCTimeStampPlugin.getTimeStampDirect(fichero);
+      System.out.println("\n\n*** INICIO RFC3161+HTTPS (Port 8443) == DIRECT ***");
+
+      byte[] direct = afirmaRFCTimeStampPlugin.getTimeStampDirect(fichero, Calendar.getInstance());
       if (direct != null) {
         System.out.println("DIRECT Sello obtenido:");
         System.out.println(new String(direct));
@@ -84,9 +84,9 @@ public class AfirmaRFCTimeStampTest extends TestCase {
       } else {
         System.out.println("DIRECT Error desconocido. Respuesta NULL.");
       }
-      */
+
       System.out.println("\n============================================\n");
-      
+      */
       
       System.out.println("\n\n*** INICIO RFC3161+HTTPS (Port 8443) == TIMESTAMP BC ***");
       long start = System.currentTimeMillis();
@@ -105,6 +105,7 @@ public class AfirmaRFCTimeStampTest extends TestCase {
       
 
       System.out.println("*** FIN RFC3161+HTTPS (Port 8443) ***");
+      
 
     } catch (Exception e) {
       e.printStackTrace();
