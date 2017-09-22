@@ -1,5 +1,7 @@
 package es.caib.plugins.arxiu.api;
 
+import java.util.Arrays;
+
 /**
  * 
  * @author Limit
@@ -21,6 +23,17 @@ public class Firma {
 									//		- TF09 - OOXML
 	private String nom;				// Nom del fitxer que conté la firma
 	private String csvRegulacio;	// Referència a la llei que regula l’aplicació del CSV
+	
+	
+	public boolean igual(
+			Firma f) {
+		
+		return  Arrays.equals(f.getContingut(), contingut) &&
+				f.getTipusMime().equals(tipusMime) &&
+				f.getTipus().equals(tipus) &&
+				f.getNom().equals(nom) &&
+				f.getCsvRegulacio().equals(csvRegulacio);
+	}
 	
 	public Firma() {
 		super();

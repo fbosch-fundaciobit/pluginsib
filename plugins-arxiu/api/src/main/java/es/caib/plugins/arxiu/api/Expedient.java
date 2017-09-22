@@ -2,6 +2,8 @@ package es.caib.plugins.arxiu.api;
 
 import java.util.List;
 
+import org.apache.commons.collections4.ListUtils;
+
 /**
  * 
  * @author Limit
@@ -13,6 +15,23 @@ public class Expedient {
 	private String nom;								// Nom de l’expedient
 	private ExpedientMetadades metadades;			// Metadades de l’expedient
 	private List<InformacioItem> continguts;		// Llista d’items que penjen de l’expedient
+	
+	
+	public boolean igual(
+			Expedient e) {
+		
+		return e.getIdentificador().equals(identificador) &&
+				e.getNom().equals(nom) &&
+				e.getMetadades().getIdentificador().equals(metadades.getIdentificador()) &&
+				e.getMetadades().getVersioNti().equals(metadades.getVersioNti()) &&
+				e.getMetadades().getOrigen().equals(metadades.getOrigen()) &&
+				e.getMetadades().getOrigen().equals(metadades.getOrigen()) &&
+				ListUtils.isEqualList(e.getMetadades().getOrgans(), metadades.getOrgans()) &&
+				e.getMetadades().getDataObertura().getTime() == metadades.getDataObertura().getTime() &&
+				e.getMetadades().getClassificacio().equals(metadades.getClassificacio()) &&
+				e.getMetadades().getEstat().equals(metadades.getEstat()) &&
+				e.getMetadades().getSerieDocumental().equals(metadades.getSerieDocumental());
+	}
 	
 	public Expedient() {
 		super();

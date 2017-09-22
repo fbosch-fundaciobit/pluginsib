@@ -4,4 +4,5 @@ public enum ContingutTipus {
 	EXPEDIENT,
 	CARPETA,
 	DOCUMENT;
+	
 }

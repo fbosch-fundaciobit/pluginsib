@@ -1,6 +1,10 @@
 package es.caib.plugins.arxiu.api;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.collections4.ListUtils;
 
 /**
  * 
@@ -14,6 +18,34 @@ public class Document {
 	private DocumentMetadades metadades;		// Metadades del document
 	private List<Firma> firmes;					// Llista de firmes del document
 	private DocumentContingut contingut;		// Contingut del document
+	
+	public boolean igual(
+			Document d) {
+		
+		if(d.getFirmes().size() != firmes.size()) return false;
+		for(int i = 0; i < firmes.size(); i++) {
+			if(!d.getFirmes().get(i).igual(firmes.get(i))) return false;
+		}
+		
+		String origenId = d.getContingut().getIdentificadorOrigen() == null ?
+				"" : d.getContingut().getIdentificadorOrigen();
+		
+		return d.getIdentificador().equals(identificador) &&
+				d.getNom().equals(nom) &&
+				d.getMetadades().getIdentificador().equals(metadades.getIdentificador()) &&
+				d.getMetadades().getVersioNti().equals(metadades.getVersioNti()) &&
+				d.getMetadades().getVersioNti().equals(metadades.getVersioNti()) &&
+				ListUtils.isEqualList(d.getMetadades().getOrgans(), metadades.getOrgans()) &&
+				d.getMetadades().getData().getTime() == metadades.getData().getTime() &&
+				d.getMetadades().getOrigen().equals(metadades.getOrigen()) &&
+				d.getMetadades().getEstatElaboracio().equals(metadades.getEstatElaboracio()) &&
+				d.getMetadades().getTipusDocumental().equals(metadades.getTipusDocumental()) &&
+				d.getMetadades().getSerieDocumental().equals(metadades.getSerieDocumental()) &&
+				Arrays.equals(d.getContingut().getContingut(), contingut.getContingut()) &&
+				d.getContingut().getTipusMime().equals(contingut.getTipusMime()) &&
+				origenId.equals(contingut.getIdentificadorOrigen());
+				
+	}
 	
 	public Document() {
 		super();

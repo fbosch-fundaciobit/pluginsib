@@ -13,6 +13,14 @@ public class Carpeta {
 	private String nom;								// Nom de la carpeta
 	private List<InformacioItem> informacioItems;	// Llista d’elements que pengen de la carpeta
 	
+	
+	public boolean igual(
+			Carpeta c) {
+		
+		return c.getIdentificador().equals(identificador) &&
+				c.getNom().equals(nom);
+	}
+	
 	public Carpeta() {
 		super();
 	}

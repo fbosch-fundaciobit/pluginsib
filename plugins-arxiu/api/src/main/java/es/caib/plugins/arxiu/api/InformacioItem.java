@@ -1,11 +1,13 @@
 package es.caib.plugins.arxiu.api;
 
+import java.io.Serializable;
+
 /**
  * 
  * @author Limit
  *
  */
-public class InformacioItem {
+public class InformacioItem implements Serializable {
 
 	private String identificador;		// Identificador de l’item
 	private String nom;					// Nom de l’item

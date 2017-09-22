@@ -1,8 +1,16 @@
 package es.caib.plugins.arxiu.api;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+
+import es.caib.arxiudigital.apirest.constantes.EstadosExpediente;
+import es.caib.arxiudigital.apirest.constantes.MetadatosExpediente;
 
 /**
  * 
@@ -13,6 +21,7 @@ public class ExpedientMetadades {
 
 	private String identificador;						// Identificador de la metadada
 	private String versioNti;							// http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e
+	private String origen;								// Administració o ciutadà
 	private List<String> organs;						// Codis Dir3 de les unitats orgàniques
 	private Date dataObertura;							// Data d’obertura de l’expedient
 	private String classificacio;						// Codi SIA del procediment
@@ -30,8 +39,9 @@ public class ExpedientMetadades {
 
 	public ExpedientMetadades(
 			String identificador, 
-			String versioNti, 
-			List<String> organs, 
+			String versioNti,
+			String origen,
+			List<String> organs,
 			Date dataObertura,
 			String classificacio, 
 			String estat, 
@@ -39,6 +49,7 @@ public class ExpedientMetadades {
 		super();
 		this.identificador = identificador;
 		this.versioNti = versioNti;
+		this.origen = origen;
 		this.organs = organs;
 		this.dataObertura = dataObertura;
 		this.classificacio = classificacio;
@@ -48,7 +59,8 @@ public class ExpedientMetadades {
 	
 	public ExpedientMetadades(
 			String identificador, 
-			String versioNti, 
+			String versioNti,
+			String origen,
 			List<String> organs, 
 			Date dataObertura,
 			String classificacio, 
@@ -58,6 +70,7 @@ public class ExpedientMetadades {
 		super();
 		this.identificador = identificador;
 		this.versioNti = versioNti;
+		this.origen = origen;
 		this.organs = organs;
 		this.dataObertura = dataObertura;
 		this.classificacio = classificacio;
@@ -68,7 +81,8 @@ public class ExpedientMetadades {
 	
 	public ExpedientMetadades(
 			String identificador, 
-			String versioNti, 
+			String versioNti,
+			String origen,
 			List<String> organs, 
 			Date dataObertura,
 			String classificacio, 
@@ -78,6 +92,7 @@ public class ExpedientMetadades {
 		super();
 		this.identificador = identificador;
 		this.versioNti = versioNti;
+		this.origen = origen;
 		this.organs = organs;
 		this.dataObertura = dataObertura;
 		this.classificacio = classificacio;
@@ -87,8 +102,9 @@ public class ExpedientMetadades {
 	}
 	
 	public ExpedientMetadades(
-			String identificador, 
-			String versioNti, 
+			String identificador,
+			String versioNti,
+			String origen,
 			List<String> organs, 
 			Date dataObertura,
 			String classificacio, 
@@ -99,6 +115,7 @@ public class ExpedientMetadades {
 		super();
 		this.identificador = identificador;
 		this.versioNti = versioNti;
+		this.origen = origen;
 		this.organs = organs;
 		this.dataObertura = dataObertura;
 		this.classificacio = classificacio;
@@ -112,6 +129,7 @@ public class ExpedientMetadades {
 		super();
 		this.identificador = em.identificador;
 		this.versioNti = em.versioNti;
+		this.origen = em.origen;
 		this.organs = em.organs;
 		this.dataObertura = em.dataObertura;
 		this.classificacio = em.classificacio;
@@ -135,6 +153,14 @@ public class ExpedientMetadades {
 
 	public void setVersioNti(String versioNti) {
 		this.versioNti = versioNti;
+	}
+	
+	public String getOrigen() {
+		return origen;
+	}
+
+	public void setOrigen(String origen) {
+		this.origen = origen;
 	}
 
 	public List<String> getOrgans() {
@@ -192,5 +218,6 @@ public class ExpedientMetadades {
 	public void setMetadadesAddicionals(Map<String, String> metadadesAddicionals) {
 		this.metadadesAddicionals = metadadesAddicionals;
 	}
+	
 	
 }
