@@ -5,14 +5,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
-import es.caib.plugins.arxiu.api.DocumentMetadades;
-import es.caib.plugins.arxiu.api.ExpedientMetadades;
 import es.caib.plugins.arxiu.api.Operacio;
 
 public class Utils {
@@ -29,195 +30,134 @@ public class Utils {
 		ObjectInputStream is = new ObjectInputStream(in);
 		return is.readObject();
 	}
-
-	public static boolean isValid(
-			ExpedientDao expedient,
-			List<ConsultaFiltre> filtres) throws ArxiuException {
+	
+	public static String formatDateIso8601(Date date) {
 		
-		for(ConsultaFiltre filtre : filtres) {
-			switch(filtre.getMetadataClau()) {
-				case Fields.EX_METADADESID:
-					if(!validateString(
-							expedient.getIdMetadades(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		df.setTimeZone(tz);
+		
+		return df.format(date);
+	}
+	
+	public static Date parseDateIso8601(String date) throws ArxiuException {
+		
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		df.setTimeZone(tz);
+		
+		try {
+			return df.parse(date);
+		} catch (ParseException e) {
+			throw new ArxiuException(
+					"No s'ha pogut parsejar el valor per el camp Data (" +
+					"valor=" + date + ")");
+		}
+	}
+	
+	private static enum Type {String, List, Date};
+	
+	public static String getQuery(List<ConsultaFiltre> filtres) throws ArxiuException {
+		
+		String query = "";
+		
+		for(int i = 0; i < filtres.size(); i++) {
+			ConsultaFiltre filtre = filtres.get(i);
+			
+			Type type = metadataClass(filtre.getMetadataClau());
+			switch(type) {
+				case String:
+					switch(filtre.getOperacio()) {
+						case IGUAL:
+							query = query + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							break;
+						case CONTE:
+							query = query + filtre.getMetadataClau() + ":*" + filtre.getValorOperacio1() + "*";
+							break;
+						case MAJOR:
+							query = query + filtre.getMetadataClau() + ":[" + filtre.getValorOperacio1() + " TO *]" +
+									" -" + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							break;
+						case MENOR:
+							query = query + filtre.getMetadataClau() + ":[* TO " + filtre.getValorOperacio1() + "]" +
+									" -" + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							break;
+						case ENTRE:
+							query = query + filtre.getMetadataClau() + ":[" + filtre.getValorOperacio1() + " TO " + filtre.getValorOperacio2() + "]";
+							break;
+						default:
+							throw new ArxiuException("No s'ha definit un operador per la metadada " + filtre.getMetadataClau());
+					}
 					break;
-				case Fields.EX_VERSIONTI:
-					if(!validateString(
-							expedient.getVersioNti(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
+				case List:
+					switch(filtre.getOperacio()) {
+						case IGUAL:
+							throw new ArxiuException("L'operador " + filtre.getOperacio() + " no es aplicable al un tipus de dades " + type);
+						case CONTE:
+							query = query + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							break;
+						case MAJOR:
+							throw new ArxiuException("L'operador " + filtre.getOperacio() + " no es aplicable al un tipus de dades " + type);
+						case MENOR:
+							throw new ArxiuException("L'operador " + filtre.getOperacio() + " no es aplicable al un tipus de dades " + type);
+						case ENTRE:
+							throw new ArxiuException("L'operador " + filtre.getOperacio() + " no es aplicable al un tipus de dades " + type);
+						default:
+							throw new ArxiuException("No s'ha definit un operador per la metadada " + filtre.getMetadataClau());
+					}
 					break;
-				case Fields.EX_ORIGEN:
-					if(!validateString(
-							expedient.getOrigen(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
+				case Date:
+					switch(filtre.getOperacio()) {
+						case IGUAL:
+							query = query + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							break;
+						case CONTE:
+							throw new ArxiuException("L'operador " + filtre.getOperacio() + " no es aplicable al un tipus de dades " + type);
+						case MAJOR:
+							query = query + filtre.getMetadataClau() + ":[" + filtre.getValorOperacio1() + " TO *]" +
+									" -" + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							break;
+						case MENOR:
+							query = query + filtre.getMetadataClau() + ":[* TO " + filtre.getValorOperacio1() + "]" +
+									" -" + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							break;
+						case ENTRE:
+							query = query + filtre.getMetadataClau() + ":[" + filtre.getValorOperacio1() + " TO " + filtre.getValorOperacio2() + "]";
+							break;
+						default:
+							throw new ArxiuException("No s'ha definit un operador per la metadada " + filtre.getMetadataClau());
+					}
 					break;
-				case Fields.EX_ORGAN:
-					if(!validateListString(
-							expedient.getOrgans(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-				case Fields.EX_DATA_OBERTURA:
-					if(!validatedata(
-							expedient.getDataObertura(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-				case Fields.EX_CLASSIFICACIO:
-					if(!validateString(
-							expedient.getClassificacio(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-				case Fields.EX_ESTAT:
-					if(!validateString(
-							expedient.getEstat(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-				case Fields.EX_INTERESSAT:
-					if(!validateListString(
-							expedient.getInteressats(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-				case Fields.EX_SERIE_DOCUMENTAL:
-					if(!validateString(
-							expedient.getSerieDocumental(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
+				default:
+					throw new ArxiuException("La metadada " + filtre.getMetadataClau() + " no esta definida");
 			}
+			if(i < filtres.size()-1) query = query + " AND ";
 		}
 		
-		return true;
+		return query;
 	}
 	
-	public static boolean isValid(
-			DocumentDao document,
-			List<ConsultaFiltre> filtres) throws ArxiuException {
+	private static Type metadataClass(String metadata) throws ArxiuException {
 		
-		for(ConsultaFiltre filtre : filtres) {
-			switch(filtre.getMetadataClau()) {
-				case Fields.DOC_METADADESID:
-					if(!validateString(
-							document.getMetadadesid(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-				case Fields.DOC_VERSIONTI:
-					if(!validateString(
-							document.getVersioNti(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-				case Fields.DOC_ORGAN:
-					if(!validateListString(
-							document.getOrgans(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-				case Fields.DOC_DATA:
-					if(!validatedata(
-							document.getData(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-				case Fields.DOC_ORIGEN:
-					if(!validateString(
-							document.getOrigen(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-				case Fields.DOC_ESTAT_ELABORACIO:
-					if(!validateString(
-							document.getEstatElaboracio(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-				case Fields.DOC_SERIE_DOCUMENTAL:
-					if(!validateString(
-							document.getSerieDocumental(),
-							filtre.getValorOperacio(),
-							filtre.getOperacio())
-							) return false;
-					break;
-			}
+		switch(metadata) {
+			case Fields.EX_METADADESID: return Type.String;
+			case Fields.EX_VERSIONTI: return Type.String;
+			case Fields.EX_ORIGEN: return Type.String;
+			case Fields.EX_ORGAN: return Type.List;
+			case Fields.EX_DATA_OBERTURA: return Type.Date;
+			case Fields.EX_CLASSIFICACIO: return Type.String;
+			case Fields.EX_ESTAT: return Type.String;
+			case Fields.EX_INTERESSAT: return Type.List;
+			case Fields.EX_SERIE_DOCUMENTAL: return Type.String;
+			case Fields.DOC_METADADESID: return Type.String;
+			case Fields.DOC_VERSIONTI: return Type.String;
+			case Fields.DOC_ORGAN: return Type.List;
+			case Fields.DOC_DATA: return Type.Date;
+			case Fields.DOC_ORIGEN: return Type.String;
+			case Fields.DOC_ESTAT_ELABORACIO: return Type.String;
+			case Fields.DOC_SERIE_DOCUMENTAL: return Type.String;
+			default: return null;
 		}
-		
-		return true;
-	}
-	
-	private static boolean validateString(
-			String camp,
-			String valor,
-			Operacio operacio) throws ArxiuException {
-		
-		switch(operacio) {
-			case CONTE:
-				return camp.contains(valor);
-			case IGUAL:
-				return camp.equals(valor);
-			default:
-				throw new ArxiuException("El filtre pel camp String no conté un operador valid.");
-		}
-	}
-	private static boolean validateListString(
-			List<String> camps,
-			String valor,
-			Operacio operacio) throws ArxiuException {
-		
-		switch(operacio) {
-			case CONTE:
-				for(String camp : camps)
-					if(camp.equals(valor)) return true;
-				
-				return false;
-			default:
-				throw new ArxiuException("El filtre pel camp List<String> no conté un operador valid.");
-		}
-	}
-	private static boolean validatedata(
-			Date camp,
-			String valor,
-			Operacio operacio) throws ArxiuException {
-		
-		Date data = new Date(Integer.parseInt(valor));
-		switch(operacio) {
-			case IGUAL:
-				return camp.getTime() == data.getTime();
-			case MAJOR:
-				return camp.getTime() > data.getTime();
-			case MENOR:
-				return camp.getTime() < data.getTime();
-			default:
-				throw new ArxiuException("El filtre pel camp Date no conté un operador valid.");
-		}
-	}
-	
-	public static String nextVersionValue(
-			String version) {
-		
-		int versionInt = Integer.parseInt(version);
-		return String.valueOf(versionInt++);
 	}
 	
 

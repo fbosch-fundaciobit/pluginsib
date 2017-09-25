@@ -3,9 +3,6 @@ package es.caib.plugins.arxiu.filesystem;
 import java.util.Date;
 import java.util.List;
 
-import es.caib.plugins.arxiu.api.Document;
-import es.caib.plugins.arxiu.api.DocumentContingut;
-import es.caib.plugins.arxiu.api.DocumentMetadades;
 import es.caib.plugins.arxiu.api.Firma;
 
 public class DocumentDao {

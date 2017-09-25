@@ -5,8 +5,6 @@ import java.util.concurrent.Semaphore;
 public class MySemaphore extends Semaphore {
 	
 	private static MySemaphore semaphore = null;
-	private static Long threadId = null;
-	private static Integer count = null;
 	
 	public static MySemaphore get() {
 		

@@ -228,6 +228,11 @@ public class FilesystemArxiuPlugin extends AbstractPluginProperties implements I
 					expedient.getContinguts());
 			getFilesystemArxiuDAO().fileCreate(w, expedientUpdate);
 			
+			ExpedientDao expedientOriginal = getFilesystemArxiuDAO().fileGet(identificador);
+			expedientOriginal.setContinguts(null);
+			getFilesystemArxiuDAO().fileDelete(w, identificador);
+			getFilesystemArxiuDAO().fileCreate(w, expedientOriginal);
+			
 			getFilesystemArxiuDAO().closeWriter(w);
 			
 			MySemaphore.get().release();
@@ -734,8 +739,6 @@ public class FilesystemArxiuPlugin extends AbstractPluginProperties implements I
 			String identificador) throws ArxiuException {
 		
 		try {
-			DocumentDao document = getFilesystemArxiuDAO().documentGet(identificador);
-			
 			getFilesystemArxiuDAO().documentDelete(w, identificador);
 			
 			getFilesystemArxiuFilesystem().esborrarDocument(
@@ -1472,7 +1475,6 @@ public class FilesystemArxiuPlugin extends AbstractPluginProperties implements I
 		
 		boolean emmagatzemamentCodificat = isEmmagatzemamentCodificat();
 		
-		List<InformacioItem> informacioItem = new ArrayList<InformacioItem>();		
 		if(emmagatzemamentCodificat) {
 			for(int i = 0; i < NUM_CARPETES_CODIFICADES; i++) {
 				String nom = Integer.toString(i);
