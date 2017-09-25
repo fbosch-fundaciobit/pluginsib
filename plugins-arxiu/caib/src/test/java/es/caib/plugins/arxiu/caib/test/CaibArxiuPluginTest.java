@@ -93,7 +93,18 @@ public class CaibArxiuPluginTest {
 
 	@Test
 	public void a1_testExpedientModificar() {
-		fail("Not yet implemented");
+		Long time = System.currentTimeMillis();
+		String nomModificat = expedientNomPerConsultar + "_mod";
+		ExpedientMetadades expedientMetadadesModificades = getExpedientMetadades(time);
+		
+		InformacioItem modificacioExpedient = null;
+		try {
+			modificacioExpedient = caibArxiuPlugin.expedientModificar(expedientIdPerConsultar, nomModificat, expedientMetadadesModificades);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al intentar modificar un expedient.");
+		}
+		
+		assertNotNull("No s'ha pogut modificar l'expedient", modificacioExpedient);
 	}
 
 	@Test

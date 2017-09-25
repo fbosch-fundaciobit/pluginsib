@@ -270,7 +270,7 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 		
-		metode = CaibArxiuMethods.FILE_CREATE;
+		metode = CaibArxiuMethods.FILE_SET;
 		
 		try {
 			SetFile setFile = new SetFile();
