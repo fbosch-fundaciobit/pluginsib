@@ -24,12 +24,6 @@
       <scope>provided</scope>
     </dependency>
     
-    <dependency>
-		<groupId>es.caib.arxiudigital</groupId>
-		<artifactId>arxiudigital-apirest</artifactId>
-		<version>1.0.1</version>
-	</dependency>
-	
 	<dependency>
 	    <groupId>org.apache.commons</groupId>
 	    <artifactId>commons-collections4</artifactId>
