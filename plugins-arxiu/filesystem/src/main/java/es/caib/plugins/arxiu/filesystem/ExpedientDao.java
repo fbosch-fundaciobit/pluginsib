@@ -47,6 +47,7 @@ public class ExpedientDao {
 						dataObertura,
 						classificacio,
 						estat,
+						interessats,
 						serieDocumental,
 						null),
 				continguts);

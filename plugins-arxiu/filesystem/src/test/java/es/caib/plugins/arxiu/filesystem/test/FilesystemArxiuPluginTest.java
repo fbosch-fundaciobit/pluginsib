@@ -155,7 +155,7 @@ public class FilesystemArxiuPluginTest {
 		
 	}
 	
-//	@Test
+	@Test
 	public void comprovarDetalls() throws ArxiuException {
 		
 		Arrays.fill(exp_check, 0);
@@ -186,10 +186,11 @@ public class FilesystemArxiuPluginTest {
 		
 		Expedient expedient = plugin.expedientDetalls(expedientId, null);
 		assertTrue("Error al comprovar l'expedient " + expedientId,
-				expedient.igual(new Expedient(
+				expedient.equals(new Expedient(
 						expedientId,
 						"expedient_" + index,
-						GeneradorObjectes.getExpedientMetadades(index, false))));
+						GeneradorObjectes.getExpedientMetadades(index, false),
+						expedient.getContinguts())));
 		exp_check[index]++;
 		
 		for(InformacioItem item : expedient.getContinguts()) {
@@ -214,9 +215,10 @@ public class FilesystemArxiuPluginTest {
 		
 		Carpeta carpeta = plugin.carpetaDetalls(carpetaId);
 		assertTrue("Error al comprovar la carpeta " + carpetaId,
-				carpeta.igual(new Carpeta(
+				carpeta.equals(new Carpeta(
 						carpetaId,
-						"carpeta_" + index)));
+						"carpeta_" + index,
+						carpeta.getInformacioItems())));
 		cpt_check[index]++;
 		
 		for(InformacioItem item : carpeta.getInformacioItems()) {
@@ -244,7 +246,7 @@ public class FilesystemArxiuPluginTest {
 				null, 
 				true);
 		assertTrue("Error al comprovar el document " + documentId,
-				document.igual(new Document(
+				document.equals(new Document(
 						documentId,
 						"document_" + index,
 						GeneradorObjectes.getDocumentContingut(PATH_DOC_PROVES),
@@ -258,7 +260,7 @@ public class FilesystemArxiuPluginTest {
 		doc_check[index]++;
 	}
 	
-//	@Test
+	@Test
 	public void comprovarModificar() throws ArxiuException {
 		
 		int num_exp_mod = NUM_EXP / PROP_MOD;
@@ -282,10 +284,11 @@ public class FilesystemArxiuPluginTest {
 					null);
 			
 			assertTrue("Error al comprovar l'expedient modificar " + expedients_modificat[i].getIdentificador(),
-					expedient.igual(new Expedient(
+					expedient.equals(new Expedient(
 							expedients_modificat[i].getIdentificador(),
 							"expedient" + index + "_MOD",
-							GeneradorObjectes.getExpedientMetadades(i, true))));
+							GeneradorObjectes.getExpedientMetadades(i, true),
+							expedient.getContinguts())));
 		}
 		
 		for(int i = 0; i < num_cpt_mod; i++) {
@@ -298,9 +301,10 @@ public class FilesystemArxiuPluginTest {
 			Carpeta carpeta = plugin.carpetaDetalls(carpetes_modificat[i].getIdentificador());
 			
 			assertTrue("Error al comprovar la carpeta modificada " + carpetes_modificat[i].getIdentificador(),
-					carpeta.igual(new Carpeta(
+					carpeta.equals(new Carpeta(
 							carpetes_modificat[i].getIdentificador(),
-							"carpeta_" + index + "_MOD")));
+							"carpeta_" + index + "_MOD",
+							carpeta.getInformacioItems())));
 		}
 		
 		for(int i = 0; i < num_doc_mod; i++) {
@@ -325,7 +329,7 @@ public class FilesystemArxiuPluginTest {
 					true);
 			
 			assertTrue("Error al comprovar el document modificar " + documents_modificat[i].getIdentificador(),
-					document.igual(new Document(
+					document.equals(new Document(
 							documents_modificat[i].getIdentificador(),
 							"document" + index + "_MOD",
 							GeneradorObjectes.getDocumentContingut(PATH_DOC_PROVES),
@@ -341,7 +345,7 @@ public class FilesystemArxiuPluginTest {
 		System.out.println("Test [ComprovarModificar] finalitzat");
 	}
 	
-//	@Test
+	@Test
 	public void comprovarEsborrar() throws ArxiuException {
 		
 		Arrays.fill(exp_check, 0);
@@ -422,7 +426,7 @@ public class FilesystemArxiuPluginTest {
 		System.out.println("Test [ComprovarEsborrar] finalitzat");
 	}
 	
-//	@Test
+	@Test
 	public void comprovarVersions() throws ArxiuException {
 		
 		comprovarModificar();
@@ -441,7 +445,7 @@ public class FilesystemArxiuPluginTest {
 						assertTrue(
 								"L'expedient " + item0.getIdentificador() +
 								" i l'expedient " + item1.getIdentificador() + " no son version del mateix expedient",
-								expedient0.igual(expedient1));
+								expedient0.equals(expedient1));
 					}
 				}
 			}
@@ -462,7 +466,7 @@ public class FilesystemArxiuPluginTest {
 						assertTrue(
 								"El document " + item0.getIdentificador() +
 								" i el document " + item1.getIdentificador() + " no son version del mateix document",
-								document0.igual(document1));
+								document0.equals(document1));
 					}
 				}
 			}
@@ -532,7 +536,7 @@ public class FilesystemArxiuPluginTest {
 		System.out.println("Test [ComprovarConsultes] finalitzat");
 	}
 	
-//	@Test
+	@Test
 	public void comprovarExpedientTancatObert() throws ArxiuException {
 		
 		for(int i = 0; i < NUM_EXP; i++) {
@@ -564,7 +568,7 @@ public class FilesystemArxiuPluginTest {
 		System.out.println("Test [ComprovarExpedientTancatObert] finalitzat");
 	}
 	
-//	@Test
+	@Test
 	public void comprovarDocumentEsborrany() throws ArxiuException {
 		
 		for(int i = 0; i < NUM_DOC; i++) {
@@ -586,7 +590,7 @@ public class FilesystemArxiuPluginTest {
 		System.out.println("Test [ComprovarDocumentEsborrany] finalitzat");
 	}
 	
-//	@Test
+	@Test
 	public void comprovarDocumentMoure() throws ArxiuException {
 		
 		for(int i = 0; i < NUM_DOC; i++) {
@@ -618,7 +622,7 @@ public class FilesystemArxiuPluginTest {
 		System.out.println("Test [ComprovarDocumentMoure] finalitzat");
 	}
 	
-//	@Test
+	@Test
 	public void comprovarDocumentCopiar() throws ArxiuException {
 		
 		for(int i = 0; i < NUM_DOC; i++) {
@@ -656,14 +660,14 @@ public class FilesystemArxiuPluginTest {
 				assertEquals(documents[i], document1.getContingut().getIdentificadorOrigen());
 				document0.setIdentificador(documentId);
 				document0.getContingut().setIdentificadorOrigen(documents[i]);
-				assertTrue(document0.igual(document1));
+				assertTrue(document0.equals(document1));
 			}
 		}
 		
 		System.out.println("Test [ComprovarDocumentCopiar] finalitzat");
 	}
 	
-//	@Test
+	@Test
 	public void comprovarCarpetaMoure() throws ArxiuException {
 		
 		for(int i = 0; i < NUM_DOC; i++) {
@@ -703,7 +707,7 @@ public class FilesystemArxiuPluginTest {
 		System.out.println("Test [ComprovarCarpetaMoure] finalitzat");
 	}
 	
-//	@Test
+	@Test
 	public void comprovarCarpetaCopiar() throws ArxiuException {
 		
 		for(int i = 0; i < NUM_CPT; i++) {
@@ -749,7 +753,7 @@ public class FilesystemArxiuPluginTest {
 		Carpeta carpeta0 = plugin.carpetaDetalls(carpetaId0);
 		Carpeta carpeta1 = plugin.carpetaDetalls(carpetaId1);
 		carpeta1.setIdentificador(carpetaId0);
-		assertTrue(carpeta0.igual(carpeta1));
+		assertTrue(carpeta0.getNom().equals(carpeta1.getNom()));
 		assertSame(carpeta0.getInformacioItems().size(), carpeta1.getInformacioItems().size());
 		for(int i = 0; i < carpeta0.getInformacioItems().size(); i++) {
 			InformacioItem item0 = carpeta0.getInformacioItems().get(i);
@@ -772,7 +776,7 @@ public class FilesystemArxiuPluginTest {
 		assertEquals(documentId0, document1.getContingut().getIdentificadorOrigen());
 		document0.setIdentificador(documentId1);
 		document0.getContingut().setIdentificadorOrigen(documentId0);
-		assertTrue(document0.igual(document1));
+		assertTrue(document0.equals(document1));
 	}
 	
 

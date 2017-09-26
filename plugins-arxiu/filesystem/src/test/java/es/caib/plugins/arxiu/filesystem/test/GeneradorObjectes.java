@@ -48,7 +48,7 @@ public class GeneradorObjectes {
 			return new DocumentContingut(
 					Files.readAllBytes(file.toPath()),
 					FilenameUtils.getExtension(path),
-					null);
+					"");
 		} catch (IOException e) {
 			throw new ArxiuException("Error llegint el contingut del document (path=" + path + ")");
 		}

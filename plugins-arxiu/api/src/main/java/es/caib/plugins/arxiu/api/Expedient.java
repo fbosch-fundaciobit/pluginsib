@@ -17,21 +17,21 @@ public class Expedient {
 	private List<InformacioItem> continguts;		// Llista d’items que penjen de l’expedient
 	
 	
-	public boolean igual(
-			Expedient e) {
-		
-		return e.getIdentificador().equals(identificador) &&
-				e.getNom().equals(nom) &&
-				e.getMetadades().getIdentificador().equals(metadades.getIdentificador()) &&
-				e.getMetadades().getVersioNti().equals(metadades.getVersioNti()) &&
-				e.getMetadades().getOrigen().equals(metadades.getOrigen()) &&
-				e.getMetadades().getOrigen().equals(metadades.getOrigen()) &&
-				ListUtils.isEqualList(e.getMetadades().getOrgans(), metadades.getOrgans()) &&
-				e.getMetadades().getDataObertura().getTime() == metadades.getDataObertura().getTime() &&
-				e.getMetadades().getClassificacio().equals(metadades.getClassificacio()) &&
-				e.getMetadades().getEstat().equals(metadades.getEstat()) &&
-				e.getMetadades().getSerieDocumental().equals(metadades.getSerieDocumental());
-	}
+//	public boolean igual(
+//			Expedient e) {
+//		
+//		return e.getIdentificador().equals(identificador) &&
+//				e.getNom().equals(nom) &&
+//				e.getMetadades().getIdentificador().equals(metadades.getIdentificador()) &&
+//				e.getMetadades().getVersioNti().equals(metadades.getVersioNti()) &&
+//				e.getMetadades().getOrigen().equals(metadades.getOrigen()) &&
+//				e.getMetadades().getOrigen().equals(metadades.getOrigen()) &&
+//				ListUtils.isEqualList(e.getMetadades().getOrgans(), metadades.getOrgans()) &&
+//				e.getMetadades().getDataObertura().getTime() == metadades.getDataObertura().getTime() &&
+//				e.getMetadades().getClassificacio().equals(metadades.getClassificacio()) &&
+//				e.getMetadades().getEstat().equals(metadades.getEstat()) &&
+//				e.getMetadades().getSerieDocumental().equals(metadades.getSerieDocumental());
+//	}
 	
 	public Expedient() {
 		super();
@@ -116,5 +116,50 @@ public class Expedient {
 	public void setContinguts(List<InformacioItem> continguts) {
 		this.continguts = continguts;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((continguts == null) ? 0 : continguts.hashCode());
+		result = prime * result + ((identificador == null) ? 0 : identificador.hashCode());
+		result = prime * result + ((metadades == null) ? 0 : metadades.hashCode());
+		result = prime * result + ((nom == null) ? 0 : nom.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Expedient other = (Expedient) obj;
+		if (continguts == null) {
+			if (other.continguts != null)
+				return false;
+		} else if (!continguts.equals(other.continguts))
+			return false;
+		if (identificador == null) {
+			if (other.identificador != null)
+				return false;
+		} else if (!identificador.equals(other.identificador))
+			return false;
+		if (metadades == null) {
+			if (other.metadades != null)
+				return false;
+		} else if (!metadades.equals(other.metadades))
+			return false;
+		if (nom == null) {
+			if (other.nom != null)
+				return false;
+		} else if (!nom.equals(other.nom))
+			return false;
+		return true;
+	}
+	
+	
 	
 }

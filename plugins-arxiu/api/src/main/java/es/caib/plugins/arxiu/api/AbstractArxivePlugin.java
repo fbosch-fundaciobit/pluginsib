@@ -11,7 +11,7 @@ import org.fundaciobit.plugins.utils.AbstractPluginProperties;
  * @author Limit
  *
  */
-public abstract class AbstractArxivePlugin extends AbstractPluginProperties implements IArxivePlugin {
+public abstract class AbstractArxivePlugin extends AbstractPluginProperties implements IArxiuPlugin {
 
 	protected final Logger log = Logger.getLogger(getClass());
 
