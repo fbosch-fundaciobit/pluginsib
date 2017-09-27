@@ -1,7 +1,7 @@
 /**
  * 
  */
-package es.caib.plugins.arxiu.api;
+package es.caib.plugins.arxiu.caib;
 
 /**
  * Capçalera amb informació comuna a totes les peticions a l'arxiu.

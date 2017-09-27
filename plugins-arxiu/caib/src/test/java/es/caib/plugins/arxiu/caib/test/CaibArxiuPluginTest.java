@@ -18,24 +18,24 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import es.caib.arxiudigital.apirest.constantes.Aspectos;
-import es.caib.arxiudigital.apirest.constantes.EstadosElaboracion;
-import es.caib.arxiudigital.apirest.constantes.EstadosExpediente;
-import es.caib.arxiudigital.apirest.constantes.PerfilesFirma;
-import es.caib.arxiudigital.apirest.constantes.TiposFirma;
 import es.caib.plugins.arxiu.api.ArxiuException;
+import es.caib.plugins.arxiu.api.Aspectes;
 import es.caib.plugins.arxiu.api.Capsalera;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.ConsultaResultat;
 import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.DocumentContingut;
 import es.caib.plugins.arxiu.api.DocumentMetadades;
+import es.caib.plugins.arxiu.api.Estat;
+import es.caib.plugins.arxiu.api.EstatElaboracio;
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
 import es.caib.plugins.arxiu.api.Firma;
 import es.caib.plugins.arxiu.api.InformacioItem;
-import es.caib.plugins.arxiu.api.Operacio;
+import es.caib.plugins.arxiu.api.ConsultaOperacio;
 import es.caib.plugins.arxiu.api.Origen;
+import es.caib.plugins.arxiu.api.PerfilsFirma;
+import es.caib.plugins.arxiu.api.FirmaTipus;
 import es.caib.plugins.arxiu.caib.CaibArxiuPlugin;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -170,7 +170,7 @@ public class CaibArxiuPluginTest {
 			List<ConsultaFiltre> filtres = new ArrayList<ConsultaFiltre>();
 			filtres.add(new ConsultaFiltre(
 					"ex_versio",
-					Operacio.IGUAL,
+					ConsultaOperacio.IGUAL,
 					"1"));
 			resultat = caibArxiuPlugin.expedientConsulta(filtres, pagina, itemsPerPagina);
 		} catch (ArxiuException e) {
@@ -382,10 +382,10 @@ public class CaibArxiuPluginTest {
 	}
 	private static String getEstadosExpediente(Long i, boolean aleatori) {
 		if (aleatori) {
-			EstadosExpediente[] estadosExpediente = EstadosExpediente.values();
+			Estat[] estadosExpediente = Estat.values();
 			return estadosExpediente[(int) (i % 3)].name();
 		} else {
-			return EstadosExpediente.ABIERTO.name();
+			return Estat.E01.name();
 		}
 	}
 	
@@ -421,8 +421,8 @@ public class CaibArxiuPluginTest {
 				getEstadosElaboracion(i), 
 				"ALTRES", 
 				SERIE_DOCUMENTAL, 
-				TiposFirma.PADES,
-				PerfilesFirma.EPES,
+				FirmaTipus.TF06,
+				PerfilsFirma.EPES,
 				null);
 	}
 	
@@ -445,11 +445,11 @@ public class CaibArxiuPluginTest {
 				null);
 	}
 	
-	private static List<Aspectos> getDocumentAspectes() {
+	private static List<Aspectes> getDocumentAspectes() {
 			
-		List<Aspectos> aspects = new ArrayList<Aspectos>();
-	    aspects.add(Aspectos.INTEROPERABLE);
-	    aspects.add(Aspectos.TRANSFERIBLE);
+		List<Aspectes> aspects = new ArrayList<Aspectes>();
+	    aspects.add(Aspectes.INTEROPERABLE);
+	    aspects.add(Aspectes.TRANSFERIBLE);
 	    
 	    return aspects;
 	}
@@ -458,14 +458,14 @@ public class CaibArxiuPluginTest {
 		
 		List<Firma> firmes = new ArrayList<Firma>();
 		Firma firma = new Firma();
-		firma.setTipus(TiposFirma.PADES.getValue());
+		firma.setTipus(FirmaTipus.TF06.name());
 		firmes.add(firma);
 	    
 	    return firmes;
 	}
 	
 	private static String getEstadosElaboracion(Long i) {
-		EstadosElaboracion[] estadosElaboracion = EstadosElaboracion.values();
+		EstatElaboracio[] estadosElaboracion = EstatElaboracio.values();
 		return estadosElaboracion[(int) (i % 5)].name();
 	}
 }

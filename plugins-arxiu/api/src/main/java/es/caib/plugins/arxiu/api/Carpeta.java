@@ -1,75 +1,36 @@
+/**
+ * 
+ */
 package es.caib.plugins.arxiu.api;
 
 import java.util.List;
 
 /**
- * 
- * @author Limit
+ * Informació d'un contingut de l'arxiu de tipus carpeta.
  *
+ * @author Limit Tecnologies <limit@limit.es>
  */
 public class Carpeta {
 
-	private String identificador;					// Identificador de la carpeta
-	private String nom;								// Nom de la carpeta
-	private List<InformacioItem> informacioItems;	// Llista d’elements que pengen de la carpeta
-	
-	
-//	public boolean igual(
-//			Carpeta c) {
-//		
-//		return c.getIdentificador().equals(identificador) &&
-//				c.getNom().equals(nom);
-//	}
-	
-	public Carpeta() {
-		super();
-	}
-
-	public Carpeta(
-			String identificador, 
-			String nom, 
-			List<InformacioItem> informacioItems) {
-		super();
-		this.identificador = identificador;
-		this.nom = nom;
-		this.informacioItems = informacioItems;
-	}
-	
-	public Carpeta(
-			String identificador, 
-			String nom) {
-		super();
-		this.identificador = identificador;
-		this.nom = nom;
-	}
-	
-	public Carpeta(Carpeta c) {
-		super();
-		this.identificador = c.identificador;
-		this.nom = c.nom;
-		this.informacioItems = c.informacioItems;
-	}
+	private String identificador;
+	private String nom;
+	private List<InformacioItem> informacioItems;
 
 	public String getIdentificador() {
 		return identificador;
 	}
-
 	public void setIdentificador(String identificador) {
 		this.identificador = identificador;
 	}
-
 	public String getNom() {
 		return nom;
 	}
-	
 	public void setNom(String nom) {
 		this.nom = nom;
 	}
-
 	public List<InformacioItem> getInformacioItems() {
 		return informacioItems;
 	}
-	
 	public void setInformacioItems(List<InformacioItem> informacioItems) {
 		this.informacioItems = informacioItems;
 	}
@@ -79,11 +40,8 @@ public class Carpeta {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((identificador == null) ? 0 : identificador.hashCode());
-		result = prime * result + ((informacioItems == null) ? 0 : informacioItems.hashCode());
-		result = prime * result + ((nom == null) ? 0 : nom.hashCode());
 		return result;
 	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -98,19 +56,7 @@ public class Carpeta {
 				return false;
 		} else if (!identificador.equals(other.identificador))
 			return false;
-		if (informacioItems == null) {
-			if (other.informacioItems != null)
-				return false;
-		} else if (!informacioItems.equals(other.informacioItems))
-			return false;
-		if (nom == null) {
-			if (other.nom != null)
-				return false;
-		} else if (!nom.equals(other.nom))
-			return false;
 		return true;
 	}
-	
-	
-	
+
 }

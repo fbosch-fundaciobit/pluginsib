@@ -1,8 +1,12 @@
-package es.caib.plugins.arxiu.api;
 /**
  * 
- * @author Limit
+ */
+package es.caib.plugins.arxiu.api;
+
+/**
+ * Excepció que es produeix al processar les peticions a l'arxiu.
  *
+ * @author Limit Tecnologies <limit@limit.es>
  */
 public class ArxiuException extends Exception {
 

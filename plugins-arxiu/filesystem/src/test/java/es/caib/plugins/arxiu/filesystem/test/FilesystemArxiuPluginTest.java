@@ -27,7 +27,7 @@ import es.caib.plugins.arxiu.api.ContingutTipus;
 import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.InformacioItem;
-import es.caib.plugins.arxiu.api.Operacio;
+import es.caib.plugins.arxiu.api.ConsultaOperacio;
 import es.caib.plugins.arxiu.filesystem.Fields;
 import es.caib.plugins.arxiu.filesystem.FilesystemArxiuFilesystem;
 import es.caib.plugins.arxiu.filesystem.FilesystemArxiuPlugin;
@@ -482,21 +482,21 @@ public class FilesystemArxiuPluginTest {
 		
 		filtres.add(new ConsultaFiltre(
 				Fields.EX_VERSIONTI,
-				Operacio.CONTE,
+				ConsultaOperacio.CONTE,
 				"1"));
 		ConsultaResultat resultat = plugin.expedientConsulta(filtres, 1, 10);
 		assertSame(resultat.getNumRetornat().intValue(), 6);
 		
 		filtres.add(new ConsultaFiltre(
 				Fields.EX_DATA_OBERTURA,
-				Operacio.MAJOR,
+				ConsultaOperacio.MAJOR,
 				String.valueOf(new Date(11).getTime())));
 		resultat = plugin.expedientConsulta(filtres, 1, 10);
 		assertSame(resultat.getNumRetornat().intValue(), 3);
 		
 		filtres.add(new ConsultaFiltre(
 				Fields.EX_SERIE_DOCUMENTAL,
-				Operacio.IGUAL,
+				ConsultaOperacio.IGUAL,
 				"ex_seriedoc_12"));
 		resultat = plugin.expedientConsulta(filtres, 1, 10);
 		assertSame(resultat.getNumRetornat().intValue(), 1);
@@ -505,21 +505,21 @@ public class FilesystemArxiuPluginTest {
 		
 		filtres.add(new ConsultaFiltre(
 				Fields.DOC_VERSIONTI,
-				Operacio.CONTE,
+				ConsultaOperacio.CONTE,
 				"1"));
 		resultat = plugin.documentConsulta(filtres, 1, 100);
 		assertSame(resultat.getNumRetornat().intValue(), 15);
 		
 		filtres.add(new ConsultaFiltre(
 				Fields.DOC_DATA,
-				Operacio.MAJOR,
+				ConsultaOperacio.MAJOR,
 				String.valueOf(new Date(20).getTime())));
 		resultat = plugin.documentConsulta(filtres, 1, 100);
 		assertSame(resultat.getNumRetornat().intValue(), 4);
 		
 		filtres.add(new ConsultaFiltre(
 				Fields.DOC_SERIE_DOCUMENTAL,
-				Operacio.IGUAL,
+				ConsultaOperacio.IGUAL,
 				"doc_serieDocumental_31"));
 		resultat = plugin.documentConsulta(filtres, 1, 100);
 		assertSame(resultat.getNumRetornat().intValue(), 1);
@@ -528,7 +528,7 @@ public class FilesystemArxiuPluginTest {
 		
 		filtres.add(new ConsultaFiltre(
 				Fields.DOC_ORGAN,
-				Operacio.CONTE,
+				ConsultaOperacio.CONTE,
 				"doc_organ_a_42"));
 		resultat = plugin.documentConsulta(filtres, 1, 100);
 		assertSame(resultat.getNumRetornat().intValue(), 1);

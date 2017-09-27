@@ -26,13 +26,10 @@ import es.caib.arxiudigital.apirest.constantes.FormatosFichero;
 import es.caib.arxiudigital.apirest.constantes.MetadatosDocumento;
 import es.caib.arxiudigital.apirest.constantes.MetadatosExpediente;
 import es.caib.arxiudigital.apirest.constantes.OrigenesContenido;
-import es.caib.arxiudigital.apirest.constantes.PerfilesFirma;
 import es.caib.arxiudigital.apirest.constantes.TiposContenidosBinarios;
 import es.caib.arxiudigital.apirest.constantes.TiposDocumentosENI;
-import es.caib.arxiudigital.apirest.constantes.TiposFirma;
 import es.caib.arxiudigital.apirest.constantes.TiposObjetoSGD;
 import es.caib.plugins.arxiu.api.ArxiuException;
-import es.caib.plugins.arxiu.api.Capsalera;
 import es.caib.plugins.arxiu.api.Carpeta;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.ContingutTipus;
@@ -43,6 +40,8 @@ import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
 import es.caib.plugins.arxiu.api.Firma;
 import es.caib.plugins.arxiu.api.InformacioItem;
+import es.caib.plugins.arxiu.api.PerfilsFirma;
+import es.caib.plugins.arxiu.api.FirmaTipus;
 
 public class CaibArxiuConversioHelper {
 	
@@ -192,9 +191,9 @@ public class CaibArxiuConversioHelper {
 				fileNode.getId(),
 				fileNode.getName(),
 				toExpedientMetadades(fileNode.getMetadataCollection()),
-				fileNode.getChildObjects() != null ? toInformacioItems(fileNode.getChildObjects()) : null
-				);
+				fileNode.getChildObjects() != null ? toInformacioItems(fileNode.getChildObjects()) : null);
 	}
+	@SuppressWarnings("unchecked")
 	private static ExpedientMetadades toExpedientMetadades(
 			List<Metadata> metadataList) throws ArxiuException {
 		
@@ -331,7 +330,6 @@ public class CaibArxiuConversioHelper {
 						document,
 						aplicacioCodi));
 		node.setBinaryContents(toContents(document));
-		node.setAspects(document.getAspectes());
 		
 		return node;
 	}
@@ -380,7 +378,7 @@ public class CaibArxiuConversioHelper {
 		if (documentMetadades.getTipoFirma() != null) {
 			metadata = new Metadata();
 			metadata.setQname(MetadatosDocumento.TIPO_FIRMA);
-			metadata.setValue(documentMetadades.getTipoFirma().getValue());
+			metadata.setValue(documentMetadades.getTipoFirma().name());
 			metadades.add(metadata);
 		}
 		
@@ -499,6 +497,7 @@ public class CaibArxiuConversioHelper {
 				content.getMimetype(), 
 				null);
 	}
+	@SuppressWarnings("unchecked")
 	private static DocumentMetadades toDocumentMetadades(
 			List<Metadata> metadatas) throws ArxiuException {
 		
@@ -508,8 +507,8 @@ public class CaibArxiuConversioHelper {
 				tipusDocumental = null,
 				serieDocumental = null;
 				
-		TiposFirma tipoFirma = null;
-		PerfilesFirma perfilFirma = null;
+		FirmaTipus tipoFirma = null;
+		PerfilsFirma perfilFirma = null;
 		List<String> organs = null;
 		Date data = null;
 		for(Metadata metadata : metadatas) {
@@ -540,10 +539,10 @@ public class CaibArxiuConversioHelper {
 					break;
 					
 				case MetadatosDocumento.TIPO_FIRMA:
-					tipoFirma = (TiposFirma) metadata.getValue();
+					tipoFirma = (FirmaTipus) metadata.getValue();
 					break;
 				case MetadatosDocumento.PERFIL_FIRMA:
-					perfilFirma = (PerfilesFirma) metadata.getValue();
+					perfilFirma = (PerfilsFirma) metadata.getValue();
 					break;
 			}
 		}
@@ -898,7 +897,7 @@ public class CaibArxiuConversioHelper {
 			}
 	}
 	
-	private static TiposFirma toTipoFirma(String tipoFirma) throws ArxiuException {
+	/*private static TiposFirma toTipoFirma(String tipoFirma) throws ArxiuException {
 		if(tipoFirma == null) return null;
 		switch (tipoFirma) {
 			case "CSV":
@@ -940,7 +939,7 @@ public class CaibArxiuConversioHelper {
 				throw new ArxiuException(
 						"No s'ha pogut convertir el valor per l'enumeració PerfilesFirma (" + "valor=" + perfilFirma + ")");
 		}
-	}
+	}*/
 	
 	private static Date parseDateIso8601(String date) throws ArxiuException {
 		

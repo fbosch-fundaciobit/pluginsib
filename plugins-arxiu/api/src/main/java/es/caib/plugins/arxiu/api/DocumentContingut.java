@@ -1,18 +1,21 @@
+/**
+ * 
+ */
 package es.caib.plugins.arxiu.api;
 
 import java.util.Arrays;
 
 /**
- * 
- * @author Limit
+ * Informació sobre un contingut d’un document.
  *
+ * @author Limit Tecnologies <limit@limit.es>
  */
 public class DocumentContingut {
 
-	private byte[] contingut;				// Contingut del fitxer
-	private String tipusMime;				// Tipus de format del contingut
-	private String identificadorOrigen;		// Identificador del document copiat
-	
+	private byte[] contingut;
+	private String tipusMime;
+	private String identificadorOrigen;
+
 	public DocumentContingut() {
 		super();
 	}

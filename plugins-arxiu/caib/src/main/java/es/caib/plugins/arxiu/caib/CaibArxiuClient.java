@@ -6,7 +6,6 @@ package es.caib.plugins.arxiu.caib;
 import java.util.List;
 
 import es.caib.plugins.arxiu.api.ArxiuException;
-import es.caib.plugins.arxiu.api.Capsalera;
 import es.caib.plugins.arxiu.api.Carpeta;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.Document;

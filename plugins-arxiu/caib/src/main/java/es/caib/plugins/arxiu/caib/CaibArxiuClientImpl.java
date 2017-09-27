@@ -5,6 +5,7 @@ package es.caib.plugins.arxiu.caib;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -89,8 +90,8 @@ import es.caib.arxiudigital.apirest.CSGD.peticiones.SetDocument;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.SetFile;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.SetFinalDocument;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.SetFolder;
+import es.caib.plugins.arxiu.api.ArxiuConstants;
 import es.caib.plugins.arxiu.api.ArxiuException;
-import es.caib.plugins.arxiu.api.Capsalera;
 import es.caib.plugins.arxiu.api.Carpeta;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.ContingutTipus;
@@ -448,21 +449,20 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 						resposta.getJson(),
 						GetFileVersionListResult.class);
 				List<VersionNode> vns = result.getGetFileVersionListResult().getResParam();
-				vns.sort(new Comparator<VersionNode>() {
+				Collections.sort(vns, new Comparator<VersionNode>() {
 				    public int compare(VersionNode vn1, VersionNode vn2) {
 				        return vn1.getDate().compareTo(vn2.getDate());
 				    }});
 				
 				int versio = 1;
 				List<InformacioItem> informacioItems = new ArrayList<InformacioItem>();
-				for (VersionNode vn: vns) {
+				for (int i = 0; i < vns.size(); i++) {
 					informacioItems.add(
 							new InformacioItem(
 									identificador,
 									null,
-									ContingutTipus.EXPEDIENT,
+									ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT,
 									String.valueOf(versio)));
-					
 					versio++;
 				}
 				return informacioItems;
@@ -911,7 +911,7 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 						resposta.getJson(),
 						GetDocVersionListResult.class);
 				List<VersionNode> vns = result.getGetDocVersionListResult().getResParam();
-				vns.sort(new Comparator<VersionNode>() {
+				Collections.sort(vns, new Comparator<VersionNode>() {
 				    public int compare(VersionNode vn1, VersionNode vn2) {
 				        return vn1.getDate().compareTo(vn2.getDate());
 				    }});
@@ -923,7 +923,7 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 							new InformacioItem(
 									vn.getId(),
 									null,
-									ContingutTipus.DOCUMENT,
+									ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
 									String.valueOf(versio)));
 					
 					versio++;
@@ -1267,7 +1267,7 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			paramTarget.setTargetParent(targetNodeId);
 			request.setParam(paramTarget);
 			request.setServiceHeader(generarServiceHeader(capsalera));
-			copyFolder.setCopyDocumentFolder(request);
+			copyFolder.setcopyFolderRequest(request);
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					copyFolder);

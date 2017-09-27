@@ -1,11 +1,14 @@
+/**
+ * 
+ */
 package es.caib.plugins.arxiu.api;
 
 import java.util.List;
 
 /**
- * 
- * @author Limit
+ * Informació sobre el resultat d'una consulta.
  *
+ * @author Limit Tecnologies <limit@limit.es>
  */
 public class ConsultaResultat {
 

@@ -1,21 +1,19 @@
+/**
+ * 
+ */
 package es.caib.plugins.arxiu.api;
 
 /**
- * 
- * @author Limit
+ * Informació sobre el filtre per a realitzar consultes.
  *
+ * @author Limit Tecnologies <limit@limit.es>
  */
 public class ConsultaFiltre {
 
-	private String metadataClau;		// Metadada sobre la que s’aplica el criteri de filtre
-	private Operacio operacio;			// Operació a aplicar sobre la metadada:
-										//		- IGUAL,
-										//		- CONTE
-										//		- MENOR
-										//		- MAJOR
-										//		- ENTRE
-	private String valorOperacio1;		// Valor a utilitzar en el criteri
-	private String valorOperacio2;		// Valor a utilitzar en el criteri
+	private String metadataClau;
+	private ConsultaOperacio operacio;
+	private String valorOperacio1;
+	private String valorOperacio2;
 	
 	public ConsultaFiltre() {
 		super();
@@ -23,7 +21,7 @@ public class ConsultaFiltre {
 
 	public ConsultaFiltre(
 			String metadataClau, 
-			Operacio operacio, 
+			ConsultaOperacio operacio, 
 			String valorOperacio1) {
 		super();
 		this.metadataClau = metadataClau;
@@ -33,7 +31,7 @@ public class ConsultaFiltre {
 	
 	public ConsultaFiltre(
 			String metadataClau, 
-			Operacio operacio, 
+			ConsultaOperacio operacio, 
 			String valorOperacio1,
 			String valorOperacio2) {
 		super();
@@ -51,11 +49,11 @@ public class ConsultaFiltre {
 		this.metadataClau = metadataClau;
 	}
 
-	public Operacio getOperacio() {
+	public ConsultaOperacio getOperacio() {
 		return operacio;
 	}
 
-	public void setOperacio(Operacio operacio) {
+	public void setOperacio(ConsultaOperacio operacio) {
 		this.operacio = operacio;
 	}
 

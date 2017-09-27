@@ -7,6 +7,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.fundaciobit.plugins.utils.AbstractPluginProperties;
 
+import es.caib.plugins.arxiu.api.ArxiuConstants;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.Carpeta;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
@@ -104,7 +105,7 @@ public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuP
 		return new InformacioItem(
 				identificador, 
 				nom,
-				ContingutTipus.EXPEDIENT);
+				ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT);
 	}
 	
 	@Override
@@ -265,7 +266,7 @@ public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuP
 		return new InformacioItem(
 				document.getIdentificador(), 
 				document.getNom(),
-				ContingutTipus.DOCUMENT);
+				ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT);
 	}
 	
 	@Override
@@ -280,7 +281,7 @@ public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuP
 		return new InformacioItem(
 				document.getIdentificador(), 
 				document.getNom(),
-				ContingutTipus.DOCUMENT);
+				ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT);
 	}
 	
 	@Override
@@ -437,11 +438,10 @@ public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuP
 				identificador,
 				nom,
 				CaibArxiuConversioHelper.toCapsalera());
-		
 		return new InformacioItem(
 				identificador, 
 				nom,
-				ContingutTipus.CARPETA);
+				ArxiuConstants.CONTINGUT_TIPUS_CARPETA);
 	}
 	
 	@Override
