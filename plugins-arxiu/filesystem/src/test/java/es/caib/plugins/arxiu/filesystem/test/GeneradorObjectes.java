@@ -69,6 +69,8 @@ public class GeneradorObjectes {
 				"doc_estatElaboracio_" + i + mod,
 				"doc_tipusDocumental_" + i + mod,
 				"doc_serieDocumental_" + i + mod,
+				null,
+				null,
 				null);
 	}
 	

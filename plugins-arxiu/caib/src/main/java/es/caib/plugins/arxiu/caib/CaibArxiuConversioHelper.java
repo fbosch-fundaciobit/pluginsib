@@ -32,6 +32,7 @@ import es.caib.arxiudigital.apirest.constantes.TiposDocumentosENI;
 import es.caib.arxiudigital.apirest.constantes.TiposFirma;
 import es.caib.arxiudigital.apirest.constantes.TiposObjetoSGD;
 import es.caib.plugins.arxiu.api.ArxiuException;
+import es.caib.plugins.arxiu.api.Aspectes;
 import es.caib.plugins.arxiu.api.Capsalera;
 import es.caib.plugins.arxiu.api.Carpeta;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
@@ -43,6 +44,8 @@ import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
 import es.caib.plugins.arxiu.api.Firma;
 import es.caib.plugins.arxiu.api.InformacioItem;
+import es.caib.plugins.arxiu.api.PerfilsFirma;
+import es.caib.plugins.arxiu.api.TipusFirma;
 
 public class CaibArxiuConversioHelper {
 	
@@ -331,7 +334,7 @@ public class CaibArxiuConversioHelper {
 						document,
 						aplicacioCodi));
 		node.setBinaryContents(toContents(document));
-		node.setAspects(document.getAspectes());
+		node.setAspects(toApiAspectes(document.getAspectes()));
 		
 		return node;
 	}
@@ -380,7 +383,7 @@ public class CaibArxiuConversioHelper {
 		if (documentMetadades.getTipoFirma() != null) {
 			metadata = new Metadata();
 			metadata.setQname(MetadatosDocumento.TIPO_FIRMA);
-			metadata.setValue(documentMetadades.getTipoFirma().getValue());
+			metadata.setValue(documentMetadades.getTipoFirma().name());
 			metadades.add(metadata);
 		}
 		
@@ -499,6 +502,15 @@ public class CaibArxiuConversioHelper {
 				content.getMimetype(), 
 				null);
 	}
+	private static List<Aspectos> toApiAspectes(
+			List<Aspectes> aspectes) {
+		
+		List<Aspectos> aspectsRetorn = new ArrayList<Aspectos>();
+		for (Aspectes aspecte: aspectes) {
+			aspectsRetorn.add(Aspectos.valueOf(aspecte.name()));
+		}
+		return aspectsRetorn;
+	}
 	private static DocumentMetadades toDocumentMetadades(
 			List<Metadata> metadatas) throws ArxiuException {
 		
@@ -508,8 +520,8 @@ public class CaibArxiuConversioHelper {
 				tipusDocumental = null,
 				serieDocumental = null;
 				
-		TiposFirma tipoFirma = null;
-		PerfilesFirma perfilFirma = null;
+		TipusFirma tipoFirma = null;
+		PerfilsFirma perfilFirma = null;
 		List<String> organs = null;
 		Date data = null;
 		for(Metadata metadata : metadatas) {
@@ -540,10 +552,10 @@ public class CaibArxiuConversioHelper {
 					break;
 					
 				case MetadatosDocumento.TIPO_FIRMA:
-					tipoFirma = (TiposFirma) metadata.getValue();
+					tipoFirma = (TipusFirma) metadata.getValue();
 					break;
 				case MetadatosDocumento.PERFIL_FIRMA:
-					perfilFirma = (PerfilesFirma) metadata.getValue();
+					perfilFirma = (PerfilsFirma) metadata.getValue();
 					break;
 			}
 		}

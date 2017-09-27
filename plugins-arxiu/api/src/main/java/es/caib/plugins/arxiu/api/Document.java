@@ -1,11 +1,6 @@
 package es.caib.plugins.arxiu.api;
 
-import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.collections4.ListUtils;
-
-import es.caib.arxiudigital.apirest.constantes.Aspectos;
 
 /**
  * 
@@ -19,7 +14,7 @@ public class Document {
 	private DocumentMetadades metadades;		// Metadades del document
 	private List<Firma> firmes;					// Llista de firmes del document
 	private DocumentContingut contingut;		// Contingut del document
-	private List<Aspectos> aspectes;			// Aspectes del document
+	private List<Aspectes> aspectes;			// Aspectes del document
 	
 //	public boolean igual(
 //			Document d) {
@@ -150,11 +145,11 @@ public class Document {
 		this.contingut = contingut;
 	}
 
-	public List<Aspectos> getAspectes() {
+	public List<Aspectes> getAspectes() {
 		return aspectes;
 	}
 
-	public void setAspectes(List<Aspectos> aspectes) {
+	public void setAspectes(List<Aspectes> aspectes) {
 		this.aspectes = aspectes;
 	}
 	

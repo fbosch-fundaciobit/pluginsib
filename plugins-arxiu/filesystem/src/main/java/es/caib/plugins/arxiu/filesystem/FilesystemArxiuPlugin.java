@@ -780,6 +780,8 @@ public class FilesystemArxiuPlugin extends AbstractPluginProperties implements I
 							d.getEstatElaboracio(),
 							d.getTipusDocumental(),
 							d.getSerieDocumental(),
+							null,
+							null,
 							null),
 					d.getFirmes());
 		}
@@ -807,6 +809,8 @@ public class FilesystemArxiuPlugin extends AbstractPluginProperties implements I
 								d.getEstatElaboracio(),
 								d.getTipusDocumental(),
 								d.getSerieDocumental(),
+								null,
+								null,
 								null),
 						d.getFirmes());
 			}

@@ -4,9 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import es.caib.arxiudigital.apirest.constantes.PerfilesFirma;
-import es.caib.arxiudigital.apirest.constantes.TiposFirma;
-
 /**
  * 
  * @author Limit
@@ -47,8 +44,8 @@ public class DocumentMetadades {
 														//		- TD20 - Otros incautados.
 														//		- TD99 - Otros
 	private String serieDocumental;						// Identificador de la sèrie documental de l’arxiu
-	private TiposFirma tipoFirma;
-	private PerfilesFirma perfilFirma;
+	private TipusFirma tipusFirma;
+	private PerfilsFirma perfilFirma;
 	private Map<String, String> metadadesAddicionals;	// Altres metadades que es vulguin desar (Map: <nomMetadada, valorMetadada>)
 	
 	public DocumentMetadades() {
@@ -64,8 +61,8 @@ public class DocumentMetadades {
 			String estatElaboracio, 
 			String tipusDocumental, 
 			String serieDocumental,
-			TiposFirma tipoFirma,
-			PerfilesFirma perfilFirma) {
+			TipusFirma tipusFirma,
+			PerfilsFirma perfilFirma) {
 		super();
 		this.identificador = identificador;
 		this.versioNti = versioNti;
@@ -75,7 +72,7 @@ public class DocumentMetadades {
 		this.estatElaboracio = estatElaboracio;
 		this.tipusDocumental = tipusDocumental;
 		this.serieDocumental = serieDocumental;
-		this.tipoFirma = tipoFirma;
+		this.tipusFirma = tipusFirma;
 		this.perfilFirma = perfilFirma;
 	}
 	
@@ -88,8 +85,8 @@ public class DocumentMetadades {
 			String estatElaboracio, 
 			String tipusDocumental, 
 			String serieDocumental,
-			TiposFirma tipoFirma,
-			PerfilesFirma perfilFirma,
+			TipusFirma tipusFirma,
+			PerfilsFirma perfilFirma,
 			Map<String, String> metadadesAddicionals) {
 		super();
 		this.identificador = identificador;
@@ -100,7 +97,7 @@ public class DocumentMetadades {
 		this.estatElaboracio = estatElaboracio;
 		this.tipusDocumental = tipusDocumental;
 		this.serieDocumental = serieDocumental;
-		this.tipoFirma = tipoFirma;
+		this.tipusFirma = tipusFirma;
 		this.perfilFirma = perfilFirma;
 		this.metadadesAddicionals = metadadesAddicionals;
 	}
@@ -182,19 +179,19 @@ public class DocumentMetadades {
 		this.serieDocumental = serieDocumental;
 	}
 
-	public TiposFirma getTipoFirma() {
-		return tipoFirma;
+	public TipusFirma getTipoFirma() {
+		return tipusFirma;
 	}
 
-	public void setTipoFirma(TiposFirma tipoFirma) {
-		this.tipoFirma = tipoFirma;
+	public void setTipoFirma(TipusFirma tipusFirma) {
+		this.tipusFirma = tipusFirma;
 	}
 
-	public PerfilesFirma getPerfilFirma() {
+	public PerfilsFirma getPerfilFirma() {
 		return perfilFirma;
 	}
 
-	public void setPerfilFirma(PerfilesFirma perfilFirma) {
+	public void setPerfilFirma(PerfilsFirma perfilFirma) {
 		this.perfilFirma = perfilFirma;
 	}
 
