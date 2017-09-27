@@ -4,6 +4,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import es.caib.arxiudigital.apirest.constantes.PerfilesFirma;
+import es.caib.arxiudigital.apirest.constantes.TiposFirma;
+
 /**
  * 
  * @author Limit
@@ -44,6 +47,8 @@ public class DocumentMetadades {
 														//		- TD20 - Otros incautados.
 														//		- TD99 - Otros
 	private String serieDocumental;						// Identificador de la sèrie documental de l’arxiu
+	private TiposFirma tipoFirma;
+	private PerfilesFirma perfilFirma;
 	private Map<String, String> metadadesAddicionals;	// Altres metadades que es vulguin desar (Map: <nomMetadada, valorMetadada>)
 	
 	public DocumentMetadades() {
@@ -58,7 +63,9 @@ public class DocumentMetadades {
 			String origen,
 			String estatElaboracio, 
 			String tipusDocumental, 
-			String serieDocumental) {
+			String serieDocumental,
+			TiposFirma tipoFirma,
+			PerfilesFirma perfilFirma) {
 		super();
 		this.identificador = identificador;
 		this.versioNti = versioNti;
@@ -68,6 +75,8 @@ public class DocumentMetadades {
 		this.estatElaboracio = estatElaboracio;
 		this.tipusDocumental = tipusDocumental;
 		this.serieDocumental = serieDocumental;
+		this.tipoFirma = tipoFirma;
+		this.perfilFirma = perfilFirma;
 	}
 	
 	public DocumentMetadades(
@@ -79,6 +88,8 @@ public class DocumentMetadades {
 			String estatElaboracio, 
 			String tipusDocumental, 
 			String serieDocumental,
+			TiposFirma tipoFirma,
+			PerfilesFirma perfilFirma,
 			Map<String, String> metadadesAddicionals) {
 		super();
 		this.identificador = identificador;
@@ -89,6 +100,8 @@ public class DocumentMetadades {
 		this.estatElaboracio = estatElaboracio;
 		this.tipusDocumental = tipusDocumental;
 		this.serieDocumental = serieDocumental;
+		this.tipoFirma = tipoFirma;
+		this.perfilFirma = perfilFirma;
 		this.metadadesAddicionals = metadadesAddicionals;
 	}
 	
@@ -167,6 +180,22 @@ public class DocumentMetadades {
 
 	public void setSerieDocumental(String serieDocumental) {
 		this.serieDocumental = serieDocumental;
+	}
+
+	public TiposFirma getTipoFirma() {
+		return tipoFirma;
+	}
+
+	public void setTipoFirma(TiposFirma tipoFirma) {
+		this.tipoFirma = tipoFirma;
+	}
+
+	public PerfilesFirma getPerfilFirma() {
+		return perfilFirma;
+	}
+
+	public void setPerfilFirma(PerfilesFirma perfilFirma) {
+		this.perfilFirma = perfilFirma;
 	}
 
 	public Map<String, String> getMetadadesAddicionals() {

@@ -26,7 +26,10 @@ import es.caib.arxiudigital.apirest.constantes.FormatosFichero;
 import es.caib.arxiudigital.apirest.constantes.MetadatosDocumento;
 import es.caib.arxiudigital.apirest.constantes.MetadatosExpediente;
 import es.caib.arxiudigital.apirest.constantes.OrigenesContenido;
+import es.caib.arxiudigital.apirest.constantes.PerfilesFirma;
+import es.caib.arxiudigital.apirest.constantes.TiposContenidosBinarios;
 import es.caib.arxiudigital.apirest.constantes.TiposDocumentosENI;
+import es.caib.arxiudigital.apirest.constantes.TiposFirma;
 import es.caib.arxiudigital.apirest.constantes.TiposObjetoSGD;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.Capsalera;
@@ -38,6 +41,7 @@ import es.caib.plugins.arxiu.api.DocumentContingut;
 import es.caib.plugins.arxiu.api.DocumentMetadades;
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
+import es.caib.plugins.arxiu.api.Firma;
 import es.caib.plugins.arxiu.api.InformacioItem;
 
 public class CaibArxiuConversioHelper {
@@ -326,7 +330,8 @@ public class CaibArxiuConversioHelper {
 				toMetadataDocument(
 						document,
 						aplicacioCodi));
-		node.setBinaryContents(toContents(document.getContingut()));
+		node.setBinaryContents(toContents(document));
+		node.setAspects(document.getAspectes());
 		
 		return node;
 	}
@@ -372,8 +377,22 @@ public class CaibArxiuConversioHelper {
 			metadades.add(metadata);
 		}
 		
+		if (documentMetadades.getTipoFirma() != null) {
+			metadata = new Metadata();
+			metadata.setQname(MetadatosDocumento.TIPO_FIRMA);
+			metadata.setValue(documentMetadades.getTipoFirma().getValue());
+			metadades.add(metadata);
+		}
+		
+		if (documentMetadades.getPerfilFirma() != null) {
+			metadata = new Metadata();
+			metadata.setQname(MetadatosDocumento.PERFIL_FIRMA);
+			metadata.setValue(documentMetadades.getPerfilFirma().getValue());
+			metadades.add(metadata);
+		}
+		
 		String formatNom = FilenameUtils.getExtension(document.getNom()).toUpperCase();
-		if (formatNom != null) {
+		if (formatNom != null && !formatNom.isEmpty()) {
 			metadata = new Metadata();
 			metadata.setQname(MetadatosDocumento.NOMBRE_FORMATO);
 			metadata.setValue(toFormatosFichero(formatNom));
@@ -426,17 +445,30 @@ public class CaibArxiuConversioHelper {
 		return metadades;
 	}	
 	private static List<Content> toContents(
-			DocumentContingut documentCongitgut) {
+			Document document) {
 		
 		List<Content> contents = new ArrayList<Content>();
-		if (documentCongitgut != null) {
+		if (document.getContingut() != null) {
 			Content content = new Content();
 			
 			content.setEncoding("UTF-8");
-			content.setMimetype(documentCongitgut.getTipusMime());
-			content.setContent(new String(Base64.encode(documentCongitgut.getContingut())));
+			content.setMimetype(document.getContingut().getTipusMime());
+			content.setContent(new String(Base64.encode(document.getContingut().getContingut())));
 			
 			contents.add(content);
+		}
+		
+		if (document.getFirmes() != null) {
+			
+			for (Firma firma : document.getFirmes()) {
+				Content contenidofirma = new Content();
+		        contenidofirma.setBinaryType(TiposContenidosBinarios.SIGNATURE);
+		        contenidofirma.setContent(firma.getContingut() != null ? new String(firma.getContingut()) : null);
+		        contenidofirma.setEncoding("UTF-8");
+		        contenidofirma.setMimetype(firma.getTipusMime());
+
+		        contents.add(contenidofirma);
+		    }
 		}
 		
 		return contents;
@@ -475,23 +507,24 @@ public class CaibArxiuConversioHelper {
 				estatElaboracio = null,
 				tipusDocumental = null,
 				serieDocumental = null;
-		List<String>
-				organs = null;
-		Date 
-				data = null;
+				
+		TiposFirma tipoFirma = null;
+		PerfilesFirma perfilFirma = null;
+		List<String> organs = null;
+		Date data = null;
 		for(Metadata metadata : metadatas) {
 			switch(metadata.getQname()) {
 				case MetadatosDocumento.ORIGEN:
-					origen = ((OrigenesContenido) metadata.getValue()).getValue();
+					origen = String.valueOf(metadata.getValue());
 					break;
 				case MetadatosDocumento.FECHA_INICIO:
 					data = parseDateIso8601((String) metadata.getValue());
 					break;
 				case MetadatosDocumento.ESTADO_ELABORACION:
-					estatElaboracio = ((EstadosElaboracion) metadata.getValue()).getValue();
+					estatElaboracio = (String) metadata.getValue();
 					break;
 				case MetadatosDocumento.TIPO_DOC_ENI:
-					estatElaboracio = ((TiposDocumentosENI) metadata.getValue()).getValue();
+					estatElaboracio = (String) metadata.getValue();
 					break;
 				case MetadatosDocumento.ORGANO:
 					Object preValor = metadata.getValue();
@@ -505,6 +538,13 @@ public class CaibArxiuConversioHelper {
 				case MetadatosDocumento.CODIGO_CLASIFICACION:
 					serieDocumental = (String) metadata.getValue();
 					break;
+					
+				case MetadatosDocumento.TIPO_FIRMA:
+					tipoFirma = (TiposFirma) metadata.getValue();
+					break;
+				case MetadatosDocumento.PERFIL_FIRMA:
+					perfilFirma = (PerfilesFirma) metadata.getValue();
+					break;
 			}
 		}
 		
@@ -517,6 +557,8 @@ public class CaibArxiuConversioHelper {
 				estatElaboracio,
 				tipusDocumental,
 				serieDocumental,
+				tipoFirma,
+				perfilFirma,
 				null);//metadadesAddicionals
 	}
 	
@@ -645,11 +687,11 @@ public class CaibArxiuConversioHelper {
 		if (estatElaboracio == null) return null;
 		
 		switch (estatElaboracio) {
-			case "ALTRES":
+			case "OTROS":
 				return EstadosElaboracion.OTROS;
-			case "COPIA_AUTENTICA_FORMAT":
+			case "COPIA_AUTENTICA_FORMATO":
 				return EstadosElaboracion.COPIA_AUTENTICA_FORMATO;
-			case "COPIA_AUTENTICA_PAPER":
+			case "COPIA_AUTENTICA_PAPEL":
 				return EstadosElaboracion.COPIA_AUTENTICA_PAPEL;
 			case "COPIA_AUTENTICA_PARCIAL":
 				return EstadosElaboracion.COPIA_AUTENTICA_PARCIAL;
@@ -854,6 +896,50 @@ public class CaibArxiuConversioHelper {
 						"No s'ha pogut convertir el valor per l'enumeració ArxiuFormatExtensio (" +
 						"valor=" + formatExtensio + ")");
 			}
+	}
+	
+	private static TiposFirma toTipoFirma(String tipoFirma) throws ArxiuException {
+		if(tipoFirma == null) return null;
+		switch (tipoFirma) {
+			case "CSV":
+				return TiposFirma.CSV;
+			case "XADES_INTERNALLY":
+				return TiposFirma.XADES_INTERNALLY;
+			case "XADES_ENVELOPED":
+				return TiposFirma.XADES_ENVELOPED;
+			case "CADES_DETACHED":
+				return TiposFirma.CADES_DETACHED;
+			case "CADES_ATTACHED":
+				return TiposFirma.CADES_ATTACHED;
+			case "PADES":
+				return TiposFirma.PADES;
+			default:
+				throw new ArxiuException(
+						"No s'ha pogut convertir el valor per l'enumeració TipoFirma (" + "valor=" + tipoFirma + ")");
+		}
+	}
+	
+	private static PerfilesFirma toPerfilFirma(String perfilFirma) throws ArxiuException {
+		if(perfilFirma == null) return null;
+		switch (perfilFirma) {
+			case "EPES":
+				return PerfilesFirma.EPES;
+			case "LTV":
+				return PerfilesFirma.LTV;
+			case "T":
+				return PerfilesFirma.T;
+			case "C":
+				return PerfilesFirma.C;
+			case "X":
+				return PerfilesFirma.X;
+			case "XL":
+				return PerfilesFirma.XL;
+			case "A":
+				return PerfilesFirma.A;
+			default:
+				throw new ArxiuException(
+						"No s'ha pogut convertir el valor per l'enumeració PerfilesFirma (" + "valor=" + perfilFirma + ")");
+		}
 	}
 	
 	private static Date parseDateIso8601(String date) throws ArxiuException {
