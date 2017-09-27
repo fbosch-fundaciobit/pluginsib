@@ -3,18 +3,12 @@
  */
 package es.caib.plugins.arxiu.filesystem;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
 
 import es.caib.plugins.arxiu.api.ArxiuException;
-import es.caib.plugins.arxiu.api.Carpeta;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
-import es.caib.plugins.arxiu.api.Document;
-import es.caib.plugins.arxiu.api.Expedient;
-import es.caib.plugins.arxiu.api.ExpedientMetadades;
 import es.caib.plugins.arxiu.api.Firma;
 import es.caib.plugins.arxiu.api.InformacioItem;
 

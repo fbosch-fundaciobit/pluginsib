@@ -21,33 +21,33 @@ public class Document {
 	private DocumentContingut contingut;		// Contingut del document
 	private List<Aspectos> aspectes;			// Aspectes del document
 	
-	public boolean igual(
-			Document d) {
-		
-		if(d.getFirmes().size() != firmes.size()) return false;
-		for(int i = 0; i < firmes.size(); i++) {
-			if(!d.getFirmes().get(i).igual(firmes.get(i))) return false;
-		}
-		
-		String origenId = d.getContingut().getIdentificadorOrigen() == null ?
-				"" : d.getContingut().getIdentificadorOrigen();
-		
-		return d.getIdentificador().equals(identificador) &&
-				d.getNom().equals(nom) &&
-				d.getMetadades().getIdentificador().equals(metadades.getIdentificador()) &&
-				d.getMetadades().getVersioNti().equals(metadades.getVersioNti()) &&
-				d.getMetadades().getVersioNti().equals(metadades.getVersioNti()) &&
-				ListUtils.isEqualList(d.getMetadades().getOrgans(), metadades.getOrgans()) &&
-				d.getMetadades().getData().getTime() == metadades.getData().getTime() &&
-				d.getMetadades().getOrigen().equals(metadades.getOrigen()) &&
-				d.getMetadades().getEstatElaboracio().equals(metadades.getEstatElaboracio()) &&
-				d.getMetadades().getTipusDocumental().equals(metadades.getTipusDocumental()) &&
-				d.getMetadades().getSerieDocumental().equals(metadades.getSerieDocumental()) &&
-				Arrays.equals(d.getContingut().getContingut(), contingut.getContingut()) &&
-				d.getContingut().getTipusMime().equals(contingut.getTipusMime()) &&
-				origenId.equals(contingut.getIdentificadorOrigen());
-				
-	}
+//	public boolean igual(
+//			Document d) {
+//		
+//		if(d.getFirmes().size() != firmes.size()) return false;
+//		for(int i = 0; i < firmes.size(); i++) {
+//			if(!d.getFirmes().get(i).igual(firmes.get(i))) return false;
+//		}
+//		
+//		String origenId = d.getContingut().getIdentificadorOrigen() == null ?
+//				"" : d.getContingut().getIdentificadorOrigen();
+//		
+//		return d.getIdentificador().equals(identificador) &&
+//				d.getNom().equals(nom) &&
+//				d.getMetadades().getIdentificador().equals(metadades.getIdentificador()) &&
+//				d.getMetadades().getVersioNti().equals(metadades.getVersioNti()) &&
+//				d.getMetadades().getVersioNti().equals(metadades.getVersioNti()) &&
+//				ListUtils.isEqualList(d.getMetadades().getOrgans(), metadades.getOrgans()) &&
+//				d.getMetadades().getData().getTime() == metadades.getData().getTime() &&
+//				d.getMetadades().getOrigen().equals(metadades.getOrigen()) &&
+//				d.getMetadades().getEstatElaboracio().equals(metadades.getEstatElaboracio()) &&
+//				d.getMetadades().getTipusDocumental().equals(metadades.getTipusDocumental()) &&
+//				d.getMetadades().getSerieDocumental().equals(metadades.getSerieDocumental()) &&
+//				Arrays.equals(d.getContingut().getContingut(), contingut.getContingut()) &&
+//				d.getContingut().getTipusMime().equals(contingut.getTipusMime()) &&
+//				origenId.equals(contingut.getIdentificadorOrigen());
+//				
+//	}
 	
 	public Document() {
 		super();
@@ -158,4 +158,52 @@ public class Document {
 		this.aspectes = aspectes;
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((contingut == null) ? 0 : contingut.hashCode());
+		result = prime * result + ((firmes == null) ? 0 : firmes.hashCode());
+		result = prime * result + ((identificador == null) ? 0 : identificador.hashCode());
+		result = prime * result + ((metadades == null) ? 0 : metadades.hashCode());
+		result = prime * result + ((nom == null) ? 0 : nom.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Document other = (Document) obj;
+		if (contingut == null) {
+			if (other.contingut != null)
+				return false;
+		} else if (!contingut.equals(other.contingut))
+			return false;
+		if (firmes == null) {
+			if (other.firmes != null)
+				return false;
+		} else if (!firmes.equals(other.firmes))
+			return false;
+		if (identificador == null) {
+			if (other.identificador != null)
+				return false;
+		} else if (!identificador.equals(other.identificador))
+			return false;
+		if (metadades == null) {
+			if (other.metadades != null)
+				return false;
+		} else if (!metadades.equals(other.metadades))
+			return false;
+		if (nom == null) {
+			if (other.nom != null)
+				return false;
+		} else if (!nom.equals(other.nom))
+			return false;
+		return true;
+	}
 }

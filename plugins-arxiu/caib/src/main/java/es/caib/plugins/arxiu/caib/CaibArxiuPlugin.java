@@ -15,10 +15,10 @@ import es.caib.plugins.arxiu.api.ContingutTipus;
 import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
-import es.caib.plugins.arxiu.api.IArxivePlugin;
+import es.caib.plugins.arxiu.api.IArxiuPlugin;
 import es.caib.plugins.arxiu.api.InformacioItem;
 
-public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxivePlugin {
+public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuPlugin {
 
 	protected final Logger log = Logger.getLogger(getClass());
 

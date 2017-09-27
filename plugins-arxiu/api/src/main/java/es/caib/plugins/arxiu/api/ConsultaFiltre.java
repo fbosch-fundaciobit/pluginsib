@@ -14,7 +14,8 @@ public class ConsultaFiltre {
 										//		- MENOR
 										//		- MAJOR
 										//		- ENTRE
-	private String valorOperacio;		// Valor a utilitzar en el criteri
+	private String valorOperacio1;		// Valor a utilitzar en el criteri
+	private String valorOperacio2;		// Valor a utilitzar en el criteri
 	
 	public ConsultaFiltre() {
 		super();
@@ -23,11 +24,23 @@ public class ConsultaFiltre {
 	public ConsultaFiltre(
 			String metadataClau, 
 			Operacio operacio, 
-			String valorOperacio) {
+			String valorOperacio1) {
 		super();
 		this.metadataClau = metadataClau;
 		this.operacio = operacio;
-		this.valorOperacio = valorOperacio;
+		this.valorOperacio1 = valorOperacio1;
+	}
+	
+	public ConsultaFiltre(
+			String metadataClau, 
+			Operacio operacio, 
+			String valorOperacio1,
+			String valorOperacio2) {
+		super();
+		this.metadataClau = metadataClau;
+		this.operacio = operacio;
+		this.valorOperacio1 = valorOperacio1;
+		this.valorOperacio2 = valorOperacio2;
 	}
 
 	public String getMetadataClau() {
@@ -46,12 +59,22 @@ public class ConsultaFiltre {
 		this.operacio = operacio;
 	}
 
-	public String getValorOperacio() {
-		return valorOperacio;
+	public String getValorOperacio1() {
+		return valorOperacio1;
 	}
 
-	public void setValorOperacio(String valorOperacio) {
-		this.valorOperacio = valorOperacio;
+	public void setValorOperacio1(String valorOperacio1) {
+		this.valorOperacio1 = valorOperacio1;
 	}
+
+	public String getValorOperacio2() {
+		return valorOperacio2;
+	}
+
+	public void setValorOperacio2(String valorOperacio2) {
+		this.valorOperacio2 = valorOperacio2;
+	}
+
+	
 	
 }

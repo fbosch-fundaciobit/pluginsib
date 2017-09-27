@@ -25,15 +25,15 @@ public class Firma {
 	private String csvRegulacio;	// Referència a la llei que regula l’aplicació del CSV
 	
 	
-	public boolean igual(
-			Firma f) {
-		
-		return  Arrays.equals(f.getContingut(), contingut) &&
-				f.getTipusMime().equals(tipusMime) &&
-				f.getTipus().equals(tipus) &&
-				f.getNom().equals(nom) &&
-				f.getCsvRegulacio().equals(csvRegulacio);
-	}
+//	public boolean igual(
+//			Firma f) {
+//		
+//		return  Arrays.equals(f.getContingut(), contingut) &&
+//				f.getTipusMime().equals(tipusMime) &&
+//				f.getTipus().equals(tipus) &&
+//				f.getNom().equals(nom) &&
+//				f.getCsvRegulacio().equals(csvRegulacio);
+//	}
 	
 	public Firma() {
 		super();
@@ -123,5 +123,53 @@ public class Firma {
 	public void setCsvRegulacio(String csvRegulacio) {
 		this.csvRegulacio = csvRegulacio;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(contingut);
+		result = prime * result + ((csvRegulacio == null) ? 0 : csvRegulacio.hashCode());
+		result = prime * result + ((nom == null) ? 0 : nom.hashCode());
+		result = prime * result + ((tipus == null) ? 0 : tipus.hashCode());
+		result = prime * result + ((tipusMime == null) ? 0 : tipusMime.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Firma other = (Firma) obj;
+		if (!Arrays.equals(contingut, other.contingut))
+			return false;
+		if (csvRegulacio == null) {
+			if (other.csvRegulacio != null)
+				return false;
+		} else if (!csvRegulacio.equals(other.csvRegulacio))
+			return false;
+		if (nom == null) {
+			if (other.nom != null)
+				return false;
+		} else if (!nom.equals(other.nom))
+			return false;
+		if (tipus == null) {
+			if (other.tipus != null)
+				return false;
+		} else if (!tipus.equals(other.tipus))
+			return false;
+		if (tipusMime == null) {
+			if (other.tipusMime != null)
+				return false;
+		} else if (!tipusMime.equals(other.tipusMime))
+			return false;
+		return true;
+	}
+	
+	
 	
 }

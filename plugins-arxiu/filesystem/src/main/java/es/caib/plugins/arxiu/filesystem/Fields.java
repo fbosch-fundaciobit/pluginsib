@@ -1,11 +1,5 @@
 package es.caib.plugins.arxiu.filesystem;
 
-import java.util.Date;
-import java.util.List;
-
-import es.caib.plugins.arxiu.api.Firma;
-import es.caib.plugins.arxiu.api.InformacioItem;
-
 public class Fields {
 	
 	// Camps comuns

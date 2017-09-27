@@ -14,10 +14,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -33,6 +31,7 @@ import es.caib.plugins.arxiu.api.Operacio;
 import es.caib.plugins.arxiu.filesystem.Fields;
 import es.caib.plugins.arxiu.filesystem.FilesystemArxiuFilesystem;
 import es.caib.plugins.arxiu.filesystem.FilesystemArxiuPlugin;
+import es.caib.plugins.arxiu.filesystem.Utils;
 
 /**
  * Tests per al plugin filesystem de l'arxiu.
@@ -187,10 +186,11 @@ public class FilesystemArxiuPluginTest {
 		
 		Expedient expedient = plugin.expedientDetalls(expedientId, null);
 		assertTrue("Error al comprovar l'expedient " + expedientId,
-				expedient.igual(new Expedient(
+				expedient.equals(new Expedient(
 						expedientId,
 						"expedient_" + index,
-						GeneradorObjectes.getExpedientMetadades(index, false))));
+						GeneradorObjectes.getExpedientMetadades(index, false),
+						expedient.getContinguts())));
 		exp_check[index]++;
 		
 		for(InformacioItem item : expedient.getContinguts()) {
@@ -215,9 +215,10 @@ public class FilesystemArxiuPluginTest {
 		
 		Carpeta carpeta = plugin.carpetaDetalls(carpetaId);
 		assertTrue("Error al comprovar la carpeta " + carpetaId,
-				carpeta.igual(new Carpeta(
+				carpeta.equals(new Carpeta(
 						carpetaId,
-						"carpeta_" + index)));
+						"carpeta_" + index,
+						carpeta.getInformacioItems())));
 		cpt_check[index]++;
 		
 		for(InformacioItem item : carpeta.getInformacioItems()) {
@@ -245,7 +246,7 @@ public class FilesystemArxiuPluginTest {
 				null, 
 				true);
 		assertTrue("Error al comprovar el document " + documentId,
-				document.igual(new Document(
+				document.equals(new Document(
 						documentId,
 						"document_" + index,
 						GeneradorObjectes.getDocumentContingut(PATH_DOC_PROVES),
@@ -283,10 +284,11 @@ public class FilesystemArxiuPluginTest {
 					null);
 			
 			assertTrue("Error al comprovar l'expedient modificar " + expedients_modificat[i].getIdentificador(),
-					expedient.igual(new Expedient(
+					expedient.equals(new Expedient(
 							expedients_modificat[i].getIdentificador(),
 							"expedient" + index + "_MOD",
-							GeneradorObjectes.getExpedientMetadades(i, true))));
+							GeneradorObjectes.getExpedientMetadades(i, true),
+							expedient.getContinguts())));
 		}
 		
 		for(int i = 0; i < num_cpt_mod; i++) {
@@ -299,9 +301,10 @@ public class FilesystemArxiuPluginTest {
 			Carpeta carpeta = plugin.carpetaDetalls(carpetes_modificat[i].getIdentificador());
 			
 			assertTrue("Error al comprovar la carpeta modificada " + carpetes_modificat[i].getIdentificador(),
-					carpeta.igual(new Carpeta(
+					carpeta.equals(new Carpeta(
 							carpetes_modificat[i].getIdentificador(),
-							"carpeta_" + index + "_MOD")));
+							"carpeta_" + index + "_MOD",
+							carpeta.getInformacioItems())));
 		}
 		
 		for(int i = 0; i < num_doc_mod; i++) {
@@ -326,7 +329,7 @@ public class FilesystemArxiuPluginTest {
 					true);
 			
 			assertTrue("Error al comprovar el document modificar " + documents_modificat[i].getIdentificador(),
-					document.igual(new Document(
+					document.equals(new Document(
 							documents_modificat[i].getIdentificador(),
 							"document" + index + "_MOD",
 							GeneradorObjectes.getDocumentContingut(PATH_DOC_PROVES),
@@ -442,7 +445,7 @@ public class FilesystemArxiuPluginTest {
 						assertTrue(
 								"L'expedient " + item0.getIdentificador() +
 								" i l'expedient " + item1.getIdentificador() + " no son version del mateix expedient",
-								expedient0.igual(expedient1));
+								expedient0.equals(expedient1));
 					}
 				}
 			}
@@ -463,7 +466,7 @@ public class FilesystemArxiuPluginTest {
 						assertTrue(
 								"El document " + item0.getIdentificador() +
 								" i el document " + item1.getIdentificador() + " no son version del mateix document",
-								document0.igual(document1));
+								document0.equals(document1));
 					}
 				}
 			}
@@ -487,7 +490,7 @@ public class FilesystemArxiuPluginTest {
 		filtres.add(new ConsultaFiltre(
 				Fields.EX_DATA_OBERTURA,
 				Operacio.MAJOR,
-				"11"));
+				String.valueOf(new Date(11).getTime())));
 		resultat = plugin.expedientConsulta(filtres, 1, 10);
 		assertSame(resultat.getNumRetornat().intValue(), 3);
 		
@@ -510,7 +513,7 @@ public class FilesystemArxiuPluginTest {
 		filtres.add(new ConsultaFiltre(
 				Fields.DOC_DATA,
 				Operacio.MAJOR,
-				"20"));
+				String.valueOf(new Date(20).getTime())));
 		resultat = plugin.documentConsulta(filtres, 1, 100);
 		assertSame(resultat.getNumRetornat().intValue(), 4);
 		
@@ -518,6 +521,15 @@ public class FilesystemArxiuPluginTest {
 				Fields.DOC_SERIE_DOCUMENTAL,
 				Operacio.IGUAL,
 				"doc_serieDocumental_31"));
+		resultat = plugin.documentConsulta(filtres, 1, 100);
+		assertSame(resultat.getNumRetornat().intValue(), 1);
+		
+		filtres = new ArrayList<ConsultaFiltre>();
+		
+		filtres.add(new ConsultaFiltre(
+				Fields.DOC_ORGAN,
+				Operacio.CONTE,
+				"doc_organ_a_42"));
 		resultat = plugin.documentConsulta(filtres, 1, 100);
 		assertSame(resultat.getNumRetornat().intValue(), 1);
 		
@@ -648,7 +660,7 @@ public class FilesystemArxiuPluginTest {
 				assertEquals(documents[i], document1.getContingut().getIdentificadorOrigen());
 				document0.setIdentificador(documentId);
 				document0.getContingut().setIdentificadorOrigen(documents[i]);
-				assertTrue(document0.igual(document1));
+				assertTrue(document0.equals(document1));
 			}
 		}
 		
@@ -724,7 +736,7 @@ public class FilesystemArxiuPluginTest {
 				
 				int fills = 0;
 				for(InformacioItem item : items) {
-					if(item.getIdentificador().equals(carpetaId)) fills++;;
+					if(item.getIdentificador().equals(carpetaId)) fills++;
 				}
 				assertSame(fills, 1);
 				
@@ -741,7 +753,7 @@ public class FilesystemArxiuPluginTest {
 		Carpeta carpeta0 = plugin.carpetaDetalls(carpetaId0);
 		Carpeta carpeta1 = plugin.carpetaDetalls(carpetaId1);
 		carpeta1.setIdentificador(carpetaId0);
-		assertTrue(carpeta0.igual(carpeta1));
+		assertTrue(carpeta0.getNom().equals(carpeta1.getNom()));
 		assertSame(carpeta0.getInformacioItems().size(), carpeta1.getInformacioItems().size());
 		for(int i = 0; i < carpeta0.getInformacioItems().size(); i++) {
 			InformacioItem item0 = carpeta0.getInformacioItems().get(i);
@@ -764,7 +776,7 @@ public class FilesystemArxiuPluginTest {
 		assertEquals(documentId0, document1.getContingut().getIdentificadorOrigen());
 		document0.setIdentificador(documentId1);
 		document0.getContingut().setIdentificadorOrigen(documentId0);
-		assertTrue(document0.igual(document1));
+		assertTrue(document0.equals(document1));
 	}
 	
 

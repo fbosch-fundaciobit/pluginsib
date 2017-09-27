@@ -1,5 +1,7 @@
 package es.caib.plugins.arxiu.api;
 
+import java.util.Arrays;
+
 /**
  * 
  * @author Limit
@@ -63,5 +65,41 @@ public class DocumentContingut {
 	public void setIdentificadorOrigen(String identificadorOrigen) {
 		this.identificadorOrigen = identificadorOrigen;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(contingut);
+		result = prime * result + ((identificadorOrigen == null) ? 0 : identificadorOrigen.hashCode());
+		result = prime * result + ((tipusMime == null) ? 0 : tipusMime.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DocumentContingut other = (DocumentContingut) obj;
+		if (!Arrays.equals(contingut, other.contingut))
+			return false;
+		if (identificadorOrigen == null) {
+			if (other.identificadorOrigen != null)
+				return false;
+		} else if (!identificadorOrigen.equals(other.identificadorOrigen))
+			return false;
+		if (tipusMime == null) {
+			if (other.tipusMime != null)
+				return false;
+		} else if (!tipusMime.equals(other.tipusMime))
+			return false;
+		return true;
+	}
+	
+	
 	
 }

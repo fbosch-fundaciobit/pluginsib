@@ -1,16 +1,8 @@
 package es.caib.plugins.arxiu.api;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
-
-import es.caib.arxiudigital.apirest.constantes.EstadosExpediente;
-import es.caib.arxiudigital.apirest.constantes.MetadatosExpediente;
 
 /**
  * 
@@ -218,6 +210,86 @@ public class ExpedientMetadades {
 	public void setMetadadesAddicionals(Map<String, String> metadadesAddicionals) {
 		this.metadadesAddicionals = metadadesAddicionals;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((classificacio == null) ? 0 : classificacio.hashCode());
+		result = prime * result + ((dataObertura == null) ? 0 : dataObertura.hashCode());
+		result = prime * result + ((estat == null) ? 0 : estat.hashCode());
+		result = prime * result + ((identificador == null) ? 0 : identificador.hashCode());
+		result = prime * result + ((interessats == null) ? 0 : interessats.hashCode());
+		result = prime * result + ((metadadesAddicionals == null) ? 0 : metadadesAddicionals.hashCode());
+		result = prime * result + ((organs == null) ? 0 : organs.hashCode());
+		result = prime * result + ((origen == null) ? 0 : origen.hashCode());
+		result = prime * result + ((serieDocumental == null) ? 0 : serieDocumental.hashCode());
+		result = prime * result + ((versioNti == null) ? 0 : versioNti.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ExpedientMetadades other = (ExpedientMetadades) obj;
+		if (classificacio == null) {
+			if (other.classificacio != null)
+				return false;
+		} else if (!classificacio.equals(other.classificacio))
+			return false;
+		if (dataObertura == null) {
+			if (other.dataObertura != null)
+				return false;
+		} else if (!dataObertura.equals(other.dataObertura))
+			return false;
+		if (estat == null) {
+			if (other.estat != null)
+				return false;
+		} else if (!estat.equals(other.estat))
+			return false;
+		if (identificador == null) {
+			if (other.identificador != null)
+				return false;
+		} else if (!identificador.equals(other.identificador))
+			return false;
+		if (interessats == null) {
+			if (other.interessats != null)
+				return false;
+		} else if (!interessats.equals(other.interessats))
+			return false;
+		if (metadadesAddicionals == null) {
+			if (other.metadadesAddicionals != null)
+				return false;
+		} else if (!metadadesAddicionals.equals(other.metadadesAddicionals))
+			return false;
+		if (organs == null) {
+			if (other.organs != null)
+				return false;
+		} else if (!organs.equals(other.organs))
+			return false;
+		if (origen == null) {
+			if (other.origen != null)
+				return false;
+		} else if (!origen.equals(other.origen))
+			return false;
+		if (serieDocumental == null) {
+			if (other.serieDocumental != null)
+				return false;
+		} else if (!serieDocumental.equals(other.serieDocumental))
+			return false;
+		if (versioNti == null) {
+			if (other.versioNti != null)
+				return false;
+		} else if (!versioNti.equals(other.versioNti))
+			return false;
+		return true;
+	}
+	
 	
 	
 }

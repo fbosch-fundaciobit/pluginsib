@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.fundaciobit.plugins.IPlugin;
 
-public interface IArxivePlugin extends IPlugin {
+public interface IArxiuPlugin extends IPlugin {
 
 	public static final String ARXIVE_BASE_PROPERTY = IPLUGIN_BASE_PROPERTIES + "arxiu.";
 

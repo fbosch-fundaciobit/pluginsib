@@ -205,5 +205,80 @@ public class DocumentMetadades {
 	public void setMetadadesAddicionals(Map<String, String> metadadesAddicionals) {
 		this.metadadesAddicionals = metadadesAddicionals;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((data == null) ? 0 : data.hashCode());
+		result = prime * result + ((estatElaboracio == null) ? 0 : estatElaboracio.hashCode());
+		result = prime * result + ((identificador == null) ? 0 : identificador.hashCode());
+		result = prime * result + ((metadadesAddicionals == null) ? 0 : metadadesAddicionals.hashCode());
+		result = prime * result + ((organs == null) ? 0 : organs.hashCode());
+		result = prime * result + ((origen == null) ? 0 : origen.hashCode());
+		result = prime * result + ((serieDocumental == null) ? 0 : serieDocumental.hashCode());
+		result = prime * result + ((tipusDocumental == null) ? 0 : tipusDocumental.hashCode());
+		result = prime * result + ((versioNti == null) ? 0 : versioNti.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DocumentMetadades other = (DocumentMetadades) obj;
+		if (data == null) {
+			if (other.data != null)
+				return false;
+		} else if (!data.equals(other.data))
+			return false;
+		if (estatElaboracio == null) {
+			if (other.estatElaboracio != null)
+				return false;
+		} else if (!estatElaboracio.equals(other.estatElaboracio))
+			return false;
+		if (identificador == null) {
+			if (other.identificador != null)
+				return false;
+		} else if (!identificador.equals(other.identificador))
+			return false;
+		if (metadadesAddicionals == null) {
+			if (other.metadadesAddicionals != null)
+				return false;
+		} else if (!metadadesAddicionals.equals(other.metadadesAddicionals))
+			return false;
+		if (organs == null) {
+			if (other.organs != null)
+				return false;
+		} else if (!organs.equals(other.organs))
+			return false;
+		if (origen == null) {
+			if (other.origen != null)
+				return false;
+		} else if (!origen.equals(other.origen))
+			return false;
+		if (serieDocumental == null) {
+			if (other.serieDocumental != null)
+				return false;
+		} else if (!serieDocumental.equals(other.serieDocumental))
+			return false;
+		if (tipusDocumental == null) {
+			if (other.tipusDocumental != null)
+				return false;
+		} else if (!tipusDocumental.equals(other.tipusDocumental))
+			return false;
+		if (versioNti == null) {
+			if (other.versioNti != null)
+				return false;
+		} else if (!versioNti.equals(other.versioNti))
+			return false;
+		return true;
+	}
+	
+	
 	
 }
