@@ -30,8 +30,10 @@ import org.apache.lucene.store.FSDirectory;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.ContingutTipus;
+import es.caib.plugins.arxiu.api.Fields;
 import es.caib.plugins.arxiu.api.Firma;
 import es.caib.plugins.arxiu.api.InformacioItem;
+import es.caib.plugins.arxiu.api.Tables;
 
 public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	

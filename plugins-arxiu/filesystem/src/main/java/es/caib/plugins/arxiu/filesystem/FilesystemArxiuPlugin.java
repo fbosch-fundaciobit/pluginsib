@@ -21,6 +21,7 @@ import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
 import es.caib.plugins.arxiu.api.IArxiuPlugin;
 import es.caib.plugins.arxiu.api.InformacioItem;
+import es.caib.plugins.arxiu.api.Tables;
 
 public class FilesystemArxiuPlugin extends AbstractPluginProperties implements IArxiuPlugin {
 	
@@ -879,8 +880,7 @@ public class FilesystemArxiuPlugin extends AbstractPluginProperties implements I
 	}
 
 	@Override
-	public String documentGenerarCsv(
-			String identificador) throws ArxiuException {
+	public String documentGenerarCsv() throws ArxiuException {
 		
 		throw new ArxiuException(
 				"La funció generar csv no està disponible per a la implementació amb filesystem");

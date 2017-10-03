@@ -121,7 +121,7 @@ public interface CaibArxiuClient {
 	public String documentCsvGenerate(
 			Capsalera capsalera) throws ArxiuException ;
 	
-	public void documentCopy(
+	public String documentCopy(
 			String nodeId,
 			String targetNodeId,
 			Capsalera capsalera) throws ArxiuException;
@@ -158,7 +158,7 @@ public interface CaibArxiuClient {
 			String identificador,
 			Capsalera capsalera) throws ArxiuException;
 	
-	public void folderCopy(
+	public String folderCopy(
 			String nodeId,
 			String targetNodeId,
 			Capsalera capsalera) throws ArxiuException;

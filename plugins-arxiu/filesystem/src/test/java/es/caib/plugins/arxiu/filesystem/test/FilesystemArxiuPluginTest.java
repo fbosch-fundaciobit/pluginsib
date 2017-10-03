@@ -26,12 +26,11 @@ import es.caib.plugins.arxiu.api.ConsultaResultat;
 import es.caib.plugins.arxiu.api.ContingutTipus;
 import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.Expedient;
+import es.caib.plugins.arxiu.api.Fields;
 import es.caib.plugins.arxiu.api.InformacioItem;
 import es.caib.plugins.arxiu.api.Operacio;
-import es.caib.plugins.arxiu.filesystem.Fields;
 import es.caib.plugins.arxiu.filesystem.FilesystemArxiuFilesystem;
 import es.caib.plugins.arxiu.filesystem.FilesystemArxiuPlugin;
-import es.caib.plugins.arxiu.filesystem.Utils;
 
 /**
  * Tests per al plugin filesystem de l'arxiu.

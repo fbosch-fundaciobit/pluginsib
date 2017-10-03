@@ -5,7 +5,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 
 import org.apache.commons.io.FilenameUtils;
@@ -35,7 +38,6 @@ import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.Aspectes;
 import es.caib.plugins.arxiu.api.Capsalera;
 import es.caib.plugins.arxiu.api.Carpeta;
-import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.ContingutTipus;
 import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.DocumentContingut;
@@ -44,8 +46,6 @@ import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
 import es.caib.plugins.arxiu.api.Firma;
 import es.caib.plugins.arxiu.api.InformacioItem;
-import es.caib.plugins.arxiu.api.PerfilsFirma;
-import es.caib.plugins.arxiu.api.TipusFirma;
 
 public class CaibArxiuConversioHelper {
 	
@@ -292,30 +292,6 @@ public class CaibArxiuConversioHelper {
 		return informacioItemList;
 	}
 	
-	public static String consultaFiltreToQueryString(List<ConsultaFiltre> filtres) {
-//		String query = null;
-//		for (ConsultaFiltre filtre: filtres) {
-//			
-//			switch(filtre.getOperacio()){
-//			case IGUAL:
-//				break;
-//			case CONTE:
-//				break;
-//			case MENOR:
-//				break;
-//			case MAJOR:
-//				break;
-//			case ENTRE:
-//				break;
-//			}
-//			
-//		}
-//		
-//		return query;
-		return null;
-	}
-	
-	
 	/**
 	 * ================ M E T O D E S   D O C U M E N T S ================
 	 */
@@ -352,97 +328,87 @@ public class CaibArxiuConversioHelper {
 		metadata.setValue(aplicacioCodi);
 		metadades.add(metadata);
 		
-		if (documentMetadades.getOrigen() != null) {
-			metadata = new Metadata();
-			metadata.setQname(MetadatosDocumento.ORIGEN);
-			metadata.setValue(toOrigenesContenido(documentMetadades.getOrigen()));
-			metadades.add(metadata);
-		}
-		
-		if (documentMetadades.getData() != null){
-			metadata = new Metadata();
-			metadata.setQname(MetadatosDocumento.FECHA_INICIO);
-			metadata.setValue(formatDateIso8601(documentMetadades.getData()));
-			metadades.add(metadata);
-		}
-		
-		if (documentMetadades.getEstatElaboracio() != null) {
-			metadata = new Metadata();
-			metadata.setQname(MetadatosDocumento.ESTADO_ELABORACION);
-			metadata.setValue(toEstadosElaboracion(documentMetadades.getEstatElaboracio()));
-			metadades.add(metadata);
-		}
-		
-		if (documentMetadades.getTipusDocumental() != null) {
-			metadata = new Metadata();
-			metadata.setQname(MetadatosDocumento.TIPO_DOC_ENI);
-			metadata.setValue(toTiposDocumentosEni(documentMetadades.getTipusDocumental()));
-			metadades.add(metadata);
-		}
-		
-		if (documentMetadades.getTipoFirma() != null) {
-			metadata = new Metadata();
-			metadata.setQname(MetadatosDocumento.TIPO_FIRMA);
-			metadata.setValue(documentMetadades.getTipoFirma().name());
-			metadades.add(metadata);
-		}
-		
-		if (documentMetadades.getPerfilFirma() != null) {
-			metadata = new Metadata();
-			metadata.setQname(MetadatosDocumento.PERFIL_FIRMA);
-			metadata.setValue(documentMetadades.getPerfilFirma().getValue());
-			metadades.add(metadata);
-		}
-		
-		String formatNom = FilenameUtils.getExtension(document.getNom()).toUpperCase();
-		if (formatNom != null && !formatNom.isEmpty()) {
-			metadata = new Metadata();
-			metadata.setQname(MetadatosDocumento.NOMBRE_FORMATO);
-			metadata.setValue(toFormatosFichero(formatNom));
-			metadades.add(metadata);
+		if (documentMetadades != null) {
+			if (documentMetadades.getOrigen() != null) {
+				metadata = new Metadata();
+				metadata.setQname(MetadatosDocumento.ORIGEN);
+				metadata.setValue(toOrigenesContenido(documentMetadades.getOrigen()));
+				metadades.add(metadata);
+			}
 			
-			metadata = new Metadata();
-			metadata.setQname(MetadatosDocumento.EXTENSION_FORMATO);
-			metadata.setValue(toExtensionesFichero(formatNom));
-			metadades.add(metadata);
-		}
-		
-		if (documentMetadades.getOrgans() != null) {
-			metadata = new Metadata();
-			metadata.setQname(MetadatosDocumento.ORGANO);
-			metadata.setValue(documentMetadades.getOrgans());
-			metadades.add(metadata);
-		}
-		
-//		Firma firma = null;
-//		if(document.getFirmes() != null) firma = document.getFirmes().get(0);
-//		String tipoFirma = null;
-//		if(firma != null) tipoFirma = firma.getTipus();
-//		if (tipoFirma != null) {
-//			metadades.put(
-//					MetadatosDocumento.TIPO_FIRMA,
-//					tipoFirma);
-//		}
-//		String perfilFirma = null;
-//		if(firma != null) perfilFirma = firma.getTipusMime();
-//		if (perfilFirma != null) {
-//			metadades.put(
-//					MetadatosDocumento.PERFIL_FIRMA,
-//					perfilFirma);
-//		}
-//		String csv = null;
-//		if(firma != null) csv = firma.getCsvRegulacio();
-//		if (csv != null) {
-//			metadades.put(
-//					MetadatosDocumento.CSV,
-//					csv);
-//		}
-		
-		if (documentMetadades.getSerieDocumental() != null) {
-			metadata = new Metadata();
-			metadata.setQname(MetadatosDocumento.CODIGO_CLASIFICACION);
-			metadata.setValue(documentMetadades.getSerieDocumental());
-			metadades.add(metadata);
+			if (documentMetadades.getData() != null){
+				metadata = new Metadata();
+				metadata.setQname(MetadatosDocumento.FECHA_INICIO);
+				metadata.setValue(formatDateIso8601(documentMetadades.getData()));
+				metadades.add(metadata);
+			}
+			
+			if (documentMetadades.getEstatElaboracio() != null) {
+				metadata = new Metadata();
+				metadata.setQname(MetadatosDocumento.ESTADO_ELABORACION);
+				metadata.setValue(toEstadosElaboracion(documentMetadades.getEstatElaboracio()));
+				metadades.add(metadata);
+			}
+			
+			if (documentMetadades.getTipusDocumental() != null) {
+				metadata = new Metadata();
+				metadata.setQname(MetadatosDocumento.TIPO_DOC_ENI);
+				metadata.setValue(toTiposDocumentosEni(documentMetadades.getTipusDocumental()));
+				metadades.add(metadata);
+			}
+			
+			if (documentMetadades.getTipoFirma() != null) {
+				metadata = new Metadata();
+				metadata.setQname(MetadatosDocumento.TIPO_FIRMA);
+				metadata.setValue(toTipoFirma(documentMetadades.getTipoFirma()));
+				metadades.add(metadata);
+			}
+			
+			if (documentMetadades.getPerfilFirma() != null) {
+				metadata = new Metadata();
+				metadata.setQname(MetadatosDocumento.PERFIL_FIRMA);
+				metadata.setValue(toPerfilFirma(documentMetadades.getPerfilFirma()));
+				metadades.add(metadata);
+			}
+			
+			String formatNom = FilenameUtils.getExtension(document.getNom()).toUpperCase();
+			if (formatNom != null && !formatNom.isEmpty()) {
+				metadata = new Metadata();
+				metadata.setQname(MetadatosDocumento.NOMBRE_FORMATO);
+				metadata.setValue(toFormatosFichero(formatNom));
+				metadades.add(metadata);
+				
+				metadata = new Metadata();
+				metadata.setQname(MetadatosDocumento.EXTENSION_FORMATO);
+				metadata.setValue(toExtensionesFichero(formatNom));
+				metadades.add(metadata);
+			}
+			
+			if (documentMetadades.getOrgans() != null) {
+				metadata = new Metadata();
+				metadata.setQname(MetadatosDocumento.ORGANO);
+				metadata.setValue(documentMetadades.getOrgans());
+				metadades.add(metadata);
+			}
+			
+			if (documentMetadades.getSerieDocumental() != null) {
+				metadata = new Metadata();
+				metadata.setQname(MetadatosDocumento.CODIGO_CLASIFICACION);
+				metadata.setValue(documentMetadades.getSerieDocumental());
+				metadades.add(metadata);
+			}
+			
+			if (documentMetadades.getMetadadesAddicionals() != null) {
+				Iterator<Entry<String, String>> it = documentMetadades.getMetadadesAddicionals().entrySet().iterator();
+			    while (it.hasNext()) {
+			        Map.Entry<String, String> parella = (Map.Entry<String, String>)it.next();
+			        metadata = new Metadata();
+					metadata.setQname(parella.getKey());
+					metadata.setValue(parella.getValue());
+					metadades.add(metadata);
+			        it.remove();
+			    }
+			}
 		}
 		
 		return metadades;
@@ -506,9 +472,10 @@ public class CaibArxiuConversioHelper {
 			List<Aspectes> aspectes) {
 		
 		List<Aspectos> aspectsRetorn = new ArrayList<Aspectos>();
-		for (Aspectes aspecte: aspectes) {
-			aspectsRetorn.add(Aspectos.valueOf(aspecte.name()));
-		}
+		if (aspectes != null)
+			for (Aspectes aspecte: aspectes) {
+				aspectsRetorn.add(Aspectos.valueOf(aspecte.name()));
+			}
 		return aspectsRetorn;
 	}
 	private static DocumentMetadades toDocumentMetadades(
@@ -518,10 +485,10 @@ public class CaibArxiuConversioHelper {
 				origen = null,
 				estatElaboracio = null,
 				tipusDocumental = null,
-				serieDocumental = null;
+				serieDocumental = null,
+				tipoFirma = null,
+				perfilFirma = null;
 				
-		TipusFirma tipoFirma = null;
-		PerfilsFirma perfilFirma = null;
 		List<String> organs = null;
 		Date data = null;
 		for(Metadata metadata : metadatas) {
@@ -536,7 +503,7 @@ public class CaibArxiuConversioHelper {
 					estatElaboracio = (String) metadata.getValue();
 					break;
 				case MetadatosDocumento.TIPO_DOC_ENI:
-					estatElaboracio = (String) metadata.getValue();
+					tipusDocumental = (String) metadata.getValue();
 					break;
 				case MetadatosDocumento.ORGANO:
 					Object preValor = metadata.getValue();
@@ -552,10 +519,10 @@ public class CaibArxiuConversioHelper {
 					break;
 					
 				case MetadatosDocumento.TIPO_FIRMA:
-					tipoFirma = (TipusFirma) metadata.getValue();
+					tipoFirma = (String) metadata.getValue();
 					break;
 				case MetadatosDocumento.PERFIL_FIRMA:
-					perfilFirma = (PerfilsFirma) metadata.getValue();
+					perfilFirma = (String) metadata.getValue();
 					break;
 			}
 		}
@@ -629,7 +596,7 @@ public class CaibArxiuConversioHelper {
 		Carpeta carpeta = new Carpeta(
 				folderNode.getId(),
 				folderNode.getName(),
-				toInformacioItems(folderNode.getChildObjects()));
+				folderNode.getChildObjects() != null ? toInformacioItems(folderNode.getChildObjects()) : new ArrayList<InformacioItem>());
 		
 		return carpeta;
 	}
@@ -645,11 +612,11 @@ public class CaibArxiuConversioHelper {
 		if (estat == null) return null;
 		
 		switch (estat) {
-			case "INDICE_REMISION":
+			case "E03":
 				return EstadosExpediente.INDICE_REMISION;
-			case "ABIERTO":
+			case "E01":
 				return EstadosExpediente.ABIERTO;
-			case "CERRADO":
+			case "E02":
 				return EstadosExpediente.CERRADO;
 			default:
 				throw new ArxiuException(
@@ -683,9 +650,9 @@ public class CaibArxiuConversioHelper {
 		if(origen == null) return null;
 		
 		switch (origen) {
-			case "ADMINISTRACIO":
+			case "1":
 				return OrigenesContenido.ADMINISTRACION;
-			case "CIUTADA":
+			case "0":
 				return OrigenesContenido.CIUDADANO;
 			default:
 				throw new ArxiuException(
@@ -699,15 +666,15 @@ public class CaibArxiuConversioHelper {
 		if (estatElaboracio == null) return null;
 		
 		switch (estatElaboracio) {
-			case "OTROS":
+			case "EE99":
 				return EstadosElaboracion.OTROS;
-			case "COPIA_AUTENTICA_FORMATO":
+			case "EE02":
 				return EstadosElaboracion.COPIA_AUTENTICA_FORMATO;
-			case "COPIA_AUTENTICA_PAPEL":
+			case "EE03":
 				return EstadosElaboracion.COPIA_AUTENTICA_PAPEL;
-			case "COPIA_AUTENTICA_PARCIAL":
+			case "EE04":
 				return EstadosElaboracion.COPIA_AUTENTICA_PARCIAL;
-			case "ORIGINAL":
+			case "EE01":
 				return EstadosElaboracion.ORIGINAL;
 			default:
 				throw new ArxiuException(
@@ -721,48 +688,48 @@ public class CaibArxiuConversioHelper {
 		if (documentTipus == null) return null;
 		
 		switch (documentTipus) {
-			case "ACORD":
-				return TiposDocumentosENI.ACUERDO;
-			case "ACTA":
-				return TiposDocumentosENI.ACTA;
-			case "ALEGACIO":
-				return TiposDocumentosENI.ALEGACION;
-			case "ALTRES":
-				return TiposDocumentosENI.OTROS;
-			case "ALTRES_INCAUTATS":
-				return TiposDocumentosENI.OTROS_INCAUTADOS;
-			case "CERTIFICAT":
-				return TiposDocumentosENI.CERTIFICADO;
-			case "COMUNICACIO":
-				return TiposDocumentosENI.COMUNICACION;
-			case "COMUNICACIO_CIUTADA":
-				return TiposDocumentosENI.COMUNICACION_CIUDADANO;
-			case "CONTRACTE":
-				return TiposDocumentosENI.CONTRATO;
-			case "CONVENI":
-				return TiposDocumentosENI.CONVENIO;
-			case "DECLARACIO":
-				return TiposDocumentosENI.DECLARACION;
-			case "DENUNCIA":
-				return TiposDocumentosENI.DENUNCIA;
-			case "DILIGENCIA":
-				return TiposDocumentosENI.DILIGENCIA;
-			case "FACTURA":
-				return TiposDocumentosENI.FACTURA;
-			case "INFORME":
-				return TiposDocumentosENI.INFORME;
-			case "JUSTIFICANT_RECEPCIO":
-				return TiposDocumentosENI.ACUSE_DE_RECIBO;
-			case "NOTIFICACIO":
-				return TiposDocumentosENI.NOTIFICACION;
-			case "PUBLICACIO":
-				return TiposDocumentosENI.PUBLICACION;
-			case "RECURSOS":
-				return TiposDocumentosENI.RECURSOS;
-			case "RESOLUCIO":
+			case "TD01":
 				return TiposDocumentosENI.RESOLUCION;
-			case "SOLICITUD":
+			case "TD02":
+				return TiposDocumentosENI.ACUERDO;
+			case "TD03":
+				return TiposDocumentosENI.CONTRATO;
+			case "TD04":
+				return TiposDocumentosENI.CONVENIO;
+			case "TD05":
+				return TiposDocumentosENI.DECLARACION;
+			case "TD06":
+				return TiposDocumentosENI.COMUNICACION;
+			case "TD07":
+				return TiposDocumentosENI.NOTIFICACION;
+			case "TD08":
+				return TiposDocumentosENI.PUBLICACION;
+			case "TD09":
+				return TiposDocumentosENI.ACUSE_DE_RECIBO;
+			case "TD10":
+				return TiposDocumentosENI.ACTA;
+			case "TD11":
+				return TiposDocumentosENI.CERTIFICADO;
+			case "TD12":
+				return TiposDocumentosENI.DILIGENCIA;
+			case "TD13":
+				return TiposDocumentosENI.INFORME;
+			case "TD14":
 				return TiposDocumentosENI.SOLICITUD;
+			case "TD15":
+				return TiposDocumentosENI.DENUNCIA;
+			case "TD16":
+				return TiposDocumentosENI.ALEGACION;
+			case "TD17":
+				return TiposDocumentosENI.RECURSOS;
+			case "TD18":
+				return TiposDocumentosENI.COMUNICACION_CIUDADANO;
+			case "TD19":
+				return TiposDocumentosENI.FACTURA;
+			case "TD20":
+				return TiposDocumentosENI.OTROS_INCAUTADOS;
+			case "TD99":
+				return TiposDocumentosENI.OTROS;
 			default:
 				throw new ArxiuException(
 						"No s'ha pogut convertir el valor per l'enumeració ArxiuDocumentTipus (" +
@@ -913,17 +880,17 @@ public class CaibArxiuConversioHelper {
 	private static TiposFirma toTipoFirma(String tipoFirma) throws ArxiuException {
 		if(tipoFirma == null) return null;
 		switch (tipoFirma) {
-			case "CSV":
+			case "TF01":
 				return TiposFirma.CSV;
-			case "XADES_INTERNALLY":
+			case "TF02":
 				return TiposFirma.XADES_INTERNALLY;
-			case "XADES_ENVELOPED":
+			case "TF03":
 				return TiposFirma.XADES_ENVELOPED;
-			case "CADES_DETACHED":
+			case "TF04":
 				return TiposFirma.CADES_DETACHED;
-			case "CADES_ATTACHED":
+			case "TF05":
 				return TiposFirma.CADES_ATTACHED;
-			case "PADES":
+			case "TF06":
 				return TiposFirma.PADES;
 			default:
 				throw new ArxiuException(

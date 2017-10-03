@@ -10,7 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.junit.BeforeClass;
@@ -18,9 +20,11 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import es.caib.arxiudigital.apirest.constantes.MetadatosDocumento;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.Aspectes;
 import es.caib.plugins.arxiu.api.Capsalera;
+import es.caib.plugins.arxiu.api.Carpeta;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.ConsultaResultat;
 import es.caib.plugins.arxiu.api.Document;
@@ -30,11 +34,13 @@ import es.caib.plugins.arxiu.api.Estat;
 import es.caib.plugins.arxiu.api.EstatElaboracio;
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
+import es.caib.plugins.arxiu.api.Fields;
 import es.caib.plugins.arxiu.api.Firma;
 import es.caib.plugins.arxiu.api.InformacioItem;
 import es.caib.plugins.arxiu.api.Operacio;
 import es.caib.plugins.arxiu.api.Origen;
 import es.caib.plugins.arxiu.api.PerfilsFirma;
+import es.caib.plugins.arxiu.api.TipusDocumental;
 import es.caib.plugins.arxiu.api.TipusFirma;
 import es.caib.plugins.arxiu.caib.CaibArxiuPlugin;
 
@@ -49,11 +55,16 @@ public class CaibArxiuPluginTest {
 	private static List<String> interessatsTest;
 	
 	private static String expedientIdPerConsultar;
+	private static String expedientIdNoBorrat;
 	private static String expedientNomPerConsultar;
 	private static ExpedientMetadades expedientMetadadesConsultades;
 	
 	private static String documentIdPerConsultar;
-//	private static String documentNomPerConsultar;
+	private static String documentIdPerBorrar;
+	private static String documentNomPerConsultar;
+	
+	private static String carpetaIdPerConsultar;
+	private static String carpetaNomPerConsultar;
 	
 	private static String CONTINGUT_FITXER_TEXT_PLA;
 	
@@ -77,6 +88,7 @@ public class CaibArxiuPluginTest {
 		
 		pagina = 1;
 		itemsPerPagina = 10;
+		expedientIdNoBorrat = "d2a6e047-d026-49e3-8e2c-2e77641e27dd";
 		
 		capsaleraTest = new Capsalera();
 		capsaleraTest.setInteressatNom("Limit Tecnologies");
@@ -144,7 +156,6 @@ public class CaibArxiuPluginTest {
 			if (expedient != null)
 				fail("No s'ha pogut esborrar l'expedient amb identificador " + expedientIdPerConsultar);
 		} catch (ArxiuException e) {
-			System.out.println("No s'ha trobat l'expedient. Eliminació correcte");
 		}
 	}
 
@@ -159,8 +170,6 @@ public class CaibArxiuPluginTest {
 		}
 		assertNotNull("No s'ha pogut crear l'expedient", expedient);
 		assertEquals("El nom de l'expedient no coincideix amb l'utilitzat al crear l'expedient", expedient.getNom(), expedientNomPerConsultar);
-//		expedient.getContinguts();
-//		assertEquals("Les metadades de l'expedient no coincideixen amb les utilitzades al crear l'expedient", expedient.getMetadades(), expedientMetadadesConsultades);
 	}
 
 	@Test
@@ -169,9 +178,9 @@ public class CaibArxiuPluginTest {
 		try {
 			List<ConsultaFiltre> filtres = new ArrayList<ConsultaFiltre>();
 			filtres.add(new ConsultaFiltre(
-					"ex_versio",
+					Fields.EX_SERIE_DOCUMENTAL,
 					Operacio.IGUAL,
-					"1"));
+					SERIE_DOCUMENTAL));
 			resultat = caibArxiuPlugin.expedientConsulta(filtres, pagina, itemsPerPagina);
 		} catch (ArxiuException e) {
 			fail("S'ha produit una excepció al intentar obtenir els detalls d'un expedient.");
@@ -218,125 +227,273 @@ public class CaibArxiuPluginTest {
 	}
 	
 
-	@Test
-	public void a12_testDocumentCrear() {
-		try {
-			Long time = System.currentTimeMillis();
-			String nomDocument = getDocumentName(time);
-			String documentContingutDirectori = System.getProperty("plugins.arxiu.caib.dirs.documents");
-			String documentContingutNom = System.getProperty("plugins.arxiu.caib.name.doc1");
-			
-			Document document = new Document();
-			document.setNom(nomDocument);
-			document.setContingut(llegirFitxer(documentContingutDirectori + "/" + documentContingutNom));
-			document.setMetadades(getDocumentMetadades(time));
-			document.setAspectes(getDocumentAspectes());
-//			document.setFirmes(getDocumentFirmes());
-			
-			String cosa = caibArxiuPlugin.documentCrear(document, expedientIdPerConsultar);
-		} catch (ArxiuException | IOException e) {
-			fail("S'ha produit una excepció al crear un document");
-		}
-	}
+//	@Test
+//	public void a12_testDocumentCrear() {
+//		try {
+//			Long time = System.currentTimeMillis();
+//			String nomDocument = getDocumentName(time);
+//			String documentContingutDirectori = System.getProperty("plugins.arxiu.caib.dirs.documents");
+//			String documentContingutNom = System.getProperty("plugins.arxiu.caib.name.doc1");
+//			
+//			Document document = new Document();
+//			document.setNom(nomDocument);
+//			document.setContingut(llegirFitxer(documentContingutDirectori + "/" + documentContingutNom));
+//			document.setMetadades(getDocumentMetadades(time));
+//			document.setAspectes(getDocumentAspectes());
+////			document.setFirmes(getDocumentFirmes());
+//			
+//			String cosa = caibArxiuPlugin.documentCrear(document, expedientIdPerConsultar);
+//		} catch (ArxiuException | IOException e) {
+//			fail("S'ha produit una excepció al crear un document");
+//		}
+//	}
 
 	@Test
 	public void a11_testDocumentEsborranyCrear() {
 		try {
 			Long time = System.currentTimeMillis();
-			String nomDocumentDraft = getDocumentName(time);
+			documentNomPerConsultar = getDocumentName(time);
 //			String documentContingutDirectori = System.getProperty("plugins.arxiu.caib.dirs.documents");
 //			String documentContingutNom = System.getProperty("plugins.arxiu.caib.name.doc1");
 			
 			Document document = new Document();
-			document.setNom(nomDocumentDraft);
+			document.setNom(documentNomPerConsultar);
 			document.setContingut(llegirFitxerDraft());
 			document.setMetadades(getDocumentDraftMetadades(time));
 			document.setAspectes(getDocumentAspectes());
 			
-			caibArxiuPlugin.documentEsborranyCrear(document, expedientIdPerConsultar);
+			documentIdPerConsultar = caibArxiuPlugin.documentEsborranyCrear(document, expedientIdPerConsultar);
+			
+			
+			time = System.currentTimeMillis();
+			
+			Document document2 = new Document();
+			document2.setNom(getDocumentName(time));
+			document2.setContingut(llegirFitxerDraft());
+			document2.setMetadades(getDocumentDraftMetadades(time));
+			document2.setAspectes(getDocumentAspectes());
+			
+			documentIdPerBorrar = caibArxiuPlugin.documentEsborranyCrear(document2, expedientIdPerConsultar);
+			
 		} catch (ArxiuException | IOException e) {
 			fail("S'ha produit una excepció al crear un document");
 		}
 	}
 
 	@Test
-	public void testDocumentEstablirDefinitiu() {
-		fail("Not yet implemented");
+	public void a190_testDocumentEstablirDefinitiu() {
+		InformacioItem informacioDefinitiu = null; 
+		try {
+			informacioDefinitiu = caibArxiuPlugin.documentEstablirDefinitiu(documentIdPerConsultar);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al intentar exportar l'expedient");
+		}
+		assertNotNull("No s'ha establert el document com a definitiu", informacioDefinitiu);
 	}
 
 	@Test
-	public void testDocumentModificar() {
-		fail("Not yet implemented");
+	public void a13_testDocumentModificar() {
+		InformacioItem infoDocumentModificat = null;
+		try {
+			documentNomPerConsultar = documentNomPerConsultar + "_mod";
+			
+			Document document = new Document();
+			document.setIdentificador(documentIdPerConsultar);
+			document.setNom(documentNomPerConsultar);
+			
+			infoDocumentModificat = caibArxiuPlugin.documentModificar(document);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al crear un document");
+		}
+		
+		
+		assertNotNull("No s'ha pogut modificar el document", infoDocumentModificat);
 	}
 
 	@Test
-	public void testDocumentEsborrar() {
-		fail("Not yet implemented");
+	public void a193_testDocumentEsborrar() {
+		try {
+			caibArxiuPlugin.documentEsborrar(documentIdPerBorrar);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al intentar esborrar el document.");
+		}
+		
+		try {
+			Document document = caibArxiuPlugin.documentDetalls(documentIdPerBorrar, null, true);
+			if (document != null)
+				fail("No s'ha pogut esborrar el document amb identificador " + expedientIdPerConsultar);
+		} catch (ArxiuException e) {
+			
+		}
 	}
 
 	@Test
-	public void testDocumentDetalls() {
-		fail("Not yet implemented");
+	public void a16_testDocumentDetalls() {
+		Document document = null;
+		
+		try {
+			document = caibArxiuPlugin.documentDetalls(documentIdPerConsultar, null, false);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al intentar obtenir els detalls d'un document.");
+		}
+		assertNotNull("No s'ha pogut consultar el document", document);
+		assertEquals("El nom de l'expedient no coincideix amb l'utilitzat al crear l'expedient", document.getNom(), documentNomPerConsultar);
 	}
 
 	@Test
-	public void testDocumentConsulta() {
-		fail("Not yet implemented");
+	public void a14_testDocumentConsulta() {
+		ConsultaResultat resultat = null;
+		try {
+			List<ConsultaFiltre> filtres = new ArrayList<ConsultaFiltre>();
+			filtres.add(new ConsultaFiltre(
+					Fields.DOC_SERIE_DOCUMENTAL,
+					Operacio.IGUAL,
+					SERIE_DOCUMENTAL));
+			resultat = caibArxiuPlugin.documentConsulta(filtres, pagina, itemsPerPagina);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al intentar obtenir el llistat de documents.");
+		}
+		assertNotNull("No s'ha obtingut cap resultat", resultat);
 	}
 
 	@Test
-	public void testDocumentVersions() {
-		fail("Not yet implemented");
+	public void a15_testDocumentVersions() {
+		List<InformacioItem> informacioVersions = null;
+		
+		try {
+			informacioVersions = caibArxiuPlugin.documentVersions(documentIdPerConsultar);
+			assertNotNull("No s'han trobat versions del document", informacioVersions);
+			if (informacioVersions.size() < 1)
+				fail("No s'han trobat versions del document");
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al intentar obtenir les versions del document.");
+		}
 	}
 
 	@Test
-	public void testDocumentGenerarCsv() {
-		fail("Not yet implemented");
+	public void a18_testDocumentGenerarCsv() {
+		String csv = null;
+		try {
+			csv = caibArxiuPlugin.documentGenerarCsv();
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció copiant el document");
+		}
+		assertNotNull("No s'ha recuperat contingut CSV", csv);
 	}
 
 	@Test
-	public void testDocumentCopiar() {
-		fail("Not yet implemented");
+	public void a17_testDocumentCopiar() {
+		String infoCopia = null;
+		try {
+			infoCopia = caibArxiuPlugin.documentCopiar(documentIdPerConsultar, expedientIdNoBorrat);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció copiant el document");
+		}
+		
+		assertNotNull("No s'ha pogut copiar el document", infoCopia);
 	}
 
 	@Test
-	public void testDocumentMoure() {
-		fail("Not yet implemented");
+	public void a191_testDocumentMoure() {
+		try {
+			caibArxiuPlugin.documentMoure(documentIdPerConsultar, expedientIdNoBorrat);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al moguent un document");
+		}
 	}
 
 	@Test
-	public void testDocumentExportarEni() {
-		fail("Not yet implemented");
+	public void a192_testDocumentExportarEni() {
+		String exportacio = null;
+		try {
+			exportacio = caibArxiuPlugin.documentExportarEni(documentIdPerConsultar);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció exportant");
+		}
+		assertNotNull("No s'ha recuperat contingut exportat", exportacio);
 	}
 
 	@Test
-	public void testCarpetaCrear() {
-		fail("Not yet implemented");
+	public void a51_testCarpetaCrear() {
+		String carpetaId = null;
+		
+		Long time = System.currentTimeMillis();
+		carpetaNomPerConsultar = getFolderName(time);
+		
+		try {
+			carpetaId = caibArxiuPlugin.carpetaCrear(carpetaNomPerConsultar, expedientIdPerConsultar);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al intentar crear una carpeta.");
+		}
+		
+		assertNotNull("No s'ha pogut crear l'expedient", carpetaId);
+		
+		carpetaIdPerConsultar = carpetaId;
 	}
 
 	@Test
-	public void testCarpetaModificar() {
-		fail("Not yet implemented");
+	public void a52_testCarpetaModificar() {
+		InformacioItem infoCarpetaModificada = null;
+		try {
+			carpetaNomPerConsultar = carpetaNomPerConsultar + "_mod";
+			
+			infoCarpetaModificada = caibArxiuPlugin.carpetaModificar(carpetaIdPerConsultar, carpetaNomPerConsultar);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al modificar la carpeta");
+		}
+		
+		assertNotNull("No s'ha pogut modificar la carpeta", infoCarpetaModificada);
 	}
 
 	@Test
-	public void testCarpetaEsborrar() {
-		fail("Not yet implemented");
+	public void a56_testCarpetaEsborrar() {
+		try {
+			caibArxiuPlugin.carpetaEsborrar(carpetaIdPerConsultar);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al intentar esborrar la carpeta.");
+		}
+		
+		try {
+			Carpeta carpeta = caibArxiuPlugin.carpetaDetalls(carpetaIdPerConsultar);
+			if (carpeta != null)
+				fail("No s'ha pogut esborrar la carpeta amb identificador " + carpetaIdPerConsultar);
+		} catch (ArxiuException e) {
+			
+		}
 	}
 
 	@Test
-	public void testCarpetaDetalls() {
-		fail("Not yet implemented");
+	public void a53_testCarpetaDetalls() {
+		Carpeta carpeta = null;
+		
+		try {
+			carpeta = caibArxiuPlugin.carpetaDetalls(carpetaIdPerConsultar);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al intentar obtenir els detalls d'una carpeta.");
+		}
+		assertNotNull("No s'ha pogut consultar la carpeta", carpeta);
+		assertEquals("El nom de l'expedient no coincideix amb l'utilitzat al crear l'expedient", carpeta.getNom(), carpetaNomPerConsultar);
 	}
 
 	@Test
-	public void testCarpetaCopiar() {
-		fail("Not yet implemented");
+	public void a54_testCarpetaCopiar() {
+		String infoCopia = null;
+		try {
+			infoCopia = caibArxiuPlugin.carpetaCopiar(carpetaIdPerConsultar, expedientIdNoBorrat);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció copiant la carpeta");
+		}
+		
+		assertNotNull("No s'ha pogut copiar la carpeta", infoCopia);
 	}
 
 	@Test
-	public void testCarpetaMoure() {
-		fail("Not yet implemented");
+	public void a55_testCarpetaMoure() {
+		try {
+			caibArxiuPlugin.carpetaMoure(carpetaIdPerConsultar, expedientIdNoBorrat);
+		} catch (ArxiuException e) {
+			fail("S'ha produit una excepció al moguent un document");
+		}
 	}
 	
 	private static String getExpedientName(Long i) {
@@ -358,7 +515,7 @@ public class CaibArxiuPluginTest {
 				organsTest,
 				new Date(i), 
 				"CLASSEX_" + i, 
-				getEstadosExpediente(i, estatAleatori),
+				Estat.E01.name(),
 				interessatsTest,
 				//Arrays.asList("IEX1_" + i, "IEX2_" + i, "IEX3_" + i),
 				SERIE_DOCUMENTAL, 
@@ -418,18 +575,27 @@ public class CaibArxiuPluginTest {
 				organsTest, 
 				new Date(i), 
 				Origen.ADMINISTRACIO.getText(), 
-				getEstadosElaboracion(i), 
-				"ALTRES", 
+				EstatElaboracio.EE01.name(), 
+				TipusDocumental.TD99.name(), 
 				SERIE_DOCUMENTAL, 
-				TipusFirma.TF06,
-				PerfilsFirma.EPES,
+				TipusFirma.TF06.name(),
+				PerfilsFirma.EPES.name(),
 				null);
 	}
 	
 	private static DocumentMetadades getDocumentDraftMetadades(Long i) {
 		
-//		Map<String, String> metadadesAdicionals = new HashMap<String, String>();
-//		metadadesAdicionals.put(MetadatosDocumento.CSV, value);
+		Map<String, String> metadadesAdicionals = new HashMap<String, String>();
+		metadadesAdicionals.put(MetadatosDocumento.NOMBRE_FORMATO, FormatsFitxer.CSV.name());
+		metadadesAdicionals.put(MetadatosDocumento.EXTENSION_FORMATO, ExtensionsFitxer.CSV.name());
+		
+		String csv = null;
+		try {
+			csv = caibArxiuPlugin.documentGenerarCsv();
+			metadadesAdicionals.put(MetadatosDocumento.CSV, csv);
+		} catch (ArxiuException e) {
+			fail("No s'ha pogut generar el CSV");
+		}
 		
 		return new DocumentMetadades(
 				"IDDOCDRAFT_" + i, 
@@ -437,12 +603,12 @@ public class CaibArxiuPluginTest {
 				organsTest, 
 				new Date(i), 
 				Origen.ADMINISTRACIO.getText(), 
-				getEstadosElaboracion(i), 
-				"ALTRES", 
+				EstatElaboracio.EE01.name(), 
+				TipusDocumental.TD99.name(), 
 				SERIE_DOCUMENTAL, 
-				null,
-				null,
-				null);
+				TipusFirma.TF01.name(),
+				PerfilsFirma.A.name(),
+				metadadesAdicionals);
 	}
 	
 	private static List<Aspectes> getDocumentAspectes() {
@@ -466,6 +632,6 @@ public class CaibArxiuPluginTest {
 	
 	private static String getEstadosElaboracion(Long i) {
 		EstatElaboracio[] estadosElaboracion = EstatElaboracio.values();
-		return estadosElaboracion[(int) (i % 5)].name();
+		return estadosElaboracion[(int) (i % 4)].name();
 	}
 }

@@ -11,6 +11,7 @@ import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.Firma;
 import es.caib.plugins.arxiu.api.InformacioItem;
+import es.caib.plugins.arxiu.api.Tables;
 
 /**
  * Interfície per a accedir a la base de dades Lucene.

@@ -83,8 +83,7 @@ public interface IArxiuPlugin extends IPlugin {
 	public List<InformacioItem> documentVersions(
 			String identificador) throws ArxiuException;
 	//tested
-	public String documentGenerarCsv(
-			String identificador) throws ArxiuException;
+	public String documentGenerarCsv() throws ArxiuException;
 	//tested
 	public String documentCopiar(
 			String identificador,

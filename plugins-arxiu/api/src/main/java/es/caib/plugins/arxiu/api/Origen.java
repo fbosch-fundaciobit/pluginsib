@@ -2,8 +2,8 @@ package es.caib.plugins.arxiu.api;
 
 public enum Origen {
 
-	ADMINISTRACIO ("ADMINISTRACIO"),
-	CIUTADA ("CIUDADANO");
+	ADMINISTRACIO ("1"),
+	CIUTADA ("0");
 
 	private final String text;
 	private final String id;
