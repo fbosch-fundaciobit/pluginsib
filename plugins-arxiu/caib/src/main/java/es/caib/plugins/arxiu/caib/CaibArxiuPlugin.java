@@ -176,7 +176,7 @@ public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuP
 				new Integer(result.size() / itemsPerPagina.intValue()),
 				new Integer(result.size()),
 				pagina,
-				result.subList(fromIndex, toIndex));
+				result.size() == 0 ? new ArrayList<InformacioItem>() : result.subList(fromIndex, toIndex));
 	}
 	
 	@Override
@@ -321,7 +321,7 @@ public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuP
 		String nodeIdAmbVersio = (versio != null) ?
 				versio + "@" + identificadorDocument : identificadorDocument;
 		return getArxiuClient().documentGet(
-				nodeIdAmbVersio,
+				identificador,
 				null,
 				ambContingut,
 				CaibArxiuConversioHelper.toCapsalera());
@@ -357,7 +357,7 @@ public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuP
 				new Integer(result.size() / itemsPerPagina.intValue()),
 				new Integer(result.size()),
 				pagina,
-				result.subList(fromIndex, toIndex));
+				result.size() == 0 ? new ArrayList<InformacioItem>() : result.subList(fromIndex, toIndex));
 	}
 	
 	@Override
@@ -370,8 +370,7 @@ public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuP
 	}
 	
 	@Override
-	public String documentGenerarCsv(
-			String identificador) throws ArxiuException {
+	public String documentGenerarCsv() throws ArxiuException {
 		
 		return getArxiuClient().documentCsvGenerate(
 				CaibArxiuConversioHelper.toCapsalera());
@@ -382,13 +381,11 @@ public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuP
 			String identificador,
 			String identificadorDesti) throws ArxiuException {
 		
-		getArxiuClient().documentCopy(
+		return getArxiuClient().documentCopy(
 				identificador,
 				identificadorDesti,
 				CaibArxiuConversioHelper.toCapsalera());
 		
-		// TODO
-		return null;
 	}
 	
 	@Override
@@ -467,13 +464,11 @@ public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuP
 			String identificador,
 			String identificadorDesti) throws ArxiuException {
 		
-		getArxiuClient().folderCopy(
+		return getArxiuClient().folderCopy(
 				identificador,
 				identificadorDesti,
 				CaibArxiuConversioHelper.toCapsalera());
 		
-		// TODO
-		return null;
 	}
 	
 	@Override
@@ -486,7 +481,6 @@ public class CaibArxiuPlugin extends AbstractPluginProperties implements IArxiuP
 				identificadorDesti,
 				CaibArxiuConversioHelper.toCapsalera());
 	}
-	
 	
 	/**
 	 * ===============================================================

@@ -14,7 +14,11 @@ import java.util.TimeZone;
 
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
+<<<<<<< HEAD
 import es.caib.plugins.arxiu.api.ConsultaOperacio;
+=======
+import es.caib.plugins.arxiu.api.Fields;
+>>>>>>> branch 'pluginsib-1.0' of https://github.com/GovernIB/pluginsib.git
 
 public class Utils {
 

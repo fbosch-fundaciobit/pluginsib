@@ -26,12 +26,16 @@ import es.caib.plugins.arxiu.api.ConsultaResultat;
 import es.caib.plugins.arxiu.api.ContingutTipus;
 import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.Expedient;
+import es.caib.plugins.arxiu.api.Fields;
 import es.caib.plugins.arxiu.api.InformacioItem;
+<<<<<<< HEAD
 import es.caib.plugins.arxiu.api.ConsultaOperacio;
 import es.caib.plugins.arxiu.filesystem.Fields;
+=======
+import es.caib.plugins.arxiu.api.Operacio;
+>>>>>>> branch 'pluginsib-1.0' of https://github.com/GovernIB/pluginsib.git
 import es.caib.plugins.arxiu.filesystem.FilesystemArxiuFilesystem;
 import es.caib.plugins.arxiu.filesystem.FilesystemArxiuPlugin;
-import es.caib.plugins.arxiu.filesystem.Utils;
 
 /**
  * Tests per al plugin filesystem de l'arxiu.

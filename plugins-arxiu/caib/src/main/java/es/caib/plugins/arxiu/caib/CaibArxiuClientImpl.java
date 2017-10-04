@@ -48,6 +48,8 @@ import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamSearch
 import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamSetDocument;
 import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamSetFile;
 import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamSetFolder;
+import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CopyDocumentResult;
+import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CopyFolderResult;
 import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateDraftDocumentResult;
 import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateFileResult;
 import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateFolderResult;
@@ -99,6 +101,7 @@ import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
 import es.caib.plugins.arxiu.api.InformacioItem;
+import es.caib.plugins.arxiu.api.Tables;
 
 /**
  * Interfície del client per a accedir a la funcionalitat de
@@ -393,8 +396,10 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			SearchFiles searchFiles = new SearchFiles();
 			Request<ParamSearch> request = new Request<ParamSearch>();
 			ParamSearch param = new ParamSearch();
-			param.setQuery(
-					CaibArxiuConversioHelper.consultaFiltreToQueryString(filtres));
+			
+			String query = Utils.getQuery(Tables.TABLE_EXPEDIENT, filtres);	
+			
+			param.setQuery(query);
 			param.setPageNumber(pagina);
 			request.setParam(param);
 			request.setServiceHeader(generarServiceHeader(capsalera));
@@ -408,8 +413,13 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 				SearchFilesResult result = mapper.readValue(
 						resposta.getJson(),
 						SearchFilesResult.class);
-				return CaibArxiuConversioHelper.fileNodeToFileInformacioItem(
-						result.getSearchFilesResult().getResParam().getFiles());
+				
+				List<FileNode> files = new ArrayList<FileNode>();
+				if (result.getSearchFilesResult().getResParam() != null &&
+						result.getSearchFilesResult().getResParam().getFiles() != null)
+					files = result.getSearchFilesResult().getResParam().getFiles();
+					 
+				return CaibArxiuConversioHelper.fileNodeToFileInformacioItem(files);
 			} else {
 				throw generarExcepcioJson(
 						metode,
@@ -854,8 +864,10 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			SearchDocs searchDocs = new SearchDocs();
 			Request<ParamSearch> request = new Request<ParamSearch>();
 			ParamSearch param = new ParamSearch();
-			param.setQuery(
-					CaibArxiuConversioHelper.consultaFiltreToQueryString(filtres));
+			
+			String query = Utils.getQuery(Tables.TABLE_DOCUMENT, filtres);	
+			
+			param.setQuery(query);
 			param.setPageNumber(pagina);
 			request.setParam(param);
 			request.setServiceHeader(generarServiceHeader(capsalera));
@@ -870,8 +882,13 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 						resposta.getJson(),
 						SearchDocsResult.class);
 				
-				return CaibArxiuConversioHelper.fileNodeToDocumentInformacioItem(
-						result.getSearchDocumentsResult().getResParam().getDocuments());
+				List<DocumentNode> docs = new ArrayList<DocumentNode>();
+				if (result.getSearchDocumentsResult().getResParam() != null &&
+						result.getSearchDocumentsResult().getResParam().getDocuments() != null)
+					docs = result.getSearchDocumentsResult().getResParam().getDocuments();
+					 
+				return CaibArxiuConversioHelper.fileNodeToDocumentInformacioItem(docs);
+				
 			} else {
 				throw generarExcepcioJson(
 						metode,
@@ -979,7 +996,7 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 	}
 	
 	@Override
-	public void documentCopy(
+	public String documentCopy(
 			String nodeId,
 			String targetNodeId,
 			Capsalera capsalera) throws ArxiuException {
@@ -999,11 +1016,17 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					metode,
 					copyDocument);
 			
-			if (resposta.getStatus() != 200) {
+			if (resposta.getStatus() == 200) {
+				CopyDocumentResult result = mapper.readValue(
+						resposta.getJson(),
+						CopyDocumentResult.class);
+				return result.getCopyDocumentResult().getResParam();
+			} else {
 				throw generarExcepcioJson(
 						metode,
 						resposta);
 			}
+			
 		} catch (ArxiuException aex) {
 			throw aex;
 		} catch (Exception ex) {
@@ -1252,7 +1275,7 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 	}
 	
 	@Override
-	public void folderCopy(
+	public String folderCopy(
 			String nodeId,
 			String targetNodeId,
 			Capsalera capsalera) throws ArxiuException {
@@ -1267,12 +1290,21 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			paramTarget.setTargetParent(targetNodeId);
 			request.setParam(paramTarget);
 			request.setServiceHeader(generarServiceHeader(capsalera));
+<<<<<<< HEAD
 			copyFolder.setcopyFolderRequest(request);
+=======
+			copyFolder.setCopyFolderRequest(request);
+>>>>>>> branch 'pluginsib-1.0' of https://github.com/GovernIB/pluginsib.git
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					copyFolder);
 			
-			if (resposta.getStatus() != 200) {
+			if (resposta.getStatus() == 200) {
+				CopyFolderResult result = mapper.readValue(
+						resposta.getJson(),
+						CopyFolderResult.class);
+				return result.getCopyFolderResult().getResParam();
+			} else {
 				throw generarExcepcioJson(
 						metode,
 						resposta);

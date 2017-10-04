@@ -1,4 +1,4 @@
-package es.caib.plugins.arxiu.filesystem;
+package es.caib.plugins.arxiu.api;
 
 public enum Tables {
 	
