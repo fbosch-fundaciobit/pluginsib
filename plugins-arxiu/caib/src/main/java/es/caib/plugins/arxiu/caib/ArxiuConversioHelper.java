@@ -74,7 +74,8 @@ public class ArxiuConversioHelper {
 	}
 
 	public static Expedient fileNodeToExpedient(
-			FileNode fileNode) throws ArxiuException {
+			FileNode fileNode,
+			String versio) throws ArxiuException {
 		Expedient expedient = new Expedient();
 		expedient.setIdentificador(
 				fileNode.getId());
@@ -84,6 +85,9 @@ public class ArxiuConversioHelper {
 				toExpedientMetadades(fileNode.getMetadataCollection()));
 		expedient.setContinguts(
 				summaryInfoNodesToInformacioItems(fileNode.getChildObjects()));
+		if (versio != null) {
+			expedient.setVersio(versio);
+		}
 		return expedient;
 	}
 
@@ -134,7 +138,8 @@ public class ArxiuConversioHelper {
 	}
 
 	public static Document documentNodeToDocument(
-			DocumentNode documentNode) throws ArxiuException {
+			DocumentNode documentNode,
+			String versio) throws ArxiuException {
 		Document document = new Document();
 		document.setIdentificador(
 				documentNode.getId());
@@ -150,6 +155,17 @@ public class ArxiuConversioHelper {
 				toDocumentFirmes(
 						documentNode.getBinaryContents(),
 						documentNode.getMetadataCollection()));
+		if (documentNode.getAspects() != null) {
+			boolean esborrany = documentNode.getAspects().contains(Aspectos.BORRADOR);
+			if (esborrany) {
+				document.setEstat(ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY);
+			} else {
+				document.setEstat(ArxiuConstants.DOCUMENT_ESTAT_DEFINITIU);
+			}
+		}
+		if (versio != null) {
+			document.setVersio(versio);
+		}
 		return document;
 	}
 

@@ -112,6 +112,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 
 	public static final String ARXIUCAIB_PROPERTY_BASE = ARXIVE_BASE_PROPERTY + "caib.";
 	private static final int NUM_PAGINES_RESULTAT_CERCA = 100;
+	private static final String VERSIO_INICIAL = "1.0";
 
 	private ArxiuCaibClient arxiuClient;
 
@@ -153,12 +154,13 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					ParamCreateFile.class,
 					CreateFileResult.class);
 			Expedient expedientCreat = ArxiuConversioHelper.fileNodeToExpedient(
-					resposta.getCreateFileResult().getResParam());
+					resposta.getCreateFileResult().getResParam(),
+					VERSIO_INICIAL);
 			return crearContingutArxiu(
 					expedientCreat.getIdentificador(), 
 					expedientCreat.getNom(),
 					ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT,
-					"1.0");
+					expedientCreat.getVersio());
 		} catch (ArxiuException aex) {
 			throw aex;
 		} catch (Exception ex) {
@@ -207,12 +209,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					},
 					ParamSetFile.class,
 					SetFileResult.class);
-			String versio = null;
-			List<ContingutArxiu> versions = expedientVersionsComu(
+			String versio = expedientDarreraVersio(
 					expedient.getIdentificador());
-			if (versions != null && !versions.isEmpty()) {
-				versio = versions.get(versions.size() - 1).getVersio();
-			}
 			return crearContingutArxiu(
 					expedient.getIdentificador(), 
 					expedient.getNom(),
@@ -260,6 +258,12 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			final String versio) throws ArxiuException {
 		String metode = Servicios.GET_FILE;
 		try {
+			String versioResposta = null;
+			if (versio == null) {
+				versioResposta = expedientDarreraVersio(identificador);
+			} else {
+				versioResposta = versio;
+			}
 			GetFileResult resposta = getArxiuClient().generarEnviarPeticio(
 					metode,
 					GetFile.class,
@@ -280,7 +284,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					ParamNodeId.class,
 					GetFileResult.class);
 			return ArxiuConversioHelper.fileNodeToExpedient(
-					resposta.getGetFileResult().getResParam());
+					resposta.getGetFileResult().getResParam(),
+					versioResposta);
 		} catch (ArxiuException aex) {
 			throw aex;
 		} catch (Exception ex) {
@@ -480,7 +485,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 						ParamCreateDraftDocument.class,
 						CreateDraftDocumentResult.class);
 				creat = ArxiuConversioHelper.documentNodeToDocument(
-						resposta.getCreateDraftDocumentResult().getResParam());
+						resposta.getCreateDraftDocumentResult().getResParam(),
+						VERSIO_INICIAL);
 			} else if (ArxiuConstants.DOCUMENT_ESTAT_DEFINITIU.equals(document.getEstat())) {
 				metode = Servicios.CREATE_DOC;
 				CreateDocumentResult resposta = getArxiuClient().generarEnviarPeticio(
@@ -507,7 +513,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 						ParamCreateDocument.class,
 						CreateDocumentResult.class);
 				creat = ArxiuConversioHelper.documentNodeToDocument(
-						resposta.getCreateDocumentResult().getResParam());
+						resposta.getCreateDocumentResult().getResParam(),
+						VERSIO_INICIAL);
 			} else {
 				throw new ArxiuValidacioException(
 						"No s'ha emplenat l'estat del document o el document no conte un estat reconegut (ESBORRANY o DEFINITIU)");
@@ -516,7 +523,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					creat.getIdentificador(), 
 					creat.getNom(),
 					ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
-					"1.0");
+					creat.getVersio());
 		} catch (ArxiuException aex) {
 			throw aex;
 		} catch (Exception ex) {
@@ -553,8 +560,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 								param.setDocument(
 										ArxiuConversioHelper.documentToDocumentNode(
 												document,
-												null, //respostaGet.getGetDocumentResult().getResParam().getMetadataCollection(),
-												null, //respostaGet.getGetDocumentResult().getResParam().getAspects(),
+												null, //resposta.getGetDocumentResult().getResParam().getMetadataCollection(),
+												null, //resposta.getGetDocumentResult().getResParam().getAspects(),
 												null,
 												csv,
 												getPropertyDefinicioCsv(),
@@ -588,12 +595,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 						ParamSetDocument.class,
 						SetDocumentResult.class);
 			}
-			String versio = null;
-			List<ContingutArxiu> versions = documentVersionsComu(
+			String versio = documentDarreraVersio(
 					document.getIdentificador());
-			if (versions != null && !versions.isEmpty()) {
-				versio = versions.get(versions.size() - 1).getVersio();
-			}
 			return crearContingutArxiu(
 					document.getIdentificador(), 
 					document.getNom(),
@@ -642,6 +645,12 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			final boolean ambContingut) throws ArxiuException {
 		String metode = Servicios.GET_DOC;
 		try {
+			String versioResposta = null;
+			if (versio == null) {
+				versioResposta = documentDarreraVersio(identificador);
+			} else {
+				versioResposta = versio;
+			}
 			GetDocumentResult resposta = getArxiuClient().generarEnviarPeticio(
 					metode,
 					GetDocument.class,
@@ -665,7 +674,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					ParamGetDocument.class,
 					GetDocumentResult.class);
 			return ArxiuConversioHelper.documentNodeToDocument(
-					resposta.getGetDocumentResult().getResParam());
+					resposta.getGetDocumentResult().getResParam(),
+					versioResposta);
 		} catch (ArxiuException aex) {
 			throw aex;
 		} catch (Exception ex) {
@@ -719,69 +729,6 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					new Integer(resultatConsulta.size()),
 					pagina,
 					resultatConsulta.size() == 0 ? new ArrayList<ContingutArxiu>() : resultatConsulta.subList(fromIndex, toIndex));
-		} catch (ArxiuException aex) {
-			throw aex;
-		} catch (Exception ex) {
-			throw new ArxiuException(
-					"S'ha produit un error cridant el mètode " + metode,
-					ex);
-		}
-	}
-
-	@Override
-	public void documentEstablirDefinitiu(
-			final String identificador) throws ArxiuException {
-		String metode = null;
-		try {
-			metode = Servicios.GENERATE_CSV;
-			GenerateDocCSVResult respostaCsv = getArxiuClient().generarEnviarPeticio(
-					metode,
-					GenerateDocCSV.class,
-					null,
-					Object.class,
-					GenerateDocCSVResult.class);
-			final String csv = respostaCsv.getGenerateDocCSVResult().getResParam();
-			/*metode = Servicios.GET_DOC;
-			final GetDocumentResult respostaGet = getArxiuClient().generarEnviarPeticio(
-					metode,
-					GetDocument.class,
-					new GeneradorParam<ParamGetDocument>() {
-						@Override
-						public ParamGetDocument generar() {
-							ParamGetDocument param = new ParamGetDocument();
-							DocumentId documentId = new DocumentId();
-							documentId.setNodeId(identificador);
-							param.setDocumentId(documentId);
-							param.setContent(new Boolean(false).toString());
-							return param;
-						}
-					},
-					ParamGetDocument.class,
-					GetDocumentResult.class);*/
-			metode = Servicios.SET_FINAL_DOC;
-			getArxiuClient().generarEnviarPeticio(
-					metode,
-					SetFinalDocument.class,
-					new GeneradorParam<ParamSetDocument>() {
-						@Override
-						public ParamSetDocument generar() {
-							ParamSetDocument param = new ParamSetDocument();
-							Document document = new Document();
-							document.setIdentificador(identificador);
-							param.setDocument(
-									ArxiuConversioHelper.documentToDocumentNode(
-											document,
-											null, //respostaGet.getGetDocumentResult().getResParam().getMetadataCollection(),
-											null, //respostaGet.getGetDocumentResult().getResParam().getAspects(),
-											null,
-											csv,
-											getPropertyDefinicioCsv(),
-											false));
-							return param;
-						}
-					},
-					ParamSetDocument.class,
-					SetFinalDocumentResult.class);
 		} catch (ArxiuException aex) {
 			throw aex;
 		} catch (Exception ex) {
@@ -1169,6 +1116,16 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 		}
 		return continguts;
 	}
+	private String expedientDarreraVersio(
+			String identificador) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, UniformInterfaceException, ClientHandlerException, IOException {
+		String darreraVersio = null;
+		List<ContingutArxiu> versions = expedientVersionsComu(
+				identificador);
+		if (versions != null && !versions.isEmpty()) {
+			darreraVersio = versions.get(versions.size() - 1).getVersio();
+		}
+		return darreraVersio;
+	}
 
 	private List<ContingutArxiu> documentVersionsComu(
 			final String identificador) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, UniformInterfaceException, ClientHandlerException, IOException {
@@ -1206,6 +1163,16 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			versio++;
 		}
 		return continguts;
+	}
+	private String documentDarreraVersio(
+			String identificador) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, UniformInterfaceException, ClientHandlerException, IOException {
+		String darreraVersio = null;
+		List<ContingutArxiu> versions = documentVersionsComu(
+				identificador);
+		if (versions != null && !versions.isEmpty()) {
+			darreraVersio = versions.get(versions.size() - 1).getVersio();
+		}
+		return darreraVersio;
 	}
 
 	private void comprovarAbsenciaMetadadaCsv(

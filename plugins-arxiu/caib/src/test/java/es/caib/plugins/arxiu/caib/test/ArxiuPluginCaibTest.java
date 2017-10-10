@@ -304,16 +304,17 @@ public class ArxiuPluginCaibTest {
 						ContingutArxiu documentCreat = elementsCreats.get(1);
 						String documentCreatId = documentCreat.getIdentificador();
 						System.out.print("1.- Comprovant que no es pot establir document com a definitiu sense firma (id=" + documentCreatId + ")... ");
+						Document documentPerModificar = new Document();
+						documentPerModificar.setIdentificador(documentCreatId);
 						try {
-							arxiuPlugin.documentEstablirDefinitiu(
-									documentCreatId);
+							arxiuPlugin.documentModificar(
+									documentPerModificar,
+									true);
 							fail("No s'hauria de poder establir com a definitiu un document sense firma (id=" + documentCreatId + ")");
 						} catch (ArxiuException ex) {
 							System.out.println("Ok");
 						}
-						System.out.print("2.- Guardant firma de document (id=" + documentCreatId + ")... ");
-						Document documentPerModificar = new Document();
-						documentPerModificar.setIdentificador(documentCreatId);
+						System.out.print("2.- Guardant firma de document i marcant com a definitiu (id=" + documentCreatId + ")... ");
 						Firma firmaPades = new Firma();
 						firmaPades.setTipus(ArxiuConstants.FIRMA_TIPUS_PADES);
 						firmaPades.setPerfil(ArxiuConstants.FIRMA_PERFIL_EPES);
@@ -325,12 +326,8 @@ public class ArxiuPluginCaibTest {
 						documentPerModificar.setFirmes(firmes);
 						ContingutArxiu itemDocumentModificat = arxiuPlugin.documentModificar(
 								documentPerModificar,
-								false);
+								true);
 						assertNotNull(itemDocumentModificat);
-						System.out.println("Ok");
-						System.out.print("3.- Establint document com a definitiu (id=" + documentCreatId + ")... ");
-						arxiuPlugin.documentEstablirDefinitiu(
-								documentCreatId);
 						System.out.println("Ok");
 						System.out.print("4.- Comprovant firmes del document (id=" + documentCreatId + ")... ");
 						Document documentFirmat = arxiuPlugin.documentDetalls(
@@ -410,6 +407,94 @@ public class ArxiuPluginCaibTest {
 				},
 				expedientPerCrear,
 				documentPerCrear);
+	}
+
+	//@Test
+	public void carpetaCicleDeVida() throws Exception {
+		System.out.println("TEST: CICLE DE VIDA DE LES CARPETES");
+		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
+		final Expedient expedientPerCrear = new Expedient();
+		expedientPerCrear.setNom(nomExp);
+		final ExpedientMetadades metadades = new ExpedientMetadades();
+		metadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		metadades.setOrgans(organsTest);
+		metadades.setDataObertura(new Date());
+		metadades.setClassificacio("organo1_PRO_123456789");
+		metadades.setEstat(ArxiuConstants.EXPEDIENT_ESTAT_OBERT);
+		metadades.setInteressats(interessatsTest);
+		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
+		expedientPerCrear.setMetadades(metadades);
+		String nomCar = "ARXIUAPI_prova_car_" + System.currentTimeMillis();
+		final Carpeta carpetaPerCrear = new Carpeta();
+		carpetaPerCrear.setNom(nomCar);
+		String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
+		final Document documentPerCrear = new Document();
+		documentPerCrear.setNom(nomDoc);
+		documentPerCrear.setEstat(ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY);
+		final DocumentMetadades documentMetadades = new DocumentMetadades();
+		documentMetadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		documentMetadades.setOrgans(organsTest);
+		documentMetadades.setDataCaptura(new Date());
+		documentMetadades.setEstatElaboracio(ArxiuConstants.DOCUMENT_ESTAT_ELAB_ORIG);
+		documentMetadades.setTipusDocumental(ArxiuConstants.DOCUMENT_TIPUS_OTROS);
+		documentMetadades.setFormat(ArxiuConstants.DOCUMENT_FORMAT_OASIS12);
+		documentMetadades.setExtensio(ArxiuConstants.DOCUMENT_EXTENSIO_ODT);
+		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
+		documentPerCrear.setMetadades(documentMetadades);
+		DocumentContingut documentContingut = new DocumentContingut();
+		documentContingut.setContingut(
+				IOUtils.toByteArray(
+						getDocumentContingutEsborrany()));
+		documentContingut.setTipusMime("application/vnd.oasis.opendocument.text");
+		documentPerCrear.setContingut(documentContingut);
+		testCreantElements(
+				new TestAmbElementsCreats() {
+					@Override
+					public void executar(List<ContingutArxiu> elementsCreats) throws IOException {
+						ContingutArxiu carpetaCreada = elementsCreats.get(2);
+						String carpetaCreadaId = carpetaCreada.getIdentificador();
+						System.out.print("1.- Comprovant informació de la carpeta creada (id=" + carpetaCreadaId + ")... ");
+						Carpeta carpetaDetalls = arxiuPlugin.carpetaDetalls(
+								carpetaCreadaId);
+						carpetaComprovar(
+								carpetaPerCrear,
+								carpetaDetalls,
+								false);
+						System.out.println("Ok");
+						System.out.print("2.- Modificant carpeta (id=" + carpetaCreadaId + ")... ");
+						Carpeta carpetaPerModificar = new Carpeta();
+						carpetaPerModificar.setIdentificador(carpetaCreadaId);
+						carpetaPerModificar.setNom(carpetaPerCrear.getNom() + "_MOD");
+						ContingutArxiu carpetaModificada = arxiuPlugin.carpetaModificar(
+								carpetaPerModificar);
+						assertNotNull(carpetaModificada);
+						assertEquals(carpetaCreadaId, carpetaModificada.getIdentificador());
+						System.out.println("Ok");
+						System.out.print("3.- Comprovant informació de la carpeta modificada (id=" + carpetaCreadaId + ")... ");
+						Carpeta carpetaModificadaDetalls = arxiuPlugin.carpetaDetalls(
+								carpetaCreadaId);
+						carpetaComprovar(
+								carpetaPerModificar,
+								carpetaModificadaDetalls,
+								true);
+						System.out.println("Ok");
+						System.out.print("5.- Esborrant carpeta creada (id=" + carpetaCreadaId + ")... ");
+						arxiuPlugin.carpetaEsborrar(carpetaCreadaId);
+						elementsCreats.remove(carpetaCreada);
+						System.out.println("Ok");
+						System.out.print("6.- Obtenint carpeta esborrada per verificar que no existeix (id=" + carpetaCreadaId + ")... ");
+						try {
+							arxiuPlugin.carpetaDetalls(
+									carpetaCreada.getIdentificador());
+							fail("No s'hauria d'haver trobat la carpeta una vegada esborrada (id=" + carpetaCreadaId + ")");
+						} catch (ArxiuNotFoundException ex) {
+							System.out.println("Ok");
+						}
+					}
+				},
+				expedientPerCrear,
+				documentPerCrear,
+				carpetaPerCrear);
 	}
 
 	/*@Test
@@ -814,6 +899,21 @@ public class ArxiuPluginCaibTest {
 		} else {
 			assertNull(documentPerComprovar.getFirmes());
 		}
+	}
+
+	private void carpetaComprovar(
+			Carpeta carpetaEsperada,
+			Carpeta carpetaPerComprovar,
+			boolean comprovarIdentificador) {
+		assertNotNull(carpetaPerComprovar);
+		if (comprovarIdentificador) {
+			assertEquals(
+					carpetaEsperada.getIdentificador(),
+					carpetaPerComprovar.getIdentificador());
+		}
+		assertEquals(
+				carpetaEsperada.getNom(),
+				carpetaPerComprovar.getNom());
 	}
 
 	private Date truncar(Date data) {

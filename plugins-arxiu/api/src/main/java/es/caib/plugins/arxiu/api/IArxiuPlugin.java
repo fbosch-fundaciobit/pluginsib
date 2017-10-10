@@ -209,17 +209,6 @@ public interface IArxiuPlugin extends IPlugin {
 			Integer itemsPerPagina) throws ArxiuException;
 
 	/**
-	 * Estableix un document de tipus esborrany com a definitiu.
-	 * 
-	 * @param identificador
-	 *            Identificador del document.
-	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
-	 */
-	public void documentEstablirDefinitiu(
-			String identificador) throws ArxiuException;
-
-	/**
 	 * Retorna les versions disponibles d'un expedient.
 	 * 
 	 * @param identificador
