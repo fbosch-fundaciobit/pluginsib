@@ -8,40 +8,21 @@ package es.caib.plugins.arxiu.api;
  *
  * @author Limit Tecnologies <limit@limit.es>
  */
-public class ArxiuException extends Exception {
+public class ArxiuException extends RuntimeException {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -311353047419727743L;
-
-	/**
-	 * 
-	 */
 	public ArxiuException() {
 		super();
 	}
-
-	/**
-	 * @param message
-	 * @param cause
-	 */
 	public ArxiuException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
-	/**
-	 * @param message
-	 */
 	public ArxiuException(String message) {
 		super(message);
 	}
-
-	/**
-	 * @param cause
-	 */
 	public ArxiuException(Throwable cause) {
 		super(cause);
 	}
+
+	private static final long serialVersionUID = 6220288486244096013L;
 
 }

@@ -4,16 +4,23 @@
 package es.caib.plugins.arxiu.api;
 
 /**
- * Informació sobre un contingut d’un expedient o carpeta.
+ * Informació sobre un contingut genèric de l’arxiu.
+ * Aquest contingut pot ser de tipus document, expedient
+ * o carpeta.
  * 
  * @author Limit Tecnologies <limit@limit.es>
  */
-public class InformacioItem {
+public class ContingutArxiu {
 
-	private String identificador;
-	private String nom;
-	private String tipus;
-	private String versio;
+	protected String identificador;
+	protected String nom;
+	protected String tipus;
+	protected String versio;
+
+	public ContingutArxiu(String tipus) {
+		super();
+		this.tipus = tipus;
+	}
 
 	public String getIdentificador() {
 		return identificador;
@@ -29,9 +36,6 @@ public class InformacioItem {
 	}
 	public String getTipus() {
 		return tipus;
-	}
-	public void setTipus(String tipus) {
-		this.tipus = tipus;
 	}
 	public String getVersio() {
 		return versio;

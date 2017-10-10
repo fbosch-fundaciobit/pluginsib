@@ -11,6 +11,7 @@ package es.caib.plugins.arxiu.api;
 public class Firma {
 
 	private String tipus;
+	private String perfil;
 	private String fitxerNom;
 	private byte[] contingut;
 	private String tipusMime;
@@ -21,6 +22,12 @@ public class Firma {
 	}
 	public void setTipus(String tipus) {
 		this.tipus = tipus;
+	}
+	public String getPerfil() {
+		return perfil;
+	}
+	public void setPerfil(String perfil) {
+		this.perfil = perfil;
 	}
 	public String getFitxerNom() {
 		return fitxerNom;

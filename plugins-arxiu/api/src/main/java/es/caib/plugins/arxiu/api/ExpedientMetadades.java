@@ -23,7 +23,7 @@ public class ExpedientMetadades {
 	private String estat;
 	private List<String> interessats;
 	private String serieDocumental;
-	private Map<String, String> metadadesAddicionals;
+	private Map<String, Object> metadadesAddicionals;
 	
 	public String getIdentificador() {
 		return identificador;
@@ -79,10 +79,10 @@ public class ExpedientMetadades {
 	public void setSerieDocumental(String serieDocumental) {
 		this.serieDocumental = serieDocumental;
 	}
-	public Map<String, String> getMetadadesAddicionals() {
+	public Map<String, Object> getMetadadesAddicionals() {
 		return metadadesAddicionals;
 	}
-	public void setMetadadesAddicionals(Map<String, String> metadadesAddicionals) {
+	public void setMetadadesAddicionals(Map<String, Object> metadadesAddicionals) {
 		this.metadadesAddicionals = metadadesAddicionals;
 	}
 

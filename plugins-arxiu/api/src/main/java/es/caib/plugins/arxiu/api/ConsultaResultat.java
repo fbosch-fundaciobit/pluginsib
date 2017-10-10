@@ -16,7 +16,7 @@ public class ConsultaResultat {
 	private Integer numPagines;					// Paginació: Número de pagines que retorna la consulta
 	private Integer numRetornat;				// Número de resultats que retorna la consulta
 	private Integer paginaActual;				// Paginació: Número de la pàgina actual
-	private List<InformacioItem> resultats;		// Resultat de la consulta 
+	private List<ContingutArxiu> resultats;		// Resultat de la consulta 
 	
 	public ConsultaResultat() {
 		super();
@@ -24,7 +24,7 @@ public class ConsultaResultat {
 
 	public ConsultaResultat(
 			Integer numRetornat, 
-			List<InformacioItem> resultats) {
+			List<ContingutArxiu> resultats) {
 		super();
 		this.numRetornat = numRetornat;
 		this.resultats = resultats;
@@ -35,7 +35,7 @@ public class ConsultaResultat {
 			Integer numPagines, 
 			Integer numRetornat, 
 			Integer paginaActual,
-			List<InformacioItem> resultats) {
+			List<ContingutArxiu> resultats) {
 		super();
 		this.numRegistres = numRegistres;
 		this.numPagines = numPagines;
@@ -76,11 +76,11 @@ public class ConsultaResultat {
 		this.paginaActual = paginaActual;
 	}
 
-	public List<InformacioItem> getResultats() {
+	public List<ContingutArxiu> getResultats() {
 		return resultats;
 	}
 
-	public void setResultats(List<InformacioItem> resultats) {
+	public void setResultats(List<ContingutArxiu> resultats) {
 		this.resultats = resultats;
 	}
 	

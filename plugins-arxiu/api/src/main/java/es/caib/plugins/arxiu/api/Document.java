@@ -10,25 +10,22 @@ import java.util.List;
  *
  * @author Limit Tecnologies <limit@limit.es>
  */
-public class Document {
+public class Document extends ContingutArxiu {
 
-	private String identificador;
-	private String nom;
+	private String estat;
 	private DocumentMetadades metadades;
 	private List<Firma> firmes;
 	private DocumentContingut contingut;
 
-	public String getIdentificador() {
-		return identificador;
+	public Document() {
+		super(ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT);
 	}
-	public void setIdentificador(String identificador) {
-		this.identificador = identificador;
+
+	public String getEstat() {
+		return estat;
 	}
-	public String getNom() {
-		return nom;
-	}
-	public void setNom(String nom) {
-		this.nom = nom;
+	public void setEstat(String estat) {
+		this.estat = estat;
 	}
 	public DocumentMetadades getMetadades() {
 		return metadades;
@@ -47,31 +44,6 @@ public class Document {
 	}
 	public void setContingut(DocumentContingut contingut) {
 		this.contingut = contingut;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((identificador == null) ? 0 : identificador.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Document other = (Document) obj;
-		if (identificador == null) {
-			if (other.identificador != null)
-				return false;
-		} else if (!identificador.equals(other.identificador))
-			return false;
-		return true;
 	}
 
 }

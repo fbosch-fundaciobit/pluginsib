@@ -10,35 +10,25 @@ import java.util.List;
  *
  * @author Limit Tecnologies <limit@limit.es>
  */
-public class Expedient {
+public class Expedient extends ContingutArxiu {
 
-	private String identificador;
-	private String nom;
 	private ExpedientMetadades metadades;
-	private List<InformacioItem> continguts;
+	private List<ContingutArxiu> continguts;
 
-	public String getIdentificador() {
-		return identificador;
+	public Expedient() {
+		super(ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT);
 	}
-	public void setIdentificador(String identificador) {
-		this.identificador = identificador;
-	}
-	public String getNom() {
-		return nom;
-	}
-	public void setNom(String nom) {
-		this.nom = nom;
-	}
+
 	public ExpedientMetadades getMetadades() {
 		return metadades;
 	}
 	public void setMetadades(ExpedientMetadades metadades) {
 		this.metadades = metadades;
 	}
-	public List<InformacioItem> getContinguts() {
+	public List<ContingutArxiu> getContinguts() {
 		return continguts;
 	}
-	public void setContinguts(List<InformacioItem> continguts) {
+	public void setContinguts(List<ContingutArxiu> continguts) {
 		this.continguts = continguts;
 	}
 

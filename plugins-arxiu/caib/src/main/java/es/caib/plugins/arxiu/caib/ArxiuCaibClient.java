@@ -4,12 +4,9 @@
 package es.caib.plugins.arxiu.caib;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,95 +22,29 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 
-import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.DocumentId;
-import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.DocumentNode;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.FileAuditInfo;
-import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.FileNode;
-import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.FolderNode;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.PersonIdentAuditInfo;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.ProceedingsAuditInfo;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.PublicServantAuditInfo;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.ServiceAuditInfo;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.ServiceHeader;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.ServiceSecurityInfo;
-import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.VersionNode;
-import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamCreateDocument;
-import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamCreateDraftDocument;
-import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamCreateFile;
-import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamCreateFolder;
-import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamGetDocument;
-import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamNodeID_TargetParent;
-import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamNodeId;
-import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamSearch;
-import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamSetDocument;
-import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamSetFile;
-import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamSetFolder;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CopyDocumentResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CopyFolderResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateDraftDocumentResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateFileResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateFolderResult;
 import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.ExceptionResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.ExportFileResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.GenerateDocCSVResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.GetDocVersionListResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.GetDocumentResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.GetENIDocumentResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.GetFileResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.GetFileVersionListResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.GetFolderResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.SearchDocsResult;
-import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.SearchFilesResult;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.CloseFile;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.CopyDocument;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.CopyFolder;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.CreateDocument;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.CreateDraftDocument;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.CreateFile;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.CreateFolder;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.ExportFile;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.GenerateDocCSV;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.GetDocVersionList;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.GetDocument;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.GetENIDocument;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.GetFile;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.GetFileVersionList;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.GetFolder;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.MoveDocument;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.MoveFolder;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.RemoveDocument;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.RemoveFile;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.RemoveFolder;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.ReopenFile;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.Request;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.SearchDocs;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.SearchFiles;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.SetDocument;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.SetFile;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.SetFinalDocument;
-import es.caib.arxiudigital.apirest.CSGD.peticiones.SetFolder;
-import es.caib.plugins.arxiu.api.ArxiuConstants;
 import es.caib.plugins.arxiu.api.ArxiuException;
-import es.caib.plugins.arxiu.api.Carpeta;
-import es.caib.plugins.arxiu.api.ConsultaFiltre;
-import es.caib.plugins.arxiu.api.ContingutTipus;
-import es.caib.plugins.arxiu.api.Document;
-import es.caib.plugins.arxiu.api.Expedient;
-import es.caib.plugins.arxiu.api.ExpedientMetadades;
-import es.caib.plugins.arxiu.api.InformacioItem;
-import es.caib.plugins.arxiu.api.Tables;
+import es.caib.plugins.arxiu.api.ArxiuNotFoundException;
 
 /**
- * Interfície del client per a accedir a la funcionalitat de
- * l'arxiu digital.
+ * Client per a accedir a la funcionalitat de l'arxiu digital de
+ * la CAIB.
  * 
  * @author Limit Tecnologies <limit@limit.es>
  */
-public class CaibArxiuClientImpl implements CaibArxiuClient {
-	
+public class ArxiuCaibClient {
 
 	private static final String SERVEI_VERSIO = "1.0";
-	
+	private static final int JERSEY_TIMEOUT_CONNECT = 5000;
+	private static final int JERSEY_TIMEOUT_READ = 20000;
 
 	private String url;
 	private String aplicacioCodi;
@@ -122,11 +53,8 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 
 	private Client jerseyClient;
 	private ObjectMapper mapper;
-	private String lastJsonRequest;
-	private String lastJsonResponse;
-	
-	
-	public CaibArxiuClientImpl(
+
+	public ArxiuCaibClient(
 			String url,
 			String aplicacioCodi,
 			String usuariHttp,
@@ -134,11 +62,17 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			String usuariSgd,
 			String contrasenyaSgd) {
 		super();
-		this.url = url;
+		if (url.endsWith("/")) {
+			this.url = url.substring(0, url.length() - 1);
+		} else {
+			this.url = url;
+		}
 		this.aplicacioCodi = aplicacioCodi;
 		this.usuariSgd = usuariSgd;
 		this.contrasenyaSgd = contrasenyaSgd;
 		jerseyClient = new Client();
+		jerseyClient.setConnectTimeout(JERSEY_TIMEOUT_CONNECT);
+		jerseyClient.setReadTimeout(JERSEY_TIMEOUT_READ);
 		if (usuariHttp != null) {
 			jerseyClient.addFilter(new HTTPBasicAuthFilter(usuariHttp, contrasenyaHttp));
 		}
@@ -152,49 +86,71 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 		// To suppress serializing properties with null values
 		mapper.setSerializationInclusion(Include.NON_NULL);
 	}
-	
-	public CaibArxiuClientImpl(
+
+	public ArxiuCaibClient(
 			String url,
 			String aplicacioCodi,
 			String usuariSgd,
 			String contrasenyaSgd) {
-		this(	url,
+		this(
+				url,
 				aplicacioCodi,
 				null,
 				null,
 				usuariSgd,
 				contrasenyaSgd);
 	}
-	
-	public String getLastJsonRequest() {
-		return lastJsonRequest;
-	}
-	public String getLastJsonResponse() {
-		return lastJsonResponse;
-	}
-	
-	
-	/**
-	 * ================= M E T O D E S   E X P E D I E N T S =================
-	 */
 
-	@Override
-	public Expedient fileCreate(
+
+
+	public <T, U, V> V generarEnviarPeticio(
+			String metode,
+			Class<T> peticioType,
+			GeneradorParam<U> generador,
+			Class<U> paramType,
+			Class<V> respostaType) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, UniformInterfaceException, ClientHandlerException, IOException {
+		Request<U> request = new Request<U>();
+		Capsalera capsalera = generarCapsalera();
+		request.setServiceHeader(
+				generarServiceHeader(capsalera));
+		if (generador != null) {
+			request.setParam(generador.generar());
+		}
+		T peticio = peticioType.newInstance();
+		for (Method method: peticioType.getMethods()) {
+			if (method.getName().startsWith("set")) {
+				method.invoke(peticio, request);
+				break;
+			}
+		}
+		JerseyResponse response = enviarPeticioRest(
+				metode,
+				peticio);
+		if (response.getStatus() == 200) {
+			return mapper.readValue(
+					response.getJson(),
+					respostaType);
+		} else {
+			throw generarExcepcioJson(
+					metode,
+					response);
+		}
+	}
+
+
+
+	/*public Expedient fileCreate(
 			String nom,
-			ExpedientMetadades metadades,
-			String aplicacioCodi,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FILE_CREATE;
-		
+			ExpedientMetadades metadades) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.CREATE_FILE;
 		try {
-			
 			CreateFile createFile = new CreateFile();
 			Request<ParamCreateFile> request = new Request<ParamCreateFile>();
 			request.setServiceHeader(generarServiceHeader(capsalera));
 			ParamCreateFile param = new ParamCreateFile();
 			param.setFile(
-					CaibArxiuConversioHelper.toFileNode(
+					ArxiuConversioHelper.toFileNode(
 							null,
 							nom, 
 							metadades,
@@ -205,18 +161,15 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			param.setRetrieveNode(Boolean.TRUE.toString());
 			request.setParam(param);
 			createFile.setCreateFileRequest(request);
-			
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					createFile);
-			
 			if (resposta.getStatus() == 200) {
 				CreateFileResult result = mapper.readValue(
 						resposta.getJson(),
 						CreateFileResult.class);
 				FileNode fileNode = result.getCreateFileResult().getResParam();
-				
-				return CaibArxiuConversioHelper.toExpedient(fileNode);
+				return ArxiuConversioHelper.fileNodeToExpedient(fileNode);
 			} else {
 				throw generarExcepcioJson(
 						metode,
@@ -231,19 +184,14 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 		}
 	}
 
-	@Override
 	public void fileUpdate(
 			String identificador, 
 			String nom,
-			ExpedientMetadades metadades,
-			String aplicacioCodi,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode;
-		metode = CaibArxiuMethods.FILE_GET;
-		
+			ExpedientMetadades metadades) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();*/
+		/*String metode;
+		metode = Servicios.GET_FILE;
 		FileNode fileNode;
-		
 		try {
 			GetFile getFile = new GetFile();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -255,7 +203,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					getFile);
-			
 			if (resposta.getStatus() == 200) {
 				GetFileResult result = mapper.readValue(
 						resposta.getJson(),
@@ -272,30 +219,27 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			throw new ArxiuException(
 					"S'ha produit un error cridant el mètode " + metode,
 					ex);
-		}
-		
-		metode = CaibArxiuMethods.FILE_SET;
-		
+		}*/
+		/*String metode = Servicios.SET_FILE;
 		try {
 			SetFile setFile = new SetFile();
 			Request<ParamSetFile> request = new Request<ParamSetFile>();
 			request.setServiceHeader(generarServiceHeader(capsalera));
 			ParamSetFile param = new ParamSetFile();
 			param.setFile(
-					CaibArxiuConversioHelper.toFileNode(
+					ArxiuConversioHelper.toFileNode(
 						identificador,
 						nom, 
 						metadades,
-						fileNode.getMetadataCollection(),
+						new ArrayList<Metadata>(),
 						aplicacioCodi,
-						fileNode.getAspects(),
+						new ArrayList<Aspectos>(),
 						false));
 			request.setParam(param);
 			setFile.setSetFileRequest(request);
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					setFile);
-			
 			if (resposta.getStatus() != 200) {
 				throw generarExcepcioJson(
 						metode,
@@ -310,14 +254,10 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 		}
 	}
 
-
-	@Override
 	public void fileDelete(
-			String identificador,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FILE_REMOVE;
-		
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.REMOVE_FILE;
 		try {
 			RemoveFile removeFile = new RemoveFile();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -329,7 +269,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					removeFile);
-			
 			if (resposta.getStatus() != 200) {
 				throw generarExcepcioJson(
 						metode,
@@ -344,13 +283,10 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 		}
 	}
 
-	@Override
 	public Expedient fileGet(
-			String identificador,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FILE_GET;
-		
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.GET_FILE;
 		try {
 			GetFile getFile = new GetFile();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -362,70 +298,17 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					getFile);
-			
 			if (resposta.getStatus() == 200) {
 				GetFileResult result = mapper.readValue(
 						resposta.getJson(),
 						GetFileResult.class);
 				FileNode fileNode = result.getGetFileResult().getResParam();
-				
-				return CaibArxiuConversioHelper.toExpedient(fileNode);
+				return ArxiuConversioHelper.fileNodeToExpedient(fileNode);
 			} else {
 				throw generarExcepcioJson(
 						metode,
 						resposta);
 			}
-		} catch (ArxiuException aex) {
-			throw aex;
-		} catch (Exception ex) {
-			throw new ArxiuException(
-					"S'ha produit un error cridant el mètode " + metode,
-					ex);
-		}
-	}
-	
-	@Override
-	public List<InformacioItem> fileSearch(
-			List<ConsultaFiltre> filtres,
-			Integer pagina,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FILE_SEARCH;
-		
-		try {	
-			SearchFiles searchFiles = new SearchFiles();
-			Request<ParamSearch> request = new Request<ParamSearch>();
-			ParamSearch param = new ParamSearch();
-			
-			String query = Utils.getQuery(Tables.TABLE_EXPEDIENT, filtres);	
-			
-			param.setQuery(query);
-			param.setPageNumber(pagina);
-			request.setParam(param);
-			request.setServiceHeader(generarServiceHeader(capsalera));
-			searchFiles.setSearchFilesRequest(request);
-			
-			JerseyResponse resposta = enviarPeticioRest(
-					metode,
-					searchFiles);
-			
-			if (resposta.getStatus() == 200) {
-				SearchFilesResult result = mapper.readValue(
-						resposta.getJson(),
-						SearchFilesResult.class);
-				
-				List<FileNode> files = new ArrayList<FileNode>();
-				if (result.getSearchFilesResult().getResParam() != null &&
-						result.getSearchFilesResult().getResParam().getFiles() != null)
-					files = result.getSearchFilesResult().getResParam().getFiles();
-					 
-				return CaibArxiuConversioHelper.fileNodeToFileInformacioItem(files);
-			} else {
-				throw generarExcepcioJson(
-						metode,
-						resposta);
-			}
-			
 		} catch (ArxiuException aex) {
 			throw aex;
 		} catch (Exception ex) {
@@ -435,13 +318,54 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 		}
 	}
 
-	@Override
-	public List<InformacioItem> fileVersionList(
-			String identificador,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FILE_GET_VERSION;
-		
+	public List<ContingutArxiu> fileSearch(
+			List<ConsultaFiltre> filtres,
+			Integer pagina) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.SEARCH_FILE;
+		try {	
+			SearchFiles searchFiles = new SearchFiles();
+			Request<ParamSearch> request = new Request<ParamSearch>();
+			ParamSearch param = new ParamSearch();
+			String query = ArxiuConsultaHelper.generarConsulta(
+					"\"eni:expediente\" ",
+					filtres);
+			param.setQuery(query);
+			param.setPageNumber(pagina);
+			request.setParam(param);
+			request.setServiceHeader(generarServiceHeader(capsalera));
+			searchFiles.setSearchFilesRequest(request);
+			JerseyResponse resposta = enviarPeticioRest(
+					metode,
+					searchFiles);
+			if (resposta.getStatus() == 200) {
+				SearchFilesResult result = mapper.readValue(
+						resposta.getJson(),
+						SearchFilesResult.class);
+				
+				List<FileNode> files = new ArrayList<FileNode>();
+				if (result.getSearchFilesResult().getResParam() != null &&
+						result.getSearchFilesResult().getResParam().getFiles() != null)
+					files = result.getSearchFilesResult().getResParam().getFiles();
+				return ArxiuConversioHelper.fileNodesToFileContingutArxiu(files);
+			} else {
+				throw generarExcepcioJson(
+						metode,
+						resposta);
+			}
+		} catch (ArxiuException aex) {
+			throw aex;
+		} catch (Exception ex) {
+			throw new ArxiuException(
+					"S'ha produit un error cridant el mètode " + metode,
+					ex);
+		}
+	}
+
+	public List<ContingutArxiu> fileVersionList(
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.GET_VERSION_FILE;
 		try {
 			GetFileVersionList getFileVersionList = new GetFileVersionList();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -453,7 +377,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					getFileVersionList);
-			
 			if (resposta.getStatus() == 200) {
 				GetFileVersionListResult result = mapper.readValue(
 						resposta.getJson(),
@@ -463,19 +386,18 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 				    public int compare(VersionNode vn1, VersionNode vn2) {
 				        return vn1.getDate().compareTo(vn2.getDate());
 				    }});
-				
 				int versio = 1;
-				List<InformacioItem> informacioItems = new ArrayList<InformacioItem>();
+				List<ContingutArxiu> continguts = new ArrayList<ContingutArxiu>();
 				for (int i = 0; i < vns.size(); i++) {
-					informacioItems.add(
-							new InformacioItem(
+					continguts.add(
+							ArxiuConversioHelper.crearContingutArxiu(
 									identificador,
 									null,
 									ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT,
 									String.valueOf(versio)));
 					versio++;
 				}
-				return informacioItems;
+				return continguts;
 			} else {
 				throw generarExcepcioJson(
 						metode,
@@ -490,13 +412,10 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 		}
 	}
 
-	@Override
 	public void fileClose(
-			String identificador,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FILE_CLOSE;
-		
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.CLOSE_FILE;
 		try {
 			CloseFile closeFile = new CloseFile();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -508,7 +427,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					closeFile);
-			
 			if (resposta.getStatus() != 200) {
 				throw generarExcepcioJson(
 						metode,
@@ -523,13 +441,10 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 		}
 	}
 
-	@Override
 	public void fileReopen(
-			String identificador,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FILE_REOPEN;
-		
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.REOPEN_FILE;
 		try {
 			ReopenFile reopenFile = new ReopenFile();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -541,7 +456,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					reopenFile);
-			
 			if (resposta.getStatus() != 200) {
 				throw generarExcepcioJson(
 						metode,
@@ -555,14 +469,11 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
+
 	public String fileExport(
-			String identificador,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FILE_EXPORT;
-		
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.EXPORT_FILE;
 		try {
 			ExportFile exportFile = new ExportFile();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -574,7 +485,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					exportFile);
-			
 			if (resposta.getStatus() == 200) {
 				ExportFileResult result = mapper.readValue(
 						resposta.getJson(),
@@ -600,28 +510,19 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	
-	/**
-	 * ================= M E T O D E S   D O C U M E N T S =================
-	 */
-	
-	@Override
+
 	public Document documentFinalCreate(
 			String pareIdentificador,
-			Document document,
-			String aplicacioCodi,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_CREATE;
-		
+			Document document) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.CREATE_DOC;
 		try {
 			CreateDocument createDocument = new CreateDocument();
 			Request<ParamCreateDocument> request = new Request<ParamCreateDocument>();
 			request.setServiceHeader(generarServiceHeader(capsalera));
 			ParamCreateDocument param = new ParamCreateDocument();
 			param.setParent(pareIdentificador);
-			param.setDocument(CaibArxiuConversioHelper.toDocumentNode(
+			param.setDocument(ArxiuConversioHelper.toDocumentNode(
 					document,
 					aplicacioCodi));
 			param.setRetrieveNode(Boolean.TRUE.toString());
@@ -630,14 +531,12 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					createDocument);
-			
 			if (resposta.getStatus() == 200) {
 				CreateDraftDocumentResult result = mapper.readValue(
 						resposta.getJson(),
 						CreateDraftDocumentResult.class);
 				DocumentNode documentNode = result.getCreateDraftDocumentResult().getResParam();
-				
-				return CaibArxiuConversioHelper.toDocument(documentNode);
+				return ArxiuConversioHelper.documentNodeToDocument(documentNode);
 			} else {
 				throw generarExcepcioJson(
 						metode,
@@ -651,23 +550,19 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
+
 	public Document documentDraftCreate(
 			String pareIdentificador,
-			Document document,
-			String aplicacioCodi,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_CREATE_DRAFT;
-		
+			Document document) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.CREATE_DRAFT;
 		try {
 			CreateDraftDocument createDraftDocument = new CreateDraftDocument();
 			Request<ParamCreateDraftDocument> request = new Request<ParamCreateDraftDocument>();
 			request.setServiceHeader(generarServiceHeader(capsalera));
 			ParamCreateDraftDocument param = new ParamCreateDraftDocument();
 			param.setParent(pareIdentificador);
-			param.setDocument(CaibArxiuConversioHelper.toDocumentNode(
+			param.setDocument(ArxiuConversioHelper.toDocumentNode(
 					document,
 					aplicacioCodi));
 			param.setRetrieveNode(Boolean.TRUE.toString());
@@ -676,14 +571,12 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					createDraftDocument);
-			
 			if (resposta.getStatus() == 200) {
 				CreateDraftDocumentResult result = mapper.readValue(
 						resposta.getJson(),
 						CreateDraftDocumentResult.class);
 				DocumentNode documentNode = result.getCreateDraftDocumentResult().getResParam();
-				
-				return CaibArxiuConversioHelper.toDocument(documentNode);
+				return ArxiuConversioHelper.documentNodeToDocument(documentNode);
 			} else {
 				throw generarExcepcioJson(
 						metode,
@@ -697,20 +590,18 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
+
 	public void documentFinalSet(
-			Document document,
-			String aplicacioCodi,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_SET_FINAL;
-		
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.SET_FINAL_DOC;
 		try {
 			SetFinalDocument setFinalDocument = new SetFinalDocument();
 			Request<ParamSetDocument> request = new Request<ParamSetDocument>();
 			ParamSetDocument param = new ParamSetDocument();
-			param.setDocument(CaibArxiuConversioHelper.toDocumentNode(
+			Document document = new Document();
+			document.setIdentificador(identificador);
+			param.setDocument(ArxiuConversioHelper.toDocumentNode(
 					document,
 					aplicacioCodi));
 			request.setParam(param);
@@ -719,7 +610,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					setFinalDocument);
-			
 			if (resposta.getStatus() != 200) {
 				throw generarExcepcioJson(
 						metode,
@@ -734,20 +624,16 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 		}
 	}
 
-	@Override
 	public void documentUpdate(
-			Document document,
-			String aplicacioCodi,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_SET;
-		
+			Document document) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.SET_DOC;
 		try {
 			SetDocument setDocument = new SetDocument();
 			Request<ParamSetDocument> request = new Request<ParamSetDocument>();
 			request.setServiceHeader(generarServiceHeader(capsalera));
 			ParamSetDocument param = new ParamSetDocument();
-			param.setDocument(CaibArxiuConversioHelper.toDocumentNode(
+			param.setDocument(ArxiuConversioHelper.toDocumentNode(
 					document,
 					aplicacioCodi));
 			request.setParam(param);
@@ -755,7 +641,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					setDocument);
-			
 			if (resposta.getStatus() != 200) {
 				throw generarExcepcioJson(
 						metode,
@@ -770,13 +655,10 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 		}
 	}
 
-	@Override
 	public void documentDelete(
-			String identificador,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_REMOVE;
-		
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.REMOVE_DOC;
 		try {
 			RemoveDocument removeDocument = new RemoveDocument();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -788,7 +670,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					removeDocument);
-			
 			if (resposta.getStatus() != 200) {
 				throw generarExcepcioJson(
 						metode,
@@ -803,18 +684,12 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 		}
 	}
 
-	@Override
 	public Document documentGet(
 			String identificador,
 			String csv,
-			boolean ambContingut,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_GET;
-		logger.debug("Invocant mètode " + metode + " amb paràmetres (" +
-				"nodeId=" + identificador + ", " +
-				"capsalera=" + capsalera + ")");
-		
+			boolean ambContingut) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.GET_DOC;
 		try {
 			GetDocument getDocument = new GetDocument();
 			Request<ParamGetDocument> request = new Request<ParamGetDocument>();
@@ -830,14 +705,12 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					getDocument);
-			
 			if (resposta.getStatus() == 200) {
 				GetDocumentResult result = mapper.readValue(
 						resposta.getJson(),
 						GetDocumentResult.class);
 				DocumentNode documentNode = result.getGetDocumentResult().getResParam();
-				
-				return CaibArxiuConversioHelper.toDocument(documentNode);
+				return ArxiuConversioHelper.documentNodeToDocument(documentNode);
 			} else {
 				throw generarExcepcioJson(
 						metode,
@@ -851,50 +724,42 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
-	public List<InformacioItem> documentSearch(
+
+	public List<ContingutArxiu> documentSearch(
 			List<ConsultaFiltre> filtres,
-			Integer pagina,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_SEARCH;
-		
+			Integer pagina) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.SEARCH_DOC;
 		try {	
 			SearchDocs searchDocs = new SearchDocs();
 			Request<ParamSearch> request = new Request<ParamSearch>();
 			ParamSearch param = new ParamSearch();
-			
-			String query = Utils.getQuery(Tables.TABLE_DOCUMENT, filtres);	
-			
+			String query = ArxiuConsultaHelper.generarConsulta(
+					"\"eni:documento\" ",
+					filtres);
 			param.setQuery(query);
 			param.setPageNumber(pagina);
 			request.setParam(param);
 			request.setServiceHeader(generarServiceHeader(capsalera));
 			searchDocs.setSearchDocsRequest(request);
-			
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					searchDocs);
-			
 			if (resposta.getStatus() == 200) {
 				SearchDocsResult result = mapper.readValue(
 						resposta.getJson(),
 						SearchDocsResult.class);
-				
 				List<DocumentNode> docs = new ArrayList<DocumentNode>();
 				if (result.getSearchDocumentsResult().getResParam() != null &&
 						result.getSearchDocumentsResult().getResParam().getDocuments() != null)
 					docs = result.getSearchDocumentsResult().getResParam().getDocuments();
 					 
-				return CaibArxiuConversioHelper.fileNodeToDocumentInformacioItem(docs);
-				
+				return ArxiuConversioHelper.fileNodeToDocumentContingut(docs);
 			} else {
 				throw generarExcepcioJson(
 						metode,
 						resposta);
 			}
-			
 		} catch (ArxiuException aex) {
 			throw aex;
 		} catch (Exception ex) {
@@ -903,14 +768,11 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
-	public List<InformacioItem> documentVersionList(
-			String identificador,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_GET_VERSION;
-		
+
+	public List<ContingutArxiu> documentVersionList(
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.GET_VERSION_DOC;
 		try {
 			GetDocVersionList getDocVersionList = new GetDocVersionList();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -922,30 +784,27 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					getDocVersionList);
-			
 			if (resposta.getStatus() == 200) {
 				GetDocVersionListResult result = mapper.readValue(
 						resposta.getJson(),
 						GetDocVersionListResult.class);
 				List<VersionNode> vns = result.getGetDocVersionListResult().getResParam();
-				Collections.sort(vns, new Comparator<VersionNode>() {
-				    public int compare(VersionNode vn1, VersionNode vn2) {
-				        return vn1.getDate().compareTo(vn2.getDate());
-				    }});
-				
-				int versio = 1;
-				List<InformacioItem> informacioItems = new ArrayList<InformacioItem>();
-				for (VersionNode vn: vns) {
-					informacioItems.add(
-							new InformacioItem(
-									vn.getId(),
-									null,
-									ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
-									String.valueOf(versio)));
-					
-					versio++;
+				List<ContingutArxiu> informacioItems = null;
+				if (vns != null) {
+					Collections.sort(vns, new Comparator<VersionNode>() {
+					    public int compare(VersionNode vn1, VersionNode vn2) {
+					        return vn1.getDate().compareTo(vn2.getDate());
+					    }});
+					informacioItems = new ArrayList<ContingutArxiu>();
+					for (VersionNode vn: vns) {
+						informacioItems.add(
+								ArxiuConversioHelper.crearContingutArxiu(
+										identificador,
+										null,
+										ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+										new Float(vn.getId()).toString()));
+					}
 				}
-				
 				return informacioItems;
 			} else {
 				throw generarExcepcioJson(
@@ -960,13 +819,10 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
-	public String documentCsvGenerate(
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_GENERATE_CSV;
-		
+
+	public String documentCsvGenerate() throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.GENERATE_CSV;
 		try {
 			GenerateDocCSV generateDocCSV = new GenerateDocCSV();
 			Request<Object> request = new Request<Object>();
@@ -975,7 +831,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					generateDocCSV);
-			
 			if (resposta.getStatus() == 200) {
 				GenerateDocCSVResult result = mapper.readValue(
 						resposta.getJson(),
@@ -994,15 +849,12 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
+
 	public String documentCopy(
 			String nodeId,
-			String targetNodeId,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_COPY;
-		
+			String targetNodeId) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.COPY_DOC;
 		try {
 			CopyDocument copyDocument = new CopyDocument();
 			Request<ParamNodeID_TargetParent> request = new Request<ParamNodeID_TargetParent>();
@@ -1015,7 +867,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					copyDocument);
-			
 			if (resposta.getStatus() == 200) {
 				CopyDocumentResult result = mapper.readValue(
 						resposta.getJson(),
@@ -1026,7 +877,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 						metode,
 						resposta);
 			}
-			
 		} catch (ArxiuException aex) {
 			throw aex;
 		} catch (Exception ex) {
@@ -1035,15 +885,12 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
+
 	public void documentMove(
 			String nodeId,
-			String targetNodeId,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_MOVE;
-		
+			String targetNodeId) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.MOVE_DOC;
 		try {
 			MoveDocument moveDocument = new MoveDocument();
 			Request<ParamNodeID_TargetParent> request = new Request<ParamNodeID_TargetParent>();
@@ -1056,7 +903,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					moveDocument);
-			
 			if (resposta.getStatus() != 200) {
 				throw generarExcepcioJson(
 						metode,
@@ -1070,14 +916,11 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
+
 	public String documentEniGet(
-			String identificador,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.DOCUMENT_GET_ENIDOC;
-		
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.GET_ENIDOC;
 		try {
 			GetENIDocument getEniDocument = new GetENIDocument();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -1090,13 +933,11 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					getEniDocument);
-			
 			if (resposta.getStatus() == 200) {
 				GetENIDocumentResult result = mapper.readValue(
 						resposta.getJson(),
 						GetENIDocumentResult.class);
 				String exportBase64 = result.getGetENIDocResult().getResParam();
-				
 				if (exportBase64 != null) {
 					return new String(
 							Base64.decodeBase64(exportBase64));
@@ -1116,20 +957,12 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	
-	/**
-	 * ================= M E T O D E S   C A R P E T E S =================
-	 */
-	
-	@Override
-	public String folderCreate(
-			String pareIdentificador,
+
+	public Carpeta folderCreate(
 			String nom,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FOLDER_CREATE;
-		
+			String pareIdentificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.CREATE_FOLDER;
 		try {
 			CreateFolder createFolder = new CreateFolder();
 			Request<ParamCreateFolder> request = new Request<ParamCreateFolder>();
@@ -1137,7 +970,7 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			ParamCreateFolder param = new ParamCreateFolder();
 			param.setParent(pareIdentificador);
 			param.setFolder(
-					CaibArxiuConversioHelper.toFolderNode(
+					ArxiuConversioHelper.toFolderNode(
 							null,
 							nom));
 			param.setRetrieveNode(Boolean.TRUE.toString());
@@ -1146,14 +979,12 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					createFolder);
-			
 			if (resposta.getStatus() == 200) {
 				CreateFolderResult result = mapper.readValue(
 						resposta.getJson(),
 						CreateFolderResult.class);
 				FolderNode folderNode = result.getCreateFolderResult().getResParam();
-				
-				return folderNode.getId();
+				return ArxiuConversioHelper.folderNodeToCarpeta(folderNode);
 			} else {
 				throw generarExcepcioJson(
 						metode,
@@ -1167,21 +998,18 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
+
 	public void folderUpdate(
 			String identificador,
-			String nom,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FOLDER_SET;
-		
+			String nom) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.SET_FOLDER;
 		try {
 			SetFolder setFolder = new SetFolder();
 			Request<ParamSetFolder> request = new Request<ParamSetFolder>();
 			request.setServiceHeader(generarServiceHeader(capsalera));
 			ParamSetFolder param = new ParamSetFolder();
-			param.setFolder(CaibArxiuConversioHelper.toFolderNode(
+			param.setFolder(ArxiuConversioHelper.toFolderNode(
 					identificador,
 					nom));
 			request.setParam(param);
@@ -1189,7 +1017,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					setFolder);
-			
 			if (resposta.getStatus() != 200) {
 				throw generarExcepcioJson(
 						metode,
@@ -1203,14 +1030,11 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
+
 	public void folderDelete(
-			String identificador,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FOLDER_REMOVE;
-		
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.REMOVE_FOLDER;
 		try {
 			RemoveFolder removeFolder = new RemoveFolder();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -1222,7 +1046,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					removeFolder);
-			
 			if (resposta.getStatus() != 200) {
 				throw generarExcepcioJson(
 						metode,
@@ -1236,12 +1059,11 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
+
 	public Carpeta folderGet(
-			String identificador,
-			Capsalera capsalera) throws ArxiuException {
-		String metode = CaibArxiuMethods.FOLDER_GET;
+			String identificador) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.GET_FOLDER;
 		try {
 			GetFolder getFolder = new GetFolder();
 			Request<ParamNodeId> request = new Request<ParamNodeId>();
@@ -1258,8 +1080,7 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 						resposta.getJson(),
 						GetFolderResult.class);
 				FolderNode folderNode = result.getGetFolderResult().getResParam();
-				
-				return CaibArxiuConversioHelper.toCarpeta(folderNode);
+				return ArxiuConversioHelper.folderNodeToCarpeta(folderNode);
 			} else {
 				throw generarExcepcioJson(
 						metode,
@@ -1273,15 +1094,14 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
+
 	public String folderCopy(
 			String nodeId,
-			String targetNodeId,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FOLDER_COPY;
-		
+			String targetNodeId) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		// TODO
+		//String metode = Servicios.COPY_FOLDER;
+		String metode = "/services/copyFolder";
 		try {
 			CopyFolder copyFolder = new CopyFolder();
 			Request<ParamNodeID_TargetParent> request = new Request<ParamNodeID_TargetParent>();
@@ -1290,15 +1110,10 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			paramTarget.setTargetParent(targetNodeId);
 			request.setParam(paramTarget);
 			request.setServiceHeader(generarServiceHeader(capsalera));
-<<<<<<< HEAD
 			copyFolder.setcopyFolderRequest(request);
-=======
-			copyFolder.setCopyFolderRequest(request);
->>>>>>> branch 'pluginsib-1.0' of https://github.com/GovernIB/pluginsib.git
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					copyFolder);
-			
 			if (resposta.getStatus() == 200) {
 				CopyFolderResult result = mapper.readValue(
 						resposta.getJson(),
@@ -1317,15 +1132,12 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					ex);
 		}
 	}
-	
-	@Override
+
 	public void folderMove(
 			String nodeId,
-			String targetNodeId,
-			Capsalera capsalera) throws ArxiuException {
-		
-		String metode = CaibArxiuMethods.FOLDER_MOVE;
-		
+			String targetNodeId) throws ArxiuException {
+		Capsalera capsalera = generarCapsalera();
+		String metode = Servicios.MOVE_FOLDER;
 		try {
 			MoveFolder moveFolder = new MoveFolder();
 			Request<ParamNodeID_TargetParent> request = new Request<ParamNodeID_TargetParent>();
@@ -1338,7 +1150,6 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			JerseyResponse resposta = enviarPeticioRest(
 					metode,
 					moveFolder);
-			
 			if (resposta.getStatus() != 200) {
 				throw generarExcepcioJson(
 						metode,
@@ -1351,69 +1162,126 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 					"S'ha produit un error cridant el mètode " + metode,
 					ex);
 		}
+	}*/
+
+
+
+	public static Capsalera generarCapsalera() {
+		Capsalera capsalera = new Capsalera();
+		//		header.setInteressatNom(capsalera.getInteressatNom());
+		//		header.setInteressatNif(capsalera.getInteressatNif());
+		//		header.setFuncionariNom(capsalera.getFuncionariNom());
+		//		header.setFuncionariNif(capsalera.getFuncionariNif());
+		//		header.setFuncionariOrgan(capsalera.getFuncionariOrgan());
+		//		header.setProcedimentId(capsalera.getProcedimentId());
+		//		header.setProcedimentNom(capsalera.getProcedimentNom());
+		//		header.setExpedientId(capsalera.getExpedientId());
+		return capsalera;
 	}
-	
-	
-	/**
-	 * ================ M E T O D E S   P R I V A T S ================
-	 */
-	
+
 	private ServiceHeader generarServiceHeader(Capsalera capsalera) {
 		ServiceHeader serviceHeader = new ServiceHeader();
-		ServiceAuditInfo auditInfo = new ServiceAuditInfo();
-		PersonIdentAuditInfo interessat = new PersonIdentAuditInfo();
-		interessat.setName(capsalera.getInteressatNom());
-		interessat.setDocument(capsalera.getInteressatNif());
-		auditInfo.setApplicant(interessat);
-		PublicServantAuditInfo publicServant = new PublicServantAuditInfo();
-		PersonIdentAuditInfo funcionari = new PersonIdentAuditInfo();
-		funcionari.setName(capsalera.getFuncionariNom());
-		funcionari.setDocument(capsalera.getFuncionariNif());
-		publicServant.setIdentificationData(funcionari);
-		publicServant.setOrganization(capsalera.getFuncionariOrgan());
-		auditInfo.setPublicServant(publicServant);
-		FileAuditInfo expedient = new FileAuditInfo();
-		expedient.setId(capsalera.getExpedientId());
-		ProceedingsAuditInfo procediment = new ProceedingsAuditInfo();
-		procediment.setId(capsalera.getProcedimentId());
-		procediment.setName(capsalera.getProcedimentNom());
-		expedient.setProceedings(procediment);
-		auditInfo.setFile(expedient);
-		auditInfo.setApplication(aplicacioCodi);
+		ServiceAuditInfo auditInfo = null;
+		if (capsalera.getInteressatNom() != null || capsalera.getInteressatNif() != null) {
+			PersonIdentAuditInfo interessat = new PersonIdentAuditInfo();
+			interessat.setName(capsalera.getInteressatNom());
+			interessat.setDocument(capsalera.getInteressatNif());
+			if (auditInfo == null) {
+				auditInfo = new ServiceAuditInfo();
+			}
+			auditInfo.setApplicant(interessat);
+		}
+		PublicServantAuditInfo publicServant = null;
+		if (capsalera.getFuncionariNom() != null || capsalera.getFuncionariNif() != null) {
+			PersonIdentAuditInfo funcionari = new PersonIdentAuditInfo();
+			funcionari.setName(capsalera.getFuncionariNom());
+			funcionari.setDocument(capsalera.getFuncionariNif());
+			if (publicServant == null) {
+				publicServant = new PublicServantAuditInfo();
+			}
+			publicServant.setIdentificationData(funcionari);
+		}
+		if (capsalera.getFuncionariOrgan() != null) {
+			if (publicServant == null) {
+				publicServant = new PublicServantAuditInfo();
+			}
+			publicServant.setOrganization(capsalera.getFuncionariOrgan());
+		}
+		if (publicServant != null) {
+			if (auditInfo == null) {
+				auditInfo = new ServiceAuditInfo();
+			}
+			auditInfo.setPublicServant(publicServant);
+		}
+		FileAuditInfo expedient = null;
+		if (capsalera.getExpedientId() != null) {
+			if (expedient == null) {
+				expedient = new FileAuditInfo();
+			}
+			expedient.setId(capsalera.getExpedientId());
+		}
+		if (capsalera.getProcedimentId() != null || capsalera.getProcedimentNom() != null) {
+			ProceedingsAuditInfo procediment = new ProceedingsAuditInfo();
+			procediment.setId(capsalera.getProcedimentId());
+			procediment.setName(capsalera.getProcedimentNom());
+			if (expedient == null) {
+				expedient = new FileAuditInfo();
+			}
+			expedient.setProceedings(procediment);
+		}
+		if (expedient != null) {
+			if (auditInfo == null) {
+				auditInfo = new ServiceAuditInfo();
+			}
+			auditInfo.setFile(expedient);
+		}
+		if (aplicacioCodi != null) {
+			if (auditInfo == null) {
+				auditInfo = new ServiceAuditInfo();
+			}
+			auditInfo.setApplication(aplicacioCodi);
+		}
 		serviceHeader.setAuditInfo(auditInfo);
 		serviceHeader.setServiceVersion(SERVEI_VERSIO);
-		ServiceSecurityInfo securityInfo = new ServiceSecurityInfo();
-		securityInfo.setUser(usuariSgd);
-		securityInfo.setPassword(contrasenyaSgd);
-		serviceHeader.setSecurityInfo(securityInfo);
+		if (usuariSgd != null || contrasenyaSgd != null) {
+			ServiceSecurityInfo securityInfo = new ServiceSecurityInfo();
+			securityInfo.setUser(usuariSgd);
+			securityInfo.setPassword(contrasenyaSgd);
+			serviceHeader.setSecurityInfo(securityInfo);
+		}
 		return serviceHeader;
 	}
-	
+
 	private ArxiuException generarExcepcioJson(
 			String metode,
-			JerseyResponse resposta) throws JsonParseException, JsonMappingException, IOException {
-		
+			JerseyResponse resposta)
+		      throws JsonParseException, JsonMappingException, IOException {
 		ExceptionResult exceptionResult = mapper.readValue(
 				resposta.getJson(),
 				ExceptionResult.class);
 		String code = exceptionResult.getException().getCode();
 		String description = exceptionResult.getException().getDescription();
-
-		return new ArxiuException(
-				"S'ha produit un error (" + resposta.getStatus() + ") cridant el mètode " + metode +
-				"\nCODI: " + code + "\nDESCRIPCIO: " + description);
+		if ("COD_021".equals(code) && description.contains("not found")) {
+			return new ArxiuNotFoundException();
+		} else {
+			return new ArxiuCaibException(
+					metode,
+					resposta.getStatus(),
+					code,
+					description);
+		}
 	}
-	
+
 	private JerseyResponse enviarPeticioRest(
 			String metode,
 			Object peticio) throws UniformInterfaceException, ClientHandlerException, JsonProcessingException {
-		String urlAmbMetode = (url.endsWith("/")) ? url + "services/" + metode : url + "/services/" + metode;
+		String urlAmbMetode = url + metode;
 		String body = mapper.writeValueAsString(peticio);
 		logger.debug("Enviant petició HTTP a l'arxiu (" +
 				"url=" + urlAmbMetode + ", " +
 				"tipus=application/json, " +
 				"body=" + body + ")");
-		lastJsonRequest = body;
+		//lastJsonRequest = body;
 		ClientResponse response = jerseyClient.
 				resource(urlAmbMetode).
 				type("application/json").
@@ -1422,13 +1290,13 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 		logger.debug("Rebuda resposta HTTP de l'arxiu (" +
 				"status=" + response.getStatus() + ", " +
 				"body=" + json + ")");
-		lastJsonResponse = json;
+		//lastJsonResponse = json;
 		return new JerseyResponse(
 				json,
 				response.getStatus());
 	}
-	
-	private class JerseyResponse {
+
+	private static class JerseyResponse {
 		String json;
 		int status;
 		public JerseyResponse(String json, int status) {
@@ -1442,8 +1310,71 @@ public class CaibArxiuClientImpl implements CaibArxiuClient {
 			return status;
 		}
 	}
-	
-	
-	private static final Logger logger = LoggerFactory.getLogger(CaibArxiuClientImpl.class);
-	
+
+	@SuppressWarnings("unused")
+	private static class Capsalera {
+		private String interessatNom;
+		private String interessatNif;
+		private String funcionariNom;
+		private String funcionariNif;
+		private String funcionariOrgan;
+		private String procedimentId;
+		private String procedimentNom;
+		private String expedientId;
+		public String getInteressatNom() {
+			return interessatNom;
+		}
+		public void setInteressatNom(String interessatNom) {
+			this.interessatNom = interessatNom;
+		}
+		public String getInteressatNif() {
+			return interessatNif;
+		}
+		public void setInteressatNif(String interessatNif) {
+			this.interessatNif = interessatNif;
+		}
+		public String getFuncionariNom() {
+			return funcionariNom;
+		}
+		public void setFuncionariNom(String funcionariNom) {
+			this.funcionariNom = funcionariNom;
+		}
+		public String getFuncionariNif() {
+			return funcionariNif;
+		}
+		public void setFuncionariNif(String funcionariNif) {
+			this.funcionariNif = funcionariNif;
+		}
+		public String getFuncionariOrgan() {
+			return funcionariOrgan;
+		}
+		public void setFuncionariOrgan(String funcionariOrgan) {
+			this.funcionariOrgan = funcionariOrgan;
+		}
+		public String getProcedimentId() {
+			return procedimentId;
+		}
+		public void setProcedimentId(String procedimentId) {
+			this.procedimentId = procedimentId;
+		}
+		public String getProcedimentNom() {
+			return procedimentNom;
+		}
+		public void setProcedimentNom(String procedimentNom) {
+			this.procedimentNom = procedimentNom;
+		}
+		public String getExpedientId() {
+			return expedientId;
+		}
+		public void setExpedientId(String expedientId) {
+			this.expedientId = expedientId;
+		}
+	}
+
+	public interface GeneradorParam<T> {
+		public T generar();
+	}
+
+	private static final Logger logger = LoggerFactory.getLogger(ArxiuCaibClient.class);
+
 }
