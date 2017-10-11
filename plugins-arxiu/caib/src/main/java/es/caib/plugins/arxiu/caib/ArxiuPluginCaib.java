@@ -118,8 +118,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	private static final String ARXIUCAIB_PROPERTY_BASE = ARXIVE_BASE_PROPERTY + "caib.";
 	private static final int NUM_PAGINES_RESULTAT_CERCA = 100;
 	private static final String VERSIO_INICIAL_CONTINGUT = "1.0";
-	private static final String JERSEY_TIMEOUT_CONNECT = "5000";
-	private static final String JERSEY_TIMEOUT_READ = "20000";
+	private static final String JERSEY_TIMEOUT_CONNECT = "10000";
+	private static final String JERSEY_TIMEOUT_READ = "60000";
 
 	private ArxiuCaibClient arxiuClient;
 	private Client versioImprimibleClient;
