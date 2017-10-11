@@ -4,6 +4,7 @@
 package es.caib.plugins.arxiu.caib;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,10 +13,13 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.fundaciobit.plugins.utils.AbstractPluginProperties;
 
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.UniformInterfaceException;
+import com.sun.jersey.api.client.WebResource;
 
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.DocumentId;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.DocumentNode;
@@ -99,6 +103,7 @@ import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.DocumentContingut;
 import es.caib.plugins.arxiu.api.DocumentMetadades;
 import es.caib.plugins.arxiu.api.Expedient;
+import es.caib.plugins.arxiu.api.Firma;
 import es.caib.plugins.arxiu.api.IArxiuPlugin;
 import es.caib.plugins.arxiu.caib.ArxiuCaibClient.GeneradorParam;
 
@@ -110,11 +115,14 @@ import es.caib.plugins.arxiu.caib.ArxiuCaibClient.GeneradorParam;
  */
 public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuPlugin {
 
-	public static final String ARXIUCAIB_PROPERTY_BASE = ARXIVE_BASE_PROPERTY + "caib.";
+	private static final String ARXIUCAIB_PROPERTY_BASE = ARXIVE_BASE_PROPERTY + "caib.";
 	private static final int NUM_PAGINES_RESULTAT_CERCA = 100;
-	private static final String VERSIO_INICIAL = "1.0";
+	private static final String VERSIO_INICIAL_CONTINGUT = "1.0";
+	private static final String JERSEY_TIMEOUT_CONNECT = "5000";
+	private static final String JERSEY_TIMEOUT_READ = "20000";
 
 	private ArxiuCaibClient arxiuClient;
+	private Client versioImprimibleClient;
 
 
 
@@ -155,7 +163,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					CreateFileResult.class);
 			Expedient expedientCreat = ArxiuConversioHelper.fileNodeToExpedient(
 					resposta.getCreateFileResult().getResParam(),
-					VERSIO_INICIAL);
+					VERSIO_INICIAL_CONTINGUT);
 			return crearContingutArxiu(
 					expedientCreat.getIdentificador(), 
 					expedientCreat.getNom(),
@@ -458,6 +466,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 		String metode = Servicios.CREATE_DOC;
 		try {
 			comprovarAbsenciaMetadadaCsv(document.getMetadades());
+			comprovarFirma(document);
 			Document creat = null;
 			if (ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY.equals(document.getEstat())) {
 				metode = Servicios.CREATE_DRAFT;
@@ -486,7 +495,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 						CreateDraftDocumentResult.class);
 				creat = ArxiuConversioHelper.documentNodeToDocument(
 						resposta.getCreateDraftDocumentResult().getResParam(),
-						VERSIO_INICIAL);
+						VERSIO_INICIAL_CONTINGUT);
 			} else if (ArxiuConstants.DOCUMENT_ESTAT_DEFINITIU.equals(document.getEstat())) {
 				metode = Servicios.CREATE_DOC;
 				CreateDocumentResult resposta = getArxiuClient().generarEnviarPeticio(
@@ -514,7 +523,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 						CreateDocumentResult.class);
 				creat = ArxiuConversioHelper.documentNodeToDocument(
 						resposta.getCreateDocumentResult().getResParam(),
-						VERSIO_INICIAL);
+						VERSIO_INICIAL_CONTINGUT);
 			} else {
 				throw new ArxiuValidacioException(
 						"No s'ha emplenat l'estat del document o el document no conte un estat reconegut (ESBORRANY o DEFINITIU)");
@@ -540,6 +549,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 		String metode = null;
 		try {
 			comprovarAbsenciaMetadadaCsv(document.getMetadades());
+			comprovarFirma(document);
 			if (marcarDefinitiu) {
 				metode = Servicios.GENERATE_CSV;
 				GenerateDocCSVResult respostaCsv = getArxiuClient().generarEnviarPeticio(
@@ -846,19 +856,35 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	}
 
 	@Override
-	public DocumentContingut documentImprimible() throws ArxiuException {
-		// TODO Auto-generated method stub
+	public DocumentContingut documentImprimible(
+			final String identificador) throws ArxiuException {
 		/*
-		La URL de consulta es la següent:
-			https://intranet.caib.es/concsv/rest/printable/IDENTIFICADOR?metadata1=METADADA_1&metadata2=METADADA_2&watermark=MARCA_AIGUA
-		A on:
-			- IDENTIFICADOR és l'id del document a consultar [OBLIGATORI]
-			- METADADA_1 és la primera metadada [OPCIONAL]
-			- METADADA_2 és la segona metadada [OPCIONAL]
-			- MARCA_AIGUA és el text de la marca d'aigua que apareixerà impresa a cada fulla [OPCIONAL]
-		Només es obligatori informa la HASH, la resta d'elements son opcionals. Si no s'informen metadades s'imprimeix l'hora i dia de la generació del document imprimible.
+		 * La URL de consulta es la següent:
+		 * https://intranet.caib.es/concsv/rest/printable/IDENTIFICADOR?metadata1=METADADA_1&metadata2=METADADA_2&watermark=MARCA_AIGUA
+		 * A on:
+		 *   - IDENTIFICADOR és l'id del document a consultar [OBLIGATORI]
+		 *   - METADADA_1 és la primera metadada [OPCIONAL]
+		 *   - METADADA_2 és la segona metadada [OPCIONAL]
+		 *   - MARCA_AIGUA és el text de la marca d'aigua que apareixerà impresa a cada fulla [OPCIONAL]
+		 * Només es obligatori informa la HASH, la resta d'elements son opcionals. Si no s'informen metadades s'imprimeix l'hora i dia de la generació del document imprimible.
 		 */
-		return null;
+		try {
+			InputStream is = generarVersioImprimible(
+					identificador,
+					null, // metadada 1
+					null, // metadada 2
+					null); // marca d'aigua
+			DocumentContingut contingut = new DocumentContingut();
+			contingut.setArxiuNom("versio_imprimible.pdf");
+			contingut.setTipusMime("application/pdf");
+			contingut.setContingut(IOUtils.toByteArray(is));
+			return contingut;
+		} catch (Exception ex) {
+			throw new ArxiuException(
+					"S'ha produit un error generant la versió imprimible del document",
+					ex);
+		}
+		
 	}
 
 	@Override
@@ -1191,15 +1217,117 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 		}
 	}
 
+	private void comprovarFirma(
+			final Document document) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, UniformInterfaceException, ClientHandlerException, IOException {
+		if (document.getFirmes() != null && !document.getFirmes().isEmpty()) {
+			String firmaTipus = null;
+			for (Firma firma: document.getFirmes()) {
+				if (firmaTipus == null) {
+					firmaTipus = firma.getTipus();
+				} else {
+					if (!firmaTipus.equals(firma.getTipus())) {
+						throw new ArxiuValidacioException(
+								"El document no pot contenir firmes de diferents tipus");
+					}
+				}
+			}
+			boolean formatComprovat = false;
+			if (document.getMetadades() != null && document.getMetadades().getFormat() != null) {
+				if (ArxiuConstants.FIRMA_TIPUS_PADES.equals(firmaTipus)) {
+					formatComprovat = true;
+					if (!ArxiuConstants.DOCUMENT_FORMAT_PDF.equals(document.getMetadades().getFormat())) {
+						throw new ArxiuValidacioException(
+								"Un document que no te el format PDF (" + document.getMetadades().getFormat() + ") no pot tenir una firma de tipus PADES");
+					}
+				}
+			}
+			if (document.getIdentificador() != null) {
+				String metode = Servicios.GET_DOC;
+				GetDocumentResult resposta = getArxiuClient().generarEnviarPeticio(
+						metode,
+						GetDocument.class,
+						new GeneradorParam<ParamGetDocument>() {
+							@Override
+							public ParamGetDocument generar() {
+								ParamGetDocument param = new ParamGetDocument();
+								DocumentId documentId = new DocumentId();
+								documentId.setNodeId(document.getIdentificador());
+								param.setDocumentId(documentId);
+								param.setContent(new Boolean(false).toString());
+								return param;
+							}
+						},
+						ParamGetDocument.class,
+						GetDocumentResult.class);
+				Document documentResposta = ArxiuConversioHelper.documentNodeToDocument(
+						resposta.getGetDocumentResult().getResParam(),
+						null);
+				if (firmaTipus != null && documentResposta.getFirmes() != null && !documentResposta.getFirmes().isEmpty()) {
+					Firma primeraFirma = documentResposta.getFirmes().get(0);
+					if (!firmaTipus.equals(primeraFirma.getTipus())) {
+						throw new ArxiuValidacioException(
+								"El document de l'arxiu ja està firmat i el tipus de firma especificat (" + firmaTipus + ") no coicideix amb l'existent a l'arxiu (" + primeraFirma.getTipus() + ")");
+					}
+				}
+				if (!formatComprovat && documentResposta.getMetadades() != null && documentResposta.getMetadades().getFormat() != null) {
+					if (ArxiuConstants.FIRMA_TIPUS_PADES.equals(firmaTipus)) {
+						if (!ArxiuConstants.DOCUMENT_FORMAT_PDF.equals(documentResposta.getMetadades().getFormat())) {
+							throw new ArxiuValidacioException(
+									"Un document que no te el format PDF (" + documentResposta.getMetadades().getFormat() + ") no pot tenir una firma de tipus PADES");
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public InputStream generarVersioImprimible(
+			String identificador,
+			String metadada1,
+			String metadada2,
+			String marcaAigua) throws IOException {
+		String url = getPropertyConversioImprimibleUrl();
+		WebResource webResource;
+		if (url.endsWith("/")) {
+			webResource = getVersioImprimibleClient().
+					resource(url + identificador);
+		} else {
+			webResource = getVersioImprimibleClient().
+					resource(url + "/" + identificador);
+		}
+		if (metadada1 != null) {
+			webResource.queryParam("metadata1", metadada1);
+		}
+		if (metadada2 != null) {
+			webResource.queryParam("metadata2", metadada2);
+		}
+		if (marcaAigua != null) {
+			webResource.queryParam("watermark", marcaAigua);
+		}
+		return webResource.get(InputStream.class);
+	}
+
 	private ArxiuCaibClient getArxiuClient() {
 		if (arxiuClient == null) {
 			arxiuClient = new ArxiuCaibClient(
 					getPropertyBaseUrl(),
 					getPropertyAplicacioCodi(),
 					getPropertyUsuari(),
-					getPropertyContrasenya());
+					getPropertyContrasenya(),
+					getPropertyTimeoutConnect(),
+					getPropertyTimeoutRead());
 		}
 		return arxiuClient;
+	}
+	private Client getVersioImprimibleClient() {
+		if (versioImprimibleClient == null) {
+			versioImprimibleClient = new Client();
+			versioImprimibleClient.setConnectTimeout(
+					getPropertyTimeoutConnect());
+			versioImprimibleClient.setReadTimeout(
+					getPropertyTimeoutRead());
+		}
+		return versioImprimibleClient;
 	}
 
 	private String getPropertyBaseUrl() {
@@ -1216,6 +1344,21 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	}
 	private String getPropertyDefinicioCsv() {
 		return getProperty(ARXIUCAIB_PROPERTY_BASE + "csv.definicio");
+	}
+	private String getPropertyConversioImprimibleUrl() {
+		return getProperty(ARXIUCAIB_PROPERTY_BASE + "conversio.imprimible.url");
+	}
+	private int getPropertyTimeoutConnect() {
+		String timeout = getProperty(
+				ARXIUCAIB_PROPERTY_BASE + "timeout.connect",
+				JERSEY_TIMEOUT_CONNECT);
+		return Integer.parseInt(timeout);
+	}
+	private int getPropertyTimeoutRead() {
+		String timeout = getProperty(
+				ARXIUCAIB_PROPERTY_BASE + "timeout.read",
+				JERSEY_TIMEOUT_READ);
+		return Integer.parseInt(timeout);
 	}
 
 }

@@ -49,8 +49,7 @@ import es.caib.plugins.arxiu.api.Firma;
  * @author Limit Tecnologies <limit@limit.es>
  */
 public class ArxiuConversioHelper {
-	
-	
+
 	public static FileNode expedientToFileNode(
 			Expedient expedient,
 			List<Metadata> metadadesPrevies,
@@ -527,6 +526,7 @@ public class ArxiuConversioHelper {
 		}
 		return null;
 	}
+
 	private static List<Firma> toDocumentFirmes(
 			List<Content> contents,
 			List<Metadata> metadades) {
@@ -659,7 +659,7 @@ public class ArxiuConversioHelper {
 						"valor=" + estat + ")");
 		}
 	}
-	
+
 	private static String toContingutTipus(
 			TiposObjetoSGD tiposObjetoSGD) {
 		switch(tiposObjetoSGD) {
@@ -705,7 +705,7 @@ public class ArxiuConversioHelper {
 						"valor=" + estatElaboracio + ")");
 		}
 	}
-	
+
 	private static TiposDocumentosENI toTiposDocumentosEni(
 			String documentTipus) throws ArxiuException {
 		if (documentTipus == null) return null;
@@ -758,188 +758,6 @@ public class ArxiuConversioHelper {
 						"valor=" + documentTipus + ")");
 		}
 	}
-	
-	/*private static FormatosFichero toFormatosFichero(
-			String formatNom) throws ArxiuException {
-		if (formatNom == null) return null;
-		switch (formatNom) {
-			case "AVI":
-				return FormatosFichero.AVI;
-			case "CSS":
-				return FormatosFichero.CSS;
-			case "CSV":
-				return FormatosFichero.CSV;
-			case "GML":
-				return FormatosFichero.GML;
-			case "GZIP":
-				return FormatosFichero.GZIP;
-			case "HTML":
-				return FormatosFichero.HTML;
-			case "JPEG":
-				return FormatosFichero.JPEG;
-			case "MHTML":
-				return FormatosFichero.MHTML;
-			case "MP3":
-				return FormatosFichero.MP3;
-			case "MP4A":
-				return FormatosFichero.MP4A;
-			case "MP4V":
-				return FormatosFichero.MP4V;
-			case "OASIS12":
-				return FormatosFichero.OASIS12;
-			case "OGG":
-				return FormatosFichero.OGG;
-			case "PDF":
-				return FormatosFichero.PDF;
-			case "PDFA":
-				return FormatosFichero.PDFA;
-			case "PNG":
-				return FormatosFichero.PNG;
-			case "RTF":
-				return FormatosFichero.RTF;
-			case "SOXML":
-				return FormatosFichero.SOXML;
-			case "SVG":
-				return FormatosFichero.SVG;
-			case "TIFF":
-				return FormatosFichero.TIFF;
-			case "TXT":
-				return FormatosFichero.TXT;
-			case "WEBM":
-				return FormatosFichero.WEBM;
-			case "WFS":
-				return FormatosFichero.WFS;
-			case "WMS":
-				return FormatosFichero.WMS;
-			case "XHTML":
-				return FormatosFichero.XHTML;
-			case "ZIP":
-				return FormatosFichero.ZIP;
-			default:
-				throw new ArxiuException(
-						"No s'ha pogut convertir el valor per l'enumeració ArxiuFormatNom (" +
-						"valor=" + formatNom + ")");
-		}
-	}
-
-	private static ExtensionesFichero toExtensionesFichero(
-			String formatExtensio) throws ArxiuException {
-		
-		if (formatExtensio == null) return null;
-		
-		switch (formatExtensio) {
-			case "AVI":
-				return ExtensionesFichero.AVI;
-			case "CSS":
-				return ExtensionesFichero.CSS;
-			case "CSV":
-				return ExtensionesFichero.CSV;
-			case "DOCX":
-				return ExtensionesFichero.DOCX;
-			case "GML":
-				return ExtensionesFichero.GML;
-			case "GZ":
-				return ExtensionesFichero.GZ;
-			case "HTM":
-				return ExtensionesFichero.HTM;
-			case "HTML":
-				return ExtensionesFichero.HTML;
-			case "JPEG":
-				return ExtensionesFichero.JPEG;
-			case "JPG":
-				return ExtensionesFichero.JPG;
-			case "MHT":
-				return ExtensionesFichero.MHT;
-			case "MHTML":
-				return ExtensionesFichero.MHTML;
-			case "MP3":
-				return ExtensionesFichero.MP3;
-			case "MP4":
-				return ExtensionesFichero.MP4;
-			case "MPEG":
-				return ExtensionesFichero.MPEG;
-			case "ODG":
-				return ExtensionesFichero.ODG;
-			case "ODP":
-				return ExtensionesFichero.ODP;
-			case "ODS":
-				return ExtensionesFichero.ODS;
-			case "ODT":
-				return ExtensionesFichero.ODT;
-			case "OGA":
-				return ExtensionesFichero.OGA;
-			case "OGG":
-				return ExtensionesFichero.OGG;
-			case "PDF":
-				return ExtensionesFichero.PDF;
-			case "PNG":
-				return ExtensionesFichero.PNG;
-			case "PPTX":
-				return ExtensionesFichero.PPTX;
-			case "RTF":
-				return ExtensionesFichero.RTF;
-			case "SVG":
-				return ExtensionesFichero.SVG;
-			case "TIFF":
-				return ExtensionesFichero.TIFF;
-			case "TXT":
-				return ExtensionesFichero.TXT;
-			case "WEBM":
-				return ExtensionesFichero.WEBM;
-			case "XLSX":
-				return ExtensionesFichero.XLSX;
-			case "ZIP":
-				return ExtensionesFichero.ZIP;
-			default:
-				throw new ArxiuException(
-						"No s'ha pogut convertir el valor per l'enumeració ArxiuFormatExtensio (" +
-						"valor=" + formatExtensio + ")");
-			}
-	}*/
-	
-	/*private static TiposFirma toTipoFirma(String tipoFirma) throws ArxiuException {
-		if(tipoFirma == null) return null;
-		switch (tipoFirma) {
-			case "TF01":
-				return TiposFirma.CSV;
-			case "TF02":
-				return TiposFirma.XADES_INTERNALLY;
-			case "TF03":
-				return TiposFirma.XADES_ENVELOPED;
-			case "TF04":
-				return TiposFirma.CADES_DETACHED;
-			case "TF05":
-				return TiposFirma.CADES_ATTACHED;
-			case "TF06":
-				return TiposFirma.PADES;
-			default:
-				throw new ArxiuException(
-						"No s'ha pogut convertir el valor per l'enumeració TipoFirma (" + "valor=" + tipoFirma + ")");
-		}
-	}
-	
-	private static PerfilesFirma toPerfilFirma(String perfilFirma) throws ArxiuException {
-		if(perfilFirma == null) return null;
-		switch (perfilFirma) {
-			case "EPES":
-				return PerfilesFirma.EPES;
-			case "LTV":
-				return PerfilesFirma.LTV;
-			case "T":
-				return PerfilesFirma.T;
-			case "C":
-				return PerfilesFirma.C;
-			case "X":
-				return PerfilesFirma.X;
-			case "XL":
-				return PerfilesFirma.XL;
-			case "A":
-				return PerfilesFirma.A;
-			default:
-				throw new ArxiuException(
-						"No s'ha pogut convertir el valor per l'enumeració PerfilesFirma (" + "valor=" + perfilFirma + ")");
-		}
-	}*/
 
 	private static String formatDateIso8601(Date date) {
 		TimeZone tz = TimeZone.getTimeZone("UTC");

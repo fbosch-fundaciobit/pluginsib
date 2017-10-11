@@ -24,7 +24,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Informació per a la creació de l'expedient.
 	 * @return La informació sobre l'expedient creat.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public ContingutArxiu expedientCrear(
 			Expedient expedient) throws ArxiuException;
@@ -36,7 +36,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Informació per a la modificació de l'expedient.
 	 * @return La informació sobre l'expedient modificat.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public ContingutArxiu expedientModificar(
 			Expedient expedient) throws ArxiuException;
@@ -47,7 +47,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 * @param identificador
 	 *            Identificador de l'expedient.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public void expedientEsborrar(
 			String identificador) throws ArxiuException;
@@ -58,10 +58,11 @@ public interface IArxiuPlugin extends IPlugin {
 	 * @param identificador
 	 *            Identificador de l'expedient.
 	 * @param versio
-	 *            Versió de l'expedient (opcional).
+	 *            Versió de l'expedient (opcional). Si te el valor null
+	 *            es consulta la darrera versió disponible.
 	 * @return La informació de l'expedient.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public Expedient expedientDetalls(
 			String identificador,
@@ -74,11 +75,13 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Llista de filtres per aplicar a la consulta.
 	 * @param pagina
 	 *            Número de la pàgina de resultats que s'ha de retornar.
+	 *            Si te el valor null es fa la consulta sense paginació.
 	 * @param itemsPerPagina
-	 *            Nombre d'elements per pàgina.
+	 *            Nombre d'elements per pàgina. Si te el valor null es fa
+	 *            la consulta sense paginació.
 	 * @return El resultat de la consulta.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public ConsultaResultat expedientConsulta(
 			List<ConsultaFiltre> filtres,
@@ -92,7 +95,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Identificador de l'expedient.
 	 * @return La llista de versions començant per la més antiga.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public List<ContingutArxiu> expedientVersions(
 			String identificador) throws ArxiuException;
@@ -103,7 +106,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 * @param identificador
 	 *            Identificador de l'expedient.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public void expedientTancar(
 			String identificador) throws ArxiuException;
@@ -114,7 +117,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 * @param identificador
 	 *            Identificador de l'expedient.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public void expedientReobrir(
 			String identificador) throws ArxiuException;
@@ -126,7 +129,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Identificador de l'expedient.
 	 * @return Un document XML amb la informació de l'expedient.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public String expedientExportarEni(
 			String identificador) throws ArxiuException;
@@ -137,10 +140,10 @@ public interface IArxiuPlugin extends IPlugin {
 	 * @param document
 	 *            Informació per a la creació del document.
 	 * @param identificadorPare
-	 *            Identificador del contingut pare del document.
+	 *            Identificador del pare (expedient o carpeta) del document.
 	 * @return La informació sobre el document creat.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public ContingutArxiu documentCrear(
 			Document document, 
@@ -152,10 +155,12 @@ public interface IArxiuPlugin extends IPlugin {
 	 * @param document
 	 *            Informació per a la modificació del document.
 	 * @param marcarDefinitiu
-	 *            Indica si també s'ha de marcar el document com a definitiu.
+	 *            Indica si el document s’ha de marcar com a definitiu durant la
+	 *            modificació. Per a marcar un document com a definitiu aquest ha
+	 *            d’estar firmat.
 	 * @return La informació sobre el document modificat.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public ContingutArxiu documentModificar(
 			Document document,
@@ -167,7 +172,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 * @param identificador
 	 *            Identificador del document.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public void documentEsborrar(
 			String identificador) throws ArxiuException;
@@ -180,10 +185,10 @@ public interface IArxiuPlugin extends IPlugin {
 	 * @param versio
 	 *            Versió del document (opcional).
 	 * @param ambContingut
-	 *            Indica si en la resposta s'ha d'incloure el contingut del document.
+	 *            Indica si s'ha de retornar també el contingut del document.
 	 * @return La informació del document.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public Document documentDetalls(
 			String identificador,
@@ -191,7 +196,7 @@ public interface IArxiuPlugin extends IPlugin {
 			boolean ambContingut) throws ArxiuException;
 
 	/**
-	 * Realitza una consulta d'expedients.
+	 * Realitza una consulta de documents.
 	 * 
 	 * @param filtres
 	 *            Llista de filtres per aplicar a la consulta.
@@ -201,7 +206,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Nombre d'elements per pàgina.
 	 * @return El resultat de la consulta.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public ConsultaResultat documentConsulta(
 			List<ConsultaFiltre> filtres,
@@ -209,42 +214,40 @@ public interface IArxiuPlugin extends IPlugin {
 			Integer itemsPerPagina) throws ArxiuException;
 
 	/**
-	 * Retorna les versions disponibles d'un expedient.
+	 * Retorna les versions disponibles d'un document.
 	 * 
 	 * @param identificador
 	 *            Identificador del document.
 	 * @return La llista de versions començant per la més antiga.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public List<ContingutArxiu> documentVersions(
 			String identificador) throws ArxiuException;
 
 	/**
-	 * Copia un document a una altra carpeta o expedient que tengui
-	 * la mateixa sèrie documental.
+	 * Copia un document a una altra carpeta o expedient.
 	 * 
 	 * @param identificador
 	 *            Identificador del document que es vol copiar.
 	 * @param identificadorDesti
 	 *            Identificador de la carpeta o expedient destí.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public void documentCopiar(
 			String identificador,
 			String identificadorDesti) throws ArxiuException;
 
 	/**
-	 * Mou un document a una altra carpeta o expedient que tengui
-	 * la mateixa sèrie documental.
+	 * Mou un document a una altra carpeta o expedient.
 	 * 
 	 * @param identificador
 	 *            Identificador del document que es vol moure.
 	 * @param identificadorDesti
 	 *            Identificador de la carpeta o expedient destí.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public void documentMoure(
 			String identificador,
@@ -254,10 +257,10 @@ public interface IArxiuPlugin extends IPlugin {
 	 * Exporta el document en format ENI.
 	 * 
 	 * @param identificador
-	 *            Identificador de l'expedient.
+	 *            Identificador del document.
 	 * @return Un document XML amb la informació del document.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public String documentExportarEni(
 			String identificador) throws ArxiuException;
@@ -265,11 +268,14 @@ public interface IArxiuPlugin extends IPlugin {
 	/**
 	 * Genera la versió imprimible del document.
 	 * 
+	 * @param identificador
+	 *            Identificador del document.
 	 * @return La informació de l'arxiu imprimible en format PDF.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
-	public DocumentContingut documentImprimible() throws ArxiuException;
+	public DocumentContingut documentImprimible(
+			String identificador) throws ArxiuException;
 
 	/**
 	 * Crea una nova carpeta.
@@ -280,7 +286,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Identificador del contingut pare de la carpeta.
 	 * @return La informació sobre la carpeta creada.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public ContingutArxiu carpetaCrear(
 			Carpeta carpeta,
@@ -293,7 +299,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Informació per a la modificació de la carpeta.
 	 * @return La informació sobre la carpeta modificada.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public ContingutArxiu carpetaModificar(
 			Carpeta carpeta) throws ArxiuException;
@@ -304,7 +310,7 @@ public interface IArxiuPlugin extends IPlugin {
 	 * @param identificador
 	 *            Identificador de la carpeta.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public void carpetaEsborrar(
 			String identificador) throws ArxiuException;
@@ -316,36 +322,34 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Identificador de la carpeta.
 	 * @return La informació de la carpeta.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public Carpeta carpetaDetalls(
 			String identificador) throws ArxiuException;
 
 	/**
-	 * Copia una carpeta a una altra carpeta o expedient que tengui
-	 * la mateixa sèrie documental.
+	 * Copia una carpeta a una altra carpeta o expedient.
 	 * 
 	 * @param identificador
 	 *            Identificador de la carpeta que es vol copiar.
 	 * @param identificadorDesti
 	 *            Identificador de la carpeta o expedient destí.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public void carpetaCopiar(
 			String identificador,
 			String identificadorDesti) throws ArxiuException;
 
 	/**
-	 * Mou una carpeta a una altra carpeta o expedient que tengui
-	 * la mateixa sèrie documental.
+	 * Mou una carpeta a una altra carpeta o expedient.
 	 * 
 	 * @param identificador
 	 *            Identificador de la carpeta que es vol moure.
 	 * @param identificadorDesti
 	 *            Identificador de la carpeta o expedient destí.
 	 * @throws ArxiuException
-	 *             Si s'ha produit algun problema al executar l'acció.
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public void carpetaMoure(
 			String identificador,
