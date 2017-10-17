@@ -9,9 +9,8 @@ import org.apache.lucene.index.IndexWriter;
 
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
+import es.caib.plugins.arxiu.api.ContingutArxiu;
 import es.caib.plugins.arxiu.api.Firma;
-import es.caib.plugins.arxiu.api.InformacioItem;
-import es.caib.plugins.arxiu.api.Tables;
 
 /**
  * Interfície per a accedir a la base de dades Lucene.
@@ -36,7 +35,7 @@ public interface FilesystemArxiuDAO {
 	public ExpedientDao fileGet(
 			String identificador) throws ArxiuException;
 	
-	public List<InformacioItem> fileSearch(
+	public List<ContingutArxiu> fileSearch(
 			List<ConsultaFiltre> filtres) throws ArxiuException;
 	
 	public void fileClose(
@@ -55,7 +54,7 @@ public interface FilesystemArxiuDAO {
 	public void fileAddSon(
 			IndexWriter w,
 			String expedientId,
-			InformacioItem son) throws ArxiuException;
+			ContingutArxiu son) throws ArxiuException;
 	
 	
 	/**
@@ -77,7 +76,7 @@ public interface FilesystemArxiuDAO {
 	public DocumentDao documentGet(
 			String identificador) throws ArxiuException;
 	
-	public List<InformacioItem> documentSearch(
+	public List<ContingutArxiu> documentSearch(
 			List<ConsultaFiltre> filtres) throws ArxiuException;
 	
 	
@@ -104,7 +103,7 @@ public interface FilesystemArxiuDAO {
 	public void folderAddSon(
 			IndexWriter w,
 			String folderId,
-			InformacioItem son) throws ArxiuException;
+			ContingutArxiu son) throws ArxiuException;
 	
 	
 	/**

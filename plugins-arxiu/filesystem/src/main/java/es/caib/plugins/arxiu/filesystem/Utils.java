@@ -14,11 +14,7 @@ import java.util.TimeZone;
 
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
-<<<<<<< HEAD
-import es.caib.plugins.arxiu.api.ConsultaOperacio;
-=======
-import es.caib.plugins.arxiu.api.Fields;
->>>>>>> branch 'pluginsib-1.0' of https://github.com/GovernIB/pluginsib.git
+import es.caib.plugins.arxiu.api.ContingutArxiu;
 
 public class Utils {
 
@@ -58,39 +54,46 @@ public class Utils {
 					"valor=" + date + ")");
 		}
 	}
-	
+
+	public static ContingutArxiu crearContingutArxiu(
+			String identificador, 
+			String nom,
+			String tipus,
+			String versio) {
+		ContingutArxiu informacioItem = new ContingutArxiu(tipus);
+		informacioItem.setIdentificador(identificador);
+		informacioItem.setNom(nom);
+		return informacioItem;
+	}
+
 	private static enum Type {String, List, Date};
-	
 	public static String getQuery(List<ConsultaFiltre> filtres) throws ArxiuException {
-		
 		String query = "";
-		
-		for(int i = 0; i < filtres.size(); i++) {
+		for (int i = 0; i < filtres.size(); i++) {
 			ConsultaFiltre filtre = filtres.get(i);
-			
-			Type type = metadataClass(filtre.getMetadataClau());
+			Type type = metadataClass(filtre.getMetadada());
 			switch(type) {
 				case String:
 					switch(filtre.getOperacio()) {
 						case IGUAL:
-							query = query + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							query = query + filtre.getMetadada() + ":\"" + filtre.getValorOperacio1() + "\"";
 							break;
 						case CONTE:
-							query = query + filtre.getMetadataClau() + ":*" + filtre.getValorOperacio1() + "*";
+							query = query + filtre.getMetadada() + ":*" + filtre.getValorOperacio1() + "*";
 							break;
 						case MAJOR:
-							query = query + filtre.getMetadataClau() + ":[" + filtre.getValorOperacio1() + " TO *]" +
-									" -" + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							query = query + filtre.getMetadada() + ":[" + filtre.getValorOperacio1() + " TO *]" +
+									" -" + filtre.getMetadada() + ":\"" + filtre.getValorOperacio1() + "\"";
 							break;
 						case MENOR:
-							query = query + filtre.getMetadataClau() + ":[* TO " + filtre.getValorOperacio1() + "]" +
-									" -" + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							query = query + filtre.getMetadada() + ":[* TO " + filtre.getValorOperacio1() + "]" +
+									" -" + filtre.getMetadada() + ":\"" + filtre.getValorOperacio1() + "\"";
 							break;
 						case ENTRE:
-							query = query + filtre.getMetadataClau() + ":[" + filtre.getValorOperacio1() + " TO " + filtre.getValorOperacio2() + "]";
+							query = query + filtre.getMetadada() + ":[" + filtre.getValorOperacio1() + " TO " + filtre.getValorOperacio2() + "]";
 							break;
 						default:
-							throw new ArxiuException("No s'ha definit un operador per la metadada " + filtre.getMetadataClau());
+							throw new ArxiuException("No s'ha definit un operador per la metadada " + filtre.getMetadada());
 					}
 					break;
 				case List:
@@ -98,7 +101,7 @@ public class Utils {
 						case IGUAL:
 							throw new ArxiuException("L'operador " + filtre.getOperacio() + " no es aplicable al un tipus de dades " + type);
 						case CONTE:
-							query = query + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							query = query + filtre.getMetadada() + ":\"" + filtre.getValorOperacio1() + "\"";
 							break;
 						case MAJOR:
 							throw new ArxiuException("L'operador " + filtre.getOperacio() + " no es aplicable al un tipus de dades " + type);
@@ -107,62 +110,75 @@ public class Utils {
 						case ENTRE:
 							throw new ArxiuException("L'operador " + filtre.getOperacio() + " no es aplicable al un tipus de dades " + type);
 						default:
-							throw new ArxiuException("No s'ha definit un operador per la metadada " + filtre.getMetadataClau());
+							throw new ArxiuException("No s'ha definit un operador per la metadada " + filtre.getMetadada());
 					}
 					break;
 				case Date:
 					switch(filtre.getOperacio()) {
 						case IGUAL:
-							query = query + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							query = query + filtre.getMetadada() + ":\"" + filtre.getValorOperacio1() + "\"";
 							break;
 						case CONTE:
 							throw new ArxiuException("L'operador " + filtre.getOperacio() + " no es aplicable al un tipus de dades " + type);
 						case MAJOR:
-							query = query + filtre.getMetadataClau() + ":[" + filtre.getValorOperacio1() + " TO *]" +
-									" -" + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							query = query + filtre.getMetadada() + ":[" + filtre.getValorOperacio1() + " TO *]" +
+									" -" + filtre.getMetadada() + ":\"" + filtre.getValorOperacio1() + "\"";
 							break;
 						case MENOR:
-							query = query + filtre.getMetadataClau() + ":[* TO " + filtre.getValorOperacio1() + "]" +
-									" -" + filtre.getMetadataClau() + ":\"" + filtre.getValorOperacio1() + "\"";
+							query = query + filtre.getMetadada() + ":[* TO " + filtre.getValorOperacio1() + "]" +
+									" -" + filtre.getMetadada() + ":\"" + filtre.getValorOperacio1() + "\"";
 							break;
 						case ENTRE:
-							query = query + filtre.getMetadataClau() + ":[" + filtre.getValorOperacio1() + " TO " + filtre.getValorOperacio2() + "]";
+							query = query + filtre.getMetadada() + ":[" + filtre.getValorOperacio1() + " TO " + filtre.getValorOperacio2() + "]";
 							break;
 						default:
-							throw new ArxiuException("No s'ha definit un operador per la metadada " + filtre.getMetadataClau());
+							throw new ArxiuException("No s'ha definit un operador per la metadada " + filtre.getMetadada());
 					}
 					break;
 				default:
-					throw new ArxiuException("La metadada " + filtre.getMetadataClau() + " no esta definida");
+					throw new ArxiuException("La metadada " + filtre.getMetadada() + " no esta definida");
 			}
 			if(i < filtres.size()-1) query = query + " AND ";
 		}
-		
 		return query;
 	}
-	
-	private static Type metadataClass(String metadata) throws ArxiuException {
-		
-		switch(metadata) {
-			case Fields.EX_METADADESID: return Type.String;
-			case Fields.EX_VERSIONTI: return Type.String;
-			case Fields.EX_ORIGEN: return Type.String;
-			case Fields.EX_ORGAN: return Type.List;
-			case Fields.EX_DATA_OBERTURA: return Type.Date;
-			case Fields.EX_CLASSIFICACIO: return Type.String;
-			case Fields.EX_ESTAT: return Type.String;
-			case Fields.EX_INTERESSAT: return Type.List;
-			case Fields.EX_SERIE_DOCUMENTAL: return Type.String;
-			case Fields.DOC_METADADESID: return Type.String;
-			case Fields.DOC_VERSIONTI: return Type.String;
-			case Fields.DOC_ORGAN: return Type.List;
-			case Fields.DOC_DATA: return Type.Date;
-			case Fields.DOC_ORIGEN: return Type.String;
-			case Fields.DOC_ESTAT_ELABORACIO: return Type.String;
-			case Fields.DOC_SERIE_DOCUMENTAL: return Type.String;
-			default: return null;
+
+	private static Type metadataClass(String metadada) throws ArxiuException {
+		if (Fields.EX_METADADESID.equals(metadada)) {
+			return Type.String;
+		} else if (Fields.EX_VERSIONTI.equals(metadada)) {
+			return Type.String;
+		} else if (Fields.EX_ORIGEN.equals(metadada)) {
+			return Type.String;
+		} else if (Fields.EX_ORGAN.equals(metadada)) {
+			return Type.List;
+		} else if (Fields.EX_DATA_OBERTURA.equals(metadada)) {
+			return Type.Date;
+		} else if (Fields.EX_CLASSIFICACIO.equals(metadada)) {
+			return Type.String;
+		} else if (Fields.EX_ESTAT.equals(metadada)) {
+			return Type.String;
+		} else if (Fields.EX_INTERESSAT.equals(metadada)) {
+			return Type.List;
+		} else if (Fields.EX_SERIE_DOCUMENTAL.equals(metadada)) {
+			return Type.String;
+		} else if (Fields.DOC_METADADESID.equals(metadada)) {
+			return Type.String;
+		} else if (Fields.DOC_VERSIONTI.equals(metadada)) {
+			return Type.String;
+		} else if (Fields.DOC_ORGAN.equals(metadada)) {
+			return Type.List;
+		} else if (Fields.DOC_DATA.equals(metadada)) {
+			return Type.Date;
+		} else if (Fields.DOC_ORIGEN.equals(metadada)) {
+			return Type.String;
+		} else if (Fields.DOC_ESTAT_ELABORACIO.equals(metadada)) {
+			return Type.String;
+		} else if (Fields.DOC_SERIE_DOCUMENTAL.equals(metadada)) {
+			return Type.String;
+		} else {
+			return null;
 		}
 	}
-	
 
 }

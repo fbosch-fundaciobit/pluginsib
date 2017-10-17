@@ -494,7 +494,7 @@ public class ArxiuConversioHelper {
 			for (Firma firma: document.getFirmes()) {
 				if (!ArxiuConstants.FIRMA_TIPUS_CSV.equals(firma.getTipus())) {
 					Content contenidofirma = new Content();
-			        contenidofirma.setBinaryType(TiposContenidosBinarios.SIGNATURE);
+			        contenidofirma.setBinaryType(TiposContenidosBinarios.CONTENT);
 			        if (firma.getContingut() != null) {
 				        contenidofirma.setContent(
 								new String(Base64.encode(firma.getContingut())));
@@ -760,6 +760,9 @@ public class ArxiuConversioHelper {
 	}
 
 	private static String formatDateIso8601(Date date) {
+		if (date == null) {
+			return null;
+		}
 		TimeZone tz = TimeZone.getTimeZone("UTC");
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		df.setTimeZone(tz);
@@ -767,6 +770,9 @@ public class ArxiuConversioHelper {
 	}
 
 	private static Date parseDateIso8601(String date) throws ArxiuException {
+		if (date == null) {
+			return null;
+		}
 		TimeZone tz = TimeZone.getTimeZone("UTC");
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 		df.setTimeZone(tz);

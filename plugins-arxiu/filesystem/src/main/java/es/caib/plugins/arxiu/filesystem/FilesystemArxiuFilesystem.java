@@ -87,38 +87,36 @@ public class FilesystemArxiuFilesystem {
 					"Error copiant la carpeta (origen=" + pathOrigen + " ,destí=" + pathDesti + ")");
 		}
 	}
-	
-	
+
+
 
 	public void crearDocument(
 			String pathDocument, 
-			byte[] contingut) throws ArxiuException {
-		
+			byte[] contingut) throws IOException {
 		String path = base + pathDocument;
 		File theDoc = new File(path);
-		
 		if (theDoc.exists() && !theDoc.isDirectory())
 			throw new ArxiuException(
 					"El document de la ruta '" + path + "' ja existeix a filesystem.");
-
+		FileOutputStream fos = null;
 		try {
-			new FileOutputStream(path).write(contingut);
-        } catch (IOException e) {
-        	throw new ArxiuException(
-					"S'ha produit un error en el proces de creació del document '" + path + "'", e);
+			fos = new FileOutputStream(path);
+			fos.write(contingut);
+        } finally {
+        	if (fos != null) {
+        		fos.close();
+        	}
         }
 	}
-	
+
 	public void modificarDocument(
 			String path,
-			byte[] contingutNew) throws ArxiuException {
-		
+			byte[] contingutNew) throws IOException {
 		File document = new File(base + path);
 		document.delete();
-		
 		crearDocument(path, contingutNew);
 	}
-	
+
 	public void esborrarDocument(
 			String path) throws ArxiuException {
 		

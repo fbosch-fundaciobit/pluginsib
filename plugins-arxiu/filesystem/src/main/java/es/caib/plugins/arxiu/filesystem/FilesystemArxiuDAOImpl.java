@@ -27,13 +27,11 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 
+import es.caib.plugins.arxiu.api.ArxiuConstants;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
-import es.caib.plugins.arxiu.api.ContingutTipus;
-import es.caib.plugins.arxiu.api.Fields;
+import es.caib.plugins.arxiu.api.ContingutArxiu;
 import es.caib.plugins.arxiu.api.Firma;
-import es.caib.plugins.arxiu.api.InformacioItem;
-import es.caib.plugins.arxiu.api.Tables;
 
 public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	
@@ -46,7 +44,6 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	
 	public FilesystemArxiuDAOImpl(
 			String basePath) throws ArxiuException {
-		
 		try {
 			index = FSDirectory.open(Paths.get(basePath + "/" + FILESYSTEM_NAME));
 			analyzer = new StandardAnalyzer(new CharArraySet(Collections.emptySet(), true));
@@ -103,7 +100,6 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 			org.apache.lucene.document.Document d,
 			String key,
 			String value){
-		
 		d.add(new TextField(key, value, Field.Store.YES));
 	}
 	
@@ -140,7 +136,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 		try {
 			String managerVersion = null;
 			String version = null;
-			List<InformacioItem> informacioItems = null;
+			List<ContingutArxiu> informacioItems = null;
 			
 	        org.apache.lucene.document.Document d = new org.apache.lucene.document.Document();
 	        
@@ -156,7 +152,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
         	addField(d, Fields.EX_VERSIO, version);
 	        
 	        informacioItems = (expedient.getContinguts() == null) ?
-	        		new ArrayList<InformacioItem>() : expedient.getContinguts();
+	        		new ArrayList<ContingutArxiu>() : expedient.getContinguts();
 	        addObject(d, Fields.EX_CONTINGUTS, informacioItems);
 	        
 	        addIndexField(d, Fields.TABLE, Tables.TABLE_EXPEDIENT.name());
@@ -256,7 +252,8 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	        
 	        org.apache.lucene.document.Document d = searcher.doc(hits[0].doc);
 	        reader.close();
-	        List<InformacioItem> items = (List<InformacioItem>) Utils.deserialize(
+	        @SuppressWarnings("unchecked")
+			List<ContingutArxiu> items = (List<ContingutArxiu>) Utils.deserialize(
 					d.getBinaryValue(Fields.EX_CONTINGUTS).bytes);
 			return new ExpedientDao(
 					d.get(Fields.ID),
@@ -280,7 +277,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	}
 
 	@Override
-	public List<InformacioItem> fileSearch(
+	public List<ContingutArxiu> fileSearch(
 			List<ConsultaFiltre> filtres) throws ArxiuException {
 	
 		try{
@@ -301,20 +298,19 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	        if(hits.length == Integer.MAX_VALUE) 
 	        	throw new ArxiuException("El número de resultat de la consulta de espedients supera el màxim permès");
 	        
-	        List<InformacioItem> informacioItems = new ArrayList<InformacioItem>();
+	        List<ContingutArxiu> continguts = new ArrayList<ContingutArxiu>();
 	        for (ScoreDoc hit : hits) {
 	        	org.apache.lucene.document.Document doc = searcher.doc(hit.doc);
 		    	ExpedientDao expedient = fileGet(doc.get(Fields.ID));
-        		informacioItems.add(new InformacioItem(
+		    	continguts.add(Utils.crearContingutArxiu(
         				expedient.getIdentificador(),
         				expedient.getNom(),
-        				ContingutTipus.EXPEDIENT,
+        				ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT,
         				expedient.getVersio()));
     		}
 	        
 	        reader.close();
-	        
-	        return informacioItems;
+	        return continguts;
 		} catch (Exception e) {
 			throw new ArxiuException("Error intentant obtenir la llista d'expedient", e);
 		}
@@ -416,7 +412,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 			String sonId) throws ArxiuException {
 		
 		ExpedientDao expedient = fileGet(expedientId);
-		for(InformacioItem informacioItem : expedient.getContinguts()) {
+		for(ContingutArxiu informacioItem : expedient.getContinguts()) {
 			if(informacioItem.getIdentificador().equals(sonId)) {
 				expedient.getContinguts().remove(informacioItem);
 				break;
@@ -429,7 +425,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	public void fileAddSon(
 			IndexWriter w,
 			String expedientId,
-			InformacioItem son) throws ArxiuException {
+			ContingutArxiu son) throws ArxiuException {
 		
 		ExpedientDao expedient = fileGet(expedientId);
 		expedient.getContinguts().add(son);
@@ -662,7 +658,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	}
 
 	@Override
-	public List<InformacioItem> documentSearch(
+	public List<ContingutArxiu> documentSearch(
 			List<ConsultaFiltre> filtres) throws ArxiuException {
 		
 		try{
@@ -682,14 +678,14 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	        if(hits.length == Integer.MAX_VALUE) 
 	        	throw new ArxiuException("El número de resultat de la consulta de documents supera el màxim permès");
 	        
-	        List<InformacioItem> informacioItems = new ArrayList<InformacioItem>();
+	        List<ContingutArxiu> informacioItems = new ArrayList<ContingutArxiu>();
 	        for (ScoreDoc hit : hits) {
 	        	org.apache.lucene.document.Document doc = searcher.doc(hit.doc);
 		    	DocumentDao document = documentGet(doc.get(Fields.ID));
-        		informacioItems.add(new InformacioItem(
+        		informacioItems.add(Utils.crearContingutArxiu(
         				document.getIdentificador(),
         				document.getNom(),
-        				ContingutTipus.DOCUMENT,
+        				ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
         				document.getVersio()));
     		}
 	        
@@ -792,12 +788,13 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	        
 	        reader.close();
 	        
-	        List<InformacioItem> items = (List<InformacioItem>) Utils.deserialize(d.getBinaryValue(Fields.CPT_ITEMS).bytes);
+	        @SuppressWarnings("unchecked")
+			List<ContingutArxiu> continguts = (List<ContingutArxiu>)Utils.deserialize(d.getBinaryValue(Fields.CPT_ITEMS).bytes);
 	        return new CarpetaDao(
 	        		d.get(Fields.ID),
 	        		d.get(Fields.NOM),
 	        		d.get(Fields.CPT_PARE),
-	        		items);
+	        		continguts);
 		} catch (Exception e) {
 			throw new ArxiuException("Error intentant obtenir la carpeta amb id=" + identificador, e);
 		}
@@ -809,7 +806,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 			String sonId) throws ArxiuException {
 		
 		CarpetaDao carpeta = folderGet(folderId);
-		for(InformacioItem informacioItem : carpeta.getInformacioItems()) {
+		for(ContingutArxiu informacioItem : carpeta.getInformacioItems()) {
 			if(informacioItem.getIdentificador().equals(sonId)) {
 				carpeta.getInformacioItems().remove(informacioItem);
 				break;
@@ -822,7 +819,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	public void folderAddSon(
 			IndexWriter w,
 			String folderId,
-			InformacioItem son) throws ArxiuException {
+			ContingutArxiu son) throws ArxiuException {
 		
 		CarpetaDao carpeta = folderGet(folderId);
 		carpeta.getInformacioItems().add(son);
@@ -852,7 +849,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	        doc.add(new StoredField(Fields.FIR_CONTINGUT, firma.getContingut()));
 	        doc.add(new StringField(Fields.FIR_MIME, firma.getTipusMime(), Field.Store.YES));
 	        doc.add(new StringField(Fields.FIR_TIPUS, firma.getTipus(), Field.Store.YES));
-	        doc.add(new StringField(Fields.NOM, firma.getNom(), Field.Store.YES));
+	        doc.add(new StringField(Fields.NOM, firma.getFitxerNom(), Field.Store.YES));
 	        doc.add(new StringField(
 	        		Fields.FIR_CSV_REGULACIO,
 	        		firma.getCsvRegulacio(),
@@ -904,7 +901,6 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	@Override
 	public Firma firmaGet(
 			String identificador) throws ArxiuException {
-		
 		try{
 			BooleanQuery.Builder builderBooleanQuery = new BooleanQuery.Builder();
 			builderBooleanQuery.add(
@@ -913,27 +909,23 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 			builderBooleanQuery.add(
 					new QueryParser(Fields.ID, analyzer).parse(identificador),
 					Occur.MUST);
-			
 	        IndexReader reader = DirectoryReader.open(index);
 	        IndexSearcher searcher = new IndexSearcher(reader);
 	        TopDocs docs = searcher.search(builderBooleanQuery.build(), 1);
 	        ScoreDoc[] hits = docs.scoreDocs;
-	        
 	        if(hits.length < 1) 
 	        	throw new ArxiuException("No s'ha trobat cap firma amb id: " + identificador);
 	        if(hits.length > 1) 
 	        	throw new ArxiuException("La firma amb id: " + identificador + " esta repetida");
-	        
 	        org.apache.lucene.document.Document d = searcher.doc(hits[0].doc);
-	        
 	        reader.close();
-	        
-			return new Firma(
-					d.getBinaryValue(Fields.FIR_CONTINGUT).bytes,
-					d.get(Fields.FIR_MIME),
-					d.get(Fields.FIR_TIPUS),
-					d.get(Fields.NOM),
-					d.get(Fields.FIR_CSV_REGULACIO));
+	        Firma firma = new Firma();
+	        firma.setContingut(d.getBinaryValue(Fields.FIR_CONTINGUT).bytes);
+	        firma.setTipus(Fields.FIR_TIPUS);
+	        firma.setTipusMime(Fields.FIR_MIME);
+	        firma.setFitxerNom(Fields.NOM);
+	        firma.setCsvRegulacio(Fields.FIR_CSV_REGULACIO);
+	        return firma;
 		} catch (Exception e) {
 			throw new ArxiuException("Error intentant obtenir la firma id=" + identificador, e);
 		}

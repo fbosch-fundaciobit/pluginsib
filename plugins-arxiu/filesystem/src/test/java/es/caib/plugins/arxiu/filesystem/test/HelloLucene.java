@@ -6,14 +6,8 @@ import java.util.Date;
 
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.FieldType;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -87,7 +81,7 @@ public class HelloLucene {
         reader.close();
     }
 
-    private static void addDoc(IndexWriter w, String title, String isbn) throws IOException {
+    /*private static void addDoc(IndexWriter w, String title, String isbn) throws IOException {
         Document doc = new Document();
         doc.add(new TextField("title", title, Field.Store.YES));
 
@@ -115,7 +109,7 @@ public class HelloLucene {
     	Document doc = new Document();
         doc.add(new TextField("date", String.valueOf(date.getTime()), Field.Store.YES));
         w.addDocument(doc);
-    }
+    }*/
     
     
 }

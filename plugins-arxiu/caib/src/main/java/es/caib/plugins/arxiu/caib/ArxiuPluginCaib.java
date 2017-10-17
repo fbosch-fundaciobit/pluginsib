@@ -497,6 +497,14 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 						resposta.getCreateDraftDocumentResult().getResParam(),
 						VERSIO_INICIAL_CONTINGUT);
 			} else if (ArxiuConstants.DOCUMENT_ESTAT_DEFINITIU.equals(document.getEstat())) {
+				metode = Servicios.GENERATE_CSV;
+				GenerateDocCSVResult respostaCsv = getArxiuClient().generarEnviarPeticio(
+						metode,
+						GenerateDocCSV.class,
+						null,
+						Object.class,
+						GenerateDocCSVResult.class);
+				final String csv = respostaCsv.getGenerateDocCSVResult().getResParam();
 				metode = Servicios.CREATE_DOC;
 				CreateDocumentResult resposta = getArxiuClient().generarEnviarPeticio(
 						metode,
@@ -512,8 +520,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 												null,
 												null,
 												null,
-												null,
-												null,
+												csv,
+												getPropertyDefinicioCsv(),
 												true));
 								param.setRetrieveNode(Boolean.TRUE.toString());
 								return param;
@@ -551,6 +559,10 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			comprovarAbsenciaMetadadaCsv(document.getMetadades());
 			comprovarFirma(document);
 			if (marcarDefinitiu) {
+				if (document.getContingut() != null) {
+					throw new ArxiuValidacioException(
+							"No és possible marcar el document com a definitiu si es vol modificar el seu contingut.");
+				}
 				metode = Servicios.GENERATE_CSV;
 				GenerateDocCSVResult respostaCsv = getArxiuClient().generarEnviarPeticio(
 						metode,

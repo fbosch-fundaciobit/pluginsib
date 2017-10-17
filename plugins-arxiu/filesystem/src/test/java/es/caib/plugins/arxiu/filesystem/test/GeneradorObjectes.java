@@ -1,24 +1,8 @@
 package es.caib.plugins.arxiu.filesystem.test;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.io.FilenameUtils;
-
-import es.caib.plugins.arxiu.api.ArxiuException;
-import es.caib.plugins.arxiu.api.DocumentContingut;
-import es.caib.plugins.arxiu.api.DocumentMetadades;
-import es.caib.plugins.arxiu.api.ExpedientMetadades;
-import es.caib.plugins.arxiu.api.Firma;
-
 public class GeneradorObjectes {
 	
-	public static ExpedientMetadades getExpedientMetadades(
+	/*public static ExpedientMetadades getExpedientMetadades(
 			int i,
 			boolean modificat) {
 		
@@ -113,6 +97,6 @@ public class GeneradorObjectes {
 		} catch (IOException e) {
 			throw new ArxiuException("Error llegint el contingut un document de signatura.");
 		}
-	}
+	}*/
 	
 }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
-import es.caib.plugins.arxiu.api.InformacioItem;
+import es.caib.plugins.arxiu.api.ContingutArxiu;
 
 /**
  * 
@@ -30,29 +30,27 @@ public class ExpedientDao {
 	private String estat;
 	private List<String> interessats;
 	private String serieDocumental;	
-	
-	private List<InformacioItem> continguts;
-	
-	
+
+	private List<ContingutArxiu> continguts;
+
 	public Expedient getExpedient() {
-		
-		return new Expedient(
-				identificador,
-				nom,
-				new ExpedientMetadades(
-						idMetadades,
-						versioNti,
-						origen,
-						organs,
-						dataObertura,
-						classificacio,
-						estat,
-						interessats,
-						serieDocumental,
-						null),
-				continguts);
+		Expedient expedient = new Expedient();
+		expedient.setIdentificador(identificador);
+		expedient.setNom(nom);
+		ExpedientMetadades metadades = new ExpedientMetadades();
+		metadades.setIdentificador(idMetadades);
+		metadades.setVersioNti(versioNti);
+		metadades.setOrigen(origen);
+		metadades.setOrgans(organs);
+		metadades.setDataObertura(dataObertura);
+		metadades.setClassificacio(classificacio);
+		metadades.setEstat(estat);
+		metadades.setInteressats(interessats);
+		metadades.setSerieDocumental(serieDocumental);
+		expedient.setContinguts(continguts);
+		return expedient;
 	}
-	
+
 	public ExpedientDao(
 			String identificador,
 			String nom,
@@ -68,10 +66,8 @@ public class ExpedientDao {
 			String estat,
 			List<String> interessats,
 			String serieDocumental,
-			List<InformacioItem> continguts) {
-		
+			List<ContingutArxiu> continguts) {
 		super();
-		
 		this.identificador = identificador;
 		this.nom = nom;
 		this.versio = versio;
@@ -88,7 +84,6 @@ public class ExpedientDao {
 		this.serieDocumental = serieDocumental;
 		this.continguts = continguts;
 	}
-
 
 	public String getIdentificador() {
 		return identificador;
@@ -188,10 +183,10 @@ public class ExpedientDao {
 		this.serieDocumental = serieDocumental;
 	}
 	
-	public List<InformacioItem> getContinguts() {
+	public List<ContingutArxiu> getContinguts() {
 		return continguts;
 	}
-	public void setContinguts(List<InformacioItem> continguts) {
+	public void setContinguts(List<ContingutArxiu> continguts) {
 		this.continguts = continguts;
 	}
 	

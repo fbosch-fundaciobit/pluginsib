@@ -3,31 +3,28 @@ package es.caib.plugins.arxiu.filesystem;
 import java.util.List;
 
 import es.caib.plugins.arxiu.api.Carpeta;
-import es.caib.plugins.arxiu.api.InformacioItem;
+import es.caib.plugins.arxiu.api.ContingutArxiu;
 
 public class CarpetaDao {
 	
 	private String identificador;
 	private String nom;
-	
 	private String pare;
-	
-	private List<InformacioItem> informacioItems;
-	
-	
+	private List<ContingutArxiu> informacioItems;
+
 	public Carpeta getCarpeta() {
-		
-		return new Carpeta(
-				identificador,
-				nom,
-				informacioItems);
+		Carpeta carpeta = new Carpeta();
+		carpeta.setIdentificador(identificador);
+		carpeta.setNom(nom);
+		carpeta.setContinguts(informacioItems);
+		return carpeta;
 	}
 	
 	public CarpetaDao(
 			String identificador,
 			String nom,
 			String pare,
-			List<InformacioItem> informacioItems) {
+			List<ContingutArxiu> informacioItems) {
 		
 		super();
 		
@@ -59,10 +56,10 @@ public class CarpetaDao {
 		this.pare = pare;
 	}
 	
-	public List<InformacioItem> getInformacioItems() {
+	public List<ContingutArxiu> getInformacioItems() {
 		return informacioItems;
 	}
-	public void setInformacioItems(List<InformacioItem> informacioItems) {
+	public void setInformacioItems(List<ContingutArxiu> informacioItems) {
 		this.informacioItems = informacioItems;
 	}
 	
