@@ -12,19 +12,19 @@ import java.util.List;
  */
 public class Document extends ContingutArxiu {
 
-	private String estat;
+	private DocumentEstat estat;
 	private DocumentMetadades metadades;
 	private List<Firma> firmes;
 	private DocumentContingut contingut;
 
 	public Document() {
-		super(ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT);
+		super(ContingutTipus.DOCUMENT);
 	}
 
-	public String getEstat() {
+	public DocumentEstat getEstat() {
 		return estat;
 	}
-	public void setEstat(String estat) {
+	public void setEstat(DocumentEstat estat) {
 		this.estat = estat;
 	}
 	public DocumentMetadades getMetadades() {

@@ -16,13 +16,13 @@ public class DocumentMetadades {
 
 	private String identificador;
 	private String versioNti;
-	private String origen;
+	private ContingutOrigen origen;
 	private List<String> organs;
 	private Date dataCaptura;
-	private String estatElaboracio;
-	private String tipusDocumental;
-	private String format;
-	private String extensio;
+	private DocumentEstatElaboracio estatElaboracio;
+	private DocumentTipus tipusDocumental;
+	private DocumentFormat format;
+	private DocumentExtensio extensio;
 	private String serieDocumental;
 	private String identificadorOrigen;
 	private Map<String, Object> metadadesAddicionals;
@@ -39,10 +39,10 @@ public class DocumentMetadades {
 	public void setVersioNti(String versioNti) {
 		this.versioNti = versioNti;
 	}
-	public String getOrigen() {
+	public ContingutOrigen getOrigen() {
 		return origen;
 	}
-	public void setOrigen(String origen) {
+	public void setOrigen(ContingutOrigen origen) {
 		this.origen = origen;
 	}
 	public List<String> getOrgans() {
@@ -57,28 +57,28 @@ public class DocumentMetadades {
 	public void setDataCaptura(Date dataCaptura) {
 		this.dataCaptura = dataCaptura;
 	}
-	public String getEstatElaboracio() {
+	public DocumentEstatElaboracio getEstatElaboracio() {
 		return estatElaboracio;
 	}
-	public void setEstatElaboracio(String estatElaboracio) {
+	public void setEstatElaboracio(DocumentEstatElaboracio estatElaboracio) {
 		this.estatElaboracio = estatElaboracio;
 	}
-	public String getTipusDocumental() {
+	public DocumentTipus getTipusDocumental() {
 		return tipusDocumental;
 	}
-	public void setTipusDocumental(String tipusDocumental) {
+	public void setTipusDocumental(DocumentTipus tipusDocumental) {
 		this.tipusDocumental = tipusDocumental;
 	}
-	public String getFormat() {
+	public DocumentFormat getFormat() {
 		return format;
 	}
-	public void setFormat(String format) {
+	public void setFormat(DocumentFormat format) {
 		this.format = format;
 	}
-	public String getExtensio() {
+	public DocumentExtensio getExtensio() {
 		return extensio;
 	}
-	public void setExtensio(String extensio) {
+	public void setExtensio(DocumentExtensio extensio) {
 		this.extensio = extensio;
 	}
 	public String getSerieDocumental() {

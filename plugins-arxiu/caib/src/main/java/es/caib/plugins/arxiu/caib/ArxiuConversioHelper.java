@@ -31,135 +31,96 @@ import es.caib.arxiudigital.apirest.constantes.OrigenesContenido;
 import es.caib.arxiudigital.apirest.constantes.TiposContenidosBinarios;
 import es.caib.arxiudigital.apirest.constantes.TiposDocumentosENI;
 import es.caib.arxiudigital.apirest.constantes.TiposObjetoSGD;
-import es.caib.plugins.arxiu.api.ArxiuConstants;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.Carpeta;
 import es.caib.plugins.arxiu.api.ContingutArxiu;
+import es.caib.plugins.arxiu.api.ContingutOrigen;
+import es.caib.plugins.arxiu.api.ContingutTipus;
 import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.DocumentContingut;
+import es.caib.plugins.arxiu.api.DocumentEstat;
+import es.caib.plugins.arxiu.api.DocumentEstatElaboracio;
+import es.caib.plugins.arxiu.api.DocumentExtensio;
+import es.caib.plugins.arxiu.api.DocumentFormat;
 import es.caib.plugins.arxiu.api.DocumentMetadades;
+import es.caib.plugins.arxiu.api.DocumentTipus;
 import es.caib.plugins.arxiu.api.Expedient;
+import es.caib.plugins.arxiu.api.ExpedientEstat;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
 import es.caib.plugins.arxiu.api.Firma;
+import es.caib.plugins.arxiu.api.FirmaPerfil;
+import es.caib.plugins.arxiu.api.FirmaTipus;
 
 /**
- * Mètodes d'ajuda per a la conversió de tipus entre l'API REST de
- * l'arxiu i el plugin.
+ * Mètodes d'ajuda per a la conversió de tipus entre l'API REST de l'arxiu i el
+ * plugin.
  * 
  * @author Limit Tecnologies <limit@limit.es>
  */
 public class ArxiuConversioHelper {
 
-	public static FileNode expedientToFileNode(
-			Expedient expedient,
-			List<Metadata> metadadesPrevies,
-			List<Aspectos> aspectesPrevis,
-			String aplicacioCodi,
-			boolean creacio) throws ArxiuException {
+	public static FileNode expedientToFileNode(Expedient expedient, List<Metadata> metadadesPrevies,
+			List<Aspectos> aspectesPrevis, String aplicacioCodi, boolean creacio) throws ArxiuException {
 		FileNode node = new FileNode();
 		node.setType(TiposObjetoSGD.EXPEDIENTE);
 		node.setId(expedient.getIdentificador());
 		node.setName(expedient.getNom());
-		node.setMetadataCollection(
-				toMetadataExpedient(
-						expedient.getMetadades(),
-						aplicacioCodi,
-						metadadesPrevies));
-		node.setAspects(
-				generarAspectes(
-						aspectesPrevis,
-						creacio));
+		node.setMetadataCollection(toMetadataExpedient(expedient.getMetadades(), aplicacioCodi, metadadesPrevies));
+		node.setAspects(generarAspectes(aspectesPrevis, creacio));
 		return node;
 	}
 
-	public static Expedient fileNodeToExpedient(
-			FileNode fileNode,
-			String versio) throws ArxiuException {
+	public static Expedient fileNodeToExpedient(FileNode fileNode, String versio) throws ArxiuException {
 		Expedient expedient = new Expedient();
-		expedient.setIdentificador(
-				fileNode.getId());
-		expedient.setNom(
-				fileNode.getName());
-		expedient.setMetadades(
-				toExpedientMetadades(fileNode.getMetadataCollection()));
-		expedient.setContinguts(
-				summaryInfoNodesToInformacioItems(fileNode.getChildObjects()));
+		expedient.setIdentificador(fileNode.getId());
+		expedient.setNom(fileNode.getName());
+		expedient.setMetadades(toExpedientMetadades(fileNode.getMetadataCollection()));
+		expedient.setContinguts(summaryInfoNodesToInformacioItems(fileNode.getChildObjects()));
 		if (versio != null) {
 			expedient.setVersio(versio);
 		}
 		return expedient;
 	}
 
-	public static List<ContingutArxiu> fileNodesToFileContingutArxiu(
-			List<FileNode> fileNodeList) {
+	public static List<ContingutArxiu> fileNodesToFileContingutArxiu(List<FileNode> fileNodeList) {
 		if (fileNodeList == null) {
 			return null;
 		}
 		List<ContingutArxiu> informacioItemList = new ArrayList<ContingutArxiu>();
 		for (FileNode fileNode: fileNodeList) {
-			informacioItemList.add(
-					crearContingutArxiu(
-							fileNode.getId(),
-							fileNode.getName(),
-							toContingutTipus(fileNode.getType()),
-							null));
+			informacioItemList.add(crearContingutArxiu(fileNode.getId(), fileNode.getName(),
+					toContingutTipus(fileNode.getType()), null));
 		}
 		return informacioItemList;
 	}
 
-	public static DocumentNode documentToDocumentNode(
-			Document document,
-			List<Metadata> metadadesPrevies,
-			List<Aspectos> aspectesPrevis,
-			String aplicacioCodi,
-			String csv,
-			String csvDef,
-			boolean creacio) throws ArxiuException {
+	public static DocumentNode documentToDocumentNode(Document document, List<Metadata> metadadesPrevies,
+			List<Aspectos> aspectesPrevis, String aplicacioCodi, String csv, String csvDef, boolean creacio)
+			throws ArxiuException {
 		DocumentNode node = new DocumentNode();
 		node.setId(document.getIdentificador());
 		node.setName(document.getNom());
 		node.setType(TiposObjetoSGD.DOCUMENTO);
-		node.setBinaryContents(
-				toContents(document));
-		node.setMetadataCollection(
-				toMetadataDocument(
-						document.getMetadades(),
-						document.getFirmes(),
-						aplicacioCodi,
-						metadadesPrevies,
-						csv,
-						csvDef));
-		node.setAspects(
-				generarAspectes(
-						aspectesPrevis,
-						creacio));
+		node.setBinaryContents(toContents(document));
+		node.setMetadataCollection(toMetadataDocument(document.getMetadades(), document.getFirmes(), aplicacioCodi,
+				metadadesPrevies, csv, csvDef));
+		node.setAspects(generarAspectes(aspectesPrevis, creacio));
 		return node;
 	}
 
-	public static Document documentNodeToDocument(
-			DocumentNode documentNode,
-			String versio) throws ArxiuException {
+	public static Document documentNodeToDocument(DocumentNode documentNode, String versio) throws ArxiuException {
 		Document document = new Document();
-		document.setIdentificador(
-				documentNode.getId());
-		document.setNom(
-				documentNode.getName());
-		document.setContingut(
-				toDocumentContingut(
-						documentNode.getBinaryContents()));
-		document.setMetadades(
-				toDocumentMetadades(
-						documentNode.getMetadataCollection()));
-		document.setFirmes(
-				toDocumentFirmes(
-						documentNode.getBinaryContents(),
-						documentNode.getMetadataCollection()));
+		document.setIdentificador(documentNode.getId());
+		document.setNom(documentNode.getName());
+		document.setContingut(toDocumentContingut(documentNode.getBinaryContents()));
+		document.setMetadades(toDocumentMetadades(documentNode.getMetadataCollection()));
+		document.setFirmes(toDocumentFirmes(documentNode.getBinaryContents(), documentNode.getMetadataCollection()));
 		if (documentNode.getAspects() != null) {
 			boolean esborrany = documentNode.getAspects().contains(Aspectos.BORRADOR);
 			if (esborrany) {
-				document.setEstat(ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY);
+				document.setEstat(DocumentEstat.ESBORRANY);
 			} else {
-				document.setEstat(ArxiuConstants.DOCUMENT_ESTAT_DEFINITIU);
+				document.setEstat(DocumentEstat.DEFINITIU);
 			}
 		}
 		if (versio != null) {
@@ -168,23 +129,16 @@ public class ArxiuConversioHelper {
 		return document;
 	}
 
-	public static List<ContingutArxiu> fileNodeToDocumentContingut(
-			List<DocumentNode> documentNodeList) {
+	public static List<ContingutArxiu> fileNodeToDocumentContingut(List<DocumentNode> documentNodeList) {
 		List<ContingutArxiu> informacioItemList = new ArrayList<ContingutArxiu>();
-		for (DocumentNode documentNode : documentNodeList) {
-			informacioItemList.add(
-					crearContingutArxiu(
-							documentNode.getId(),
-							documentNode.getName(),
-							toContingutTipus(documentNode.getType()),
-							null));
+		for (DocumentNode documentNode: documentNodeList) {
+			informacioItemList.add(crearContingutArxiu(documentNode.getId(), documentNode.getName(),
+					toContingutTipus(documentNode.getType()), null));
 		}
 		return informacioItemList;
 	}
 
-	public static FolderNode toFolderNode(
-			String identificador,
-			String nom) {
+	public static FolderNode toFolderNode(String identificador, String nom) {
 		FolderNode node = new FolderNode();
 		node.setId(identificador);
 		node.setName(nom);
@@ -192,77 +146,42 @@ public class ArxiuConversioHelper {
 		return node;
 	}
 
-	public static Carpeta folderNodeToCarpeta(
-			FolderNode folderNode) {
+	public static Carpeta folderNodeToCarpeta(FolderNode folderNode) {
 		Carpeta carpeta = new Carpeta();
-		carpeta.setIdentificador(
-				folderNode.getId());
-		carpeta.setNom(
-				folderNode.getName());
-		carpeta.setContinguts(
-				summaryInfoNodesToInformacioItems(folderNode.getChildObjects()));
+		carpeta.setIdentificador(folderNode.getId());
+		carpeta.setNom(folderNode.getName());
+		carpeta.setContinguts(summaryInfoNodesToInformacioItems(folderNode.getChildObjects()));
 		return carpeta;
 	}
 
-
-
-	private static List<Metadata> toMetadataExpedient(
-			ExpedientMetadades expedientMetadades,
-			String aplicacioCodi,
+	private static List<Metadata> toMetadataExpedient(ExpedientMetadades expedientMetadades, String aplicacioCodi,
 			List<Metadata> metadadesPrevies) throws ArxiuException {
 		List<Metadata> metadades = new ArrayList<Metadata>();
 		if (metadadesPrevies != null) {
 			metadades.addAll(metadadesPrevies);
 		}
-		addMetadata(
-				metadades,
-				MetadatosExpediente.CODIGO_APLICACION_TRAMITE,
-				aplicacioCodi);
+		addMetadata(metadades, MetadatosExpediente.CODIGO_APLICACION_TRAMITE, aplicacioCodi);
 		if (expedientMetadades != null) {
-			addMetadata(
-					metadades,
-					MetadatosExpediente.CODIGO_CLASIFICACION,
-					expedientMetadades.getSerieDocumental());
-			addMetadata(
-					metadades,
-					MetadatosExpediente.IDENTIFICADOR_PROCEDIMIENTO,
+			addMetadata(metadades, MetadatosExpediente.CODIGO_CLASIFICACION, expedientMetadades.getSerieDocumental());
+			addMetadata(metadades, MetadatosExpediente.IDENTIFICADOR_PROCEDIMIENTO,
 					expedientMetadades.getClassificacio());
-			addMetadata(
-					metadades,
-					MetadatosExpediente.ESTADO_EXPEDIENTE,
+			addMetadata(metadades, MetadatosExpediente.ESTADO_EXPEDIENTE,
 					toEstadosExpediente(expedientMetadades.getEstat()));
-			addMetadata(
-					metadades,
-					MetadatosExpediente.ORGANO,
-					expedientMetadades.getOrgans());
-			addMetadata(
-					metadades,
-					MetadatosExpediente.INTERESADOS,
-					expedientMetadades.getInteressats());
-			addMetadata(
-					metadades,
-					MetadatosExpediente.FECHA_INICIO,
+			addMetadata(metadades, MetadatosExpediente.ORGANO, expedientMetadades.getOrgans());
+			addMetadata(metadades, MetadatosExpediente.INTERESADOS, expedientMetadades.getInteressats());
+			addMetadata(metadades, MetadatosExpediente.FECHA_INICIO,
 					formatDateIso8601(expedientMetadades.getDataObertura()));
-			addMetadata(
-					metadades,
-					MetadatosExpediente.ORIGEN,
-					toOrigenesContenido(expedientMetadades.getOrigen()));
+			addMetadata(metadades, MetadatosExpediente.ORIGEN, toOrigenesContenido(expedientMetadades.getOrigen()));
 			if (expedientMetadades.getMetadadesAddicionals() != null) {
-				for (String metadada: expedientMetadades.getMetadadesAddicionals().keySet()) {
-					addMetadata(
-							metadades,
-							metadada,
-							expedientMetadades.getMetadadesAddicionals().get(metadada));
+				for (String metadada : expedientMetadades.getMetadadesAddicionals().keySet()) {
+					addMetadata(metadades, metadada, expedientMetadades.getMetadadesAddicionals().get(metadada));
 				}
 			}
 		}
 		return metadades;
 	}
 
-	private static void addMetadata(
-			List<Metadata> metadades,
-			String qname,
-			Object value) {
+	private static void addMetadata(List<Metadata> metadades, String qname, Object value) {
 		if (value != null) {
 			boolean actualitzat = false;
 			for (Metadata metadata: metadades) {
@@ -280,9 +199,7 @@ public class ArxiuConversioHelper {
 		}
 	}
 
-	private static List<Aspectos> generarAspectes(
-			List<Aspectos> aspectesPrevis,
-			boolean create) {
+	private static List<Aspectos> generarAspectes(List<Aspectos> aspectesPrevis, boolean create) {
 		List<Aspectos> aspectesCreats = null;
 		if (aspectesPrevis != null && !aspectesPrevis.isEmpty()) {
 			aspectesCreats = new ArrayList<Aspectos>();
@@ -297,24 +214,21 @@ public class ArxiuConversioHelper {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static ExpedientMetadades toExpedientMetadades(
-			List<Metadata> metadataList) throws ArxiuException {
+	private static ExpedientMetadades toExpedientMetadades(List<Metadata> metadataList) throws ArxiuException {
 		ExpedientMetadades expedientMetadades = new ExpedientMetadades();
 		for (Metadata metadata: metadataList) {
 			switch (metadata.getQname()) {
 			case MetadatosDocumento.ID_ENI:
-				expedientMetadades.setIdentificador(
-						(String)metadata.getValue());
+				expedientMetadades.setIdentificador((String) metadata.getValue());
 				break;
 			case "eni:v_nti":
-				expedientMetadades.setVersioNti(
-						(String)metadata.getValue());
+				expedientMetadades.setVersioNti((String) metadata.getValue());
 				break;
 			case MetadatosExpediente.ORIGEN:
-				Integer origen = (Integer)metadata.getValue();
+				Integer origen = (Integer) metadata.getValue();
 				if (origen != null) {
 					expedientMetadades.setOrigen(
-							origen.toString());
+							ContingutOrigen.toEnum(origen.toString()));
 				}
 				break;
 			case MetadatosExpediente.ORGANO:
@@ -331,16 +245,17 @@ public class ArxiuConversioHelper {
 				expedientMetadades.setDataObertura(parseDateIso8601((String) metadata.getValue()));
 				break;
 			case MetadatosExpediente.IDENTIFICADOR_PROCEDIMIENTO:
-				expedientMetadades.setClassificacio(
-						(String)metadata.getValue());
+				expedientMetadades.setClassificacio((String) metadata.getValue());
 				break;
 			case MetadatosExpediente.ESTADO_EXPEDIENTE:
 				if (metadata.getValue() instanceof EstadosExpediente) {
 					expedientMetadades.setEstat(
-							((EstadosExpediente)metadata.getValue()).getValue());
+							ExpedientEstat.toEnum(
+									((EstadosExpediente)metadata.getValue()).getValue()));
 				} else if (metadata.getValue() instanceof String) {
 					expedientMetadades.setEstat(
-							(String)metadata.getValue());
+							ExpedientEstat.toEnum(
+									(String) metadata.getValue()));
 				}
 				break;
 			case MetadatosExpediente.INTERESADOS:
@@ -354,47 +269,37 @@ public class ArxiuConversioHelper {
 				}
 				break;
 			case MetadatosExpediente.CODIGO_CLASIFICACION:
-				expedientMetadades.setSerieDocumental(
-						(String)metadata.getValue());
+				expedientMetadades.setSerieDocumental((String) metadata.getValue());
 				break;
 			}
-		}	
-		
+		}
+
 		return expedientMetadades;
 	}
 
-	private static List<ContingutArxiu> summaryInfoNodesToInformacioItems(
-			List<SummaryInfoNode> summaryInfoNodes) {
+	private static List<ContingutArxiu> summaryInfoNodesToInformacioItems(List<SummaryInfoNode> summaryInfoNodes) {
 		if (summaryInfoNodes == null) {
 			return null;
 		}
-		List<ContingutArxiu> informacioItems = new ArrayList<ContingutArxiu>();
-		for (SummaryInfoNode summaryInfoNode : summaryInfoNodes) {
-			informacioItems.add(
+		List<ContingutArxiu> continguts = new ArrayList<ContingutArxiu>();
+		for (SummaryInfoNode summaryInfoNode: summaryInfoNodes) {
+			continguts.add(
 					crearContingutArxiu(
 							summaryInfoNode.getId(),
 							summaryInfoNode.getName(),
 							toContingutTipus(summaryInfoNode.getType()),
 							null));
 		}
-		return informacioItems;
+		return continguts;
 	}
 
-	private static List<Metadata> toMetadataDocument(
-			DocumentMetadades documentMetadades,
-			List<Firma> firmes,
-			String aplicacioCodi,
-			List<Metadata> metadadesPrevies,
-			String csv,
-			String csvDef) throws ArxiuException {
+	private static List<Metadata> toMetadataDocument(DocumentMetadades documentMetadades, List<Firma> firmes,
+			String aplicacioCodi, List<Metadata> metadadesPrevies, String csv, String csvDef) throws ArxiuException {
 		List<Metadata> metadades = new ArrayList<Metadata>();
 		if (metadadesPrevies != null) {
 			metadades.addAll(metadadesPrevies);
 		}
-		addMetadata(
-				metadades,
-				MetadatosExpediente.CODIGO_APLICACION_TRAMITE,
-				aplicacioCodi);
+		addMetadata(metadades, MetadatosExpediente.CODIGO_APLICACION_TRAMITE, aplicacioCodi);
 		if (documentMetadades != null) {
 			addMetadata(
 					metadades,
@@ -429,7 +334,7 @@ public class ArxiuConversioHelper {
 					MetadatosDocumento.CODIGO_CLASIFICACION,
 					documentMetadades.getSerieDocumental());
 			if (documentMetadades.getMetadadesAddicionals() != null) {
-				for (String clau: documentMetadades.getMetadadesAddicionals().keySet()) {
+				for (String clau : documentMetadades.getMetadadesAddicionals().keySet()) {
 					addMetadata(
 							metadades,
 							clau,
@@ -440,51 +345,31 @@ public class ArxiuConversioHelper {
 		if (firmes != null) {
 			boolean tipusFirmaConfigurat = false;
 			for (Firma firma: firmes) {
-				if (ArxiuConstants.FIRMA_TIPUS_CSV.equals(firma.getTipus())) {
+				if (FirmaTipus.CSV.equals(firma.getTipus())) {
 					if (firma.getContingut() != null) {
-						addMetadata(
-								metadades,
-								MetadatosDocumento.CSV,
-								new String(firma.getContingut()));
+						addMetadata(metadades, MetadatosDocumento.CSV, new String(firma.getContingut()));
 					}
-					addMetadata(
-							metadades,
-							MetadatosDocumento.DEF_CSV,
-							firma.getCsvRegulacio());
+					addMetadata(metadades, MetadatosDocumento.DEF_CSV, firma.getCsvRegulacio());
 				} else if (!tipusFirmaConfigurat) {
-					addMetadata(
-							metadades,
-							MetadatosDocumento.TIPO_FIRMA,
-							firma.getTipus());
-					addMetadata(
-							metadades,
-							MetadatosDocumento.PERFIL_FIRMA,
-							firma.getPerfil());
+					addMetadata(metadades, MetadatosDocumento.TIPO_FIRMA, firma.getTipus());
+					addMetadata(metadades, MetadatosDocumento.PERFIL_FIRMA, firma.getPerfil());
 					tipusFirmaConfigurat = true;
 				}
 			}
 		}
-		addMetadata(
-				metadades,
-				MetadatosDocumento.CSV,
-				csv);
-		addMetadata(
-				metadades,
-				MetadatosDocumento.DEF_CSV,
-				csvDef);
+		addMetadata(metadades, MetadatosDocumento.CSV, csv);
+		addMetadata(metadades, MetadatosDocumento.DEF_CSV, csvDef);
 		return metadades;
 	}
 
-	private static List<Content> toContents(
-			Document document) {
+	private static List<Content> toContents(Document document) {
 		List<Content> contents = null;
 		if (document.getContingut() != null) {
 			Content content = new Content();
 			content.setBinaryType(TiposContenidosBinarios.CONTENT);
 			content.setEncoding("UTF-8");
 			content.setMimetype(document.getContingut().getTipusMime());
-			content.setContent(
-					new String(Base64.encode(document.getContingut().getContingut())));
+			content.setContent(new String(Base64.encode(document.getContingut().getContingut())));
 			if (contents == null) {
 				contents = new ArrayList<Content>();
 			}
@@ -492,27 +377,25 @@ public class ArxiuConversioHelper {
 		}
 		if (document.getFirmes() != null) {
 			for (Firma firma: document.getFirmes()) {
-				if (!ArxiuConstants.FIRMA_TIPUS_CSV.equals(firma.getTipus())) {
+				if (!FirmaTipus.CSV.equals(firma.getTipus())) {
 					Content contenidofirma = new Content();
-			        contenidofirma.setBinaryType(TiposContenidosBinarios.CONTENT);
-			        if (firma.getContingut() != null) {
-				        contenidofirma.setContent(
-								new String(Base64.encode(firma.getContingut())));
-			        }
-			        contenidofirma.setEncoding("UTF-8");
-			        contenidofirma.setMimetype(firma.getTipusMime());
-			        if (contents == null) {
+					contenidofirma.setBinaryType(TiposContenidosBinarios.CONTENT);
+					if (firma.getContingut() != null) {
+						contenidofirma.setContent(new String(Base64.encode(firma.getContingut())));
+					}
+					contenidofirma.setEncoding("UTF-8");
+					contenidofirma.setMimetype(firma.getTipusMime());
+					if (contents == null) {
 						contents = new ArrayList<Content>();
 					}
-			        contents.add(contenidofirma);
+					contents.add(contenidofirma);
 				}
-		    }
+			}
 		}
 		return contents;
 	}
 
-	private static DocumentContingut toDocumentContingut(
-			List<Content> contents) {
+	private static DocumentContingut toDocumentContingut(List<Content> contents) {
 		if (contents == null) {
 			return null;
 		}
@@ -540,35 +423,35 @@ public class ArxiuConversioHelper {
 		String firmaCsvRegulacio = null;
 		for (Metadata metadada: metadades) {
 			if (MetadatosDocumento.TIPO_FIRMA.equals(metadada.getQname())) {
-				firmaTipus = (String)metadada.getValue();
+				firmaTipus = (String) metadada.getValue();
 			} else if (MetadatosDocumento.PERFIL_FIRMA.equals(metadada.getQname())) {
-				firmaPerfil = (String)metadada.getValue();
+				firmaPerfil = (String) metadada.getValue();
 			} else if (MetadatosDocumento.CSV.equals(metadada.getQname())) {
-				firmaCsv = (String)metadada.getValue();
+				firmaCsv = (String) metadada.getValue();
 			} else if (MetadatosDocumento.DEF_CSV.equals(metadada.getQname())) {
-				firmaCsvRegulacio = (String)metadada.getValue();
+				firmaCsvRegulacio = (String) metadada.getValue();
 			}
 		}
 		if (firmaCsv != null) {
 			Firma firma = new Firma();
-			firma.setTipus(ArxiuConstants.FIRMA_TIPUS_CSV);
+			firma.setTipus(FirmaTipus.CSV);
 			firma.setContingut(firmaCsv.getBytes());
 			firma.setTipusMime("text/plain");
 			firma.setCsvRegulacio(firmaCsvRegulacio);
 			if (firmes == null) {
-				 firmes = new ArrayList<Firma>();
+				firmes = new ArrayList<Firma>();
 			}
 			firmes.add(firma);
 		}
 		for (Content content: contents) {
 			if (TiposContenidosBinarios.SIGNATURE.equals(content.getBinaryType())) {
 				Firma firma = new Firma();
-				firma.setTipus(firmaTipus);
-				firma.setPerfil(firmaPerfil);
+				firma.setTipus(FirmaTipus.toEnum(firmaTipus));
+				firma.setPerfil(FirmaPerfil.toEnum(firmaPerfil));
 				firma.setContingut(Base64.decode(content.getContent()));
 				firma.setTipusMime(content.getMimetype());
 				if (firmes == null) {
-					 firmes = new ArrayList<Firma>();
+					firmes = new ArrayList<Firma>();
 				}
 				firmes.add(firma);
 			}
@@ -577,52 +460,47 @@ public class ArxiuConversioHelper {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static DocumentMetadades toDocumentMetadades(
-			List<Metadata> metadatas) throws ArxiuException {
+	private static DocumentMetadades toDocumentMetadades(List<Metadata> metadatas) throws ArxiuException {
 		DocumentMetadades metadades = new DocumentMetadades();
-		for (Metadata metadata: metadatas) {
-			switch(metadata.getQname()) {
+		for (Metadata metadata : metadatas) {
+			switch (metadata.getQname()) {
 			case MetadatosDocumento.ID_ENI:
-				metadades.setIdentificador(
-						(String)metadata.getValue());
+				metadades.setIdentificador((String)metadata.getValue());
 				break;
 			case MetadatosDocumento.ORIGEN:
 				metadades.setOrigen(
-						String.valueOf(metadata.getValue()));
+						ContingutOrigen.toEnum(
+								String.valueOf(metadata.getValue())));
 				break;
 			case MetadatosDocumento.FECHA_INICIO:
-				metadades.setDataCaptura(
-						parseDateIso8601((String)metadata.getValue()));
+				metadades.setDataCaptura(parseDateIso8601((String)metadata.getValue()));
 				break;
 			case MetadatosDocumento.ESTADO_ELABORACION:
-				metadades.setEstatElaboracio(
-						(String)metadata.getValue());
+				metadades.setEstatElaboracio(DocumentEstatElaboracio.toEnum((String) metadata.getValue()));
 				break;
 			case MetadatosDocumento.TIPO_DOC_ENI:
 				metadades.setTipusDocumental(
-						(String)metadata.getValue());
+						DocumentTipus.toEnum(
+								(String)metadata.getValue()));
 				break;
 			case MetadatosDocumento.ORGANO:
 				Object preValor = metadata.getValue();
 				if (preValor instanceof List<?>) {
-					metadades.setOrgans(
-							(List<String>)metadata.getValue());
+					metadades.setOrgans((List<String>)metadata.getValue());
 				} else {
-					metadades.setOrgans(
-							Arrays.asList((String)preValor));
+					metadades.setOrgans(Arrays.asList((String)preValor));
 				}
 				break;
 			case MetadatosDocumento.CODIGO_CLASIFICACION:
-				metadades.setSerieDocumental(
-						(String)metadata.getValue());
+				metadades.setSerieDocumental((String)metadata.getValue());
 				break;
 			case MetadatosDocumento.NOMBRE_FORMATO:
 				metadades.setFormat(
-						(String)metadata.getValue());
+						DocumentFormat.toEnum((String)metadata.getValue()));
 				break;
 			case MetadatosDocumento.EXTENSION_FORMATO:
 				metadades.setExtensio(
-						(String)metadata.getValue());
+						DocumentExtensio.toEnum((String)metadata.getValue()));
 				break;
 			case MetadatosDocumento.CSV:
 			case MetadatosDocumento.DEF_CSV:
@@ -634,9 +512,7 @@ public class ArxiuConversioHelper {
 					metadades.setMetadadesAddicionals(metadadesAddicionals);
 				}
 				if (metadata.getValue() != null) {
-					metadadesAddicionals.put(
-							metadata.getQname(),
-							metadata.getValue());
+					metadadesAddicionals.put(metadata.getQname(), metadata.getValue());
 				}
 			}
 		}
@@ -644,118 +520,123 @@ public class ArxiuConversioHelper {
 	}
 
 	private static EstadosExpediente toEstadosExpediente(
-			String estat) throws ArxiuException {
-		if (estat == null) return null;
+			ExpedientEstat estat) throws ArxiuException {
+		if (estat == null)
+			return null;
 		switch (estat) {
-			case "E03":
-				return EstadosExpediente.INDICE_REMISION;
-			case "E01":
-				return EstadosExpediente.ABIERTO;
-			case "E02":
-				return EstadosExpediente.CERRADO;
-			default:
-				throw new ArxiuException(
-						"No s'ha pogut convertir el valor per l'enumeració ArxiuExpedientEstat (" +
-						"valor=" + estat + ")");
+		case OBERT:
+			return EstadosExpediente.ABIERTO;
+		case TANCAT:
+			return EstadosExpediente.CERRADO;
+		case INDEX_REMISSIO:
+			return EstadosExpediente.INDICE_REMISION;
+		default:
+			throw new ArxiuException(
+					"No s'ha pogut convertir el valor de l'enumeració ExpedientEstat (" + "valor=" + estat + ")");
 		}
 	}
 
-	private static String toContingutTipus(
-			TiposObjetoSGD tiposObjetoSGD) {
-		switch(tiposObjetoSGD) {
-			case DIRECTORIO : return ArxiuConstants.CONTINGUT_TIPUS_CARPETA;
-			case EXPEDIENTE : return ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT;
-			case DOCUMENTO : return ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT;
-			case DOCUMENTO_MIGRADO : return ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT;
-			default : return null;
+	private static ContingutTipus toContingutTipus(TiposObjetoSGD tiposObjetoSGD) {
+		switch (tiposObjetoSGD) {
+		case DIRECTORIO:
+			return ContingutTipus.CARPETA;
+		case EXPEDIENTE:
+			return ContingutTipus.EXPEDIENT;
+		case DOCUMENTO:
+			return ContingutTipus.DOCUMENT;
+		case DOCUMENTO_MIGRADO:
+			return ContingutTipus.DOCUMENT;
+		default:
+			return null;
 		}
 	}
 
 	private static OrigenesContenido toOrigenesContenido(
-			String origen) throws ArxiuException {
-		if (origen == null) return null;
+			ContingutOrigen origen) throws ArxiuException {
+		if (origen == null)
+			return null;
 		switch (origen) {
-			case "1":
-				return OrigenesContenido.ADMINISTRACION;
-			case "0":
-				return OrigenesContenido.CIUDADANO;
-			default:
-				throw new ArxiuException(
-						"No s'ha pogut convertir el valor per l'enumeració Origen (" + "valor=" + origen + ")");
+		case CIUTADA:
+			return OrigenesContenido.CIUDADANO;
+		case ADMINISTRACIO:
+			return OrigenesContenido.ADMINISTRACION;
+		default:
+			throw new ArxiuException(
+					"No s'ha pogut convertir el valor per l'enumeració Origen (" + "valor=" + origen + ")");
 		}
 	}
 
-	private static EstadosElaboracion toEstadosElaboracion(
-			String estatElaboracio) throws ArxiuException {
-		if (estatElaboracio == null) return null;
+	private static EstadosElaboracion toEstadosElaboracion(DocumentEstatElaboracio estatElaboracio)
+			throws ArxiuException {
+		if (estatElaboracio == null)
+			return null;
 		switch (estatElaboracio) {
-			case "EE99":
-				return EstadosElaboracion.OTROS;
-			case "EE02":
-				return EstadosElaboracion.COPIA_AUTENTICA_FORMATO;
-			case "EE03":
-				return EstadosElaboracion.COPIA_AUTENTICA_PAPEL;
-			case "EE04":
-				return EstadosElaboracion.COPIA_AUTENTICA_PARCIAL;
-			case "EE01":
-				return EstadosElaboracion.ORIGINAL;
-			default:
-				throw new ArxiuException(
-						"No s'ha pogut convertir el valor per l'enumeració ArxiuEstatElaboracio (" +
-						"valor=" + estatElaboracio + ")");
+		case ORIGINAL:
+			return EstadosElaboracion.ORIGINAL;
+		case COPIA_CF:
+			return EstadosElaboracion.COPIA_AUTENTICA_FORMATO;
+		case COPIA_DP:
+			return EstadosElaboracion.COPIA_AUTENTICA_PAPEL;
+		case COPIA_PR:
+			return EstadosElaboracion.COPIA_AUTENTICA_PARCIAL;
+		case ALTRES:
+			return EstadosElaboracion.OTROS;
+		default:
+			throw new ArxiuException("No s'ha pogut convertir el valor per l'enumeració ArxiuEstatElaboracio ("
+					+ "valor=" + estatElaboracio + ")");
 		}
 	}
 
-	private static TiposDocumentosENI toTiposDocumentosEni(
-			String documentTipus) throws ArxiuException {
-		if (documentTipus == null) return null;
+	private static TiposDocumentosENI toTiposDocumentosEni(DocumentTipus documentTipus) throws ArxiuException {
+		if (documentTipus == null)
+			return null;
 		switch (documentTipus) {
-			case "TD01":
-				return TiposDocumentosENI.RESOLUCION;
-			case "TD02":
-				return TiposDocumentosENI.ACUERDO;
-			case "TD03":
-				return TiposDocumentosENI.CONTRATO;
-			case "TD04":
-				return TiposDocumentosENI.CONVENIO;
-			case "TD05":
-				return TiposDocumentosENI.DECLARACION;
-			case "TD06":
-				return TiposDocumentosENI.COMUNICACION;
-			case "TD07":
-				return TiposDocumentosENI.NOTIFICACION;
-			case "TD08":
-				return TiposDocumentosENI.PUBLICACION;
-			case "TD09":
-				return TiposDocumentosENI.ACUSE_DE_RECIBO;
-			case "TD10":
-				return TiposDocumentosENI.ACTA;
-			case "TD11":
-				return TiposDocumentosENI.CERTIFICADO;
-			case "TD12":
-				return TiposDocumentosENI.DILIGENCIA;
-			case "TD13":
-				return TiposDocumentosENI.INFORME;
-			case "TD14":
-				return TiposDocumentosENI.SOLICITUD;
-			case "TD15":
-				return TiposDocumentosENI.DENUNCIA;
-			case "TD16":
-				return TiposDocumentosENI.ALEGACION;
-			case "TD17":
-				return TiposDocumentosENI.RECURSOS;
-			case "TD18":
-				return TiposDocumentosENI.COMUNICACION_CIUDADANO;
-			case "TD19":
-				return TiposDocumentosENI.FACTURA;
-			case "TD20":
-				return TiposDocumentosENI.OTROS_INCAUTADOS;
-			case "TD99":
-				return TiposDocumentosENI.OTROS;
-			default:
-				throw new ArxiuException(
-						"No s'ha pogut convertir el valor per l'enumeració ArxiuDocumentTipus (" +
-						"valor=" + documentTipus + ")");
+		case RESOLUCIO:
+			return TiposDocumentosENI.RESOLUCION;
+		case ACORD:
+			return TiposDocumentosENI.ACUERDO;
+		case CONTRACTE:
+			return TiposDocumentosENI.CONTRATO;
+		case CONVENI:
+			return TiposDocumentosENI.CONVENIO;
+		case DECLARACIO:
+			return TiposDocumentosENI.DECLARACION;
+		case COMUNICACIO:
+			return TiposDocumentosENI.COMUNICACION;
+		case NOTIFICACIO:
+			return TiposDocumentosENI.NOTIFICACION;
+		case PUBLICACIO:
+			return TiposDocumentosENI.PUBLICACION;
+		case JUSTIFICANT_RECEPCIO:
+			return TiposDocumentosENI.ACUSE_DE_RECIBO;
+		case ACTA:
+			return TiposDocumentosENI.ACTA;
+		case CERTIFICAT:
+			return TiposDocumentosENI.CERTIFICADO;
+		case DILIGENCIA:
+			return TiposDocumentosENI.DILIGENCIA;
+		case INFORME:
+			return TiposDocumentosENI.INFORME;
+		case SOLICITUD:
+			return TiposDocumentosENI.SOLICITUD;
+		case DENUNCIA:
+			return TiposDocumentosENI.DENUNCIA;
+		case ALEGACIO:
+			return TiposDocumentosENI.ALEGACION;
+		case RECURS:
+			return TiposDocumentosENI.RECURSOS;
+		case COMUNICACIO_CIUTADA:
+			return TiposDocumentosENI.COMUNICACION_CIUDADANO;
+		case FACTURA:
+			return TiposDocumentosENI.FACTURA;
+		case ALTRES_INCAUTATS:
+			return TiposDocumentosENI.OTROS_INCAUTADOS;
+		case ALTRES:
+			return TiposDocumentosENI.OTROS;
+		default:
+			throw new ArxiuException(
+					"No s'ha pogut convertir el valor per l'enumeració ArxiuDocumentTipus (" +
+					"valor=" + documentTipus + ")");
 		}
 	}
 
@@ -779,16 +660,14 @@ public class ArxiuConversioHelper {
 		try {
 			return df.parse(date);
 		} catch (ParseException e) {
-			throw new ArxiuException(
-					"No s'ha pogut parsejar el valor per el camp Data (" +
-					"valor=" + date + ")");
+			throw new ArxiuException("No s'ha pogut parsejar el valor per el camp Data (" + "valor=" + date + ")");
 		}
 	}
 
 	public static ContingutArxiu crearContingutArxiu(
-			String identificador, 
+			String identificador,
 			String nom,
-			String tipus,
+			ContingutTipus tipus,
 			String versio) {
 		ContingutArxiu informacioItem = new ContingutArxiu(tipus);
 		informacioItem.setIdentificador(identificador);

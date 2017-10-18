@@ -23,17 +23,26 @@ import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import es.caib.plugins.arxiu.api.ArxiuConstants;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ArxiuNotFoundException;
 import es.caib.plugins.arxiu.api.Carpeta;
 import es.caib.plugins.arxiu.api.ContingutArxiu;
+import es.caib.plugins.arxiu.api.ContingutOrigen;
+import es.caib.plugins.arxiu.api.ContingutTipus;
 import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.DocumentContingut;
+import es.caib.plugins.arxiu.api.DocumentEstat;
+import es.caib.plugins.arxiu.api.DocumentEstatElaboracio;
+import es.caib.plugins.arxiu.api.DocumentExtensio;
+import es.caib.plugins.arxiu.api.DocumentFormat;
 import es.caib.plugins.arxiu.api.DocumentMetadades;
+import es.caib.plugins.arxiu.api.DocumentTipus;
 import es.caib.plugins.arxiu.api.Expedient;
+import es.caib.plugins.arxiu.api.ExpedientEstat;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
 import es.caib.plugins.arxiu.api.Firma;
+import es.caib.plugins.arxiu.api.FirmaPerfil;
+import es.caib.plugins.arxiu.api.FirmaTipus;
 import es.caib.plugins.arxiu.api.IArxiuPlugin;
 import es.caib.plugins.arxiu.caib.ArxiuPluginCaib;
 
@@ -75,11 +84,11 @@ public class ArxiuPluginCaibTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nom);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
-		metadades.setEstat(ArxiuConstants.EXPEDIENT_ESTAT_OBERT);
+		metadades.setEstat(ExpedientEstat.OBERT);
 		metadades.setInteressats(interessatsTest);
 		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		expedientPerCrear.setMetadades(metadades);
@@ -146,26 +155,26 @@ public class ArxiuPluginCaibTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nomExp);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
-		metadades.setEstat(ArxiuConstants.EXPEDIENT_ESTAT_OBERT);
+		metadades.setEstat(ExpedientEstat.OBERT);
 		metadades.setInteressats(interessatsTest);
 		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		expedientPerCrear.setMetadades(metadades);
 		String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
 		final Document documentPerCrear = new Document();
 		documentPerCrear.setNom(nomDoc);
-		documentPerCrear.setEstat(ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY);
+		documentPerCrear.setEstat(DocumentEstat.ESBORRANY);
 		final DocumentMetadades documentMetadades = new DocumentMetadades();
-		documentMetadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
 		documentMetadades.setOrgans(organsTest);
 		documentMetadades.setDataCaptura(new Date());
-		documentMetadades.setEstatElaboracio(ArxiuConstants.DOCUMENT_ESTAT_ELAB_ORIG);
-		documentMetadades.setTipusDocumental(ArxiuConstants.DOCUMENT_TIPUS_OTROS);
-		documentMetadades.setFormat(ArxiuConstants.DOCUMENT_FORMAT_OASIS12);
-		documentMetadades.setExtensio(ArxiuConstants.DOCUMENT_EXTENSIO_ODT);
+		documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+		documentMetadades.setFormat(DocumentFormat.OASIS12);
+		documentMetadades.setExtensio(DocumentExtensio.ODT);
 		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
@@ -281,26 +290,26 @@ public class ArxiuPluginCaibTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nomExp);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
-		metadades.setEstat(ArxiuConstants.EXPEDIENT_ESTAT_OBERT);
+		metadades.setEstat(ExpedientEstat.OBERT);
 		metadades.setInteressats(interessatsTest);
 		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		expedientPerCrear.setMetadades(metadades);
 		String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
 		final Document documentPerCrear = new Document();
 		documentPerCrear.setNom(nomDoc);
-		documentPerCrear.setEstat(ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY);
+		documentPerCrear.setEstat(DocumentEstat.ESBORRANY);
 		final DocumentMetadades documentMetadades = new DocumentMetadades();
-		documentMetadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
 		documentMetadades.setOrgans(organsTest);
 		documentMetadades.setDataCaptura(new Date());
-		documentMetadades.setEstatElaboracio(ArxiuConstants.DOCUMENT_ESTAT_ELAB_ORIG);
-		documentMetadades.setTipusDocumental(ArxiuConstants.DOCUMENT_TIPUS_OTROS);
-		documentMetadades.setFormat(ArxiuConstants.DOCUMENT_FORMAT_OASIS12);
-		documentMetadades.setExtensio(ArxiuConstants.DOCUMENT_EXTENSIO_ODT);
+		documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+		documentMetadades.setFormat(DocumentFormat.OASIS12);
+		documentMetadades.setExtensio(DocumentExtensio.ODT);
 		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
@@ -332,8 +341,8 @@ public class ArxiuPluginCaibTest {
 								"2.- Guardant firma de document i marcant com a definitiu (" +
 								"id=" + documentCreatId + ")... ");
 						Firma firmaPades = new Firma();
-						firmaPades.setTipus(ArxiuConstants.FIRMA_TIPUS_PADES);
-						firmaPades.setPerfil(ArxiuConstants.FIRMA_PERFIL_EPES);
+						firmaPades.setTipus(FirmaTipus.PADES);
+						firmaPades.setPerfil(FirmaPerfil.EPES);
 						firmaPades.setTipusMime("application/pdf");
 						firmaPades.setContingut(
 								IOUtils.toByteArray(
@@ -370,26 +379,26 @@ public class ArxiuPluginCaibTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nomExp);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
-		metadades.setEstat(ArxiuConstants.EXPEDIENT_ESTAT_OBERT);
+		metadades.setEstat(ExpedientEstat.OBERT);
 		metadades.setInteressats(interessatsTest);
 		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		expedientPerCrear.setMetadades(metadades);
 		String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
 		final Document documentPerCrear = new Document();
 		documentPerCrear.setNom(nomDoc);
-		documentPerCrear.setEstat(ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY);
+		documentPerCrear.setEstat(DocumentEstat.ESBORRANY);
 		final DocumentMetadades documentMetadades = new DocumentMetadades();
-		documentMetadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
 		documentMetadades.setOrgans(organsTest);
 		documentMetadades.setDataCaptura(new Date());
-		documentMetadades.setEstatElaboracio(ArxiuConstants.DOCUMENT_ESTAT_ELAB_ORIG);
-		documentMetadades.setTipusDocumental(ArxiuConstants.DOCUMENT_TIPUS_OTROS);
-		documentMetadades.setFormat(ArxiuConstants.DOCUMENT_FORMAT_OASIS12);
-		documentMetadades.setExtensio(ArxiuConstants.DOCUMENT_EXTENSIO_ODT);
+		documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+		documentMetadades.setFormat(DocumentFormat.OASIS12);
+		documentMetadades.setExtensio(DocumentExtensio.ODT);
 		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
@@ -418,8 +427,8 @@ public class ArxiuPluginCaibTest {
 						documentContingutPdf.setTipusMime("application/pdf");
 						documentPerModificarPdf.setContingut(documentContingutPdf);
 						DocumentMetadades documentMetadadesPdf = new DocumentMetadades();
-						documentMetadadesPdf.setFormat(ArxiuConstants.DOCUMENT_FORMAT_PDF);
-						documentMetadadesPdf.setExtensio(ArxiuConstants.DOCUMENT_EXTENSIO_PDF);
+						documentMetadadesPdf.setFormat(DocumentFormat.PDF);
+						documentMetadadesPdf.setExtensio(DocumentExtensio.PDF);
 						documentPerModificarPdf.setMetadades(documentMetadadesPdf);
 						ContingutArxiu documentModificatPdf = arxiuPlugin.documentModificar(
 								documentPerModificarPdf,
@@ -431,8 +440,8 @@ public class ArxiuPluginCaibTest {
 						Document documentPerModificarFinal = new Document();
 						documentPerModificarFinal.setIdentificador(documentCreatId);
 						Firma firmaPades = new Firma();
-						firmaPades.setTipus(ArxiuConstants.FIRMA_TIPUS_PADES);
-						firmaPades.setPerfil(ArxiuConstants.FIRMA_PERFIL_EPES);
+						firmaPades.setTipus(FirmaTipus.PADES);
+						firmaPades.setPerfil(FirmaPerfil.EPES);
 						firmaPades.setTipusMime("application/pdf");
 						firmaPades.setContingut(
 								IOUtils.toByteArray(
@@ -477,26 +486,26 @@ public class ArxiuPluginCaibTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nomExp);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
-		metadades.setEstat(ArxiuConstants.EXPEDIENT_ESTAT_OBERT);
+		metadades.setEstat(ExpedientEstat.OBERT);
 		metadades.setInteressats(interessatsTest);
 		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		expedientPerCrear.setMetadades(metadades);
 		String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
 		final Document documentPerCrear = new Document();
 		documentPerCrear.setNom(nomDoc);
-		documentPerCrear.setEstat(ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY);
+		documentPerCrear.setEstat(DocumentEstat.ESBORRANY);
 		final DocumentMetadades documentMetadades = new DocumentMetadades();
-		documentMetadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
 		documentMetadades.setOrgans(organsTest);
 		documentMetadades.setDataCaptura(new Date());
-		documentMetadades.setEstatElaboracio(ArxiuConstants.DOCUMENT_ESTAT_ELAB_ORIG);
-		documentMetadades.setTipusDocumental(ArxiuConstants.DOCUMENT_TIPUS_OTROS);
-		documentMetadades.setFormat(ArxiuConstants.DOCUMENT_FORMAT_PDF);
-		documentMetadades.setExtensio(ArxiuConstants.DOCUMENT_EXTENSIO_PDF);
+		documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+		documentMetadades.setFormat(DocumentFormat.PDF);
+		documentMetadades.setExtensio(DocumentExtensio.PDF);
 		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
@@ -511,7 +520,7 @@ public class ArxiuPluginCaibTest {
 					public void executar(List<ContingutArxiu> elementsCreats) throws IOException {
 						ContingutArxiu expedientCreat = elementsCreats.get(0);
 						String expedientCreatId = expedientCreat.getIdentificador();
-						documentPerCrear.setEstat(ArxiuConstants.DOCUMENT_ESTAT_DEFINITIU);
+						documentPerCrear.setEstat(DocumentEstat.DEFINITIU);
 						System.out.println(
 								"1.- Comprovant que la creació del document definitiu a l'expedient sense informació de firma dona error (" +
 								"id=" + expedientCreatId + ")... ");
@@ -527,8 +536,8 @@ public class ArxiuPluginCaibTest {
 								"2.- Creant document definitiu amb informació de firma (" +
 								"id=" + expedientCreatId + ")... ");
 						Firma firmaPades = new Firma();
-						firmaPades.setTipus(ArxiuConstants.FIRMA_TIPUS_PADES);
-						firmaPades.setPerfil(ArxiuConstants.FIRMA_PERFIL_EPES);
+						firmaPades.setTipus(FirmaTipus.PADES);
+						firmaPades.setPerfil(FirmaPerfil.EPES);
 						firmaPades.setTipusMime("application/pdf");
 						firmaPades.setContingut(
 								IOUtils.toByteArray(
@@ -572,11 +581,11 @@ public class ArxiuPluginCaibTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nomExp);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
-		metadades.setEstat(ArxiuConstants.EXPEDIENT_ESTAT_OBERT);
+		metadades.setEstat(ExpedientEstat.OBERT);
 		metadades.setInteressats(interessatsTest);
 		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		expedientPerCrear.setMetadades(metadades);
@@ -586,15 +595,15 @@ public class ArxiuPluginCaibTest {
 		String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
 		final Document documentPerCrear = new Document();
 		documentPerCrear.setNom(nomDoc);
-		documentPerCrear.setEstat(ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY);
+		documentPerCrear.setEstat(DocumentEstat.ESBORRANY);
 		final DocumentMetadades documentMetadades = new DocumentMetadades();
-		documentMetadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
 		documentMetadades.setOrgans(organsTest);
 		documentMetadades.setDataCaptura(new Date());
-		documentMetadades.setEstatElaboracio(ArxiuConstants.DOCUMENT_ESTAT_ELAB_ORIG);
-		documentMetadades.setTipusDocumental(ArxiuConstants.DOCUMENT_TIPUS_OTROS);
-		documentMetadades.setFormat(ArxiuConstants.DOCUMENT_FORMAT_OASIS12);
-		documentMetadades.setExtensio(ArxiuConstants.DOCUMENT_EXTENSIO_ODT);
+		documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+		documentMetadades.setFormat(DocumentFormat.OASIS12);
+		documentMetadades.setExtensio(DocumentExtensio.ODT);
 		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
@@ -668,11 +677,11 @@ public class ArxiuPluginCaibTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nomExp);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
-		metadades.setEstat(ArxiuConstants.EXPEDIENT_ESTAT_OBERT);
+		metadades.setEstat(ExpedientEstat.OBERT);
 		metadades.setInteressats(interessatsTest);
 		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		expedientPerCrear.setMetadades(metadades);
@@ -682,15 +691,15 @@ public class ArxiuPluginCaibTest {
 		String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
 		final Document documentPerCrear = new Document();
 		documentPerCrear.setNom(nomDoc);
-		documentPerCrear.setEstat(ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY);
+		documentPerCrear.setEstat(DocumentEstat.ESBORRANY);
 		final DocumentMetadades documentMetadades = new DocumentMetadades();
-		documentMetadades.setOrigen(ArxiuConstants.CONTINGUT_ORIGEN_CIU);
+		documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
 		documentMetadades.setOrgans(organsTest);
 		documentMetadades.setDataCaptura(new Date());
-		documentMetadades.setEstatElaboracio(ArxiuConstants.DOCUMENT_ESTAT_ELAB_ORIG);
-		documentMetadades.setTipusDocumental(ArxiuConstants.DOCUMENT_TIPUS_OTROS);
-		documentMetadades.setFormat(ArxiuConstants.DOCUMENT_FORMAT_OASIS12);
-		documentMetadades.setExtensio(ArxiuConstants.DOCUMENT_EXTENSIO_ODT);
+		documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+		documentMetadades.setFormat(DocumentFormat.OASIS12);
+		documentMetadades.setExtensio(DocumentExtensio.ODT);
 		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
@@ -814,7 +823,7 @@ public class ArxiuPluginCaibTest {
 			}
 			Collections.reverse(elementsCreats);
 			for (ContingutArxiu element: elementsCreats) {
-				if (ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT.equals(element.getTipus())) {
+				if (ContingutTipus.EXPEDIENT.equals(element.getTipus())) {
 					String identificador = element.getIdentificador();
 					System.out.println("F.- Esborrant expedient creat (id=" + identificador + ")... ");
 					try {
@@ -825,7 +834,7 @@ public class ArxiuPluginCaibTest {
 						throw ex;
 					}
 					expedientId = null;
-				} else if (ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT.equals(element.getTipus())) {
+				} else if (ContingutTipus.DOCUMENT.equals(element.getTipus())) {
 					String identificador = element.getIdentificador();
 					System.out.println("F.- Esborrant document creat (id=" + identificador + ")... ");
 					try {
@@ -835,7 +844,7 @@ public class ArxiuPluginCaibTest {
 						System.out.println("Error: " + ex.getLocalizedMessage());
 						throw ex;
 					}
-				} else if (ArxiuConstants.CONTINGUT_TIPUS_CARPETA.equals(element.getTipus())) {
+				} else if (ContingutTipus.CARPETA.equals(element.getTipus())) {
 					String identificador = element.getIdentificador();
 					System.out.println("F.- Esborrant carpeta creada (id=" + identificador + ")... ");
 					try {

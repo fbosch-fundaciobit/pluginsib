@@ -3,9 +3,11 @@ package es.caib.plugins.arxiu.filesystem;
 import java.util.Date;
 import java.util.List;
 
-import es.caib.plugins.arxiu.api.Expedient;
-import es.caib.plugins.arxiu.api.ExpedientMetadades;
 import es.caib.plugins.arxiu.api.ContingutArxiu;
+import es.caib.plugins.arxiu.api.ContingutOrigen;
+import es.caib.plugins.arxiu.api.Expedient;
+import es.caib.plugins.arxiu.api.ExpedientEstat;
+import es.caib.plugins.arxiu.api.ExpedientMetadades;
 
 /**
  * 
@@ -23,11 +25,11 @@ public class ExpedientDao {
 	
 	private String idMetadades;
 	private String versioNti;
-	private String origen;
+	private ContingutOrigen origen;
 	private List<String> organs;
 	private Date dataObertura;
 	private String classificacio;
-	private String estat;
+	private ExpedientEstat estat;
 	private List<String> interessats;
 	private String serieDocumental;	
 
@@ -59,11 +61,11 @@ public class ExpedientDao {
 			boolean obert,
 			String idMetadades,
 			String versioNti,
-			String origen,
+			ContingutOrigen origen,
 			List<String> organs,
 			Date dataObertura,
 			String classificacio,
-			String estat,
+			ExpedientEstat estat,
 			List<String> interessats,
 			String serieDocumental,
 			List<ContingutArxiu> continguts) {
@@ -134,10 +136,10 @@ public class ExpedientDao {
 		this.versioNti = versioNti;
 	}
 	
-	public String getOrigen() {
+	public ContingutOrigen getOrigen() {
 		return origen;
 	}
-	public void setOrigen(String origen) {
+	public void setOrigen(ContingutOrigen origen) {
 		this.origen = origen;
 	}
 	
@@ -162,10 +164,10 @@ public class ExpedientDao {
 		this.classificacio = classificacio;
 	}
 	
-	public String getEstat() {
+	public ExpedientEstat getEstat() {
 		return estat;
 	}
-	public void setEstat(String estat) {
+	public void setEstat(ExpedientEstat estat) {
 		this.estat = estat;
 	}
 	

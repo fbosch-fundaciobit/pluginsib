@@ -10,23 +10,23 @@ package es.caib.plugins.arxiu.api;
  */
 public class Firma {
 
-	private String tipus;
-	private String perfil;
+	private FirmaTipus tipus;
+	private FirmaPerfil perfil;
 	private String fitxerNom;
 	private byte[] contingut;
 	private String tipusMime;
 	private String csvRegulacio;
 
-	public String getTipus() {
+	public FirmaTipus getTipus() {
 		return tipus;
 	}
-	public void setTipus(String tipus) {
+	public void setTipus(FirmaTipus tipus) {
 		this.tipus = tipus;
 	}
-	public String getPerfil() {
+	public FirmaPerfil getPerfil() {
 		return perfil;
 	}
-	public void setPerfil(String perfil) {
+	public void setPerfil(FirmaPerfil perfil) {
 		this.perfil = perfil;
 	}
 	public String getFitxerNom() {

@@ -16,7 +16,7 @@ public class Expedient extends ContingutArxiu {
 	private List<ContingutArxiu> continguts;
 
 	public Expedient() {
-		super(ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT);
+		super(ContingutTipus.EXPEDIENT);
 	}
 
 	public ExpedientMetadades getMetadades() {

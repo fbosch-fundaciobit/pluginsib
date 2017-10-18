@@ -15,7 +15,7 @@ public class Carpeta extends ContingutArxiu {
 	private List<ContingutArxiu> continguts;
 
 	public Carpeta() {
-		super(ArxiuConstants.CONTINGUT_TIPUS_CARPETA);
+		super(ContingutTipus.CARPETA);
 	}
 
 	public List<ContingutArxiu> getContinguts() {

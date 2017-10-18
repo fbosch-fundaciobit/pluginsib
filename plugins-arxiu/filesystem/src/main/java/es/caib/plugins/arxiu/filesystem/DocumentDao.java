@@ -3,6 +3,9 @@ package es.caib.plugins.arxiu.filesystem;
 import java.util.Date;
 import java.util.List;
 
+import es.caib.plugins.arxiu.api.ContingutOrigen;
+import es.caib.plugins.arxiu.api.DocumentEstatElaboracio;
+import es.caib.plugins.arxiu.api.DocumentTipus;
 import es.caib.plugins.arxiu.api.Firma;
 
 public class DocumentDao {
@@ -19,9 +22,9 @@ public class DocumentDao {
 	private String versioNti;
 	private List<String> organs;
 	private Date data;
-	private String origen;
-	private String estatElaboracio;
-	private String tipusDocumental;
+	private ContingutOrigen origen;
+	private DocumentEstatElaboracio estatElaboracio;
+	private DocumentTipus tipusDocumental;
 	private String serieDocumental;
 	
 	private List<Firma> firmes;
@@ -41,16 +44,14 @@ public class DocumentDao {
 			String versioNti,
 			List<String> organs,
 			Date data,
-			String origen,
-			String estatElaboracio,
-			String tipusDocumental,
+			ContingutOrigen origen,
+			DocumentEstatElaboracio estatElaboracio,
+			DocumentTipus tipusDocumental,
 			String serieDocumental,
 			List<Firma> firmes,
 			String tipusMime,
 			String identificadorOrigen) {
-		
 		super();
-		
 		this.identificador = identificador;
 		this.nom = nom;
 		this.versio = versio;
@@ -141,24 +142,24 @@ public class DocumentDao {
 		this.data = data;
 	}
 	
-	public String getOrigen() {
+	public ContingutOrigen getOrigen() {
 		return origen;
 	}
-	public void setOrigen(String origen) {
+	public void setOrigen(ContingutOrigen origen) {
 		this.origen = origen;
 	}
 	
-	public String getEstatElaboracio() {
+	public DocumentEstatElaboracio getEstatElaboracio() {
 		return estatElaboracio;
 	}
-	public void setEstatElaboracio(String estatElaboracio) {
+	public void setEstatElaboracio(DocumentEstatElaboracio estatElaboracio) {
 		this.estatElaboracio = estatElaboracio;
 	}
 	
-	public String getTipusDocumental() {
+	public DocumentTipus getTipusDocumental() {
 		return tipusDocumental;
 	}
-	public void setTipusDocumental(String tipusDocumental) {
+	public void setTipusDocumental(DocumentTipus tipusDocumental) {
 		this.tipusDocumental = tipusDocumental;
 	}
 	

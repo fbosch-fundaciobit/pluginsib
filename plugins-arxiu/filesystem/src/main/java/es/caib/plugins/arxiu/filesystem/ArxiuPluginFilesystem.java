@@ -16,14 +16,15 @@ import org.fundaciobit.plugins.utils.AbstractPluginProperties;
 
 import com.sun.jersey.core.util.Base64;
 
-import es.caib.plugins.arxiu.api.ArxiuConstants;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.Carpeta;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.ConsultaResultat;
 import es.caib.plugins.arxiu.api.ContingutArxiu;
+import es.caib.plugins.arxiu.api.ContingutTipus;
 import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.DocumentContingut;
+import es.caib.plugins.arxiu.api.DocumentEstat;
 import es.caib.plugins.arxiu.api.DocumentMetadades;
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
@@ -90,7 +91,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 			return Utils.crearContingutArxiu(
 					expedientCreat.getIdentificador(), 
 					expedientCreat.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT,
+					ContingutTipus.EXPEDIENT,
 					expedientCreat.getVersio());
 		} catch (Exception ex) {
 			throw new ArxiuException("Error creant l'expedient", ex);
@@ -147,7 +148,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 			return Utils.crearContingutArxiu(
 					expedientUpdate.getIdentificador(), 
 					expedientUpdate.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT,
+					ContingutTipus.EXPEDIENT,
 					expedientUpdate.getVersio());
 		} catch (Exception ex) {
 			throw new ArxiuException("Error modificant l'expedient", ex);
@@ -169,9 +170,9 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 			IndexWriter w = getFilesystemArxiuDAO().getWriter();
 			ExpedientDao expedient = getFilesystemArxiuDAO().fileGet(identificador);
 			for (ContingutArxiu informacioItem : expedient.getContinguts()) {
-				if (informacioItem.getTipus() == ArxiuConstants.CONTINGUT_TIPUS_CARPETA) {
+				if (informacioItem.getTipus() == ContingutTipus.CARPETA) {
 					carpetaEsborrarRecursiu(w, informacioItem.getIdentificador());
-				} else if (informacioItem.getTipus() == ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT) {
+				} else if (informacioItem.getTipus() == ContingutTipus.DOCUMENT) {
 					documentEsborrarRecursiu(w, informacioItem.getIdentificador());
 				}
 			}
@@ -252,7 +253,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 					Utils.crearContingutArxiu(
 							expedientDao.getIdentificador(), 
 							expedientDao.getNom(),
-							ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT,
+							ContingutTipus.EXPEDIENT,
 							expedientDao.getVersio()));
 		}
 		return informacioItems;
@@ -319,7 +320,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 		}
 		try {
 			IndexWriter w = getFilesystemArxiuDAO().getWriter();
-			boolean isDraft = ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY.equals(document.getEstat());
+			boolean isDraft = DocumentEstat.ESBORRANY.equals(document.getEstat());
 			String documentId = getFilesystemArxiuDAO().getIdentificador();
 			DocumentMetadades metadades = document.getMetadades();
 			String identificador = metadades.getIdentificador();
@@ -349,7 +350,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 			ContingutArxiu contingutArxiu = Utils.crearContingutArxiu(
 					documentId,
 					document.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+					ContingutTipus.DOCUMENT,
 					documentCreat.getVersio());
 			if (getFilesystemArxiuDAO().conte(Tables.TABLE_EXPEDIENT, identificadorPare)) {
 				getFilesystemArxiuDAO().fileAddSon(
@@ -416,7 +417,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 			ContingutArxiu contingutArxiu = Utils.crearContingutArxiu(
 					documentUpated.getIdentificador(),
 					documentUpated.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+					ContingutTipus.DOCUMENT,
 					documentUpated.getVersio());
 			if (getFilesystemArxiuDAO().conte(Tables.TABLE_EXPEDIENT, documentUpated.getPare())) {
 				getFilesystemArxiuDAO().fileAddSon(
@@ -592,14 +593,14 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 			continguts.add(Utils.crearContingutArxiu(
 					d.getIdentificador(),
 					d.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+					ContingutTipus.DOCUMENT,
 					d.getVersio()));
 		}
 		return continguts;
 	}
 
 	@Override
-	public void documentCopiar(
+	public ContingutArxiu documentCopiar(
 			String identificador,
 			String identificadorDesti) throws ArxiuException {
 		try {
@@ -626,7 +627,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 						Utils.crearContingutArxiu(
 								documentCreat.getIdentificador(),
 								documentCreat.getNom(),
-								ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+								ContingutTipus.DOCUMENT,
 								documentCreat.getVersio()));
 			else if(pareEsCarpeta)
 				getFilesystemArxiuDAO().folderAddSon(
@@ -635,9 +636,14 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 						Utils.crearContingutArxiu(
 								documentCreat.getIdentificador(),
 								documentCreat.getNom(),
-								ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+								ContingutTipus.DOCUMENT,
 								documentCreat.getVersio()));
 			getFilesystemArxiuDAO().closeWriter(w);
+			return Utils.crearContingutArxiu(
+					documentCreat.getIdentificador(),
+					documentCreat.getNom(),
+					ContingutTipus.DOCUMENT,
+					documentCreat.getVersio());
 		} catch (Exception ex) {
 			throw new ArxiuException("Error copiant un document", ex);
 		} finally {
@@ -675,7 +681,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 						Utils.crearContingutArxiu(
 								document.getIdentificador(),
 								document.getNom(),
-								ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+								ContingutTipus.DOCUMENT,
 								document.getVersio()));
 			} else if(esDestiCarpeta) {
 				getFilesystemArxiuDAO().folderAddSon(
@@ -684,7 +690,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 						Utils.crearContingutArxiu(
 								document.getIdentificador(),
 								document.getNom(),
-								ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+								ContingutTipus.DOCUMENT,
 								document.getVersio()));
 			}
 			getFilesystemArxiuDAO().documentDelete(w, identificador);
@@ -756,7 +762,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 			ContingutArxiu contingut = Utils.crearContingutArxiu(
 					carpetaId,
 					carpeta.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_CARPETA,
+					ContingutTipus.CARPETA,
 					null);
 			if (esPareExpedient) {
 				getFilesystemArxiuDAO().fileAddSon(
@@ -796,7 +802,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 			ContingutArxiu contingut = Utils.crearContingutArxiu(
 					carpeta.getIdentificador(),
 					carpeta.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_CARPETA,
+					ContingutTipus.CARPETA,
 					null);
 			if (getFilesystemArxiuDAO().conte(Tables.TABLE_EXPEDIENT, c.getPare())) {
 				getFilesystemArxiuDAO().fileDeleteSon(w, c.getPare(), carpeta.getIdentificador());
@@ -839,9 +845,9 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 				getFilesystemArxiuDAO().folderDeleteSon(w, carpeta.getPare(), identificador);
 			}
 			for (ContingutArxiu contingut: carpeta.getInformacioItems()) {
-				if (contingut.getTipus().equals(ArxiuConstants.CONTINGUT_TIPUS_CARPETA)) {
+				if (contingut.getTipus().equals(ContingutTipus.CARPETA)) {
 					carpetaEsborrarRecursiu(w, contingut.getIdentificador());
-				} else if (contingut.getTipus().equals(ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT)) {
+				} else if (contingut.getTipus().equals(ContingutTipus.DOCUMENT)) {
 					documentEsborrarRecursiu(w, contingut.getIdentificador());
 				}
 			}
@@ -862,7 +868,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 	}
 
 	@Override
-	public void carpetaCopiar(
+	public ContingutArxiu carpetaCopiar(
 			String identificador,
 			String identificadorDesti) throws ArxiuException {
 		try {
@@ -888,7 +894,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 						Utils.crearContingutArxiu(
 								carpetaCopiadaId,
 								carpetaOrigen.getNom(),
-								ArxiuConstants.CONTINGUT_TIPUS_CARPETA,
+								ContingutTipus.CARPETA,
 								null));
 			} else if (esDestiCarpeta) {
 				getFilesystemArxiuDAO().folderAddSon(
@@ -897,12 +903,12 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 						Utils.crearContingutArxiu(
 								carpetaCopiadaId,
 								carpetaOrigen.getNom(),
-								ArxiuConstants.CONTINGUT_TIPUS_CARPETA,
+								ContingutTipus.CARPETA,
 								null));
 			}
 			List<ContingutArxiu> informacioItems = new ArrayList<ContingutArxiu>();
 			for(ContingutArxiu informacioItem : carpetaOrigen.getInformacioItems()) {
-				if (informacioItem.getTipus().equals(ArxiuConstants.CONTINGUT_TIPUS_CARPETA)) {
+				if (informacioItem.getTipus().equals(ContingutTipus.CARPETA)) {
 					String carpetaFillId = carpetaCopiarRecursiu(
 							w,
 							informacioItem.getIdentificador(),
@@ -910,9 +916,9 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 					informacioItems.add(Utils.crearContingutArxiu(
 							carpetaFillId,
 							informacioItem.getNom(),
-							ArxiuConstants.CONTINGUT_TIPUS_CARPETA,
+							ContingutTipus.CARPETA,
 							null));
-				} else if (informacioItem.getTipus().equals(ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT)) {
+				} else if (informacioItem.getTipus().equals(ContingutTipus.DOCUMENT)) {
 					DocumentDao documentFill = documentCopiarRecursiu(
 							w,
 							informacioItem.getIdentificador(),
@@ -920,7 +926,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 					informacioItems.add(Utils.crearContingutArxiu(
 							documentFill.getIdentificador(),
 							informacioItem.getNom(),
-							ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+							ContingutTipus.DOCUMENT,
 							documentFill.getVersio()));
 				}
 			}
@@ -932,6 +938,11 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 							identificadorDesti,
 							informacioItems));
 			getFilesystemArxiuDAO().closeWriter(w);
+			return Utils.crearContingutArxiu(
+					carpetaCopiadaId,
+					carpetaOrigen.getNom(),
+					ContingutTipus.CARPETA,
+					null);
 		} catch (Exception ex) {
 			throw new ArxiuException("Error copiant una carpeta", ex);
 		} finally {
@@ -969,7 +980,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 						Utils.crearContingutArxiu(
 								carpeta.getIdentificador(),
 								carpeta.getNom(),
-								ArxiuConstants.CONTINGUT_TIPUS_CARPETA,
+								ContingutTipus.CARPETA,
 								null));
 			} else if(esDestiCarpeta) {
 				getFilesystemArxiuDAO().folderAddSon(
@@ -978,7 +989,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 						Utils.crearContingutArxiu(
 								carpeta.getIdentificador(),
 								carpeta.getNom(),
-								ArxiuConstants.CONTINGUT_TIPUS_CARPETA,
+								ContingutTipus.CARPETA,
 								null));
 			}
 			getFilesystemArxiuDAO().folderDelete(w, carpeta.getIdentificador());
@@ -1008,6 +1019,11 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 	@Override
 	public boolean suportaVersionatCarpeta() {
 		return false;
+	}
+
+	@Override
+	public boolean generaIdentificadorNti() {
+		return true;
 	}
 
 
@@ -1069,9 +1085,9 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 		String identificador) {
 		CarpetaDao carpeta = getFilesystemArxiuDAO().folderGet(identificador);
 		for (ContingutArxiu informacioItem : carpeta.getInformacioItems()) {
-			if (informacioItem.getTipus().equals(ArxiuConstants.CONTINGUT_TIPUS_CARPETA)) {
+			if (informacioItem.getTipus().equals(ContingutTipus.CARPETA)) {
 				carpetaEsborrarRecursiu(w, informacioItem.getIdentificador());
-			} else if(informacioItem.getTipus().equals(ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT)) {
+			} else if(informacioItem.getTipus().equals(ContingutTipus.DOCUMENT)) {
 				documentEsborrarRecursiu(w, informacioItem.getIdentificador());
 			}
 		}
@@ -1119,7 +1135,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 		CarpetaDao carpeta = getFilesystemArxiuDAO().folderGet(identificador);
 		List<ContingutArxiu> informacioItems = new ArrayList<ContingutArxiu>();
 		for(ContingutArxiu informacioItem : carpeta.getInformacioItems()) {
-			if(informacioItem.getTipus().equals(ArxiuConstants.CONTINGUT_TIPUS_CARPETA)) {
+			if(informacioItem.getTipus().equals(ContingutTipus.CARPETA)) {
 				String carpetaFillId = carpetaCopiarRecursiu(
 						w,
 						informacioItem.getIdentificador(),
@@ -1127,9 +1143,9 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 				informacioItems.add(Utils.crearContingutArxiu(
 						carpetaFillId,
 						informacioItem.getNom(),
-						ArxiuConstants.CONTINGUT_TIPUS_CARPETA,
+						ContingutTipus.CARPETA,
 						null));
-			} else if(informacioItem.getTipus().equals(ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT)) {
+			} else if(informacioItem.getTipus().equals(ContingutTipus.DOCUMENT)) {
 				DocumentDao documentFill = documentCopiarRecursiu(
 						w,
 						informacioItem.getIdentificador(),
@@ -1137,7 +1153,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 				informacioItems.add(Utils.crearContingutArxiu(
 						documentFill.getIdentificador(),
 						informacioItem.getNom(),
-						ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+						ContingutTipus.DOCUMENT,
 						documentFill.getVersio()));
 			}
 		}

@@ -258,7 +258,6 @@ public class ArxiuCaibClient {
 				"url=" + urlAmbMetode + ", " +
 				"tipus=application/json, " +
 				"body=" + body + ")");
-		//lastJsonRequest = body;
 		ClientResponse response = jerseyClient.
 				resource(urlAmbMetode).
 				type("application/json").
@@ -267,7 +266,6 @@ public class ArxiuCaibClient {
 		logger.debug("Rebuda resposta HTTP de l'arxiu (" +
 				"status=" + response.getStatus() + ", " +
 				"body=" + json + ")");
-		//lastJsonResponse = json;
 		return new JerseyResponse(
 				json,
 				response.getStatus());

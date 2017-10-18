@@ -232,10 +232,11 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Identificador del document que es vol copiar.
 	 * @param identificadorDesti
 	 *            Identificador de la carpeta o expedient destí.
+	 * @return La informació sobre el document creat.
 	 * @throws ArxiuException
 	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
-	public void documentCopiar(
+	public ContingutArxiu documentCopiar(
 			String identificador,
 			String identificadorDesti) throws ArxiuException;
 
@@ -334,10 +335,11 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Identificador de la carpeta que es vol copiar.
 	 * @param identificadorDesti
 	 *            Identificador de la carpeta o expedient destí.
+	 * @return La informació sobre la carpeta creada.
 	 * @throws ArxiuException
 	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
-	public void carpetaCopiar(
+	public ContingutArxiu carpetaCopiar(
 			String identificador,
 			String identificadorDesti) throws ArxiuException;
 
@@ -378,5 +380,13 @@ public interface IArxiuPlugin extends IPlugin {
 	 * @return true si ho suporta o false en cas contrari.
 	 */
 	public boolean suportaVersionatCarpeta();
+
+	/**
+	 * Indica si la implementació del plugin genera automàticament
+	 * l'identificador NTI dels expedients i documents.
+	 * 
+	 * @return true si el genera o false en cas contrari.
+	 */
+	public boolean generaIdentificadorNti();
 
 }

@@ -15,6 +15,7 @@ import java.util.TimeZone;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.ContingutArxiu;
+import es.caib.plugins.arxiu.api.ContingutTipus;
 
 public class Utils {
 
@@ -58,7 +59,7 @@ public class Utils {
 	public static ContingutArxiu crearContingutArxiu(
 			String identificador, 
 			String nom,
-			String tipus,
+			ContingutTipus tipus,
 			String versio) {
 		ContingutArxiu informacioItem = new ContingutArxiu(tipus);
 		informacioItem.setIdentificador(identificador);

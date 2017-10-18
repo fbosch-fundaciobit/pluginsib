@@ -27,11 +27,16 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 
-import es.caib.plugins.arxiu.api.ArxiuConstants;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.ContingutArxiu;
+import es.caib.plugins.arxiu.api.ContingutOrigen;
+import es.caib.plugins.arxiu.api.ContingutTipus;
+import es.caib.plugins.arxiu.api.DocumentEstatElaboracio;
+import es.caib.plugins.arxiu.api.DocumentTipus;
+import es.caib.plugins.arxiu.api.ExpedientEstat;
 import es.caib.plugins.arxiu.api.Firma;
+import es.caib.plugins.arxiu.api.FirmaTipus;
 
 public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	
@@ -161,10 +166,10 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	        addField(d, Fields.EX_OBERT, String.valueOf(expedient.isObert()));
 	        addIndexField(d, Fields.EX_METADADESID, expedient.getIdMetadades());
 	        addIndexField(d, Fields.EX_VERSIONTI, expedient.getVersioNti());
-	        addIndexField(d, Fields.EX_ORIGEN, expedient.getOrigen());
+	        addIndexField(d, Fields.EX_ORIGEN, expedient.getOrigen().toString());
 	        addIndexField(d, Fields.EX_DATA_OBERTURA, String.valueOf(expedient.getDataObertura().getTime()));
 	        addIndexField(d, Fields.EX_CLASSIFICACIO, expedient.getClassificacio());
-	        addIndexField(d, Fields.EX_ESTAT, expedient.getEstat());
+	        addIndexField(d, Fields.EX_ESTAT, expedient.getEstat().toString());
 	        addIndexField(d, Fields.EX_SERIE_DOCUMENTAL, expedient.getSerieDocumental());
 	        
 	        for(String organ : expedient.getOrgans()) addIndexField(d, Fields.EX_ORGAN, organ);
@@ -263,11 +268,11 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 					Boolean.parseBoolean(d.get(Fields.EX_OBERT)),
 					d.get(Fields.EX_METADADESID),
 					d.get(Fields.EX_VERSIONTI),
-					d.get(Fields.EX_ORIGEN),
+					ContingutOrigen.toEnum(d.get(Fields.EX_ORIGEN)),
 					Arrays.asList(d.getValues(Fields.EX_ORGAN)),
 					new Date(Long.parseLong(d.get(Fields.EX_DATA_OBERTURA))),
 					d.get(Fields.EX_CLASSIFICACIO),
-					d.get(Fields.EX_ESTAT),
+					ExpedientEstat.toEnum(d.get(Fields.EX_ESTAT)),
 					Arrays.asList(d.getValues(Fields.EX_INTERESSAT)),
 					d.get(Fields.EX_SERIE_DOCUMENTAL),
 					items);
@@ -305,7 +310,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 		    	continguts.add(Utils.crearContingutArxiu(
         				expedient.getIdentificador(),
         				expedient.getNom(),
-        				ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT,
+        				ContingutTipus.EXPEDIENT,
         				expedient.getVersio()));
     		}
 	        
@@ -468,9 +473,9 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	        addIndexField(d, Fields.DOC_METADADESID, document.getMetadadesid());
 	        addIndexField(d, Fields.DOC_VERSIONTI, document.getVersioNti());
 	        addIndexField(d, Fields.DOC_DATA, String.valueOf(document.getData().getTime()));
-	        addIndexField(d, Fields.DOC_ORIGEN, document.getOrigen());
-	        addIndexField(d, Fields.DOC_ESTAT_ELABORACIO, document.getEstatElaboracio());
-	        addIndexField(d, Fields.DOC_TIPUS_DOCUMENTAL, document.getTipusDocumental());
+	        addIndexField(d, Fields.DOC_ORIGEN, document.getOrigen().toString());
+	        addIndexField(d, Fields.DOC_ESTAT_ELABORACIO, document.getEstatElaboracio().toString());
+	        addIndexField(d, Fields.DOC_TIPUS_DOCUMENTAL, document.getTipusDocumental().toString());
 	        addIndexField(d, Fields.DOC_SERIE_DOCUMENTAL, document.getSerieDocumental());
 	        addField(d, Fields.DOC_TIPUS_MIME, document.getTipusMime());
 	        addField(
@@ -645,9 +650,9 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	        		d.get(Fields.DOC_VERSIONTI),
 	        		Arrays.asList(d.getValues(Fields.DOC_ORGAN)),
 	        		new Date(Long.parseLong(d.get(Fields.DOC_DATA))),
-	        		d.get(Fields.DOC_ORIGEN),
-	        		d.get(Fields.DOC_ESTAT_ELABORACIO),
-					d.get(Fields.DOC_TIPUS_DOCUMENTAL),
+	        		ContingutOrigen.toEnum(d.get(Fields.DOC_ORIGEN)),
+	        		DocumentEstatElaboracio.toEnum(d.get(Fields.DOC_ESTAT_ELABORACIO)),
+	        		DocumentTipus.toEnum(d.get(Fields.DOC_TIPUS_DOCUMENTAL)),
 					d.get(Fields.DOC_SERIE_DOCUMENTAL),
 	        		firmes,
 	        		d.get(Fields.DOC_TIPUS_MIME),
@@ -685,7 +690,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
         		informacioItems.add(Utils.crearContingutArxiu(
         				document.getIdentificador(),
         				document.getNom(),
-        				ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+        				ContingutTipus.DOCUMENT,
         				document.getVersio()));
     		}
 	        
@@ -848,7 +853,11 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	        doc.add(new StringField(Fields.FIR_DOCUMENT_PARE, pareId, Field.Store.YES));
 	        doc.add(new StoredField(Fields.FIR_CONTINGUT, firma.getContingut()));
 	        doc.add(new StringField(Fields.FIR_MIME, firma.getTipusMime(), Field.Store.YES));
-	        doc.add(new StringField(Fields.FIR_TIPUS, firma.getTipus(), Field.Store.YES));
+	        doc.add(
+	        		new StringField(
+	        				Fields.FIR_TIPUS,
+	        				firma.getTipus().toString(),
+	        				Field.Store.YES));
 	        doc.add(new StringField(Fields.NOM, firma.getFitxerNom(), Field.Store.YES));
 	        doc.add(new StringField(
 	        		Fields.FIR_CSV_REGULACIO,
@@ -921,7 +930,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	        reader.close();
 	        Firma firma = new Firma();
 	        firma.setContingut(d.getBinaryValue(Fields.FIR_CONTINGUT).bytes);
-	        firma.setTipus(Fields.FIR_TIPUS);
+	        firma.setTipus(FirmaTipus.toEnum(Fields.FIR_TIPUS));
 	        firma.setTipusMime(Fields.FIR_MIME);
 	        firma.setFitxerNom(Fields.NOM);
 	        firma.setCsvRegulacio(Fields.FIR_CSV_REGULACIO);

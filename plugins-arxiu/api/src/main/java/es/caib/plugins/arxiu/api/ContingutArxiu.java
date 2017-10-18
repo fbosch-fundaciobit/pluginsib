@@ -14,10 +14,10 @@ public class ContingutArxiu {
 
 	protected String identificador;
 	protected String nom;
-	protected String tipus;
+	protected ContingutTipus tipus;
 	protected String versio;
 
-	public ContingutArxiu(String tipus) {
+	public ContingutArxiu(ContingutTipus tipus) {
 		super();
 		this.tipus = tipus;
 	}
@@ -34,7 +34,7 @@ public class ContingutArxiu {
 	public void setNom(String nom) {
 		this.nom = nom;
 	}
-	public String getTipus() {
+	public ContingutTipus getTipus() {
 		return tipus;
 	}
 	public String getVersio() {

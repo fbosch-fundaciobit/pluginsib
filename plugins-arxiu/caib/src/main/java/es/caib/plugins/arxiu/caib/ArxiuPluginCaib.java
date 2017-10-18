@@ -92,18 +92,21 @@ import es.caib.arxiudigital.apirest.CSGD.peticiones.SetFinalDocument;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.SetFolder;
 import es.caib.arxiudigital.apirest.constantes.MetadatosDocumento;
 import es.caib.arxiudigital.apirest.constantes.Servicios;
-import es.caib.plugins.arxiu.api.ArxiuConstants;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ArxiuValidacioException;
 import es.caib.plugins.arxiu.api.Carpeta;
 import es.caib.plugins.arxiu.api.ConsultaFiltre;
 import es.caib.plugins.arxiu.api.ConsultaResultat;
 import es.caib.plugins.arxiu.api.ContingutArxiu;
+import es.caib.plugins.arxiu.api.ContingutTipus;
 import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.DocumentContingut;
+import es.caib.plugins.arxiu.api.DocumentEstat;
+import es.caib.plugins.arxiu.api.DocumentFormat;
 import es.caib.plugins.arxiu.api.DocumentMetadades;
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.Firma;
+import es.caib.plugins.arxiu.api.FirmaTipus;
 import es.caib.plugins.arxiu.api.IArxiuPlugin;
 import es.caib.plugins.arxiu.caib.ArxiuCaibClient.GeneradorParam;
 
@@ -167,7 +170,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			return crearContingutArxiu(
 					expedientCreat.getIdentificador(), 
 					expedientCreat.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT,
+					ContingutTipus.EXPEDIENT,
 					expedientCreat.getVersio());
 		} catch (ArxiuException aex) {
 			throw aex;
@@ -222,7 +225,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			return crearContingutArxiu(
 					expedient.getIdentificador(), 
 					expedient.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT,
+					ContingutTipus.EXPEDIENT,
 					versio);
 		} catch (ArxiuException aex) {
 			throw aex;
@@ -468,7 +471,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			comprovarAbsenciaMetadadaCsv(document.getMetadades());
 			comprovarFirma(document);
 			Document creat = null;
-			if (ArxiuConstants.DOCUMENT_ESTAT_ESBORRANY.equals(document.getEstat())) {
+			if (DocumentEstat.ESBORRANY.equals(document.getEstat())) {
 				metode = Servicios.CREATE_DRAFT;
 				CreateDraftDocumentResult resposta = getArxiuClient().generarEnviarPeticio(
 						metode,
@@ -496,7 +499,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 				creat = ArxiuConversioHelper.documentNodeToDocument(
 						resposta.getCreateDraftDocumentResult().getResParam(),
 						VERSIO_INICIAL_CONTINGUT);
-			} else if (ArxiuConstants.DOCUMENT_ESTAT_DEFINITIU.equals(document.getEstat())) {
+			} else if (DocumentEstat.DEFINITIU.equals(document.getEstat())) {
 				metode = Servicios.GENERATE_CSV;
 				GenerateDocCSVResult respostaCsv = getArxiuClient().generarEnviarPeticio(
 						metode,
@@ -539,7 +542,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			return crearContingutArxiu(
 					creat.getIdentificador(), 
 					creat.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+					ContingutTipus.DOCUMENT,
 					creat.getVersio());
 		} catch (ArxiuException aex) {
 			throw aex;
@@ -622,7 +625,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			return crearContingutArxiu(
 					document.getIdentificador(), 
 					document.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+					ContingutTipus.DOCUMENT,
 					versio);
 		} catch (ArxiuException aex) {
 			throw aex;
@@ -776,12 +779,12 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	}
 
 	@Override
-	public void documentCopiar(
+	public ContingutArxiu documentCopiar(
 			final String identificador,
 			final String identificadorDesti) throws ArxiuException {
 		String metode = Servicios.COPY_DOC;
 		try {
-			getArxiuClient().generarEnviarPeticio(
+			CopyDocumentResult resposta = getArxiuClient().generarEnviarPeticio(
 					metode,
 					CopyDocument.class,
 					new GeneradorParam<ParamNodeID_TargetParent>() {
@@ -795,6 +798,12 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					},
 					ParamNodeID_TargetParent.class,
 					CopyDocumentResult.class);
+			resposta.getCopyDocumentResult().getResParam();
+			return crearContingutArxiu(
+					resposta.getCopyDocumentResult().getResParam(), 
+					null,
+					ContingutTipus.DOCUMENT,
+					VERSIO_INICIAL_CONTINGUT);
 		} catch (ArxiuException aex) {
 			throw aex;
 		} catch (Exception ex) {
@@ -929,7 +938,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			return crearContingutArxiu(
 					carpetaCreada.getIdentificador(), 
 					carpetaCreada.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_CARPETA,
+					ContingutTipus.CARPETA,
 					null);
 		} catch (ArxiuException aex) {
 			throw aex;
@@ -963,7 +972,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			return crearContingutArxiu(
 					carpeta.getIdentificador(),
 					carpeta.getNom(),
-					ArxiuConstants.CONTINGUT_TIPUS_CARPETA,
+					ContingutTipus.CARPETA,
 					null);
 		} catch (ArxiuException aex) {
 			throw aex;
@@ -1031,13 +1040,13 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	}
 
 	@Override
-	public void carpetaCopiar(
+	public ContingutArxiu carpetaCopiar(
 			final String identificador,
 			final String identificadorDesti) throws ArxiuException {
 		//String metode = Servicios.COPY_FOLDER;
 		String metode = "/services/copyFolder";
 		try {
-			getArxiuClient().generarEnviarPeticio(
+			CopyFolderResult resposta = getArxiuClient().generarEnviarPeticio(
 					metode,
 					CopyFolder.class,
 					new GeneradorParam<ParamNodeID_TargetParent>() {
@@ -1051,6 +1060,11 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					},
 					ParamNodeID_TargetParent.class,
 					CopyFolderResult.class);
+			return crearContingutArxiu(
+					resposta.getCopyFolderResult().getResParam(), 
+					null,
+					ContingutTipus.CARPETA,
+					null);
 		} catch (ArxiuException aex) {
 			throw aex;
 		} catch (Exception ex) {
@@ -1104,12 +1118,17 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 		return false;
 	}
 
+	@Override
+	public boolean generaIdentificadorNti() {
+		return true;
+	}
+
 
 
 	private ContingutArxiu crearContingutArxiu(
 			String identificador, 
 			String nom,
-			String tipus,
+			ContingutTipus tipus,
 			String versio) {
 		ContingutArxiu informacioItem = new ContingutArxiu(tipus);
 		informacioItem.setIdentificador(identificador);
@@ -1148,7 +1167,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					ArxiuConversioHelper.crearContingutArxiu(
 							identificador,
 							null,
-							ArxiuConstants.CONTINGUT_TIPUS_EXPEDIENT,
+							ContingutTipus.EXPEDIENT,
 							String.valueOf(versio)));
 			versio++;
 		}
@@ -1196,7 +1215,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					ArxiuConversioHelper.crearContingutArxiu(
 							identificador,
 							null,
-							ArxiuConstants.CONTINGUT_TIPUS_DOCUMENT,
+							ContingutTipus.DOCUMENT,
 							String.valueOf(versio)));
 			versio++;
 		}
@@ -1232,7 +1251,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	private void comprovarFirma(
 			final Document document) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, UniformInterfaceException, ClientHandlerException, IOException {
 		if (document.getFirmes() != null && !document.getFirmes().isEmpty()) {
-			String firmaTipus = null;
+			FirmaTipus firmaTipus = null;
 			for (Firma firma: document.getFirmes()) {
 				if (firmaTipus == null) {
 					firmaTipus = firma.getTipus();
@@ -1245,9 +1264,9 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			}
 			boolean formatComprovat = false;
 			if (document.getMetadades() != null && document.getMetadades().getFormat() != null) {
-				if (ArxiuConstants.FIRMA_TIPUS_PADES.equals(firmaTipus)) {
+				if (FirmaTipus.PADES.equals(firmaTipus)) {
 					formatComprovat = true;
-					if (!ArxiuConstants.DOCUMENT_FORMAT_PDF.equals(document.getMetadades().getFormat())) {
+					if (!DocumentFormat.PDF.equals(document.getMetadades().getFormat())) {
 						throw new ArxiuValidacioException(
 								"Un document que no te el format PDF (" + document.getMetadades().getFormat() + ") no pot tenir una firma de tipus PADES");
 					}
@@ -1282,8 +1301,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					}
 				}
 				if (!formatComprovat && documentResposta.getMetadades() != null && documentResposta.getMetadades().getFormat() != null) {
-					if (ArxiuConstants.FIRMA_TIPUS_PADES.equals(firmaTipus)) {
-						if (!ArxiuConstants.DOCUMENT_FORMAT_PDF.equals(documentResposta.getMetadades().getFormat())) {
+					if (FirmaTipus.PADES.equals(firmaTipus)) {
+						if (!DocumentFormat.PDF.equals(documentResposta.getMetadades().getFormat())) {
 							throw new ArxiuValidacioException(
 									"Un document que no te el format PDF (" + documentResposta.getMetadades().getFormat() + ") no pot tenir una firma de tipus PADES");
 						}

@@ -16,11 +16,11 @@ public class ExpedientMetadades {
 
 	private String identificador;
 	private String versioNti;
-	private String origen;
+	private ContingutOrigen origen;
 	private List<String> organs;
 	private Date dataObertura;
 	private String classificacio;
-	private String estat;
+	private ExpedientEstat estat;
 	private List<String> interessats;
 	private String serieDocumental;
 	private Map<String, Object> metadadesAddicionals;
@@ -37,10 +37,10 @@ public class ExpedientMetadades {
 	public void setVersioNti(String versioNti) {
 		this.versioNti = versioNti;
 	}
-	public String getOrigen() {
+	public ContingutOrigen getOrigen() {
 		return origen;
 	}
-	public void setOrigen(String origen) {
+	public void setOrigen(ContingutOrigen origen) {
 		this.origen = origen;
 	}
 	public List<String> getOrgans() {
@@ -61,10 +61,10 @@ public class ExpedientMetadades {
 	public void setClassificacio(String classificacio) {
 		this.classificacio = classificacio;
 	}
-	public String getEstat() {
+	public ExpedientEstat getEstat() {
 		return estat;
 	}
-	public void setEstat(String estat) {
+	public void setEstat(ExpedientEstat estat) {
 		this.estat = estat;
 	}
 	public List<String> getInteressats() {
