@@ -347,12 +347,24 @@ public class ArxiuConversioHelper {
 			for (Firma firma: firmes) {
 				if (FirmaTipus.CSV.equals(firma.getTipus())) {
 					if (firma.getContingut() != null) {
-						addMetadata(metadades, MetadatosDocumento.CSV, new String(firma.getContingut()));
+						addMetadata(
+								metadades,
+								MetadatosDocumento.CSV,
+								new String(firma.getContingut()));
 					}
-					addMetadata(metadades, MetadatosDocumento.DEF_CSV, firma.getCsvRegulacio());
+					addMetadata(
+							metadades,
+							MetadatosDocumento.DEF_CSV,
+							firma.getCsvRegulacio());
 				} else if (!tipusFirmaConfigurat) {
-					addMetadata(metadades, MetadatosDocumento.TIPO_FIRMA, firma.getTipus());
-					addMetadata(metadades, MetadatosDocumento.PERFIL_FIRMA, firma.getPerfil());
+					addMetadata(
+							metadades,
+							MetadatosDocumento.TIPO_FIRMA,
+							firma.getTipus().toString());
+					addMetadata(
+							metadades,
+							MetadatosDocumento.PERFIL_FIRMA,
+							firma.getPerfil().toString());
 					tipusFirmaConfigurat = true;
 				}
 			}
@@ -423,16 +435,16 @@ public class ArxiuConversioHelper {
 		String firmaCsvRegulacio = null;
 		for (Metadata metadada: metadades) {
 			if (MetadatosDocumento.TIPO_FIRMA.equals(metadada.getQname())) {
-				firmaTipus = (String) metadada.getValue();
+				firmaTipus = (String)metadada.getValue();
 			} else if (MetadatosDocumento.PERFIL_FIRMA.equals(metadada.getQname())) {
-				firmaPerfil = (String) metadada.getValue();
+				firmaPerfil = (String)metadada.getValue();
 			} else if (MetadatosDocumento.CSV.equals(metadada.getQname())) {
-				firmaCsv = (String) metadada.getValue();
+				firmaCsv = (String)metadada.getValue();
 			} else if (MetadatosDocumento.DEF_CSV.equals(metadada.getQname())) {
-				firmaCsvRegulacio = (String) metadada.getValue();
+				firmaCsvRegulacio = (String)metadada.getValue();
 			}
 		}
-		if (firmaCsv != null) {
+		if (firmaCsv != null && firmaTipus == null) {
 			Firma firma = new Firma();
 			firma.setTipus(FirmaTipus.CSV);
 			firma.setContingut(firmaCsv.getBytes());
@@ -442,18 +454,19 @@ public class ArxiuConversioHelper {
 				firmes = new ArrayList<Firma>();
 			}
 			firmes.add(firma);
-		}
-		for (Content content: contents) {
-			if (TiposContenidosBinarios.SIGNATURE.equals(content.getBinaryType())) {
-				Firma firma = new Firma();
-				firma.setTipus(FirmaTipus.toEnum(firmaTipus));
-				firma.setPerfil(FirmaPerfil.toEnum(firmaPerfil));
-				firma.setContingut(Base64.decode(content.getContent()));
-				firma.setTipusMime(content.getMimetype());
-				if (firmes == null) {
-					firmes = new ArrayList<Firma>();
+		} else if (firmaTipus != null) {
+			for (Content content: contents) {
+				if (TiposContenidosBinarios.CONTENT.equals(content.getBinaryType())) {
+					Firma firma = new Firma();
+					firma.setTipus(FirmaTipus.toEnum(firmaTipus));
+					firma.setPerfil(FirmaPerfil.toEnum(firmaPerfil));
+					firma.setContingut(Base64.decode(content.getContent()));
+					firma.setTipusMime(content.getMimetype());
+					if (firmes == null) {
+						firmes = new ArrayList<Firma>();
+					}
+					firmes.add(firma);
 				}
-				firmes.add(firma);
 			}
 		}
 		return firmes;
