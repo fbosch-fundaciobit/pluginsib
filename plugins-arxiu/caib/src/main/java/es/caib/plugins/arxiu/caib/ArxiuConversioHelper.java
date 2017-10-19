@@ -59,8 +59,12 @@ import es.caib.plugins.arxiu.api.FirmaTipus;
  */
 public class ArxiuConversioHelper {
 
-	public static FileNode expedientToFileNode(Expedient expedient, List<Metadata> metadadesPrevies,
-			List<Aspectos> aspectesPrevis, String aplicacioCodi, boolean creacio) throws ArxiuException {
+	public static FileNode expedientToFileNode(
+			Expedient expedient,
+			List<Metadata> metadadesPrevies,
+			List<Aspectos> aspectesPrevis,
+			String aplicacioCodi,
+			boolean creacio) throws ArxiuException {
 		FileNode node = new FileNode();
 		node.setType(TiposObjetoSGD.EXPEDIENTE);
 		node.setId(expedient.getIdentificador());
@@ -70,7 +74,9 @@ public class ArxiuConversioHelper {
 		return node;
 	}
 
-	public static Expedient fileNodeToExpedient(FileNode fileNode, String versio) throws ArxiuException {
+	public static Expedient fileNodeToExpedient(
+			FileNode fileNode,
+			String versio) throws ArxiuException {
 		Expedient expedient = new Expedient();
 		expedient.setIdentificador(fileNode.getId());
 		expedient.setNom(fileNode.getName());
@@ -82,7 +88,8 @@ public class ArxiuConversioHelper {
 		return expedient;
 	}
 
-	public static List<ContingutArxiu> fileNodesToFileContingutArxiu(List<FileNode> fileNodeList) {
+	public static List<ContingutArxiu> fileNodesToFileContingutArxiu(
+			List<FileNode> fileNodeList) {
 		if (fileNodeList == null) {
 			return null;
 		}
@@ -94,21 +101,36 @@ public class ArxiuConversioHelper {
 		return informacioItemList;
 	}
 
-	public static DocumentNode documentToDocumentNode(Document document, List<Metadata> metadadesPrevies,
-			List<Aspectos> aspectesPrevis, String aplicacioCodi, String csv, String csvDef, boolean creacio)
-			throws ArxiuException {
+	public static DocumentNode documentToDocumentNode(
+			Document document,
+			List<Metadata> metadadesPrevies,
+			List<Aspectos> aspectesPrevis,
+			String aplicacioCodi,
+			String csv,
+			String csvDef,
+			boolean creacio) throws ArxiuException {
 		DocumentNode node = new DocumentNode();
 		node.setId(document.getIdentificador());
 		node.setName(document.getNom());
 		node.setType(TiposObjetoSGD.DOCUMENTO);
-		node.setBinaryContents(toContents(document));
-		node.setMetadataCollection(toMetadataDocument(document.getMetadades(), document.getFirmes(), aplicacioCodi,
-				metadadesPrevies, csv, csvDef));
-		node.setAspects(generarAspectes(aspectesPrevis, creacio));
+		node.setBinaryContents(
+				toBinaryContents(document));
+		node.setMetadataCollection(
+				toMetadataDocument(
+						document.getMetadades(),
+						document.getFirmes(),
+						aplicacioCodi,
+						metadadesPrevies,
+						csv,
+						csvDef));
+		node.setAspects(
+				generarAspectes(aspectesPrevis, creacio));
 		return node;
 	}
 
-	public static Document documentNodeToDocument(DocumentNode documentNode, String versio) throws ArxiuException {
+	public static Document documentNodeToDocument(
+			DocumentNode documentNode,
+			String versio) throws ArxiuException {
 		Document document = new Document();
 		document.setIdentificador(documentNode.getId());
 		document.setNom(documentNode.getName());
@@ -129,7 +151,8 @@ public class ArxiuConversioHelper {
 		return document;
 	}
 
-	public static List<ContingutArxiu> fileNodeToDocumentContingut(List<DocumentNode> documentNodeList) {
+	public static List<ContingutArxiu> fileNodeToDocumentContingut(
+			List<DocumentNode> documentNodeList) {
 		List<ContingutArxiu> informacioItemList = new ArrayList<ContingutArxiu>();
 		for (DocumentNode documentNode: documentNodeList) {
 			informacioItemList.add(crearContingutArxiu(documentNode.getId(), documentNode.getName(),
@@ -138,7 +161,9 @@ public class ArxiuConversioHelper {
 		return informacioItemList;
 	}
 
-	public static FolderNode toFolderNode(String identificador, String nom) {
+	public static FolderNode toFolderNode(
+			String identificador,
+			String nom) {
 		FolderNode node = new FolderNode();
 		node.setId(identificador);
 		node.setName(nom);
@@ -154,7 +179,9 @@ public class ArxiuConversioHelper {
 		return carpeta;
 	}
 
-	private static List<Metadata> toMetadataExpedient(ExpedientMetadades expedientMetadades, String aplicacioCodi,
+	private static List<Metadata> toMetadataExpedient(
+			ExpedientMetadades expedientMetadades,
+			String aplicacioCodi,
 			List<Metadata> metadadesPrevies) throws ArxiuException {
 		List<Metadata> metadades = new ArrayList<Metadata>();
 		if (metadadesPrevies != null) {
@@ -181,7 +208,10 @@ public class ArxiuConversioHelper {
 		return metadades;
 	}
 
-	private static void addMetadata(List<Metadata> metadades, String qname, Object value) {
+	private static void addMetadata(
+			List<Metadata> metadades,
+			String qname,
+			Object value) {
 		if (value != null) {
 			boolean actualitzat = false;
 			for (Metadata metadata: metadades) {
@@ -199,7 +229,9 @@ public class ArxiuConversioHelper {
 		}
 	}
 
-	private static List<Aspectos> generarAspectes(List<Aspectos> aspectesPrevis, boolean create) {
+	private static List<Aspectos> generarAspectes(
+			List<Aspectos> aspectesPrevis,
+			boolean create) {
 		List<Aspectos> aspectesCreats = null;
 		if (aspectesPrevis != null && !aspectesPrevis.isEmpty()) {
 			aspectesCreats = new ArrayList<Aspectos>();
@@ -214,7 +246,8 @@ public class ArxiuConversioHelper {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static ExpedientMetadades toExpedientMetadades(List<Metadata> metadataList) throws ArxiuException {
+	private static ExpedientMetadades toExpedientMetadades(
+			List<Metadata> metadataList) throws ArxiuException {
 		ExpedientMetadades expedientMetadades = new ExpedientMetadades();
 		for (Metadata metadata: metadataList) {
 			switch (metadata.getQname()) {
@@ -277,7 +310,8 @@ public class ArxiuConversioHelper {
 		return expedientMetadades;
 	}
 
-	private static List<ContingutArxiu> summaryInfoNodesToInformacioItems(List<SummaryInfoNode> summaryInfoNodes) {
+	private static List<ContingutArxiu> summaryInfoNodesToInformacioItems(
+			List<SummaryInfoNode> summaryInfoNodes) {
 		if (summaryInfoNodes == null) {
 			return null;
 		}
@@ -293,8 +327,13 @@ public class ArxiuConversioHelper {
 		return continguts;
 	}
 
-	private static List<Metadata> toMetadataDocument(DocumentMetadades documentMetadades, List<Firma> firmes,
-			String aplicacioCodi, List<Metadata> metadadesPrevies, String csv, String csvDef) throws ArxiuException {
+	private static List<Metadata> toMetadataDocument(
+			DocumentMetadades documentMetadades,
+			List<Firma> firmes,
+			String aplicacioCodi,
+			List<Metadata> metadadesPrevies,
+			String csv,
+			String csvDef) throws ArxiuException {
 		List<Metadata> metadades = new ArrayList<Metadata>();
 		if (metadadesPrevies != null) {
 			metadades.addAll(metadadesPrevies);
@@ -320,11 +359,11 @@ public class ArxiuConversioHelper {
 			addMetadata(
 					metadades,
 					MetadatosDocumento.NOMBRE_FORMATO,
-					documentMetadades.getFormat());
+					documentMetadades.getFormat().toString());
 			addMetadata(
 					metadades,
 					MetadatosDocumento.EXTENSION_FORMATO,
-					documentMetadades.getExtensio());
+					documentMetadades.getExtensio().toString());
 			addMetadata(
 					metadades,
 					MetadatosDocumento.ORGANO,
@@ -342,6 +381,7 @@ public class ArxiuConversioHelper {
 				}
 			}
 		}
+		boolean firmaCsvConfigurada = false;
 		if (firmes != null) {
 			boolean tipusFirmaConfigurat = false;
 			for (Firma firma: firmes) {
@@ -356,6 +396,7 @@ public class ArxiuConversioHelper {
 							metadades,
 							MetadatosDocumento.DEF_CSV,
 							firma.getCsvRegulacio());
+					firmaCsvConfigurada = true;
 				} else if (!tipusFirmaConfigurat) {
 					addMetadata(
 							metadades,
@@ -369,19 +410,21 @@ public class ArxiuConversioHelper {
 				}
 			}
 		}
-		addMetadata(metadades, MetadatosDocumento.CSV, csv);
-		addMetadata(metadades, MetadatosDocumento.DEF_CSV, csvDef);
+		if (!firmaCsvConfigurada) {
+			addMetadata(metadades, MetadatosDocumento.CSV, csv);
+			addMetadata(metadades, MetadatosDocumento.DEF_CSV, csvDef);
+		}
 		return metadades;
 	}
 
-	private static List<Content> toContents(Document document) {
+	private static List<Content> toBinaryContents(Document document) {
 		List<Content> contents = null;
 		if (document.getContingut() != null) {
 			Content content = new Content();
 			content.setBinaryType(TiposContenidosBinarios.CONTENT);
+			content.setContent(new String(Base64.encode(document.getContingut().getContingut())));
 			content.setEncoding("UTF-8");
 			content.setMimetype(document.getContingut().getTipusMime());
-			content.setContent(new String(Base64.encode(document.getContingut().getContingut())));
 			if (contents == null) {
 				contents = new ArrayList<Content>();
 			}
@@ -389,18 +432,35 @@ public class ArxiuConversioHelper {
 		}
 		if (document.getFirmes() != null) {
 			for (Firma firma: document.getFirmes()) {
-				if (!FirmaTipus.CSV.equals(firma.getTipus())) {
-					Content contenidofirma = new Content();
-					contenidofirma.setBinaryType(TiposContenidosBinarios.CONTENT);
+				if (!FirmaTipus.CSV.equals(firma.getTipus()) && !FirmaTipus.PADES.equals(firma.getTipus())) {
+					Content content = new Content();
+					content.setBinaryType(TiposContenidosBinarios.SIGNATURE);
 					if (firma.getContingut() != null) {
-						contenidofirma.setContent(new String(Base64.encode(firma.getContingut())));
+						content.setContent(new String(Base64.encode(firma.getContingut())));
 					}
-					contenidofirma.setEncoding("UTF-8");
-					contenidofirma.setMimetype(firma.getTipusMime());
+					content.setEncoding("UTF-8");
+					content.setMimetype(firma.getTipusMime());
 					if (contents == null) {
 						contents = new ArrayList<Content>();
 					}
-					contents.add(contenidofirma);
+					contents.add(content);
+				} else if (
+						FirmaTipus.PADES.equals(firma.getTipus()) &&
+						document.getContingut() == null &&
+						firma.getContingut() != null) {
+					// En el cas de les firmes PAdES es dona la possibilitat de que
+					// el contingut del PDF firmat s'especifiqui a dins la firma o com
+					// a contingut. En el cas de que s'especifiqui a dins la firma el
+					// contingut haurà de ser null.
+					Content content = new Content();
+					content.setBinaryType(TiposContenidosBinarios.CONTENT);
+					content.setContent(new String(Base64.encode(firma.getContingut())));
+					content.setEncoding("UTF-8");
+					content.setMimetype(firma.getTipusMime());
+					if (contents == null) {
+						contents = new ArrayList<Content>();
+					}
+					contents.add(content);
 				}
 			}
 		}
@@ -455,10 +515,21 @@ public class ArxiuConversioHelper {
 			}
 			firmes.add(firma);
 		} else if (firmaTipus != null) {
+			FirmaTipus firmaTipusEnum = FirmaTipus.toEnum(firmaTipus);
 			for (Content content: contents) {
-				if (TiposContenidosBinarios.CONTENT.equals(content.getBinaryType())) {
+				if (TiposContenidosBinarios.SIGNATURE.equals(content.getBinaryType())) {
 					Firma firma = new Firma();
-					firma.setTipus(FirmaTipus.toEnum(firmaTipus));
+					firma.setTipus(firmaTipusEnum);
+					firma.setPerfil(FirmaPerfil.toEnum(firmaPerfil));
+					firma.setContingut(Base64.decode(content.getContent()));
+					firma.setTipusMime(content.getMimetype());
+					if (firmes == null) {
+						firmes = new ArrayList<Firma>();
+					}
+					firmes.add(firma);
+				} else if (FirmaTipus.PADES.equals(firmaTipusEnum) && TiposContenidosBinarios.CONTENT.equals(content.getBinaryType())) {
+					Firma firma = new Firma();
+					firma.setTipus(firmaTipusEnum);
 					firma.setPerfil(FirmaPerfil.toEnum(firmaPerfil));
 					firma.setContingut(Base64.decode(content.getContent()));
 					firma.setTipusMime(content.getMimetype());

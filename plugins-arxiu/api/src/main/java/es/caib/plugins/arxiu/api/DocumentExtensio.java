@@ -4,7 +4,7 @@
 package es.caib.plugins.arxiu.api;
 
 /**
- * Enumerat amb les possibles extensions d'un document.
+ * Possibles extensions d'un document.
  *
  * @author Limit Tecnologies <limit@limit.es>
  */

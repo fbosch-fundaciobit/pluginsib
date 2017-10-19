@@ -4,7 +4,7 @@
 package es.caib.plugins.arxiu.api;
 
 /**
- * Enumerat amb els possibles tipus de contingut.
+ * Possibles tipus de continguts que gestiona l’arxiu.
  * 
  * @author Limit Tecnologies <limit@limit.es>
  */

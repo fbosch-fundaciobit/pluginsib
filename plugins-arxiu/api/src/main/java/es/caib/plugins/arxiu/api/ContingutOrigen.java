@@ -4,7 +4,7 @@
 package es.caib.plugins.arxiu.api;
 
 /**
- * Enumerat amb els possibles orígens d'un document.
+ * Possibles orígens d'un document.
  * 
  * CIUTADA: Ciudadano.
  * ADMINISTRACIO: Administración.

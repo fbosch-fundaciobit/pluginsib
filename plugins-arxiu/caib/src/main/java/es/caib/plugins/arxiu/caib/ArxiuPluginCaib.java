@@ -1208,16 +1208,14 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 						return vn1.getDate().compareTo(vn2.getDate());
 					}
 				});
-		int versio = 1;
 		List<ContingutArxiu> continguts  = new ArrayList<ContingutArxiu>();
-		for (int i = 0; i < versions.size(); i++) {
+		for (VersionNode versio: versions) {
 			continguts.add(
 					ArxiuConversioHelper.crearContingutArxiu(
 							identificador,
 							null,
 							ContingutTipus.DOCUMENT,
-							String.valueOf(versio)));
-			versio++;
+							String.valueOf(versio.getId())));
 		}
 		return continguts;
 	}
@@ -1269,6 +1267,15 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 					if (!DocumentFormat.PDF.equals(document.getMetadades().getFormat())) {
 						throw new ArxiuValidacioException(
 								"Un document que no te el format PDF (" + document.getMetadades().getFormat() + ") no pot tenir una firma de tipus PADES");
+					}
+					if (document.getFirmes().size() > 1) {
+						throw new ArxiuValidacioException(
+								"Només es pot especificar una firma de tipus PAdES");
+					}
+					Firma firma = document.getFirmes().get(0);
+					if (document.getContingut() != null && firma.getContingut() != null) {
+						throw new ArxiuValidacioException(
+								"Al firmar un document amb firma PAdES no es pot especificar a la vegada el contingut del document i el contingut de la firma");
 					}
 				}
 			}

@@ -77,7 +77,7 @@ public class ArxiuPluginCaibTest {
 		interessatsTest.add("00000000T");
 	}
 
-	//@Test
+	@Test
 	public void expedientCicleDeVida() throws Exception {
 		System.out.println("TEST: CICLE DE VIDA DELS EXPEDIENTS");
 		String nom = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -148,7 +148,7 @@ public class ArxiuPluginCaibTest {
 				expedientPerCrear);
 	}
 
-	//@Test
+	@Test
 	public void documentCicleDeVida() throws Exception {
 		System.out.println("TEST: CICLE DE VIDA DELS DOCUMENTS");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -349,8 +349,11 @@ public class ArxiuPluginCaibTest {
 						firmaPades.setContingut(
 								IOUtils.toByteArray(
 										getDocumentContingutFirma()));
-						List<Firma> firmes = Arrays.asList(firmaPades);
-						documentPerModificar.setFirmes(firmes);
+						documentPerModificar.setFirmes(Arrays.asList(firmaPades));
+						DocumentMetadades documentMetadadesModificar = new DocumentMetadades();
+						documentMetadadesModificar.setFormat(DocumentFormat.PDF);
+						documentMetadadesModificar.setExtensio(DocumentExtensio.PDF);
+						documentPerModificar.setMetadades(documentMetadadesModificar);
 						ContingutArxiu contingutModificat = arxiuPlugin.documentModificar(
 								documentPerModificar,
 								true);
@@ -398,7 +401,7 @@ public class ArxiuPluginCaibTest {
 				documentPerCrear);
 	}
 
-	//@Test
+	@Test
 	public void documentModificarFinal() throws Exception {
 		System.out.println("TEST: DOCUMENT ESBORRANY I DEFINITIU");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -505,7 +508,7 @@ public class ArxiuPluginCaibTest {
 				documentPerCrear);
 	}
 
-	//@Test
+	@Test
 	public void documentFinalCrear() throws Exception {
 		System.out.println("TEST: DOCUMENT DEFINITIU DE BON COMENÇAMENT");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -520,32 +523,25 @@ public class ArxiuPluginCaibTest {
 		metadades.setInteressats(interessatsTest);
 		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		expedientPerCrear.setMetadades(metadades);
-		String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
-		final Document documentPerCrear = new Document();
-		documentPerCrear.setNom(nomDoc);
-		documentPerCrear.setEstat(DocumentEstat.ESBORRANY);
-		final DocumentMetadades documentMetadades = new DocumentMetadades();
-		documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
-		documentMetadades.setOrgans(organsTest);
-		documentMetadades.setDataCaptura(new Date());
-		documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
-		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
-		documentMetadades.setFormat(DocumentFormat.PDF);
-		documentMetadades.setExtensio(DocumentExtensio.PDF);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
-		documentPerCrear.setMetadades(documentMetadades);
-		DocumentContingut documentContingut = new DocumentContingut();
-		documentContingut.setContingut(
-				IOUtils.toByteArray(
-						getDocumentContingutEsborranyPdf()));
-		documentContingut.setTipusMime("application/pdf");
-		documentPerCrear.setContingut(documentContingut);
 		testCreantElements(
 				new TestAmbElementsCreats() {
 					@Override
 					public void executar(List<ContingutArxiu> elementsCreats) throws IOException {
 						ContingutArxiu expedientCreat = elementsCreats.get(0);
 						String expedientCreatId = expedientCreat.getIdentificador();
+						final Document documentPerCrear = new Document();
+						String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
+						documentPerCrear.setNom(nomDoc);
+						final DocumentMetadades documentMetadades = new DocumentMetadades();
+						documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
+						documentMetadades.setOrgans(organsTest);
+						documentMetadades.setDataCaptura(new Date());
+						documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+						documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+						documentMetadades.setFormat(DocumentFormat.PDF);
+						documentMetadades.setExtensio(DocumentExtensio.PDF);
+						documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
+						documentPerCrear.setMetadades(documentMetadades);
 						documentPerCrear.setEstat(DocumentEstat.DEFINITIU);
 						System.out.println(
 								"1.- Comprovant que la creació del document definitiu a l'expedient sense informació de firma dona error (" +
@@ -601,7 +597,7 @@ public class ArxiuPluginCaibTest {
 				expedientPerCrear);
 	}
 
-	//@Test
+	@Test
 	public void carpetaCicleDeVida() throws Exception {
 		System.out.println("TEST: CICLE DE VIDA DE LES CARPETES");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -697,7 +693,7 @@ public class ArxiuPluginCaibTest {
 				carpetaPerCrear);
 	}
 
-	//@Test
+	@Test
 	public void carpetaEsborrarAmbContingut() throws Exception {
 		System.out.println("TEST: ESBORRAR CARPETA AMB CONTINGUTS");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();

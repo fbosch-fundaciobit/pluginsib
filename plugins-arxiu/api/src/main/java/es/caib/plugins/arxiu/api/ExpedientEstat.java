@@ -4,7 +4,7 @@
 package es.caib.plugins.arxiu.api;
 
 /**
- * Enumerat amb els possibles orígens d'un document.
+ * Possibles estats d'un expedient.
  * 
  * OBERT: Abierto.
  * TANCAT: Cerrado.

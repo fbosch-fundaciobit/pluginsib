@@ -4,7 +4,7 @@
 package es.caib.plugins.arxiu.api;
 
 /**
- * Enumerat amb els possibles estats d'elaboració d'un document.
+ * Possibles estats d'elaboració d'un document.
  * 
  * ORIGINAL: Original (Llei 11/2007 Art. 30)
  * COPIA_CF: Còpia electrònica autèntica amb canvi de format (Llei 

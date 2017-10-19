@@ -4,7 +4,7 @@
 package es.caib.plugins.arxiu.api;
 
 /**
- * Enumerat amb els possibles estats d'un document.
+ * Possibles estats d'un document.
  * 
  * RESOLUCIO: Resolución
  * ACORD: Acuerdo

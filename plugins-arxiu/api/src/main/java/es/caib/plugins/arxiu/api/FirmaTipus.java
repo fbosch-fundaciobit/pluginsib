@@ -4,7 +4,7 @@
 package es.caib.plugins.arxiu.api;
 
 /**
- * Enumerat amb els possibles tipus de firma.
+ * Possibles tipus de firma.
  * 
  * CSV: Código seguro de verificación
  * XADES_DET: XAdES internally detached signature

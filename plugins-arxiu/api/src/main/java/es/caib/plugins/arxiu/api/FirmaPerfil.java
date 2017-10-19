@@ -4,7 +4,7 @@
 package es.caib.plugins.arxiu.api;
 
 /**
- * Enumerat amb els possibles perfils de firma.
+ * Possibles perfils de firma.
  *
  * @author Limit Tecnologies <limit@limit.es>
  */
