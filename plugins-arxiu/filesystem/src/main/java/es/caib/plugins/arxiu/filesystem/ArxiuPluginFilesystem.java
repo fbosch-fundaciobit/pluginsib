@@ -10,11 +10,10 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.lucene.index.IndexWriter;
 import org.fundaciobit.plugins.utils.AbstractPluginProperties;
-
-import com.sun.jersey.core.util.Base64;
 
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.Carpeta;
@@ -1174,7 +1173,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 		new Random().nextBytes(rnd);
 		uuidHex += new String(Hex.encodeHex(rnd));
 		byte[] bytes = Hex.decodeHex(uuidHex.toCharArray());
-		String uuidBase64 = "FS" + new String(Base64.encode(bytes));
+		String uuidBase64 = "FS" + new String(Base64.encodeBase64(bytes));
 		int anyActual = Calendar.getInstance().get(Calendar.YEAR);
 		return "ES_" + getPropertyIdentificadorNtiOrgan() + "_" + anyActual + "_" + uuidBase64;
 	}

@@ -132,6 +132,9 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	public ArxiuPluginCaib() {
 		super();
 	}
+	public ArxiuPluginCaib(Properties properties) {
+		super("", properties);
+	}
 	public ArxiuPluginCaib(String propertyKeyBase, Properties properties) {
 		super(propertyKeyBase, properties);
 	}

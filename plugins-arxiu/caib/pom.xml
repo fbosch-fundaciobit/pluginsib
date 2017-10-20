@@ -10,21 +10,19 @@
 	<packaging>jar</packaging>
 	<dependencies>
 		<dependency>
+			<groupId>es.caib.arxiudigital</groupId>
+			<artifactId>arxiudigital-apirest</artifactId>
+			<version>1.0.4</version>
+		</dependency>
+		<dependency>
 			<groupId>org.fundaciobit.plugins</groupId>
 			<artifactId>plugins-api</artifactId>
 			<version>1.0.0</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.fundaciobit.plugins</groupId>
 			<artifactId>plugin-arxiu-api</artifactId>
-			<version>1.0.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>es.caib.arxiudigital</groupId>
-			<artifactId>arxiudigital-apirest</artifactId>
-			<version>1.0.4</version>
+			<version>${plugin.arxiu.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>

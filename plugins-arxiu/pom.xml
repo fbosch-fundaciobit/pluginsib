@@ -10,6 +10,7 @@
 	<packaging>pom</packaging>
 	<name>FundacioBit Plugins - Arxiu Plugins</name>
 	<properties>
+		<plugin.arxiu.version>1.0.0</plugin.arxiu.version>
 		<slf4j.version>1.5.11</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.7</java.version>
@@ -19,5 +20,6 @@
 		<module>api</module>
 		<module>caib</module>
 		<module>filesystem</module>
+		<module>plugin-arxiu-client</module>
 	</modules>
 </project>
