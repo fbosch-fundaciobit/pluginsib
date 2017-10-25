@@ -78,7 +78,6 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 							true,
 							identificador,
 							metadades.getVersioNti(),
-							metadades.getOrigen(),
 							metadades.getOrgans(),
 							metadades.getDataObertura(),
 							metadades.getClassificacio(),
@@ -129,7 +128,6 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 					expedientDao.isObert(),
 					metadades.getIdentificador(),
 					metadades.getVersioNti(),
-					metadades.getOrigen(),
 					metadades.getOrgans(),
 					metadades.getDataObertura(),
 					metadades.getClassificacio(),
@@ -1018,6 +1016,11 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 	@Override
 	public boolean suportaVersionatCarpeta() {
 		return false;
+	}
+
+	@Override
+	public boolean suportaMetadadesNti() {
+		return true;
 	}
 
 	@Override

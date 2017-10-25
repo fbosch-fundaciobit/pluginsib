@@ -16,7 +16,6 @@ public class ExpedientMetadades {
 
 	private String identificador;
 	private String versioNti;
-	private ContingutOrigen origen;
 	private List<String> organs;
 	private Date dataObertura;
 	private String classificacio;
@@ -36,12 +35,6 @@ public class ExpedientMetadades {
 	}
 	public void setVersioNti(String versioNti) {
 		this.versioNti = versioNti;
-	}
-	public ContingutOrigen getOrigen() {
-		return origen;
-	}
-	public void setOrigen(ContingutOrigen origen) {
-		this.origen = origen;
 	}
 	public List<String> getOrgans() {
 		return organs;

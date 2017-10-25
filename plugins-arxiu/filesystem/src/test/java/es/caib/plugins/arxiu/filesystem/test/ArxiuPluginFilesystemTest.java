@@ -106,7 +106,6 @@ public class ArxiuPluginFilesystemTest {
 		expedientPerCrear.setNom(nom);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
 		metadades.setVersioNti("http://administracionelectronica.gob.es/ENI/XSD/v1.0/expediente-e");
-		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
@@ -177,7 +176,6 @@ public class ArxiuPluginFilesystemTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nomExp);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
@@ -312,7 +310,6 @@ public class ArxiuPluginFilesystemTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nomExp);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
@@ -401,7 +398,6 @@ public class ArxiuPluginFilesystemTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nomExp);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
@@ -470,7 +466,6 @@ public class ArxiuPluginFilesystemTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nomExp);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
@@ -566,7 +561,6 @@ public class ArxiuPluginFilesystemTest {
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nomExp);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
@@ -767,9 +761,6 @@ public class ArxiuPluginFilesystemTest {
 		if (expedientEsperat.getMetadades() != null) {
 			assertNotNull(expedientPerComprovar.getMetadades());
 			ExpedientMetadades metadades = expedientEsperat.getMetadades();
-			assertEquals(
-					metadades.getOrigen(),
-					expedientPerComprovar.getMetadades().getOrigen());
 			assertEquals(
 					metadades.getOrgans(),
 					expedientPerComprovar.getMetadades().getOrgans());

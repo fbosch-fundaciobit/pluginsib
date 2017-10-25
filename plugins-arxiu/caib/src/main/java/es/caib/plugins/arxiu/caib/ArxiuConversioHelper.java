@@ -198,7 +198,6 @@ public class ArxiuConversioHelper {
 			addMetadata(metadades, MetadatosExpediente.INTERESADOS, expedientMetadades.getInteressats());
 			addMetadata(metadades, MetadatosExpediente.FECHA_INICIO,
 					formatDateIso8601(expedientMetadades.getDataObertura()));
-			addMetadata(metadades, MetadatosExpediente.ORIGEN, toOrigenesContenido(expedientMetadades.getOrigen()));
 			if (expedientMetadades.getMetadadesAddicionals() != null) {
 				for (String metadada : expedientMetadades.getMetadadesAddicionals().keySet()) {
 					addMetadata(metadades, metadada, expedientMetadades.getMetadadesAddicionals().get(metadada));
@@ -256,13 +255,6 @@ public class ArxiuConversioHelper {
 				break;
 			case "eni:v_nti":
 				expedientMetadades.setVersioNti((String) metadata.getValue());
-				break;
-			case MetadatosExpediente.ORIGEN:
-				Integer origen = (Integer) metadata.getValue();
-				if (origen != null) {
-					expedientMetadades.setOrigen(
-							ContingutOrigen.toEnum(origen.toString()));
-				}
 				break;
 			case MetadatosExpediente.ORGANO:
 				Object preOrgan = metadata.getValue();
@@ -588,7 +580,6 @@ public class ArxiuConversioHelper {
 				break;
 			case MetadatosDocumento.CSV:
 			case MetadatosDocumento.DEF_CSV:
-				break;
 			default:
 				Map<String, Object> metadadesAddicionals = metadades.getMetadadesAddicionals();
 				if (metadadesAddicionals == null) {

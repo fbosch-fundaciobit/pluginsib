@@ -42,7 +42,6 @@ public class ExpedientDao {
 		ExpedientMetadades metadades = new ExpedientMetadades();
 		metadades.setIdentificador(idMetadades);
 		metadades.setVersioNti(versioNti);
-		metadades.setOrigen(origen);
 		metadades.setOrgans(organs);
 		metadades.setDataObertura(dataObertura);
 		metadades.setClassificacio(classificacio);
@@ -61,7 +60,6 @@ public class ExpedientDao {
 			boolean obert,
 			String idMetadades,
 			String versioNti,
-			ContingutOrigen origen,
 			List<String> organs,
 			Date dataObertura,
 			String classificacio,
@@ -77,7 +75,6 @@ public class ExpedientDao {
 		this.obert = obert;
 		this.idMetadades = idMetadades;
 		this.versioNti = versioNti;
-		this.origen = origen;
 		this.organs = organs;
 		this.dataObertura = dataObertura;
 		this.classificacio = classificacio;

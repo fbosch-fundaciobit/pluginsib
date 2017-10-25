@@ -1122,6 +1122,11 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	}
 
 	@Override
+	public boolean suportaMetadadesNti() {
+		return true;
+	}
+
+	@Override
 	public boolean generaIdentificadorNti() {
 		return true;
 	}
@@ -1322,7 +1327,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 		}
 	}
 
-	public InputStream generarVersioImprimible(
+	private InputStream generarVersioImprimible(
 			String identificador,
 			String metadada1,
 			String metadada2,

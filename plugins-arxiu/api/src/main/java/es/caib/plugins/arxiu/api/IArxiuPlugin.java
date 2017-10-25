@@ -382,6 +382,14 @@ public interface IArxiuPlugin extends IPlugin {
 	public boolean suportaVersionatCarpeta();
 
 	/**
+	 * Indica si la implementació del plugin suporta le gestió
+	 * de les metadades NTI.
+	 * 
+	 * @return true si ho suporta o false en cas contrari.
+	 */
+	public boolean suportaMetadadesNti();
+
+	/**
 	 * Indica si la implementació del plugin genera automàticament
 	 * l'identificador NTI dels expedients i documents.
 	 * 

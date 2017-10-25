@@ -377,7 +377,6 @@ public class CaibArxiuPluginTest {
 		ExpedientMetadades metadades = new ExpedientMetadades();
 		metadades.setIdentificador("IDEX_" + i);
 		metadades.setVersioNti("VNTIEX_" + i);
-		metadades.setOrigen(ContingutOrigen.ADMINISTRACIO);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date(i));
 		metadades.setClassificacio("CLASSEX_" + i);

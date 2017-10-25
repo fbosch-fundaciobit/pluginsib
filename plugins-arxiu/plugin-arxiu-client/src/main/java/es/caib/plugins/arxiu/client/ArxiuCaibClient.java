@@ -11,7 +11,6 @@ import java.util.Properties;
 
 import es.caib.plugins.arxiu.api.ArxiuNotFoundException;
 import es.caib.plugins.arxiu.api.ContingutArxiu;
-import es.caib.plugins.arxiu.api.ContingutOrigen;
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientEstat;
 import es.caib.plugins.arxiu.api.ExpedientMetadades;
@@ -40,7 +39,6 @@ public class ArxiuCaibClient {
 		final Expedient expedient = new Expedient();
 		expedient.setNom(nom);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
-		metadades.setOrigen(ContingutOrigen.CIUTADA);
 		metadades.setOrgans(organsTest);
 		metadades.setDataObertura(new Date());
 		metadades.setClassificacio("organo1_PRO_123456789");
