@@ -118,7 +118,7 @@ import es.caib.plugins.arxiu.caib.ArxiuCaibClient.GeneradorParam;
  */
 public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuPlugin {
 
-	private static final String ARXIUCAIB_PROPERTY_BASE = ARXIVE_BASE_PROPERTY + "caib.";
+	private static final String ARXIUCAIB_BASE_PROPERTY = ARXIU_BASE_PROPERTY + "caib.";
 	private static final int NUM_PAGINES_RESULTAT_CERCA = 100;
 	private static final String VERSIO_INICIAL_CONTINGUT = "1.0";
 	private static final String JERSEY_TIMEOUT_CONNECT = "10000";
@@ -1377,32 +1377,32 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	}
 
 	private String getPropertyBaseUrl() {
-		return getProperty(ARXIUCAIB_PROPERTY_BASE + "base.url");
+		return getProperty(ARXIUCAIB_BASE_PROPERTY + "base.url");
 	}
 	private String getPropertyAplicacioCodi() {
-		return getProperty(ARXIUCAIB_PROPERTY_BASE + "aplicacio.codi");
+		return getProperty(ARXIUCAIB_BASE_PROPERTY + "aplicacio.codi");
 	}
 	private String getPropertyUsuari() {
-		return getProperty(ARXIUCAIB_PROPERTY_BASE + "usuari");
+		return getProperty(ARXIUCAIB_BASE_PROPERTY + "usuari");
 	}
 	private String getPropertyContrasenya() {
-		return getProperty(ARXIUCAIB_PROPERTY_BASE + "contrasenya");
+		return getProperty(ARXIUCAIB_BASE_PROPERTY + "contrasenya");
 	}
 	private String getPropertyDefinicioCsv() {
-		return getProperty(ARXIUCAIB_PROPERTY_BASE + "csv.definicio");
+		return getProperty(ARXIUCAIB_BASE_PROPERTY + "csv.definicio");
 	}
 	private String getPropertyConversioImprimibleUrl() {
-		return getProperty(ARXIUCAIB_PROPERTY_BASE + "conversio.imprimible.url");
+		return getProperty(ARXIUCAIB_BASE_PROPERTY + "conversio.imprimible.url");
 	}
 	private int getPropertyTimeoutConnect() {
 		String timeout = getProperty(
-				ARXIUCAIB_PROPERTY_BASE + "timeout.connect",
+				ARXIUCAIB_BASE_PROPERTY + "timeout.connect",
 				JERSEY_TIMEOUT_CONNECT);
 		return Integer.parseInt(timeout);
 	}
 	private int getPropertyTimeoutRead() {
 		String timeout = getProperty(
-				ARXIUCAIB_PROPERTY_BASE + "timeout.read",
+				ARXIUCAIB_BASE_PROPERTY + "timeout.read",
 				JERSEY_TIMEOUT_READ);
 		return Integer.parseInt(timeout);
 	}

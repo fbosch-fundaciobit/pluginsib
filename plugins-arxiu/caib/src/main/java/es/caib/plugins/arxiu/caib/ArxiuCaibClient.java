@@ -258,12 +258,19 @@ public class ArxiuCaibClient {
 				"url=" + urlAmbMetode + ", " +
 				"tipus=application/json, " +
 				"body=" + body + ")");
+		System.out.println("Enviant petició HTTP a l'arxiu (" +
+				"url=" + urlAmbMetode + ", " +
+				"tipus=application/json, " +
+				"body=" + body + ")");
 		ClientResponse response = jerseyClient.
 				resource(urlAmbMetode).
 				type("application/json").
 				post(ClientResponse.class, body);
 		String json = response.getEntity(String.class);
 		logger.debug("Rebuda resposta HTTP de l'arxiu (" +
+				"status=" + response.getStatus() + ", " +
+				"body=" + json + ")");
+		System.out.println("Rebuda resposta HTTP de l'arxiu (" +
 				"status=" + response.getStatus() + ", " +
 				"body=" + json + ")");
 		return new JerseyResponse(

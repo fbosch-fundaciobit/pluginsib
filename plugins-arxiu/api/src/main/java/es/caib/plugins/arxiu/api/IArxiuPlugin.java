@@ -15,7 +15,7 @@ import org.fundaciobit.plugins.IPlugin;
  */
 public interface IArxiuPlugin extends IPlugin {
 
-	public static final String ARXIVE_BASE_PROPERTY = IPLUGIN_BASE_PROPERTIES + "arxiu.";
+	public static final String ARXIU_BASE_PROPERTY = "plugin.arxiu.";
 
 	/**
 	 * Crea un nou expedient.

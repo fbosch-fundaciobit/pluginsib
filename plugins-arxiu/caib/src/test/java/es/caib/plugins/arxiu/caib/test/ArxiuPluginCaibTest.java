@@ -77,7 +77,7 @@ public class ArxiuPluginCaibTest {
 		interessatsTest.add("00000000T");
 	}
 
-	@Test
+	//@Test
 	public void expedientCicleDeVida() throws Exception {
 		System.out.println("TEST: CICLE DE VIDA DELS EXPEDIENTS");
 		String nom = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -147,7 +147,7 @@ public class ArxiuPluginCaibTest {
 				expedientPerCrear);
 	}
 
-	@Test
+	//@Test
 	public void documentCicleDeVida() throws Exception {
 		System.out.println("TEST: CICLE DE VIDA DELS DOCUMENTS");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -194,6 +194,8 @@ public class ArxiuPluginCaibTest {
 								documentCreatId,
 								null,
 								true);
+						assertNotNull(documentDetalls.getMetadades());
+						assertNotNull(documentDetalls.getMetadades().getIdentificador());
 						documentComprovar(
 								documentPerCrear,
 								documentDetalls,
@@ -398,7 +400,7 @@ public class ArxiuPluginCaibTest {
 				documentPerCrear);
 	}
 
-	@Test
+	//@Test
 	public void documentModificarFinal() throws Exception {
 		System.out.println("TEST: DOCUMENT ESBORRANY I DEFINITIU");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -504,7 +506,7 @@ public class ArxiuPluginCaibTest {
 				documentPerCrear);
 	}
 
-	@Test
+	//@Test
 	public void documentFinalCrear() throws Exception {
 		System.out.println("TEST: DOCUMENT DEFINITIU DE BON COMENÇAMENT");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -592,7 +594,7 @@ public class ArxiuPluginCaibTest {
 				expedientPerCrear);
 	}
 
-	@Test
+	//@Test
 	public void carpetaCicleDeVida() throws Exception {
 		System.out.println("TEST: CICLE DE VIDA DE LES CARPETES");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -687,7 +689,7 @@ public class ArxiuPluginCaibTest {
 				carpetaPerCrear);
 	}
 
-	@Test
+	//@Test
 	public void carpetaEsborrarAmbContingut() throws Exception {
 		System.out.println("TEST: ESBORRAR CARPETA AMB CONTINGUTS");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();

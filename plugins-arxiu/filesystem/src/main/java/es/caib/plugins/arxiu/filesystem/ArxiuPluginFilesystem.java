@@ -31,7 +31,7 @@ import es.caib.plugins.arxiu.api.IArxiuPlugin;
 
 public class ArxiuPluginFilesystem extends AbstractPluginProperties implements IArxiuPlugin {
 
-	private static final String FILESYSTEM_PROPERTY_BASE = ARXIVE_BASE_PROPERTY + "filesystem.";
+	private static final String FILESYSTEM_BASE_PROPERTY = ARXIU_BASE_PROPERTY + "filesystem.";
 	private static final int NUM_CARPETES_CODIFICADES = 256;
 
 	private String base;
@@ -1181,15 +1181,11 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 		return "ES_" + getPropertyIdentificadorNtiOrgan() + "_" + anyActual + "_" + uuidBase64;
 	}
 
-	private String getPropertyBase() {
-		return FILESYSTEM_PROPERTY_BASE;
-	}
-
 	private String getBasePath() throws ArxiuException {
 		if (base != null) {
 			return base;
 		}
-		String aux = getProperty(getPropertyBase() + "base.path");
+		String aux = getProperty(FILESYSTEM_BASE_PROPERTY + "base.path");
 		if (!FilesystemArxiuFilesystem.esCarpeta(aux)) {
 			throw new ArxiuException(
 					"La ruta base configurada pel sistema de fitxers no correspon a una carpeta");
@@ -1208,7 +1204,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 		Boolean result = getFilesystemArxiuDAO().isEmmagatzemamentCodificat();
 		if (result == null) {
 			emmagatzemamentCodificat = "true".equals(
-				getProperty(getPropertyBase() + "emmagatzemament.codificat"));
+				getProperty(FILESYSTEM_BASE_PROPERTY + "emmagatzemament.codificat"));
 			
 			return emmagatzemamentCodificat;
 		} else {
@@ -1217,7 +1213,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 	}
 
 	private String getPropertyIdentificadorNtiOrgan() {
-		return getProperty(getPropertyBase() + "identificador.nti.organ");
+		return getProperty(FILESYSTEM_BASE_PROPERTY + "identificador.nti.organ");
 	}
 
 	private FilesystemArxiuDAO getFilesystemArxiuDAO() throws ArxiuException {
