@@ -89,6 +89,21 @@ public interface IArxiuPlugin extends IPlugin {
 			Integer itemsPerPagina) throws ArxiuException;
 
 	/**
+	 * Crea un nou expedient a dins un expedient pare.
+	 * 
+	 * @param expedient
+	 *            Informació per a la creació de l'expedient.
+	 * @param identificadorPare
+	 *            Identificador de l'expedient pare.
+	 * @return La informació sobre l'expedient creat.
+	 * @throws ArxiuException
+	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
+	 */
+	public ContingutArxiu expedientCrearSubExpedient(
+			Expedient expedient, 
+			String identificadorPare) throws ArxiuException;
+
+	/**
 	 * Retorna les versions disponibles d'un expedient.
 	 * 
 	 * @param identificador

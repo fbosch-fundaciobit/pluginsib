@@ -25,6 +25,7 @@ import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.DocumentId;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.DocumentNode;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.FileNode;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.VersionNode;
+import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamCreateChildFile;
 import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamCreateDocument;
 import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamCreateDraftDocument;
 import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamCreateFile;
@@ -39,6 +40,7 @@ import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamSetFol
 import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CloseFileResult;
 import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CopyDocumentResult;
 import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CopyFolderResult;
+import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateChildFileResult;
 import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateDocumentResult;
 import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateDraftDocumentResult;
 import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateFileResult;
@@ -66,6 +68,7 @@ import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.SetFolderResult;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.CloseFile;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.CopyDocument;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.CopyFolder;
+import es.caib.arxiudigital.apirest.CSGD.peticiones.CreateChildFile;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.CreateDocument;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.CreateDraftDocument;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.CreateFile;
@@ -358,6 +361,50 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 		} catch (Exception ex) {
 			throw new ArxiuException(
 					"S'ha produit un error cridant el mètode " + metode,
+					ex);
+		}
+	}
+
+	@Override
+	public ContingutArxiu expedientCrearSubExpedient(
+			final Expedient expedient, 
+			final String identificadorPare) throws ArxiuException {
+		String metode = Servicios.CREATE_CHILD_FILE;
+		try {
+			CreateChildFileResult resposta = getArxiuClient().generarEnviarPeticio(
+					metode,
+					CreateChildFile.class,
+					new GeneradorParam<ParamCreateChildFile>() {
+						@Override
+						public ParamCreateChildFile generar() {
+							ParamCreateChildFile param = new ParamCreateChildFile();
+							param.setFile(
+									ArxiuConversioHelper.expedientToFileNode(
+											expedient,
+											null,
+											null,
+											null,
+											true));
+							param.setRetrieveNode(Boolean.TRUE.toString());
+							param.setParent(identificadorPare);
+							return param;
+						}
+					},
+					ParamCreateChildFile.class,
+					CreateChildFileResult.class);
+			Expedient expedientCreat = ArxiuConversioHelper.fileNodeToExpedient(
+					resposta.getCreateChildFileResult().getResParam(),
+					VERSIO_INICIAL_CONTINGUT);
+			return crearContingutArxiu(
+					expedientCreat.getIdentificador(), 
+					expedientCreat.getNom(),
+					ContingutTipus.EXPEDIENT,
+					expedientCreat.getVersio());
+		} catch (ArxiuException aex) {
+			throw aex;
+		} catch (Exception ex) {
+			throw new ArxiuException(
+					"S'ha produit un error cridant el mètode " + metode + ": " + ex.getMessage(),
 					ex);
 		}
 	}

@@ -238,6 +238,13 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 	}
 
 	@Override
+	public ContingutArxiu expedientCrearSubExpedient(
+			final Expedient expedient, 
+			final String identificadorPare) throws ArxiuException {
+		throw new ArxiuException("Mètode no suportat");
+	}
+
+	@Override
 	public List<ContingutArxiu> expedientVersions(
 			String identificador) throws ArxiuException {
 		comprovarExpedient(identificador);
