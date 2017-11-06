@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -510,20 +512,47 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
    out.print(  "       return true;\n");
     //   out.print(  "       }\n");
    out.print(  "     }\n");
-   out.print(  "     var strHTTPServer = location.hostname;\n" ); 
-   out.print(  "     var CurrentPathName = unescape(location.pathname);\n" );
-   out.print(  "     var path = CurrentPathName.substring(0, CurrentPathName.lastIndexOf('/'));\n" );
+   
+
+   try {
+    URL url = new URL(absolutePluginRequestPath);
+    out.print(  "     var strHTTPServer = \"" + url.getHost() + "\";\n" );
+    boolean isHTTPS = url.getProtocol().toLowerCase().equals("https");
+    out.print(  "     DWObject.IfSSL = " + isHTTPS + "; // Set whether SSL is used\n" );
+    
+    int port = url.getPort();
+    if (port == -1) {
+      port = isHTTPS?443:80;
+    }
+    out.print(  "     DWObject.HTTPPort = " + port + ";\n" );
+    
+  } catch (MalformedURLException e) {
+    log.error(" No s'ha pogut extreure el HostName de la URL absoluta: "
+        + absolutePluginRequestPath, new Exception());
+    out.print(  "     var strHTTPServer = location.hostname;\n" );
+    //out.print(  "     DWObject.IfSSL = false; // Set whether SSL is used\n" );
+    
+    out.print(  "     var isSSL = (window.location.protocol == 'https:');\n" );
+    out.print(  "     DWObject.IfSSL = isSSL; // Set whether SSL is used\n" );
+    out.print(  "     DWObject.HTTPPort = location.port != '' ? location.port : (isSSL ? 443 : 80);\n" );
+    
+    out.print(  "     DWObject.HTTPPort = location.port == '' ? 80 : location.port;\n" );
+  }
+    
+//   out.print(  "     var CurrentPathName = unescape(location.pathname);\n" );
+//   out.print(  "     var path = CurrentPathName.substring(0, CurrentPathName.lastIndexOf('/'));\n" );
 //   out.print(  "     var idAnex = path.substring(path.lastIndexOf('/') + 1);\n" );
     //bufferOutput.append(  "     var CurrentPath = '/" + getDynamicWebTwainProperty("applicationPath", "regweb") + "';\n" );
     //bufferOutput.append(  "     var strActionPage = CurrentPath + '/" + getDynamicWebTwainProperty("guardarScanPath", "anexo/guardarScan") + "/" + scanWebID + "';\n" ); 
     
    out.print(  "     var strActionPage = '" + relativePluginRequestPath + UPLOAD_PAGE + "';\n" );
     
-   out.print(  "     DWObject.IfSSL = false; // Set whether SSL is used\n" );
+   //out.print(  "     DWObject.IfSSL = false; // Set whether SSL is used\n" );
+   
     
     // TODO Extreure host i port de la URL ABSOLUTA !!!! 
     
-   out.print(  "     DWObject.HTTPPort = location.port == '' ? 80 : location.port;\n" );
+   
    out.print(  "     var Digital = new Date();\n");
    out.print(  "     var uploadfilename = Math.floor(new Date().getTime() / 1000) // Uses milliseconds according to local time as the file name\n" ); 
    out.print(  "     var result = DWObject.HTTPUploadAllThroughPostAsPDF(strHTTPServer, strActionPage, uploadfilename + '.pdf');\n" );
@@ -892,8 +921,9 @@ public class DynamicWebTwainScanWebPlugin extends AbstractScanWebPlugin implemen
     
     
     List<ScannedDocument> list = fullInfo.getScannedFiles();
-    
-    log.info(" SCANID[" + fullInfo.getScanWebID()  + "].LIST.SIZE() = " + list.size());  
+    if (isDebug()) {
+      log.info(" SCANID[" + fullInfo.getScanWebID()  + "].LIST.SIZE() = " + list.size());
+    }
     
     try {
     if (list.size() == 0) {
