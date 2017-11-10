@@ -7,10 +7,12 @@ import java.io.StringReader;
 import java.security.cert.X509Certificate;
 
 
+
 import org.apache.log4j.Logger;
 import org.fundaciobit.plugins.certificate.ICertificatePlugin;
 import org.fundaciobit.plugins.certificate.InformacioCertificat;
 import org.fundaciobit.plugins.certificate.ResultatValidacio;
+import org.fundaciobit.plugins.utils.CertificateUtils;
 
 /**
  *
@@ -65,9 +67,15 @@ public class FakeCertificatePlugin implements ICertificatePlugin {
     
     info.setEmissorID(cert.getIssuerDN().getName());
     info.setEmissorOrganitzacio(propIssuer.getProperty("O"));
-    info.setNifResponsable(propSubject.getProperty("SERIALNUMBER"));
+    
+    log.info("\n\n  NIF = " + CertificateUtils.getDNI(cert) + "\n\n");
+    
+    info.setNifResponsable(CertificateUtils.getDNI(cert));
     info.setNomCompletResponsable(propSubject.getProperty("CN"));
     info.setNomResponsable(propSubject.getProperty("GIVENNAME"));
+    
+    
+    
     {
       String llinatges = propSubject.getProperty("SURNAME");
       if (llinatges != null) {
@@ -83,8 +91,10 @@ public class FakeCertificatePlugin implements ICertificatePlugin {
     info.setNumeroSerie(cert.getSerialNumber());
     info.setPais(propSubject.getProperty("C"));
     
+    
+    
     info.setPolitica(null);
-    info.setPoliticaID(null);
+    info.setPoliticaID(CertificateUtils.getCertificatePolicyId(cert));
     info.setPoliticaVersio(null);
     info.setRaoSocial(null);
     info.setSubject(cert.getSubjectDN().getName());
