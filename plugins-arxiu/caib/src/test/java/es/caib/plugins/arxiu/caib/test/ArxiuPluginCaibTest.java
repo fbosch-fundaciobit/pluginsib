@@ -80,13 +80,15 @@ public class ArxiuPluginCaibTest {
 	@Test
 	public void expedientCicleDeVida() throws Exception {
 		System.out.println("TEST: CICLE DE VIDA DELS EXPEDIENTS");
-		String nom = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
+		final String nom = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
 		final Expedient expedientPerCrear = new Expedient();
 		expedientPerCrear.setNom(nom);
 		final ExpedientMetadades metadades = new ExpedientMetadades();
 		metadades.setOrgans(organsTest);
-		metadades.setDataObertura(new Date());
-		metadades.setClassificacio("organo1_PRO_123456789");
+		final Date dataObertura = new Date();
+		metadades.setDataObertura(dataObertura);
+		final String classificacio = "organo1_PRO_123456789";
+		metadades.setClassificacio(classificacio);
 		metadades.setEstat(ExpedientEstat.OBERT);
 		metadades.setInteressats(interessatsTest);
 		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
@@ -113,7 +115,9 @@ public class ArxiuPluginCaibTest {
 						System.out.println("3.- Modificant expedient creat (id=" + expedientCreatId + ")... ");
 						Expedient expedientPerModificar = new Expedient();
 						expedientPerModificar.setIdentificador(expedientCreatId);
-						expedientPerModificar.setNom(expedientPerCrear.getNom() + "_MOD");
+						String nomModificat = expedientPerCrear.getNom() + "_MOD";
+						expedientPerModificar.setNom(nomModificat);
+						metadades.setClassificacio("organo2_PRO_123456789");
 						expedientPerModificar.setMetadades(metadades);
 						ContingutArxiu expedientModificat = arxiuPlugin.expedientModificar(
 								expedientPerModificar);
@@ -129,11 +133,11 @@ public class ArxiuPluginCaibTest {
 								expedientModificatDetalls,
 								true);
 						System.out.println("Ok");
-						System.out.println("6.- Esborrant expedient creat (id=" + expedientCreatId + ")... ");
+						System.out.println("5.- Esborrant expedient creat (id=" + expedientCreatId + ")... ");
 						arxiuPlugin.expedientEsborrar(expedientCreatId);
 						elementsCreats.remove(expedientCreat);
 						System.out.println("Ok");
-						System.out.println("7.- Obtenint expedient esborrat per verificar que no existeix (id=" + expedientCreatId + ")... ");
+						System.out.println("6.- Obtenint expedient esborrat per verificar que no existeix (id=" + expedientCreatId + ")... ");
 						try {
 							arxiuPlugin.expedientDetalls(
 									expedientCreat.getIdentificador(),
@@ -142,6 +146,97 @@ public class ArxiuPluginCaibTest {
 						} catch (ArxiuNotFoundException ex) {
 							System.out.println("Ok");
 						}
+					}
+				},
+				expedientPerCrear);
+	}
+
+	@Test
+	public void expedientVersionat() throws Exception {
+		System.out.println("TEST: VERSIONAT DELS EXPEDIENTS");
+		final String nom = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
+		final Expedient expedientPerCrear = new Expedient();
+		expedientPerCrear.setNom(nom);
+		final ExpedientMetadades metadades = new ExpedientMetadades();
+		metadades.setOrgans(organsTest);
+		final Date dataObertura = new Date();
+		metadades.setDataObertura(dataObertura);
+		final String classificacio = "organo1_PRO_123456789";
+		metadades.setClassificacio(classificacio);
+		metadades.setEstat(ExpedientEstat.OBERT);
+		metadades.setInteressats(interessatsTest);
+		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
+		expedientPerCrear.setMetadades(metadades);
+		String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
+		final Document documentPerCrear = new Document();
+		documentPerCrear.setNom(nomDoc);
+		documentPerCrear.setEstat(DocumentEstat.ESBORRANY);
+		final DocumentMetadades documentMetadades = new DocumentMetadades();
+		documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
+		documentMetadades.setOrgans(organsTest);
+		documentMetadades.setDataCaptura(new Date());
+		documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+		documentMetadades.setFormat(DocumentFormat.OASIS12);
+		documentMetadades.setExtensio(DocumentExtensio.ODT);
+		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
+		documentPerCrear.setMetadades(documentMetadades);
+		DocumentContingut documentContingut = new DocumentContingut();
+		documentContingut.setContingut(
+				IOUtils.toByteArray(
+						getDocumentContingutEsborranyOdt()));
+		documentContingut.setTipusMime("application/vnd.oasis.opendocument.text");
+		documentPerCrear.setContingut(documentContingut);
+		testCreantElements(
+				new TestAmbElementsCreats() {
+					@Override
+					public void executar(List<ContingutArxiu> elementsCreats) {
+						ContingutArxiu expedientCreat = elementsCreats.get(0);
+						String expedientCreatId = expedientCreat.getIdentificador();
+						System.out.println("1.- Comprovant versions de l'expedient creat (id=" + expedientCreatId + ")... ");
+						List<ContingutArxiu> versions1 = arxiuPlugin.expedientVersions(expedientCreatId);
+						assertNotNull(versions1);
+						assertEquals(1, versions1.size());
+						System.out.println("Ok");
+						System.out.println("2.- Modificant expedient creat (id=" + expedientCreatId + ")... ");
+						Expedient expedientPerModificar = new Expedient();
+						expedientPerModificar.setIdentificador(expedientCreatId);
+						String nomModificat = expedientPerCrear.getNom() + "_MOD";
+						expedientPerModificar.setNom(nomModificat);
+						metadades.setClassificacio("organo2_PRO_123456789");
+						expedientPerModificar.setMetadades(metadades);
+						ContingutArxiu expedientModificat = arxiuPlugin.expedientModificar(
+								expedientPerModificar);
+						assertNotNull(expedientModificat);
+						System.out.println("Ok");
+						System.out.println("3.- Comprovant versions de l'expedient modificat (id=" + expedientCreatId + ")... ");
+						List<ContingutArxiu> versions2 = arxiuPlugin.expedientVersions(expedientCreatId);
+						assertNotNull(versions2);
+						assertEquals(2, versions2.size());
+						System.out.println("Ok");
+						System.out.println("4.- Comprovant versió antiga de l'expedient (id=" + expedientCreatId + ")... ");
+						Expedient expedientV1Detalls = arxiuPlugin.expedientDetalls(
+								expedientCreatId,
+								versions2.get(0).getVersio());
+						assertNotNull(expedientV1Detalls);
+						assertEquals(
+								nom,
+								expedientV1Detalls.getNom());
+						assertNotNull(expedientV1Detalls.getMetadades());
+						assertEquals(
+								classificacio,
+								expedientV1Detalls.getMetadades().getClassificacio());
+						System.out.println("Ok");
+						System.out.println("5.- Comprovant versions de l'expedient amb un nou document creat (id=" + expedientCreatId + ")... ");
+						ContingutArxiu documentCreat = arxiuPlugin.documentCrear(
+								documentPerCrear,
+								expedientCreatId);
+						assertNotNull(documentCreat);
+						assertNotNull(documentCreat.getIdentificador());
+						List<ContingutArxiu> versions3 = arxiuPlugin.expedientVersions(expedientCreatId);
+						assertNotNull(versions3);
+						assertEquals(2, versions3.size());
+						System.out.println("Ok");
 					}
 				},
 				expedientPerCrear);
@@ -593,6 +688,122 @@ public class ArxiuPluginCaibTest {
 				},
 				expedientPerCrear);
 	}
+
+	/*@Test
+	public void documentSerieDocumentalDiferent() throws Exception {
+		System.out.println("TEST: DOCUMENT SÈRIE DOCUMENTAL DIFERENT");
+		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
+		final Expedient expedientPerCrear = new Expedient();
+		expedientPerCrear.setNom(nomExp);
+		final ExpedientMetadades metadades = new ExpedientMetadades();
+		metadades.setOrgans(organsTest);
+		metadades.setDataObertura(new Date());
+		metadades.setClassificacio("organo1_PRO_123456789");
+		metadades.setEstat(ExpedientEstat.OBERT);
+		metadades.setInteressats(interessatsTest);
+		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
+		expedientPerCrear.setMetadades(metadades);
+		testCreantElements(
+				new TestAmbElementsCreats() {
+					@Override
+					public void executar(List<ContingutArxiu> elementsCreats) throws IOException {
+						ContingutArxiu expedientCreat = elementsCreats.get(0);
+						String expedientCreatId = expedientCreat.getIdentificador();
+						final Document documentPerCrear = new Document();
+						String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
+						documentPerCrear.setNom(nomDoc);
+						final DocumentMetadades documentMetadades = new DocumentMetadades();
+						documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
+						documentMetadades.setOrgans(organsTest);
+						documentMetadades.setDataCaptura(new Date());
+						documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+						documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+						documentMetadades.setFormat(DocumentFormat.PDF);
+						documentMetadades.setExtensio(DocumentExtensio.PDF);
+						documentMetadades.setSerieDocumental("S0702");
+						documentPerCrear.setMetadades(documentMetadades);
+						documentPerCrear.setEstat(DocumentEstat.DEFINITIU);
+						Firma firmaPades = new Firma();
+						firmaPades.setTipus(FirmaTipus.PADES);
+						firmaPades.setPerfil(FirmaPerfil.EPES);
+						firmaPades.setTipusMime("application/pdf");
+						firmaPades.setContingut(
+								IOUtils.toByteArray(
+										getDocumentContingutFirma()));
+						documentPerCrear.setFirmes(
+								Arrays.asList(firmaPades));
+						System.out.println(
+								"1.- Comprovant que la creació del document a l'expedient amb sèrie documental diferent dona error (" +
+								"id=" + expedientCreatId + ")... ");
+						try {
+							arxiuPlugin.documentCrear(
+									documentPerCrear,
+									expedientCreatId);
+							fail("No s'hauria de poder crear un document amb una sèrie documental (" + documentMetadades.getSerieDocumental() + ") diferent de la de l'expedient (" + metadades.getSerieDocumental() + ")");
+						} catch (ArxiuException ex) {
+							System.out.println("Ok");
+						}
+					}
+				},
+				expedientPerCrear);
+	}*/
+
+	/*@Test
+	public void documentSerieDocumentalBuida() throws Exception {
+		System.out.println("TEST: DOCUMENT SÈRIE DOCUMENTAL DIFERENT");
+		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
+		final Expedient expedientPerCrear = new Expedient();
+		expedientPerCrear.setNom(nomExp);
+		final ExpedientMetadades metadades = new ExpedientMetadades();
+		metadades.setOrgans(organsTest);
+		metadades.setDataObertura(new Date());
+		metadades.setClassificacio("organo1_PRO_123456789");
+		metadades.setEstat(ExpedientEstat.OBERT);
+		metadades.setInteressats(interessatsTest);
+		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
+		expedientPerCrear.setMetadades(metadades);
+		testCreantElements(
+				new TestAmbElementsCreats() {
+					@Override
+					public void executar(List<ContingutArxiu> elementsCreats) throws IOException {
+						ContingutArxiu expedientCreat = elementsCreats.get(0);
+						String expedientCreatId = expedientCreat.getIdentificador();
+						final Document documentPerCrear = new Document();
+						String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
+						documentPerCrear.setNom(nomDoc);
+						final DocumentMetadades documentMetadades = new DocumentMetadades();
+						documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
+						documentMetadades.setOrgans(organsTest);
+						documentMetadades.setDataCaptura(new Date());
+						documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+						documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+						documentMetadades.setFormat(DocumentFormat.PDF);
+						documentMetadades.setExtensio(DocumentExtensio.PDF);
+						documentPerCrear.setMetadades(documentMetadades);
+						documentPerCrear.setEstat(DocumentEstat.ESBORRANY);
+						System.out.println(
+								"1.- Comprovant que la creació del document a l'expedient sense sèrie documental (" +
+								"id=" + expedientCreatId + ")... ");
+						ContingutArxiu documentCreat = arxiuPlugin.documentCrear(
+								documentPerCrear,
+								expedientCreatId);
+						assertNotNull(documentCreat);
+						String documentCreatId = documentCreat.getIdentificador();
+						System.out.println("Ok");
+						System.out.println(
+								"2.- Comprovant la sèrie documental del document creat (" +
+								"id=" + documentCreatId + ")... ");
+						Document documentDetalls = arxiuPlugin.documentDetalls(
+								documentCreatId,
+								null,
+								true);
+						assertNotNull(documentDetalls.getMetadades());
+						assertNotNull(documentDetalls.getMetadades().getSerieDocumental());
+						System.out.println("Ok " + documentDetalls.getMetadades().getSerieDocumental());
+					}
+				},
+				expedientPerCrear);
+	}*/
 
 	@Test
 	public void carpetaCicleDeVida() throws Exception {

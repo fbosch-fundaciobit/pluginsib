@@ -1215,16 +1215,14 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 						return vn1.getDate().compareTo(vn2.getDate());
 					}
 				});
-		int versio = 1;
-		List<ContingutArxiu> continguts  = new ArrayList<ContingutArxiu>();
-		for (int i = 0; i < versions.size(); i++) {
+		List<ContingutArxiu> continguts = new ArrayList<ContingutArxiu>();
+		for (VersionNode versio: versions) {
 			continguts.add(
 					ArxiuConversioHelper.crearContingutArxiu(
 							identificador,
 							null,
-							ContingutTipus.EXPEDIENT,
-							String.valueOf(versio)));
-			versio++;
+							ContingutTipus.DOCUMENT,
+							String.valueOf(versio.getId())));
 		}
 		return continguts;
 	}
