@@ -251,8 +251,7 @@ public class CaibArxiuPluginTest {
 		document.setIdentificador(documentIdPerConsultar);
 		document.setNom(documentNomPerConsultar);
 		infoDocumentModificat = caibArxiuPlugin.documentModificar(
-				document,
-				false);
+				document);
 		assertNotNull("No s'ha pogut modificar el document", infoDocumentModificat);
 	}
 
@@ -455,7 +454,6 @@ public class CaibArxiuPluginTest {
 		metadades.setDataCaptura(new Date(i));
 		metadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
 		metadades.setTipusDocumental(DocumentTipus.ALTRES);
-		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		metadades.setMetadadesAddicionals(metadadesAddicionals);
 		return metadades;
 	}

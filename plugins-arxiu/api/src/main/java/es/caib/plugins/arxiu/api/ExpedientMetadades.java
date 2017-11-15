@@ -4,6 +4,7 @@
 package es.caib.plugins.arxiu.api;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -77,6 +78,22 @@ public class ExpedientMetadades {
 	}
 	public void setMetadadesAddicionals(Map<String, Object> metadadesAddicionals) {
 		this.metadadesAddicionals = metadadesAddicionals;
+	}
+
+	public Object getMetadadaAddicional(String clau) {
+		if (metadadesAddicionals == null) {
+			return null;
+		} else {
+			return metadadesAddicionals.get(clau);
+		}
+	}
+	public void addMetadadaAddicional(
+			String clau,
+			Object valor) {
+		if (metadadesAddicionals == null) {
+			metadadesAddicionals = new HashMap<String, Object>();
+		}
+		metadadesAddicionals.put(clau, valor);
 	}
 
 }

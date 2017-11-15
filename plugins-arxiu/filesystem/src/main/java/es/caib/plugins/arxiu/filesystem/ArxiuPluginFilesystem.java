@@ -347,7 +347,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 							metadades.getOrigen(),
 							metadades.getEstatElaboracio(),
 							metadades.getTipusDocumental(),
-							metadades.getSerieDocumental(),
+							null,
 							document.getFirmes(),
 							document.getContingut().getTipusMime(),
 							metadades.getIdentificadorOrigen()));
@@ -381,8 +381,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 
 	@Override
 	public ContingutArxiu documentModificar(
-			Document document,
-			final boolean marcarDefinitiu) throws ArxiuException {
+			Document document) throws ArxiuException {
 		try {
 			MySemaphore.get().acquire();
 		} catch (InterruptedException e) {
@@ -411,7 +410,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 					document.getMetadades().getOrigen(),
 					document.getMetadades().getEstatElaboracio(),
 					document.getMetadades().getTipusDocumental(),
-					document.getMetadades().getSerieDocumental(),
+					null,
 					document.getFirmes(),
 					document.getContingut().getTipusMime(),
 					document.getMetadades().getIdentificadorOrigen());
@@ -509,7 +508,6 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 			metadades.setTipusDocumental(d.getTipusDocumental());
 			//metadades.setFormat(format);
 			//metadades.setExtensio(extensio);
-			metadades.setSerieDocumental(d.getSerieDocumental());
 			metadades.setIdentificadorOrigen(d.getIdentificadorOrigen());
 			document.setMetadades(metadades);
 			document.setFirmes(d.getFirmes());
@@ -539,7 +537,6 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 				metadades.setTipusDocumental(d.getTipusDocumental());
 				//metadades.setFormat(format);
 				//metadades.setExtensio(extensio);
-				metadades.setSerieDocumental(d.getSerieDocumental());
 				metadades.setIdentificadorOrigen(d.getIdentificadorOrigen());
 				document.setMetadades(metadades);
 				document.setFirmes(d.getFirmes());
