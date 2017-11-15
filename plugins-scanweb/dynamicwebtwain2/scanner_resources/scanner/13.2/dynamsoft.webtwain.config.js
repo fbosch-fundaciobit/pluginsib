@@ -1,4 +1,4 @@
-﻿//
+//
 // Dynamsoft JavaScript Library for Basic Initiation of Dynamic Web TWAIN
 // More info on DWT: http://www.dynamsoft.com/Products/WebTWAIN_Overview.aspx
 //
