@@ -169,17 +169,12 @@ public interface IArxiuPlugin extends IPlugin {
 	 * 
 	 * @param document
 	 *            Informació per a la modificació del document.
-	 * @param marcarDefinitiu
-	 *            Indica si el document s’ha de marcar com a definitiu durant la
-	 *            modificació. Per a marcar un document com a definitiu aquest ha
-	 *            d’estar firmat.
 	 * @return La informació sobre el document modificat.
 	 * @throws ArxiuException
 	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
 	 */
 	public ContingutArxiu documentModificar(
-			Document document,
-			boolean marcarDefinitiu) throws ArxiuException;
+			Document document) throws ArxiuException;
 
 	/**
 	 * Esborra un document existent.

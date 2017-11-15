@@ -195,7 +195,6 @@ public class ArxiuPluginFilesystemTest {
 		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 		documentMetadades.setFormat(DocumentFormat.OASIS12);
 		documentMetadades.setExtensio(DocumentExtensio.ODT);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
 		documentContingut.setContingut(
@@ -235,8 +234,7 @@ public class ArxiuPluginFilesystemTest {
 						contingutPerModificar.setTipusMime("application/vnd.oasis.opendocument.text");
 						documentPerModificar.setContingut(contingutPerModificar);
 						ContingutArxiu documentModificat = arxiuPlugin.documentModificar(
-								documentPerModificar,
-								false);
+								documentPerModificar);
 						assertNotNull(documentModificat);
 						assertEquals(documentCreatId, documentModificat.getIdentificador());
 						System.out.println("Ok");
@@ -329,7 +327,6 @@ public class ArxiuPluginFilesystemTest {
 		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 		documentMetadades.setFormat(DocumentFormat.OASIS12);
 		documentMetadades.setExtensio(DocumentExtensio.ODT);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
 		documentContingut.setContingut(
@@ -348,10 +345,10 @@ public class ArxiuPluginFilesystemTest {
 								"id=" + documentCreatId + ")... ");
 						Document documentPerModificar = new Document();
 						documentPerModificar.setIdentificador(documentCreatId);
+						documentPerModificar.setEstat(DocumentEstat.DEFINITIU);
 						try {
 							arxiuPlugin.documentModificar(
-									documentPerModificar,
-									true);
+									documentPerModificar);
 							fail("No s'hauria de poder establir com a definitiu un document sense firma (id=" + documentCreatId + ")");
 						} catch (ArxiuException ex) {
 							System.out.println("Ok");
@@ -368,9 +365,9 @@ public class ArxiuPluginFilesystemTest {
 										getDocumentContingutFirma()));
 						List<Firma> firmes = Arrays.asList(firmaPades);
 						documentPerModificar.setFirmes(firmes);
+						documentPerModificar.setEstat(DocumentEstat.DEFINITIU);
 						ContingutArxiu itemDocumentModificat = arxiuPlugin.documentModificar(
-								documentPerModificar,
-								true);
+								documentPerModificar);
 						assertNotNull(itemDocumentModificat);
 						System.out.println("Ok");
 						System.out.println(
@@ -419,7 +416,6 @@ public class ArxiuPluginFilesystemTest {
 		documentMetadades.setExtensio(DocumentExtensio.PDF);
 		//documentMetadades.setFormat(ArxiuConstants.DOCUMENT_FORMAT_OASIS12);
 		//documentMetadades.setExtensio(ArxiuConstants.DOCUMENT_EXTENSIO_ODT);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
 		documentContingut.setContingut(
@@ -448,9 +444,9 @@ public class ArxiuPluginFilesystemTest {
 										getDocumentContingutFirma()));
 						documentPerModificar.setFirmes(
 								Arrays.asList(firmaPades));
+						documentPerModificar.setEstat(DocumentEstat.DEFINITIU);
 						ContingutArxiu itemDocumentModificat = arxiuPlugin.documentModificar(
-								documentPerModificar,
-								true);
+								documentPerModificar);
 						assertNotNull(itemDocumentModificat);
 						System.out.println("Ok");
 					}
@@ -488,7 +484,6 @@ public class ArxiuPluginFilesystemTest {
 		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 		documentMetadades.setFormat(DocumentFormat.OASIS12);
 		documentMetadades.setExtensio(DocumentExtensio.ODT);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
 		documentContingut.setContingut(
@@ -583,7 +578,6 @@ public class ArxiuPluginFilesystemTest {
 		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 		documentMetadades.setFormat(DocumentFormat.OASIS12);
 		documentMetadades.setExtensio(DocumentExtensio.ODT);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
 		documentContingut.setContingut(
@@ -829,9 +823,6 @@ public class ArxiuPluginFilesystemTest {
 			assertEquals(
 					metadades.getExtensio(),
 					documentPerComprovar.getMetadades().getExtensio());
-			assertEquals(
-					metadades.getSerieDocumental(),
-					documentPerComprovar.getMetadades().getSerieDocumental());
 			assertEquals(
 					metadades.getIdentificadorOrigen(),
 					documentPerComprovar.getMetadades().getIdentificadorOrigen());

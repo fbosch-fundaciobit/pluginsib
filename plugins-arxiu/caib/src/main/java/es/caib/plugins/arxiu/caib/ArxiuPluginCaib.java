@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.codec.binary.Base64;
@@ -24,6 +25,7 @@ import com.sun.jersey.api.client.WebResource;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.DocumentId;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.DocumentNode;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.FileNode;
+import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.Metadata;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.VersionNode;
 import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamCreateChildFile;
 import es.caib.arxiudigital.apirest.CSGD.entidades.parametrosLlamada.ParamCreateDocument;
@@ -95,6 +97,7 @@ import es.caib.arxiudigital.apirest.CSGD.peticiones.SetFinalDocument;
 import es.caib.arxiudigital.apirest.CSGD.peticiones.SetFolder;
 import es.caib.arxiudigital.apirest.constantes.MetadatosDocumento;
 import es.caib.arxiudigital.apirest.constantes.Servicios;
+import es.caib.arxiudigital.apirest.constantes.TiposObjetoSGD;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ArxiuValidacioException;
 import es.caib.plugins.arxiu.api.Carpeta;
@@ -520,6 +523,9 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 		try {
 			comprovarAbsenciaMetadadaCsv(document.getMetadades());
 			comprovarFirma(document);
+			final String serieDocumental = findSerieDocumentalExpedientPare(
+					document,
+					identificadorPare);
 			Document creat = null;
 			if (DocumentEstat.ESBORRANY.equals(document.getEstat())) {
 				metode = Servicios.CREATE_DRAFT;
@@ -534,6 +540,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 								param.setDocument(
 										ArxiuConversioHelper.documentToDocumentNode(
 												document,
+												serieDocumental,
 												null,
 												null,
 												null,
@@ -570,6 +577,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 								param.setDocument(
 										ArxiuConversioHelper.documentToDocumentNode(
 												document,
+												serieDocumental,
 												null,
 												null,
 												null,
@@ -605,13 +613,12 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 
 	@Override
 	public ContingutArxiu documentModificar(
-			final Document document,
-			final boolean marcarDefinitiu) throws ArxiuException {
+			final Document document) throws ArxiuException {
 		String metode = null;
 		try {
 			comprovarAbsenciaMetadadaCsv(document.getMetadades());
 			comprovarFirma(document);
-			if (marcarDefinitiu) {
+			if (DocumentEstat.DEFINITIU.equals(document.getEstat())) {
 				if (document.getContingut() != null) {
 					throw new ArxiuValidacioException(
 							"No és possible marcar el document com a definitiu si es vol modificar el seu contingut.");
@@ -635,6 +642,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 								param.setDocument(
 										ArxiuConversioHelper.documentToDocumentNode(
 												document,
+												null,
 												null, //resposta.getGetDocumentResult().getResParam().getMetadataCollection(),
 												null, //resposta.getGetDocumentResult().getResParam().getAspects(),
 												null,
@@ -658,6 +666,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 								param.setDocument(
 										ArxiuConversioHelper.documentToDocumentNode(
 												document,
+												null,
 												null, //resposta.getGetDocumentResult().getResParam().getMetadataCollection(),
 												null, //resposta.getGetDocumentResult().getResParam().getAspects(),
 												null,
@@ -726,28 +735,10 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			} else {
 				versioResposta = versio;
 			}
-			GetDocumentResult resposta = getArxiuClient().generarEnviarPeticio(
-					metode,
-					GetDocument.class,
-					new GeneradorParam<ParamGetDocument>() {
-						@Override
-						public ParamGetDocument generar() {
-							ParamGetDocument param = new ParamGetDocument();
-							DocumentId documentId = new DocumentId();
-							String identificadorAmbVersio;
-							if (versio != null) {
-								identificadorAmbVersio = versio + "@" + identificador;
-							} else {
-								identificadorAmbVersio = identificador;
-							}
-							documentId.setNodeId(identificadorAmbVersio);
-							param.setDocumentId(documentId);
-							param.setContent(new Boolean(ambContingut).toString());
-							return param;
-						}
-					},
-					ParamGetDocument.class,
-					GetDocumentResult.class);
+			GetDocumentResult resposta = getDocumentResult(
+					identificador,
+					versio,
+					ambContingut);
 			return ArxiuConversioHelper.documentNodeToDocument(
 					resposta.getGetDocumentResult().getResParam(),
 					versioResposta);
@@ -933,7 +924,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 		 * La URL de consulta es la següent:
 		 * https://intranet.caib.es/concsv/rest/printable/IDENTIFICADOR?metadata1=METADADA_1&metadata2=METADADA_2&watermark=MARCA_AIGUA
 		 * A on:
-		 *   - IDENTIFICADOR és l'id del document a consultar [OBLIGATORI]
+		 *   - IDENTIFICADOR és el CSV del document a consultar [OBLIGATORI]
 		 *   - METADADA_1 és la primera metadada [OPCIONAL]
 		 *   - METADADA_2 és la segona metadada [OPCIONAL]
 		 *   - MARCA_AIGUA és el text de la marca d'aigua que apareixerà impresa a cada fulla [OPCIONAL]
@@ -1281,6 +1272,143 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			darreraVersio = versions.get(versions.size() - 1).getVersio();
 		}
 		return darreraVersio;
+	}
+
+	private String findSerieDocumentalExpedientPare(
+			Document document,
+			String identificadorPare) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, UniformInterfaceException, ClientHandlerException, IOException {
+		if (document.getMetadades() != null && document.getMetadades().getMetadadesAddicionals() != null) {
+			Map<String, Object> metadadesAddicionals = document.getMetadades().getMetadadesAddicionals();
+			Object serieDocumental = metadadesAddicionals.get(MetadatosDocumento.CODIGO_CLASIFICACION);
+			if (serieDocumental != null) {
+				return (String)serieDocumental;
+			}
+		}
+		GetFileResult expedientPare = findExpedientPare(identificadorPare);
+		List<Metadata> metadatas = expedientPare.getGetFileResult().getResParam().getMetadataCollection();
+		String serieDocumental = null;
+		for (Metadata metadata: metadatas) {
+			if (MetadatosDocumento.CODIGO_CLASIFICACION.equals(metadata.getQname())) {
+				serieDocumental = (String)metadata.getValue();
+				break;
+			}
+		}
+		if (serieDocumental != null) {
+			return serieDocumental;
+		} else {
+			throw new ArxiuValidacioException(
+					"No s'ha pogut trobar la sèrie documental de l'expedient pare (identificadorPare=" + identificadorPare + ").");
+		}
+	}
+
+	private GetFileResult findExpedientPare(
+			String identificadorPare) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, UniformInterfaceException, ClientHandlerException, IOException {
+		String identificadorActual = identificadorPare;
+		GetFileResult getFileResult = null;
+		TiposObjetoSGD tipoObjeto;
+		do {
+			tipoObjeto = null;
+			String identificador = null;
+			try {
+				getFileResult = getFileResult(
+						identificadorActual,
+						null);
+				if (	getFileResult != null && 
+						getFileResult.getGetFileResult() != null &&
+						getFileResult.getGetFileResult().getResParam() != null) {
+					tipoObjeto = getFileResult.getGetFileResult().getResParam().getType();
+					identificador = getFileResult.getGetFileResult().getResParam().getId();
+				}
+			} catch (Exception ex) {
+				GetFolderResult getFolderResult = getFolderResult(
+						identificadorActual);
+				if (	getFolderResult != null && 
+						getFolderResult.getGetFolderResult() != null &&
+						getFolderResult.getGetFolderResult().getResParam() != null) {
+					tipoObjeto = getFolderResult.getGetFolderResult().getResParam().getType();
+					identificador = getFolderResult.getGetFolderResult().getResParam().getId();
+				}
+			}
+			if (tipoObjeto == null) {
+				throw new ArxiuValidacioException(
+						"No s'ha pogut trobar l'expedient superior per al contingut amb identificador " + identificadorPare + ". " +
+						"No s'ha pogut trobar el tipus d'objecte per al contingut amb identificador " + identificadorActual + ".");
+			}
+			identificadorActual = identificador;
+		} while (!TiposObjetoSGD.EXPEDIENTE.equals(tipoObjeto));
+		return getFileResult;
+	}
+
+	private GetFileResult getFileResult(
+			final String identificador,
+			final String versio) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, UniformInterfaceException, ClientHandlerException, IOException {
+		String metode = Servicios.GET_FILE;
+		return getArxiuClient().generarEnviarPeticio(
+				metode,
+				GetFile.class,
+				new GeneradorParam<ParamNodeId>() {
+					@Override
+					public ParamNodeId generar() {
+						ParamNodeId param = new ParamNodeId();
+						String identificadorAmbVersio;
+						if (versio != null) {
+							identificadorAmbVersio = versio + "@" + identificador;
+						} else {
+							identificadorAmbVersio = identificador;
+						}
+						param.setNodeId(identificadorAmbVersio);
+						return param;
+					}
+				},
+				ParamNodeId.class,
+				GetFileResult.class);
+	}
+
+	private GetDocumentResult getDocumentResult(
+			final String identificador,
+			final String versio,
+			final boolean ambContingut) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, UniformInterfaceException, ClientHandlerException, IOException {
+		String metode = Servicios.GET_DOC;
+		return getArxiuClient().generarEnviarPeticio(
+				metode,
+				GetDocument.class,
+				new GeneradorParam<ParamGetDocument>() {
+					@Override
+					public ParamGetDocument generar() {
+						ParamGetDocument param = new ParamGetDocument();
+						DocumentId documentId = new DocumentId();
+						String identificadorAmbVersio;
+						if (versio != null) {
+							identificadorAmbVersio = versio + "@" + identificador;
+						} else {
+							identificadorAmbVersio = identificador;
+						}
+						documentId.setNodeId(identificadorAmbVersio);
+						param.setDocumentId(documentId);
+						param.setContent(new Boolean(ambContingut).toString());
+						return param;
+					}
+				},
+				ParamGetDocument.class,
+				GetDocumentResult.class);
+	}
+
+	private GetFolderResult getFolderResult(
+			final String identificador) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, UniformInterfaceException, ClientHandlerException, IOException {
+		String metode = Servicios.GET_FOLDER;
+		return getArxiuClient().generarEnviarPeticio(
+				metode,
+				GetFolder.class,
+				new GeneradorParam<ParamNodeId>() {
+					@Override
+					public ParamNodeId generar() {
+						ParamNodeId param = new ParamNodeId();
+						param.setNodeId(identificador);
+						return param;
+					}
+				},
+				ParamNodeId.class,
+				GetFolderResult.class);
 	}
 
 	private void comprovarAbsenciaMetadadaCsv(

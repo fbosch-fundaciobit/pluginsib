@@ -23,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import es.caib.arxiudigital.apirest.constantes.MetadatosDocumento;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ArxiuNotFoundException;
 import es.caib.plugins.arxiu.api.Carpeta;
@@ -179,7 +180,6 @@ public class ArxiuPluginCaibTest {
 		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 		documentMetadades.setFormat(DocumentFormat.OASIS12);
 		documentMetadades.setExtensio(DocumentExtensio.ODT);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
 		documentContingut.setContingut(
@@ -268,7 +268,6 @@ public class ArxiuPluginCaibTest {
 		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 		documentMetadades.setFormat(DocumentFormat.OASIS12);
 		documentMetadades.setExtensio(DocumentExtensio.ODT);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
 		documentContingut.setContingut(
@@ -310,8 +309,7 @@ public class ArxiuPluginCaibTest {
 						contingutPerModificar.setTipusMime("application/vnd.oasis.opendocument.text");
 						documentPerModificar.setContingut(contingutPerModificar);
 						ContingutArxiu documentModificat = arxiuPlugin.documentModificar(
-								documentPerModificar,
-								false);
+								documentPerModificar);
 						assertNotNull(documentModificat);
 						assertEquals(documentCreatId, documentModificat.getIdentificador());
 						System.out.println("Ok");
@@ -404,7 +402,6 @@ public class ArxiuPluginCaibTest {
 		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 		documentMetadades.setFormat(DocumentFormat.OASIS12);
 		documentMetadades.setExtensio(DocumentExtensio.ODT);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
 		documentContingut.setContingut(
@@ -426,9 +423,7 @@ public class ArxiuPluginCaibTest {
 						Document documentPerModificar = new Document();
 						documentPerModificar.setIdentificador(documentCreatId);
 						try {
-							arxiuPlugin.documentModificar(
-									documentPerModificar,
-									true);
+							arxiuPlugin.documentModificar(documentPerModificar);
 							fail("No s'hauria de poder establir com a definitiu un document sense firma (id=" + documentCreatId + ")");
 						} catch (ArxiuException ex) {
 							System.out.println("Ok");
@@ -442,15 +437,15 @@ public class ArxiuPluginCaibTest {
 						firmaPades.setTipusMime("application/pdf");
 						firmaPades.setContingut(
 								IOUtils.toByteArray(
-										getDocumentContingutFirma()));
+										getDocumentFirmaPdf()));
 						documentPerModificar.setFirmes(Arrays.asList(firmaPades));
 						DocumentMetadades documentMetadadesModificar = new DocumentMetadades();
 						documentMetadadesModificar.setFormat(DocumentFormat.PDF);
 						documentMetadadesModificar.setExtensio(DocumentExtensio.PDF);
 						documentPerModificar.setMetadades(documentMetadadesModificar);
+						documentPerModificar.setEstat(DocumentEstat.DEFINITIU);
 						ContingutArxiu contingutModificat = arxiuPlugin.documentModificar(
-								documentPerModificar,
-								true);
+								documentPerModificar);
 						assertNotNull(contingutModificat);
 						System.out.println("Ok");
 						elementsCreats.remove(documentCreat);
@@ -521,7 +516,6 @@ public class ArxiuPluginCaibTest {
 		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 		documentMetadades.setFormat(DocumentFormat.OASIS12);
 		documentMetadades.setExtensio(DocumentExtensio.ODT);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
 		documentContingut.setContingut(
@@ -553,8 +547,7 @@ public class ArxiuPluginCaibTest {
 						documentMetadadesPdf.setExtensio(DocumentExtensio.PDF);
 						documentPerModificarPdf.setMetadades(documentMetadadesPdf);
 						ContingutArxiu documentModificatPdf = arxiuPlugin.documentModificar(
-								documentPerModificarPdf,
-								false);
+								documentPerModificarPdf);
 						assertNotNull(documentModificatPdf);
 						System.out.println(
 								"2.- Guardant firma i marcant com a definitiu (" +
@@ -567,12 +560,12 @@ public class ArxiuPluginCaibTest {
 						firmaPades.setTipusMime("application/pdf");
 						firmaPades.setContingut(
 								IOUtils.toByteArray(
-										getDocumentContingutFirma()));
+										getDocumentFirmaPdf()));
 						documentPerModificarFinal.setFirmes(
 								Arrays.asList(firmaPades));
+						documentPerModificarFinal.setEstat(DocumentEstat.DEFINITIU);
 						ContingutArxiu documentModificatFinal = arxiuPlugin.documentModificar(
-								documentPerModificarFinal,
-								true);
+								documentPerModificarFinal);
 						assertNotNull(documentModificatFinal);
 						System.out.println("Ok");
 						elementsCreats.remove(documentCreat);
@@ -632,7 +625,6 @@ public class ArxiuPluginCaibTest {
 						documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 						documentMetadades.setFormat(DocumentFormat.PDF);
 						documentMetadades.setExtensio(DocumentExtensio.PDF);
-						documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 						documentPerCrear.setMetadades(documentMetadades);
 						documentPerCrear.setEstat(DocumentEstat.DEFINITIU);
 						System.out.println(
@@ -655,7 +647,7 @@ public class ArxiuPluginCaibTest {
 						firmaPades.setTipusMime("application/pdf");
 						firmaPades.setContingut(
 								IOUtils.toByteArray(
-										getDocumentContingutFirma()));
+										getDocumentFirmaPdf()));
 						documentPerCrear.setFirmes(
 								Arrays.asList(firmaPades));
 						ContingutArxiu documentCreat = arxiuPlugin.documentCrear(
@@ -684,6 +676,67 @@ public class ArxiuPluginCaibTest {
 						} catch (ArxiuException ex) {
 							System.out.println("Ok");
 						}
+					}
+				},
+				expedientPerCrear);
+	}
+
+	/*
+	 * Encara no està clar com guardar a l'arxiu aquest tipus de documents
+	 */
+	public void documentFisic() throws Exception {
+		System.out.println("TEST: DOCUMENT FISIC");
+		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
+		final Expedient expedientPerCrear = new Expedient();
+		expedientPerCrear.setNom(nomExp);
+		final ExpedientMetadades metadades = new ExpedientMetadades();
+		metadades.setOrgans(organsTest);
+		metadades.setDataObertura(new Date());
+		metadades.setClassificacio("organo1_PRO_123456789");
+		metadades.setEstat(ExpedientEstat.OBERT);
+		metadades.setInteressats(interessatsTest);
+		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
+		expedientPerCrear.setMetadades(metadades);
+		testCreantElements(
+				new TestAmbElementsCreats() {
+					@Override
+					public void executar(List<ContingutArxiu> elementsCreats) throws IOException {
+						ContingutArxiu expedientCreat = elementsCreats.get(0);
+						String expedientCreatId = expedientCreat.getIdentificador();
+						final Document documentPerCrear = new Document();
+						String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
+						documentPerCrear.setNom(nomDoc);
+						final DocumentMetadades documentMetadades = new DocumentMetadades();
+						documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
+						documentMetadades.setOrgans(organsTest);
+						documentMetadades.setDataCaptura(new Date());
+						documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+						documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+						documentMetadades.setFormat(DocumentFormat.TXT);
+						documentMetadades.setExtensio(DocumentExtensio.TXT);
+						DocumentContingut contingutFisic = new DocumentContingut();
+						contingutFisic.setContingut(
+								IOUtils.toByteArray(
+										getDocumentContingutFisic()));
+						contingutFisic.setTipusMime("text/plain");
+						documentPerCrear.setContingut(contingutFisic);
+						documentPerCrear.setMetadades(documentMetadades);
+						documentPerCrear.setEstat(DocumentEstat.DEFINITIU);
+						Firma firmaCades = new Firma();
+						firmaCades.setTipus(FirmaTipus.CADES_DET);
+						firmaCades.setPerfil(FirmaPerfil.BES);
+						firmaCades.setContingut(
+								IOUtils.toByteArray(
+										getDocumentFirmaFisic()));
+						documentPerCrear.setFirmes(
+								Arrays.asList(firmaCades));
+						System.out.println(
+								"1.- Comprovant que la creació del document definitiu a l'expedient sense contingut (" +
+								"id=" + expedientCreatId + ")... ");
+						arxiuPlugin.documentCrear(
+								documentPerCrear,
+								expedientCreatId);
+						System.out.println("Ok");
 					}
 				},
 				expedientPerCrear);
@@ -748,7 +801,7 @@ public class ArxiuPluginCaibTest {
 				expedientPerCrear);
 	}*/
 
-	/*@Test
+	@Test
 	public void documentSerieDocumentalBuida() throws Exception {
 		System.out.println("TEST: DOCUMENT SÈRIE DOCUMENTAL DIFERENT");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -779,6 +832,9 @@ public class ArxiuPluginCaibTest {
 						documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 						documentMetadades.setFormat(DocumentFormat.PDF);
 						documentMetadades.setExtensio(DocumentExtensio.PDF);
+						documentMetadades.addMetadadaAddicional(
+								MetadatosDocumento.CODIGO_CLASIFICACION,
+								SERIE_DOCUMENTAL);
 						documentPerCrear.setMetadades(documentMetadades);
 						documentPerCrear.setEstat(DocumentEstat.ESBORRANY);
 						System.out.println(
@@ -798,12 +854,15 @@ public class ArxiuPluginCaibTest {
 								null,
 								true);
 						assertNotNull(documentDetalls.getMetadades());
-						assertNotNull(documentDetalls.getMetadades().getSerieDocumental());
-						System.out.println("Ok " + documentDetalls.getMetadades().getSerieDocumental());
+						assertNotNull(documentDetalls.getMetadades().getMetadadesAddicionals());
+						Object serieDocumental = documentDetalls.getMetadades().getMetadadesAddicionals().get(
+								MetadatosDocumento.CODIGO_CLASIFICACION);
+						assertNotNull(serieDocumental);
+						System.out.println("Ok (" + serieDocumental + ")");
 					}
 				},
 				expedientPerCrear);
-	}*/
+	}
 
 	@Test
 	public void carpetaCicleDeVida() throws Exception {
@@ -834,7 +893,6 @@ public class ArxiuPluginCaibTest {
 		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 		documentMetadades.setFormat(DocumentFormat.OASIS12);
 		documentMetadades.setExtensio(DocumentExtensio.ODT);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
 		documentContingut.setContingut(
@@ -929,7 +987,6 @@ public class ArxiuPluginCaibTest {
 		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
 		documentMetadades.setFormat(DocumentFormat.OASIS12);
 		documentMetadades.setExtensio(DocumentExtensio.ODT);
-		documentMetadades.setSerieDocumental(SERIE_DOCUMENTAL);
 		documentPerCrear.setMetadades(documentMetadades);
 		DocumentContingut documentContingut = new DocumentContingut();
 		documentContingut.setContingut(
@@ -1176,9 +1233,6 @@ public class ArxiuPluginCaibTest {
 					metadades.getExtensio(),
 					documentPerComprovar.getMetadades().getExtensio());
 			assertEquals(
-					metadades.getSerieDocumental(),
-					documentPerComprovar.getMetadades().getSerieDocumental());
-			assertEquals(
 					metadades.getIdentificadorOrigen(),
 					documentPerComprovar.getMetadades().getIdentificadorOrigen());
 		} else {
@@ -1269,9 +1323,19 @@ public class ArxiuPluginCaibTest {
         		"/es/caib/plugins/arxiu/caib/document_test.pdf");
 		return is;
 	}
-	private InputStream getDocumentContingutFirma() {
+	private InputStream getDocumentFirmaPdf() {
 		InputStream is = getClass().getResourceAsStream(
         		"/es/caib/plugins/arxiu/caib/firma_test_epes.pdf");
+		return is;
+	}
+	private InputStream getDocumentContingutFisic() {
+		InputStream is = getClass().getResourceAsStream(
+        		"/es/caib/plugins/arxiu/caib/document_test.txt");
+		return is;
+	}
+	private InputStream getDocumentFirmaFisic() {
+		InputStream is = getClass().getResourceAsStream(
+        		"/es/caib/plugins/arxiu/caib/firma_test_cades.csig");
 		return is;
 	}
 

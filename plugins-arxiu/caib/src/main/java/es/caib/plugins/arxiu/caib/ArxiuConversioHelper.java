@@ -113,6 +113,7 @@ public class ArxiuConversioHelper {
 
 	public static DocumentNode documentToDocumentNode(
 			Document document,
+			String serieDocumental,
 			List<Metadata> metadadesPrevies,
 			List<Aspectos> aspectesPrevis,
 			String aplicacioCodi,
@@ -128,6 +129,7 @@ public class ArxiuConversioHelper {
 		node.setMetadataCollection(
 				toMetadataDocument(
 						document.getMetadades(),
+						serieDocumental,
 						document.getFirmes(),
 						aplicacioCodi,
 						metadadesPrevies,
@@ -369,6 +371,7 @@ public class ArxiuConversioHelper {
 
 	private static List<Metadata> toMetadataDocument(
 			DocumentMetadades documentMetadades,
+			String serieDocumental,
 			List<Firma> firmes,
 			String aplicacioCodi,
 			List<Metadata> metadadesPrevies,
@@ -378,7 +381,14 @@ public class ArxiuConversioHelper {
 		if (metadadesPrevies != null) {
 			metadades.addAll(metadadesPrevies);
 		}
-		addMetadata(metadades, MetadatosExpediente.CODIGO_APLICACION_TRAMITE, aplicacioCodi);
+		addMetadata(
+				metadades,
+				MetadatosExpediente.CODIGO_APLICACION_TRAMITE,
+				aplicacioCodi);
+		addMetadata(
+				metadades,
+				MetadatosDocumento.CODIGO_CLASIFICACION,
+				serieDocumental);
 		if (documentMetadades != null) {
 			addMetadata(
 					metadades,
@@ -412,10 +422,6 @@ public class ArxiuConversioHelper {
 					metadades,
 					MetadatosDocumento.ORGANO,
 					documentMetadades.getOrgans());
-			addMetadata(
-					metadades,
-					MetadatosDocumento.CODIGO_CLASIFICACION,
-					documentMetadades.getSerieDocumental());
 			if (documentMetadades.getMetadadesAddicionals() != null) {
 				for (String clau : documentMetadades.getMetadadesAddicionals().keySet()) {
 					addMetadata(
@@ -548,7 +554,7 @@ public class ArxiuConversioHelper {
 				firmaCsvRegulacio = (String)metadada.getValue();
 			}
 		}
-		if (firmaCsv != null && firmaTipus == null) {
+		if (firmaCsv != null) {
 			Firma firma = new Firma();
 			firma.setTipus(FirmaTipus.CSV);
 			firma.setContingut(firmaCsv.getBytes());
@@ -558,7 +564,8 @@ public class ArxiuConversioHelper {
 				firmes = new ArrayList<Firma>();
 			}
 			firmes.add(firma);
-		} else if (firmaTipus != null) {
+		}
+		if (firmaTipus != null) {
 			FirmaTipus firmaTipusEnum = FirmaTipus.toEnum(firmaTipus);
 			for (Content content: contents) {
 				if (TiposContenidosBinarios.SIGNATURE.equals(content.getBinaryType())) {
@@ -621,9 +628,6 @@ public class ArxiuConversioHelper {
 				} else {
 					metadades.setOrgans(Arrays.asList((String)preValor));
 				}
-				break;
-			case MetadatosDocumento.CODIGO_CLASIFICACION:
-				metadades.setSerieDocumental((String)metadata.getValue());
 				break;
 			case MetadatosDocumento.NOMBRE_FORMATO:
 				metadades.setFormat(
