@@ -2067,7 +2067,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
    */
   protected List<Metadata> recollectAutomaticMetadatas(Map<String, Object> custodyParameters,
       String prefix) throws CustodyException {
-    final boolean ignoreErrors = false;
+    final boolean ignoreErrors = true;
 
     String propertyBase = getPropertyBase() + prefix + ".";
 
