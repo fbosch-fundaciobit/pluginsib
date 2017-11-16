@@ -74,7 +74,7 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.codi_procediment_EL=org
 # També inclou "Codigo Aplicacion" definit a la propietat "connexio.codi_aplicacio"
 
 # EE01,EE02, EE03, EE04, EE99
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.estat_elaboracio_EL=<#switch anexo.validezDocumento><#case 1>EE01<#break><#case 2>EE02<#break><#case 3>EE03<#break><#case 4>EE03<#break><#default>EE99</#switch>
+es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.estat_elaboracio_EL=<#switch anexo.validezDocumento><#case 1>EE99<#break><#case 2>EE99<#break><#case 3>EE03<#break><#case 4>EE01<#break><#default>EE99</#switch>
 
 # TIPO_DOC_ENI: TD01, TD02, TD03, ...
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.tipus_documental_EL=${anexo.tipoDocumental.codigoNTI}
