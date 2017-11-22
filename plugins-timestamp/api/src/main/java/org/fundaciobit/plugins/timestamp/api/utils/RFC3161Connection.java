@@ -509,6 +509,8 @@ public final class RFC3161Connection {
      * @throws IOException Si hay errores en la comunicaci&oacute;n o en la lectura de datos con la TSA. */
     public byte[] getTimeStampResponse(final byte[] imprint, final String hashAlgorithm, final Calendar time) throws Exception, IOException {
 
+      System.out.println(" XYZ ZZZ hashAlgorithm => " + hashAlgorithm);
+      
     	final TimeStampRequest request = this.tsqGenerator.generate(
                new ASN1ObjectIdentifier(hashAlgorithm != null ? getOID(hashAlgorithm) : X509ObjectIdentifiers.id_SHA1.getId()),
                imprint,
