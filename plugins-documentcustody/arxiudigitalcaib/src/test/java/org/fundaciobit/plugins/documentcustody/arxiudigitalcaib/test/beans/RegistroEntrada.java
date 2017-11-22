@@ -30,6 +30,8 @@ public class RegistroEntrada {
   private String numeroRegistroFormateado;
 
   private RegistroDetalle registroDetalle;
+  
+  private Libro libro;
 
   /**
      * 
@@ -53,7 +55,7 @@ public class RegistroEntrada {
   public RegistroEntrada(Long id, UsuarioEntidad usuario, Oficina oficina, Organismo destino,
       String destinoExternoCodigo, String destinoExternoDenominacion, Date fecha,
       Integer numeroRegistro, String numeroRegistroFormateado,
-      RegistroDetalle registroDetalle) {
+      RegistroDetalle registroDetalle, Libro libro) {
     super();
     this.id = id;
     this.usuario = usuario;
@@ -65,6 +67,7 @@ public class RegistroEntrada {
     this.numeroRegistro = numeroRegistro;
     this.numeroRegistroFormateado = numeroRegistroFormateado;
     this.registroDetalle = registroDetalle;
+    this.libro = libro;
   }
 
   public Long getId() {
@@ -145,6 +148,14 @@ public class RegistroEntrada {
 
   public void setRegistroDetalle(RegistroDetalle registroDetalle) {
     this.registroDetalle = registroDetalle;
+  }
+
+  public Libro getLibro() {
+    return libro;
+  }
+
+  public void setLibro(Libro libro) {
+    this.libro = libro;
   }
 
 }

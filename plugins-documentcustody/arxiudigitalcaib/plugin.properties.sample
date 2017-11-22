@@ -59,8 +59,6 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.organs_EL=A04013511
 # ADMINISTRACION=1 //  CIUDADANO=0
 es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.origen_document_EL=${anexo.origenCiudadanoAdmin}
 
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.data_creacio_EL=<#setting time_zone='UTC'>${.now?string[\"yyyy-MM-dd'T'HH:mm:ss.sss'Z'\"]}
-
 
 # =================  METADADES OBLIGATORIES EXPEDIENT ========================
 
@@ -118,26 +116,26 @@ es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.expedient.automatic_met
 # Opcional. Metadades Automàtiques per Document Electrònic
 # Nota: Només es permeten les definides en la classe es.caib.arxiudigital.apirest.constantes.MetadatosDocumento
 
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automaticmetadata_items=1,2
+es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automaticmetadata_items=1,2
 
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.1.name=eni:descripcion
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.1.valueEL=${anexo.id} - ${anexo.titulo}
+es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.1.name=eni:descripcion
+es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.1.valueEL=${anexo.id} - ${anexo.titulo}
 
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.2.name=eni:origen
-es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.2.valueEL=${registro.origen}
+es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.2.name=eni:origen
+es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.2.valueEL=${registro.origen}
 
 # REGISTRE
-#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.3.name=eni:tipo_asiento_registral
-#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.3.valueEL=${registro.???????????}
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.3.name=eni:tipo_asiento_registral
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.3.valueEL=${registro.???????????}
 
-#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.4.name=eni:codigo_oficina_registro
-#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.4.valueEL=${registro.???????????????}
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.4.name=eni:codigo_oficina_registro
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.4.valueEL=${registro.???????????????}
 
-#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.5.name=eni:eni:fecha_asiento_registral
-#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.5.valueEL=<#setting time_zone='UTC'>${registro.fecha?string[\\"yyyy-MM-dd'T'HH:mm:ss.sss'Z'\\"]}
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.5.name=eni:eni:fecha_asiento_registral
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.5.valueEL=<#setting time_zone='UTC'>${registro.fecha?string[\\"yyyy-MM-dd'T'HH:mm:ss.sss'Z'\\"]}
 
-#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.6.name=eni:numero_asiento_registral
-#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.document.automatic_metadata.6.valueEL=${registro.numeroRegistro}
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.6.name=eni:numero_asiento_registral
+#es.caib.exemple.plugins.documentcustody.arxiudigitalcaib.documentelectronic.automatic_metadata.6.valueEL=${registro.numeroRegistro}
 
 
 
