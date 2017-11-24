@@ -68,7 +68,8 @@ public class ArxiuConversioHelper {
 		FileNode node = new FileNode();
 		node.setType(TiposObjetoSGD.EXPEDIENTE);
 		node.setId(expedient.getIdentificador());
-		node.setName(expedient.getNom());
+		node.setName(
+				revisarContingutNom(expedient.getNom()));
 		node.setMetadataCollection(
 				toMetadataExpedient(
 						expedient.getMetadades(),
@@ -122,7 +123,8 @@ public class ArxiuConversioHelper {
 			boolean creacio) throws ArxiuException {
 		DocumentNode node = new DocumentNode();
 		node.setId(document.getIdentificador());
-		node.setName(document.getNom());
+		node.setName(
+				revisarContingutNom(document.getNom()));
 		node.setType(TiposObjetoSGD.DOCUMENTO);
 		node.setBinaryContents(
 				toBinaryContents(document));
@@ -178,7 +180,8 @@ public class ArxiuConversioHelper {
 			String nom) {
 		FolderNode node = new FolderNode();
 		node.setId(identificador);
-		node.setName(nom);
+		node.setName(
+				revisarContingutNom(nom));
 		node.setType(TiposObjetoSGD.DIRECTORIO);
 		return node;
 	}
@@ -796,6 +799,10 @@ public class ArxiuConversioHelper {
 		} catch (ParseException e) {
 			throw new ArxiuException("No s'ha pogut parsejar el valor per el camp Data (" + "valor=" + date + ")");
 		}
+	}
+
+	private static String revisarContingutNom(String nom) {
+		return nom.replaceAll("[\\\\/:*?\"<>|]", "_");
 	}
 
 	public static ContingutArxiu crearContingutArxiu(
