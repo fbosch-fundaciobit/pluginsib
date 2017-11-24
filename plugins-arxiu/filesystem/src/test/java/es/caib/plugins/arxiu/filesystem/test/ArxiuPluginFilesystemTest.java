@@ -17,11 +17,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.Random;
 import java.util.UUID;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
@@ -83,22 +80,6 @@ public class ArxiuPluginFilesystemTest {
 	}
 
 	//@Test
-	public void generacioIdentificadorNti() throws Exception {
-		System.out.println("TEST: GENERACIO IDENTIFICADOR NTI ");
-		String organo = "A04013511";
-		UUID uuid =  UUID.randomUUID();
-		String uuidHex = uuid.toString().replaceAll("-", "");
-		byte[] rnd = new byte[5];
-		new Random().nextBytes(rnd);
-		uuidHex += new String(Hex.encodeHex(rnd));
-		byte[] bytes = Hex.decodeHex(uuidHex.toCharArray());
-		String uuidBase64 = "FS" + new String(Base64.encodeBase64(bytes));
-		int anyActual = Calendar.getInstance().get(Calendar.YEAR);
-		String idNti = "ES_" + organo + "_" + anyActual + "_" + uuidBase64;
-		System.out.println(">>> identificador: " + idNti + " (" + idNti.length() + ")");
-	}
-
-	@Test
 	public void expedientCicleDeVida() throws Exception {
 		System.out.println("TEST: CICLE DE VIDA DELS EXPEDIENTS " + UUID.randomUUID());
 		String nom = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -226,6 +207,7 @@ public class ArxiuPluginFilesystemTest {
 						Document documentPerModificar = new Document();
 						documentPerModificar.setIdentificador(documentCreatId);
 						documentPerModificar.setNom(documentPerCrear.getNom() + "_MOD");
+						documentPerModificar.setEstat(DocumentEstat.ESBORRANY);
 						documentPerModificar.setMetadades(documentMetadades);
 						DocumentContingut contingutPerModificar = new DocumentContingut();
 						contingutPerModificar.setContingut(
@@ -251,40 +233,13 @@ public class ArxiuPluginFilesystemTest {
 								true);
 						System.out.println("Ok");
 						System.out.println(
-								"4.- Comprovant les versions del document (" +
-								"nodeId=" + documentCreatId + ")... ");
-						List<ContingutArxiu> versions = arxiuPlugin.documentVersions(documentCreatId);
-						assertNotNull(versions);
-						assertEquals(2, versions.size());
-						ContingutArxiu versio0 = versions.get(0);
-						System.out.println("v" + versio0.getVersio() + "... ");
-						Document documentVersio0 = arxiuPlugin.documentDetalls(
-								documentCreatId,
-								versio0.getVersio(),
-								true);
-						documentComprovar(
-								documentPerCrear,
-								documentVersio0,
-								false);
-						ContingutArxiu versio1 = versions.get(1);
-						System.out.println("v" + versio1.getVersio() + "... ");
-						Document documentVersio1 = arxiuPlugin.documentDetalls(
-								documentCreatId,
-								versio1.getVersio(),
-								true);
-						documentComprovar(
-								documentPerModificar,
-								documentVersio1,
-								false);
-						System.out.println("Ok");
-						System.out.println(
-								"5.- Esborrant document creat (" +
+								"4.- Esborrant document creat (" +
 								"id=" + documentCreatId + ")... ");
 						arxiuPlugin.documentEsborrar(documentCreatId);
 						elementsCreats.remove(documentCreat);
 						System.out.println("Ok");
 						System.out.println(
-								"6.- Obtenint document esborrat per verificar que no existeix (" +
+								"5.- Obtenint document esborrat per verificar que no existeix (" +
 								"id=" + documentCreatId + ")... ");
 						try {
 							arxiuPlugin.documentDetalls(
@@ -301,7 +256,7 @@ public class ArxiuPluginFilesystemTest {
 				documentPerCrear);
 	}
 
-	//@Test
+	@Test
 	public void documentEsborranyDefinitiu() throws Exception {
 		System.out.println("TEST: DOCUMENT ESBORRANY I DEFINITIU");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -338,6 +293,8 @@ public class ArxiuPluginFilesystemTest {
 				new TestAmbElementsCreats() {
 					@Override
 					public void executar(List<ContingutArxiu> elementsCreats) throws IOException {
+						ContingutArxiu expedientCreat = elementsCreats.get(0);
+						String expedientCreatId = expedientCreat.getIdentificador();
 						ContingutArxiu documentCreat = elementsCreats.get(1);
 						String documentCreatId = documentCreat.getIdentificador();
 						System.out.println(
@@ -347,8 +304,7 @@ public class ArxiuPluginFilesystemTest {
 						documentPerModificar.setIdentificador(documentCreatId);
 						documentPerModificar.setEstat(DocumentEstat.DEFINITIU);
 						try {
-							arxiuPlugin.documentModificar(
-									documentPerModificar);
+							arxiuPlugin.documentModificar(documentPerModificar);
 							fail("No s'hauria de poder establir com a definitiu un document sense firma (id=" + documentCreatId + ")");
 						} catch (ArxiuException ex) {
 							System.out.println("Ok");
@@ -362,14 +318,19 @@ public class ArxiuPluginFilesystemTest {
 						firmaPades.setTipusMime("application/pdf");
 						firmaPades.setContingut(
 								IOUtils.toByteArray(
-										getDocumentContingutFirma()));
-						List<Firma> firmes = Arrays.asList(firmaPades);
-						documentPerModificar.setFirmes(firmes);
+										getDocumentFirmaPdf()));
+						documentPerModificar.setFirmes(Arrays.asList(firmaPades));
+						DocumentMetadades documentMetadadesModificar = new DocumentMetadades();
+						documentMetadadesModificar.setFormat(DocumentFormat.PDF);
+						documentMetadadesModificar.setExtensio(DocumentExtensio.PDF);
+						documentPerModificar.setMetadades(documentMetadadesModificar);
 						documentPerModificar.setEstat(DocumentEstat.DEFINITIU);
-						ContingutArxiu itemDocumentModificat = arxiuPlugin.documentModificar(
+						ContingutArxiu contingutModificat = arxiuPlugin.documentModificar(
 								documentPerModificar);
-						assertNotNull(itemDocumentModificat);
+						assertNotNull(contingutModificat);
 						System.out.println("Ok");
+						elementsCreats.remove(documentCreat);
+						elementsCreats.remove(expedientCreat);
 						System.out.println(
 								"4.- Comprovant firmes del document (" +
 								"id=" + documentCreatId + ")... ");
@@ -377,11 +338,33 @@ public class ArxiuPluginFilesystemTest {
 								documentCreatId,
 								null,
 								true);
+						documentPerModificar.setNom(documentPerCrear.getNom());
+						documentPerModificar.setMetadades(null);
+						documentFirmat.setMetadades(null);
+						documentFirmat.setContingut(null);
 						documentComprovar(
-								documentPerCrear,
+								documentPerModificar,
 								documentFirmat,
-								true);
+								false);
 						System.out.println("Ok");
+						System.out.println(
+								"5.- Comprovant que no es pot esborrar un document definitiu (" +
+								"id=" + documentCreatId + ")... ");
+						try {
+							arxiuPlugin.documentEsborrar(documentCreatId);
+							fail("No s'hauria de poder esborrar el document creat (id=" + documentCreatId + ")");
+						} catch (ArxiuException ex) {
+							System.out.println("Ok");
+						}
+						System.out.println(
+								"6.- Comprovant que no es pot esborrar un expedient amb documents definitius (" +
+								"id=" + expedientCreatId + ")... ");
+						try {
+							arxiuPlugin.expedientEsborrar(expedientCreatId);
+							fail("No s'hauria de poder esborrar l'expedient amb documents definitius (id=" + expedientCreatId + ")");
+						} catch (ArxiuException ex) {
+							System.out.println("Ok");
+						}
 					}
 				},
 				expedientPerCrear,
@@ -441,7 +424,7 @@ public class ArxiuPluginFilesystemTest {
 						firmaPades.setTipusMime("application/pdf");
 						firmaPades.setContingut(
 								IOUtils.toByteArray(
-										getDocumentContingutFirma()));
+										getDocumentFirmaPdf()));
 						documentPerModificar.setFirmes(
 								Arrays.asList(firmaPades));
 						documentPerModificar.setEstat(DocumentEstat.DEFINITIU);
@@ -859,9 +842,14 @@ public class ArxiuPluginFilesystemTest {
 				assertEquals(
 						firmaEsperada.getFitxerNom(),
 						firmaPerComprovar.getFitxerNom());
-				assertEquals(
-						DigestUtils.sha1Hex(firmaEsperada.getContingut()),
-						DigestUtils.sha1Hex(firmaPerComprovar.getContingut()));
+				if (firmaEsperada.getContingut() != null) {
+					assertNotNull(firmaPerComprovar.getContingut());
+					assertEquals(
+							DigestUtils.sha1Hex(firmaEsperada.getContingut()),
+							DigestUtils.sha1Hex(firmaPerComprovar.getContingut()));
+				} else {
+					assertNull(firmaPerComprovar.getContingut());
+				}
 				assertEquals(
 						firmaEsperada.getTipusMime(),
 						firmaPerComprovar.getTipusMime());
@@ -914,9 +902,9 @@ public class ArxiuPluginFilesystemTest {
         		"/es/caib/plugins/arxiu/filesystem/document_test.pdf");
 		return is;
 	}
-	private InputStream getDocumentContingutFirma() {
+	private InputStream getDocumentFirmaPdf() {
 		InputStream is = getClass().getResourceAsStream(
-        		"/es/caib/plugins/arxiu/filesystem/firma_test.pdf");
+        		"/es/caib/plugins/arxiu/filesystem/firma_test_epes.pdf");
 		return is;
 	}
 
