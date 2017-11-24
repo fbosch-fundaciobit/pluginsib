@@ -34,6 +34,7 @@ import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateDraftDocumen
 import es.caib.arxiudigital.apirest.constantes.Aspectos;
 import es.caib.arxiudigital.apirest.constantes.CodigosResultadoPeticion;
 import es.caib.arxiudigital.apirest.constantes.FormatosFichero;
+import es.caib.arxiudigital.apirest.constantes.MetadatosDocumento;
 import es.caib.arxiudigital.apirest.constantes.TiposFirma;
 import es.caib.arxiudigital.apirest.constantes.TiposObjetoSGD;
 import es.caib.arxiudigital.apirest.facade.pojos.CabeceraPeticion;
@@ -247,8 +248,12 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     return getPropertyRequired(ARXIUDIGITALCAIB_PROPERTY_BASE + "codi_procediment_EL");
   }
 
-  public String getPropertyDataCreacioEL() throws Exception {
-    return getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "data_creacio_EL");
+  public String getPropertyDataCreacioDocumentEL() throws Exception {
+    return getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "data_creacio_document_EL");
+  }
+  
+  public String getPropertyDataCreacioExpedientEL() throws Exception {
+    return getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "data_creacio_expedient_EL");
   }
 
   public String getPropertyEstatElaboracioEL() throws Exception {
@@ -1505,12 +1510,11 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
       FilesInfo filesInfo = getFileInfo(ec, nodosByName);
       */
-      
+
       String uuid = ExpedientCarpetaDocument.decodeCustodyID(custodyID).documentID;
 
       FullInfoDocumentElectronic fullInfo;
       fullInfo = getFullInfoOfDocumentElectronic(apiArxiu, uuid, false);
-
 
       Map<String, List<Metadata>> map = new HashMap<String, List<Metadata>>();
 
@@ -1817,6 +1821,24 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         llistaMetadades.put(metadata.getKey(), metadata.getValue());
       }
     }
+    
+    
+    // MetadatosExpediente.FECHA_INICIO
+    // NOTA: Amb aquest canvi pots fer que l'expedient es guardi en una altre data
+    // Date fecha = new SimpleDateFormat("dd/MM/yyyy").parse("04/04/2017");
+    // String fechaCreacio = UtilidadesFechas.convertirDeDate_A_ISO8601(fecha);
+    String templateDataCreacio = getPropertyDataCreacioExpedientEL();
+    String dataCreacio;
+    if (templateDataCreacio == null) {
+      dataCreacio = UtilidadesFechas.fechaActualEnISO8601();
+    } else {
+      dataCreacio = processEL(templateDataCreacio, custodyParameters);
+    }
+    if (isDebug()) {
+      log.info("DataCreacio Expedient: " + dataCreacio);
+    }
+    llistaMetadades.put(MetadataConstants.ENI_FECHA_INICIO, dataCreacio);
+    
 
     return llistaMetadades;
   }
@@ -1905,6 +1927,23 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       llistaMetadades.put(MetadataConstants.ENI_PERFIL_FIRMA, perfilFirma);
 
     }
+    
+    
+    // MetadatosExpediente.FECHA_INICIO
+    // Data de creació del Document
+    // Date fecha = new SimpleDateFormat("dd/MM/yyyy").parse("04/04/2017");
+    // String fechaCreacio = UtilidadesFechas.convertirDeDate_A_ISO8601(fecha);
+    String templateDataCreacio = getPropertyDataCreacioDocumentEL();
+    String dataCreacio;
+    if (templateDataCreacio == null) {
+      dataCreacio = UtilidadesFechas.fechaActualEnISO8601();
+    } else {
+      dataCreacio = processEL(templateDataCreacio, custodyParameters);
+    }
+    if (isDebug()) {
+      log.info("DataCreacio Document: " + dataCreacio);
+    }
+    llistaMetadades.put(MetadataConstants.ENI_FECHA_INICIO, dataCreacio);
 
     return llistaMetadades;
 
@@ -1926,21 +1965,6 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     String origenDocument = processEL(getPropertyOrigenDocumentEL(), custodyParameters);
     llistaMetadades.put(MetadataConstants.ENI_ORIGEN, origenDocument);
 
-    // MetadatosExpediente.FECHA_INICIO
-    // NOTA: Amb aquest canvi pots fer que es guardi en una altre data
-    // Date fecha = new SimpleDateFormat("dd/MM/yyyy").parse("04/04/2017");
-    // String fechaCreacio = UtilidadesFechas.convertirDeDate_A_ISO8601(fecha);
-    String templateDataCreacio = getPropertyDataCreacioEL();
-    String dataCreacio;
-    if (templateDataCreacio == null) {
-      dataCreacio = UtilidadesFechas.fechaActualEnISO8601();
-    } else {
-      dataCreacio = processEL(templateDataCreacio, custodyParameters);
-    }
-    if (isDebug()) {
-      log.info("DataCreacio: " + dataCreacio);
-    }
-    llistaMetadades.put(MetadataConstants.ENI_FECHA_INICIO, dataCreacio);
 
     return llistaMetadades;
   }
@@ -2067,7 +2091,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
    */
   protected List<Metadata> recollectAutomaticMetadatas(Map<String, Object> custodyParameters,
       String prefix) throws CustodyException {
-    final boolean ignoreErrors = false;
+    final boolean ignoreErrors = true;
 
     String propertyBase = getPropertyBase() + prefix + ".";
 
@@ -2081,18 +2105,18 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     List<Metadata> list = AbstractDocumentCustodyPlugin.recollectAutomaticMetadatas(this,
         custodyParameters, getPropertyBase() + prefix + ".", ignoreErrors);
 
-    if (list == null) {
+    if (list == null || list.isEmpty()) {
       if (debug) {
-        log.info("recollectAutomaticMetadatas::LIST NULL: " + propertyBase);
+        log.info("recollectAutomaticMetadatas::LIST NULL or Empty: " + propertyBase
+            + "(" + list + ")");
       }
       return new ArrayList<Metadata>();
-    } else {
-      if (debug) {
-        log.info("recollectAutomaticMetadatas::LIST: " + propertyBase);
-      }
-      return list;
     }
 
+    if (debug) {
+      log.info("recollectAutomaticMetadatas::LIST(" + list.size() + "): " + propertyBase );
+    }
+    return list;
   }
 
 
@@ -2101,8 +2125,6 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     prop.store(writer, "!!! NO MODIFICAR - DO NOT MODIFY !!!");
     return writer.getBuffer().toString();
   }
-  
-  
   
 
   protected Properties stringToProperties(String str) throws IOException {

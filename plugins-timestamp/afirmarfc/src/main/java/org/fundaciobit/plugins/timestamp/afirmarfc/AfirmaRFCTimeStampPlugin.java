@@ -7,11 +7,14 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.fundaciobit.plugins.timestamp.api.ITimeStampPlugin;
+import org.fundaciobit.plugins.utils.AbstractPluginProperties;
+
+
 import org.fundaciobit.plugins.timestamp.api.utils.RFC3161Connection;
 import org.fundaciobit.plugins.timestamp.api.utils.RFC3161Params;
-import org.fundaciobit.plugins.utils.AbstractPluginProperties;
 import org.fundaciobit.plugins.utils.Base64;
 import org.fundaciobit.plugins.utils.FileUtils;
+
 
 /**
  *
@@ -81,6 +84,39 @@ public class AfirmaRFCTimeStampPlugin extends AbstractPluginProperties implement
     return getProperty(HASH_ALGORITHM);
   }
 
+  
+  
+  /*
+  @Override
+  public TimeStampToken getTimeStamp(byte[] inputdata, Calendar time) throws Exception {
+
+    return TimeStampService.componerSalida(getTimeStampDirect(inputdata, time));
+
+  }
+
+  @Override
+  public byte[] getTimeStampDirect(byte[] inputdata, Calendar time) throws Exception {
+
+    String appID = getProperty(APPLICATION_ID);
+    String tsaURL = getProperty(URL_RFC);
+    String tsaOIDPolicy = getTimeStampPolicyOID();
+
+    String locCert = getProperty(AUTH_CERT_PATH);
+    String passCert = getProperty(AUTH_CERT_PASSWORD);
+
+    String locTrust = getProperty(SERVER_TRUSTKEYSTORE_PATH);
+    String passTrust = getProperty(SERVER_TRUSTKEYSTORE_PASSWORD);
+
+    String hashAlgorithm = getTimeStampHashAlgorithm();
+
+    byte[] rawReturn = TimeStampService.requestTimeStampHTTPS(appID, tsaURL, tsaOIDPolicy,
+        locCert, passCert, locTrust, passTrust, hashAlgorithm, inputdata, time);
+
+    return rawReturn;
+
+  }
+  */
+  
   @Override
   public TimeStampToken getTimeStamp(byte[] inputdata, Calendar time) throws Exception {
 
@@ -151,6 +187,6 @@ public class AfirmaRFCTimeStampPlugin extends AbstractPluginProperties implement
 
     return Base64.encode(dataTS);
 
-  }
+}
 
 }

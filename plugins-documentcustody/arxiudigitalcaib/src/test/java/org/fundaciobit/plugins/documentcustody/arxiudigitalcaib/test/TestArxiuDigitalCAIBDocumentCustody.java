@@ -27,6 +27,7 @@ import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.ArxiuDigitalCAIB
 import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.ExpedientCarpetaDocument;
 import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test.beans.Anexo;
 import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test.beans.Interesado;
+import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test.beans.Libro;
 import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test.beans.Oficina;
 import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test.beans.Organismo;
 import org.fundaciobit.plugins.documentcustody.arxiudigitalcaib.test.beans.RegistroDetalle;
@@ -53,11 +54,6 @@ import es.caib.arxiudigital.apirest.facade.resultados.ResultadoSimple;
  */
 public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
 
-  public static final String packageBase = "es.caib.exemple.";
-
-  public static final String propertyBase = packageBase
-      + ArxiuDigitalCAIBDocumentCustodyPlugin.ARXIUDIGITALCAIB_PROPERTY_BASE;
-
   SimpleDateFormat SDF = new SimpleDateFormat("MMdd");
   
   public static Scanner scan=new Scanner(System.in);
@@ -66,11 +62,7 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
        System.out.print("Press any key to continue . . ." );
        scan.nextLine();
   }
-  
-  
-  
-  
-  
+
   public static void main(String[] args) {
     try {
 
@@ -567,10 +559,12 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
 
     RegistroDetalle registroDetalle = new RegistroDetalle("Prova de Arxiu Digital CAIB ",
         tipoDocumentacionFisica, idioma, codigoAsunto, oficinaOrigen, interesados);
+    
+    Libro llibre = new Libro(62L, "LLIB");
 
     RegistroEntrada registro = new RegistroEntrada(12345L, usuarioEntitat, oficina, destino,
         destino.getCodigo(), destino.getDenominacion(), fecha, numeroRegistro,
-        numeroRegistroFormateado, registroDetalle);
+        numeroRegistroFormateado, registroDetalle, llibre);
     return registro;
   }
 
@@ -630,7 +624,7 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
     Properties fsProperties = new Properties();
 
     try {
-      fsProperties.load(new FileInputStream("plugin.properties"));
+      fsProperties.load(new FileInputStream(getPropertiesFile()));
     } catch (Exception e) {
       throw new CustodyException("Error llegint fitxer plugin.properties: " + e.getMessage(),
           e);
@@ -642,8 +636,17 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
 
     IDocumentCustodyPlugin documentCustodyPlugin;
     documentCustodyPlugin = (IDocumentCustodyPlugin) PluginsManager.instancePluginByClass(
-        ArxiuDigitalCAIBDocumentCustodyPlugin.class, packageBase, fsProperties);
+        ArxiuDigitalCAIBDocumentCustodyPlugin.class, getPackageBase(), fsProperties);
     return documentCustodyPlugin;
+  }
+
+
+  
+
+
+
+  protected File getPropertiesFile() {
+    return new File("plugin.properties");
   }
 
   protected Map<String, Object> createCustodyParameters() throws Exception {
@@ -658,6 +661,15 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
 
     Anexo anexo = getAnexo(registro);
     custodyParameters.put("anexo", anexo);
+    
+    Usuario usuario = new Usuario("Victor", "Heerera" , "", "87654321Z", "vherrera");
+    
+    UsuarioEntidad usuarioEntidad = new UsuarioEntidad(usuario, "caib");
+    
+    custodyParameters.put("usuarioEntidad", usuarioEntidad);
+    
+    custodyParameters.put("ciudadano_nombre", "Ciudadano Ejemplar");
+    custodyParameters.put("ciudadano_idadministrativo", "12345678Z");
 
     return custodyParameters;
   }
@@ -666,8 +678,15 @@ public class TestArxiuDigitalCAIBDocumentCustody extends TestDocumentCustody {
 
   @Override
   public String getPropertyBase() {
-    return propertyBase;
+    return getPackageBase()
+        + ArxiuDigitalCAIBDocumentCustodyPlugin.ARXIUDIGITALCAIB_PROPERTY_BASE;
   }
+  
+  
+  public String getPackageBase() {
+    return "es.caib.exemple.";
+  }
+  
   
   public void sleep() {
     try {
