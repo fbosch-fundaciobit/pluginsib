@@ -66,7 +66,7 @@ public class ArxiuPluginCaibTest {
 	public static void setUp() throws IOException {
 		Properties properties = new Properties();
 		properties.load(
-				CaibArxiuPluginTest.class.getClassLoader().getResourceAsStream(
+				ArxiuPluginCaibTest.class.getClassLoader().getResourceAsStream(
 						"es/caib/plugins/arxiu/caib/test.properties"));
 		arxiuPlugin = new ArxiuPluginCaib(
 				"",
