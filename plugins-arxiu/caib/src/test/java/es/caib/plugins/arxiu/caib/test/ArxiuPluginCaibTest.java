@@ -27,6 +27,9 @@ import es.caib.arxiudigital.apirest.constantes.MetadatosDocumento;
 import es.caib.plugins.arxiu.api.ArxiuException;
 import es.caib.plugins.arxiu.api.ArxiuNotFoundException;
 import es.caib.plugins.arxiu.api.Carpeta;
+import es.caib.plugins.arxiu.api.ConsultaFiltre;
+import es.caib.plugins.arxiu.api.ConsultaOperacio;
+import es.caib.plugins.arxiu.api.ConsultaResultat;
 import es.caib.plugins.arxiu.api.ContingutArxiu;
 import es.caib.plugins.arxiu.api.ContingutOrigen;
 import es.caib.plugins.arxiu.api.ContingutTipus;
@@ -862,6 +865,27 @@ public class ArxiuPluginCaibTest {
 					}
 				},
 				expedientPerCrear);
+	}
+
+	@Test
+	public void documentConsultaAmbCsv() throws Exception {
+		String csv = "5dbd524a1bb90bde8e98c105f3aa480f7ba1784dda504e7b119d7d0394f75d65";
+		ConsultaFiltre filtreCsv = new ConsultaFiltre();
+		filtreCsv.setMetadada("eni:csv");
+		filtreCsv.setOperacio(ConsultaOperacio.IGUAL);
+		filtreCsv.setValorOperacio1(csv);
+		ConsultaResultat resultat = arxiuPlugin.documentConsulta(
+				Arrays.asList(filtreCsv),
+				0,
+				1);
+		assertNotNull(resultat);
+		assertNotNull(resultat.getNumRetornat());
+		assertNotNull(resultat.getResultats());
+		assertEquals(new Integer(1), resultat.getNumRetornat());
+		assertEquals(new Integer(0), resultat.getPaginaActual());
+		assertEquals(new Integer(1), resultat.getNumPagines());
+		assertEquals(new Integer(1), resultat.getNumRegistres());
+		assertEquals(1, resultat.getResultats().size());
 	}
 
 	@Test
