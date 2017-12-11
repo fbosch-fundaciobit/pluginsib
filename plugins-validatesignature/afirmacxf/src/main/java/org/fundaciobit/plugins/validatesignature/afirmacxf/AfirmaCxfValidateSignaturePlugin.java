@@ -472,6 +472,10 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
     
     SignatureRequestedInformation sri = validationRequest.getSignatureRequestedInformation();
     
+    if (sri == null) {
+      sri = new SignatureRequestedInformation();
+    }
+    
     final boolean debug = log.isDebugEnabled() || isDebug();
 
     final String applicationID;
