@@ -1,0 +1,5 @@
+plugin.arxiu.caib.base.url=https://afirmades.caib.es:4430/esb
+#plugin.arxiu.caib.base.url=https://esbpre.caib.es/esb
+plugin.arxiu.caib.aplicacio.codi=ARXIUTEST
+plugin.arxiu.caib.usuari=USERNAME
+plugin.arxiu.caib.contrasenya=PASSWD
