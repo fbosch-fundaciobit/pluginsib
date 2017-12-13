@@ -4,8 +4,6 @@ import java.io.FileInputStream;
 import java.util.Calendar;
 import java.util.Properties;
 
-import org.bouncycastle.tsp.TimeStampResponse;
-import org.bouncycastle.tsp.TimeStampToken;
 import org.fundaciobit.plugins.timestamp.afirmarfc.AfirmaRFCTimeStampPlugin;
 import org.fundaciobit.plugins.timestamp.api.ITimeStampPlugin;
 import org.fundaciobit.plugins.utils.Base64;
