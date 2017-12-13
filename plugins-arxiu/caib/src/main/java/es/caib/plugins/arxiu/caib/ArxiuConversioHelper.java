@@ -292,64 +292,66 @@ public class ArxiuConversioHelper {
 			List<Metadata> metadataList) throws ArxiuException {
 		ExpedientMetadades metadades = new ExpedientMetadades();
 		for (Metadata metadata: metadataList) {
-			switch (metadata.getQname()) {
-			case MetadatosDocumento.ID_ENI:
-				metadades.setIdentificador((String)metadata.getValue());
-				break;
-			case "eni:v_nti":
-				metadades.setVersioNti((String)metadata.getValue());
-				break;
-			case MetadatosExpediente.ORGANO:
-				Object preOrgan = metadata.getValue();
-				if (preOrgan instanceof List<?>) {
-					metadades.setOrgans((List<String>)preOrgan);
-				} else if (preOrgan instanceof String) {
-					List<String> organs = new ArrayList<String>();
-					organs.add((String) preOrgan);
-					metadades.setOrgans(organs);
+			if (metadata.getValue() != null) {
+				switch (metadata.getQname()) {
+				case MetadatosDocumento.ID_ENI:
+					metadades.setIdentificador(metadata.getValue().toString());
+					break;
+				case "eni:v_nti":
+					metadades.setVersioNti(metadata.getValue().toString());
+					break;
+				case MetadatosExpediente.ORGANO:
+					Object preOrgan = metadata.getValue();
+					if (preOrgan instanceof List<?>) {
+						metadades.setOrgans((List<String>)preOrgan);
+					} else if (preOrgan instanceof String) {
+						List<String> organs = new ArrayList<String>();
+						organs.add((String) preOrgan);
+						metadades.setOrgans(organs);
+					}
+					break;
+				case MetadatosExpediente.FECHA_INICIO:
+					metadades.setDataObertura(
+							parseDateIso8601(metadata.getValue().toString()));
+					break;
+				case MetadatosExpediente.IDENTIFICADOR_PROCEDIMIENTO:
+					metadades.setClassificacio(metadata.getValue().toString());
+					break;
+				case MetadatosExpediente.ESTADO_EXPEDIENTE:
+					if (metadata.getValue() instanceof EstadosExpediente) {
+						metadades.setEstat(
+								ExpedientEstat.toEnum(
+										((EstadosExpediente)metadata.getValue()).getValue()));
+					} else if (metadata.getValue() instanceof String) {
+						metadades.setEstat(
+								ExpedientEstat.toEnum(
+										(String)metadata.getValue()));
+					}
+					break;
+				case MetadatosExpediente.INTERESADOS:
+					Object preInteressat = metadata.getValue();
+					if (preInteressat instanceof List<?>) {
+						metadades.setInteressats((List<String>)preInteressat);
+					} else if (preInteressat instanceof String) {
+						List<String> interessats = new ArrayList<String>();
+						interessats.add((String) preInteressat);
+						metadades.setInteressats(interessats);
+					}
+					break;
+				case MetadatosExpediente.CODIGO_CLASIFICACION:
+					metadades.setSerieDocumental(metadata.getValue().toString());
+					break;
+				default:
+					Map<String, Object> metadadesAddicionals = metadades.getMetadadesAddicionals();
+					if (metadadesAddicionals == null) {
+						metadadesAddicionals = new HashMap<String, Object>();
+						metadades.setMetadadesAddicionals(metadadesAddicionals);
+					}
+					if (metadata.getValue() != null) {
+						metadadesAddicionals.put(metadata.getQname(), metadata.getValue());
+					}
+					break;
 				}
-				break;
-			case MetadatosExpediente.FECHA_INICIO:
-				metadades.setDataObertura(
-						parseDateIso8601((String)metadata.getValue()));
-				break;
-			case MetadatosExpediente.IDENTIFICADOR_PROCEDIMIENTO:
-				metadades.setClassificacio((String)metadata.getValue());
-				break;
-			case MetadatosExpediente.ESTADO_EXPEDIENTE:
-				if (metadata.getValue() instanceof EstadosExpediente) {
-					metadades.setEstat(
-							ExpedientEstat.toEnum(
-									((EstadosExpediente)metadata.getValue()).getValue()));
-				} else if (metadata.getValue() instanceof String) {
-					metadades.setEstat(
-							ExpedientEstat.toEnum(
-									(String)metadata.getValue()));
-				}
-				break;
-			case MetadatosExpediente.INTERESADOS:
-				Object preInteressat = metadata.getValue();
-				if (preInteressat instanceof List<?>) {
-					metadades.setInteressats((List<String>)preInteressat);
-				} else if (preInteressat instanceof String) {
-					List<String> interessats = new ArrayList<String>();
-					interessats.add((String) preInteressat);
-					metadades.setInteressats(interessats);
-				}
-				break;
-			case MetadatosExpediente.CODIGO_CLASIFICACION:
-				metadades.setSerieDocumental((String)metadata.getValue());
-				break;
-			default:
-				Map<String, Object> metadadesAddicionals = metadades.getMetadadesAddicionals();
-				if (metadadesAddicionals == null) {
-					metadadesAddicionals = new HashMap<String, Object>();
-					metadades.setMetadadesAddicionals(metadadesAddicionals);
-				}
-				if (metadata.getValue() != null) {
-					metadadesAddicionals.put(metadata.getQname(), metadata.getValue());
-				}
-				break;
 			}
 		}
 		return metadades;
@@ -600,56 +602,60 @@ public class ArxiuConversioHelper {
 	@SuppressWarnings("unchecked")
 	private static DocumentMetadades toDocumentMetadades(List<Metadata> metadatas) throws ArxiuException {
 		DocumentMetadades metadades = new DocumentMetadades();
-		for (Metadata metadata : metadatas) {
-			switch (metadata.getQname()) {
-			case MetadatosDocumento.ID_ENI:
-				metadades.setIdentificador((String)metadata.getValue());
-				break;
-			case "eni:v_nti":
-				metadades.setVersioNti((String)metadata.getValue());
-				break;
-			case MetadatosDocumento.ORIGEN:
-				metadades.setOrigen(
-						ContingutOrigen.toEnum(
-								String.valueOf(metadata.getValue())));
-				break;
-			case MetadatosDocumento.FECHA_INICIO:
-				metadades.setDataCaptura(parseDateIso8601((String)metadata.getValue()));
-				break;
-			case MetadatosDocumento.ESTADO_ELABORACION:
-				metadades.setEstatElaboracio(DocumentEstatElaboracio.toEnum((String) metadata.getValue()));
-				break;
-			case MetadatosDocumento.TIPO_DOC_ENI:
-				metadades.setTipusDocumental(
-						DocumentTipus.toEnum(
-								(String)metadata.getValue()));
-				break;
-			case MetadatosDocumento.ORGANO:
-				Object preValor = metadata.getValue();
-				if (preValor instanceof List<?>) {
-					metadades.setOrgans((List<String>)metadata.getValue());
-				} else {
-					metadades.setOrgans(Arrays.asList((String)preValor));
-				}
-				break;
-			case MetadatosDocumento.NOMBRE_FORMATO:
-				metadades.setFormat(
-						DocumentFormat.toEnum((String)metadata.getValue()));
-				break;
-			case MetadatosDocumento.EXTENSION_FORMATO:
-				metadades.setExtensio(
-						DocumentExtensio.toEnum((String)metadata.getValue()));
-				break;
-			case MetadatosDocumento.CSV:
-			case MetadatosDocumento.DEF_CSV:
-			default:
-				Map<String, Object> metadadesAddicionals = metadades.getMetadadesAddicionals();
-				if (metadadesAddicionals == null) {
-					metadadesAddicionals = new HashMap<String, Object>();
-					metadades.setMetadadesAddicionals(metadadesAddicionals);
-				}
-				if (metadata.getValue() != null) {
-					metadadesAddicionals.put(metadata.getQname(), metadata.getValue());
+		for (Metadata metadata: metadatas) {
+			if (metadata.getValue() != null) {
+				switch (metadata.getQname()) {
+				case MetadatosDocumento.ID_ENI:
+					metadades.setIdentificador(metadata.getValue().toString());
+					break;
+				case "eni:v_nti":
+					metadades.setVersioNti(metadata.getValue().toString());
+					break;
+				case MetadatosDocumento.ORIGEN:
+					metadades.setOrigen(
+							ContingutOrigen.toEnum(
+									String.valueOf(metadata.getValue())));
+					break;
+				case MetadatosDocumento.FECHA_INICIO:
+					metadades.setDataCaptura(parseDateIso8601(metadata.getValue().toString()));
+					break;
+				case MetadatosDocumento.ESTADO_ELABORACION:
+					metadades.setEstatElaboracio(
+							DocumentEstatElaboracio.toEnum(
+									metadata.getValue().toString()));
+					break;
+				case MetadatosDocumento.TIPO_DOC_ENI:
+					metadades.setTipusDocumental(
+							DocumentTipus.toEnum(
+									metadata.getValue().toString()));
+					break;
+				case MetadatosDocumento.ORGANO:
+					Object preValor = metadata.getValue();
+					if (preValor instanceof List<?>) {
+						metadades.setOrgans((List<String>)metadata.getValue());
+					} else {
+						metadades.setOrgans(Arrays.asList((String)preValor));
+					}
+					break;
+				case MetadatosDocumento.NOMBRE_FORMATO:
+					metadades.setFormat(
+							DocumentFormat.toEnum(metadata.getValue().toString()));
+					break;
+				case MetadatosDocumento.EXTENSION_FORMATO:
+					metadades.setExtensio(
+							DocumentExtensio.toEnum(metadata.getValue().toString()));
+					break;
+				case MetadatosDocumento.CSV:
+				case MetadatosDocumento.DEF_CSV:
+				default:
+					Map<String, Object> metadadesAddicionals = metadades.getMetadadesAddicionals();
+					if (metadadesAddicionals == null) {
+						metadadesAddicionals = new HashMap<String, Object>();
+						metadades.setMetadadesAddicionals(metadadesAddicionals);
+					}
+					if (metadata.getValue() != null) {
+						metadadesAddicionals.put(metadata.getQname(), metadata.getValue());
+					}
 				}
 			}
 		}
@@ -802,6 +808,8 @@ public class ArxiuConversioHelper {
 	}
 
 	private static String revisarContingutNom(String nom) {
+		if (nom == null)
+			return null;
 		return nom.replaceAll("[\\\\/:*?\"<>|]", "_");
 	}
 
