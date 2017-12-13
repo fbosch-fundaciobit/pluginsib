@@ -2,6 +2,11 @@
 CANVIS EN PLUGIN DE DOC: CUSTODY DE ARXIU CAIB
 ==============================================
 
+2017-12-13 Nova propietat [BASE].plugins.documentcustody.arxiudigitalcaib.searchifexpedientexistsinreserve
+           (Si val false cerca si existeixen Expedients amb el mateix nom) 
+
+2017-12-12 Afegir Descripció clara dins la metadada eni:description
+
 2017-11-22 Plugin Doc. Custody Arxiu CAIB: Propietats de creació per Document i Expedient #31
               - [BASE].plugins.documentcustody.arxiudigitalcaib.data_creacio_document_EL
               - [BASE].plugins.documentcustody.arxiudigitalcaib.data_creacio_expedient_EL
