@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.fundaciobit.plugins</groupId>
 	<artifactId>plugin-documentcustody-arxiudigitalcaib</artifactId>
-	<version>3.0.6</version>
+	<version>3.0.7</version>
   <packaging>jar</packaging>
 
 	<name>FundacioBit Plugins - Document Custody - ArxiuDigitalCAIB</name>
@@ -35,7 +35,7 @@
     <dependency>
       <groupId>es.caib.arxiudigital</groupId>
       <artifactId>arxiudigital-apirest</artifactId>
-      <version>1.0.4</version>
+      <version>1.0.5</version>
     </dependency>
       
 		<dependency>
