@@ -34,7 +34,6 @@ import es.caib.arxiudigital.apirest.CSGD.entidades.resultados.CreateDraftDocumen
 import es.caib.arxiudigital.apirest.constantes.Aspectos;
 import es.caib.arxiudigital.apirest.constantes.CodigosResultadoPeticion;
 import es.caib.arxiudigital.apirest.constantes.FormatosFichero;
-import es.caib.arxiudigital.apirest.constantes.MetadatosDocumento;
 import es.caib.arxiudigital.apirest.constantes.TiposFirma;
 import es.caib.arxiudigital.apirest.constantes.TiposObjetoSGD;
 import es.caib.arxiudigital.apirest.facade.pojos.CabeceraPeticion;
@@ -55,6 +54,7 @@ import es.caib.arxiudigital.apirest.utils.UtilidadesFechas;
  * 
  * @author anadal
  */
+@SuppressWarnings("deprecation")
 public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginProperties implements
     IDocumentCustodyPlugin {
 
@@ -92,6 +92,12 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   public static final Map<String, TiposFirma> TIPOFIRMA_COMPLEXE = new HashMap<String, TiposFirma>();
 
   public static final Map<String, FormatosFichero> FORMATS_BY_EXTENSION = new HashMap<String, FormatosFichero>();
+  
+  
+  // NO MODIFICAR MAI !!!!!!!!
+  public static final String NO_MODIFY_TEXT = "!!! NO MODIFICAR - DO NOT MODIFY !!!";
+  
+  public static final String NO_MODIFY_TEXT_URL_ENCODED;
 
   static {
 
@@ -141,6 +147,18 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     FORMATS_BY_EXTENSION.put("mp4v", FormatosFichero.MP4V);
     FORMATS_BY_EXTENSION.put("webm", FormatosFichero.WEBM);
 
+    String tmp;
+    try {
+      
+     tmp = URLEncoder.encode("#" + NO_MODIFY_TEXT, "UTF-8");
+      
+    } catch(Throwable e) {
+      
+      tmp = URLEncoder.encode("#" + NO_MODIFY_TEXT);
+    }
+    
+    NO_MODIFY_TEXT_URL_ENCODED = tmp;
+    
   }
 
   // ----------------------------------------------------------------------------
@@ -222,6 +240,22 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
     if (isDebug()) {
       log.info("process(tancarExpedient_EL)=[" + valueStr + "]");
+    }
+    
+    if ("true".equals(valueStr.toLowerCase())) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
+  
+  
+  public boolean isSearchIfExpedientExistsInReserve() {
+    String valueStr = getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "searchifexpedientexistsinreserve");
+
+    if (valueStr == null || valueStr.trim().length() == 0) {
+      return false;
     }
     
     if ("true".equals(valueStr.toLowerCase())) {
@@ -375,7 +409,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       // Només miram si existeix l'expedient 
       Expediente expedientCercat = null;
       
-      {
+      if (isSearchIfExpedientExistsInReserve()) {
 
         FiltroBusquedaFacilExpedientes filtrosRequeridos = new FiltroBusquedaFacilExpedientes();
         filtrosRequeridos.setName(nomExpedient);
@@ -400,11 +434,9 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         }
   
         List<Expediente> llista2 = res.getListaResultado();
-  
-        if (debug) {
-          log.info(" CERCA[].size() = " + llista2.size());
-        }
         
+        log.info(" CERCA[].size() = " + llista2.size());
+
         if (llista2.size() == 0) {
           expedientCercat = null;
         } else {
@@ -780,6 +812,9 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       } else {
 
         // ACTUALITZAR DOCUMENT-ELECTRONIC
+        
+        // Actualitzam les metadades amb les metadades generades
+        metadataCollection.putAll(generatedMetadataCollection);
 
         // Per que hem de treure tot el document. Amb la informació de
         // eni:description n'hi ha suficient ?
@@ -787,10 +822,12 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         String metasAndInfoStr = (String) metadataCollection
             .get(MetadataConstants.ENI_DESCRIPCION);
 
-        metasAndInfo = stringToProperties(metasAndInfoStr);
-
-        // Actualitzam amb les metadades amb les metadades generades
-        metadataCollection.putAll(generatedMetadataCollection);
+        metasAndInfo = stringEniDescriptionToPropertiesCustody(metasAndInfoStr);
+        
+        if(metasAndInfo.containsKey(MetadataConstants.ENI_DESCRIPCION) 
+            && !generatedMetadataCollection.containsKey(MetadataConstants.ENI_DESCRIPCION) ) {
+          metadataCollection.put(MetadataConstants.ENI_DESCRIPCION, metasAndInfo.getProperty(MetadataConstants.ENI_DESCRIPCION));
+        }
 
       }
 
@@ -872,10 +909,10 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           if (key.startsWith("eni:") || key.startsWith("gdib:")) {
             // Metadades eni: o gdib: es guarden com Metadata del Document
             // NOTA: No s'actualitzaran les metadades generades
-            if (generatedMetadataCollection.containsKey(key) || MetadataConstants.ENI_DESCRIPCION.equals(key) ) {
+            if (generatedMetadataCollection.containsKey(key)) {
               // Es generada i no la podem sobreescriure
-              log.warn("La metadada [" + key + "] no es pot guardar ja que és generada pel Sistema");
-            } else {
+              log.warn("La metadada [" + key + "] no es pot guardar ja que és generada pel Sistema");              
+            } else {         
               metadataCollection.put(key, metadata.getValue());
             }
           } else {
@@ -886,9 +923,11 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         }
       }
 
+      
       // Ara es guarden info del document i signatura més les metadades
-      doc.getMetadataCollection().put(MetadataConstants.ENI_DESCRIPCION,
-          URLEncoder.encode(propertiesToString(metasAndInfo), "UTF-8"));
+      metadataCollection.put(MetadataConstants.ENI_DESCRIPCION,
+          propertiesCustodyToStringEniDescripcion(metasAndInfo,
+              (String)metadataCollection.get(MetadataConstants.ENI_DESCRIPCION)));
 
       // ============================= MUNTAR DOCUMENTO
 
@@ -1440,7 +1479,8 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       }
       
       fullDoc.documento.getMetadataCollection().put(MetadataConstants.ENI_DESCRIPCION,
-          propertiesToString(fullDoc.infoAndMetas));
+          propertiesCustodyToStringEniDescripcion(fullDoc.infoAndMetas,
+              (String)fullDoc.documento.getMetadataCollection().get(MetadataConstants.ENI_DESCRIPCION)));
       
       Documento doc = new Documento();
       
@@ -1547,7 +1587,9 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           }
         }
        
-      } 
+      }
+     
+      
 
       return map;
 
@@ -1675,7 +1717,8 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       }
       
       fullDoc.documento.getMetadataCollection().put(MetadataConstants.ENI_DESCRIPCION,
-          propertiesToString(fullDoc.infoAndMetas));
+          propertiesCustodyToStringEniDescripcion(fullDoc.infoAndMetas,
+              (String)fullDoc.documento.getMetadataCollection().get(MetadataConstants.ENI_DESCRIPCION)));
       
       Documento doc = new Documento();
       doc.setId(fullDoc.documento.getId());
@@ -2120,20 +2163,44 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   }
 
 
-  protected String propertiesToString(Properties prop) throws Exception {
+
+  protected String propertiesCustodyToStringEniDescripcion(Properties prop, String eni_desc) throws Exception {
     StringWriter writer = new StringWriter();
-    prop.store(writer, "!!! NO MODIFICAR - DO NOT MODIFY !!!");
-    return writer.getBuffer().toString();
+    
+    if (eni_desc != null && eni_desc.trim().length() != 0) {
+      prop.setProperty(FILE_INFO_BASE_METADATA + MetadataConstants.ENI_DESCRIPCION, eni_desc);
+    }
+    
+    prop.store(writer, NO_MODIFY_TEXT);
+    
+    String core = writer.getBuffer().toString();
+    
+    core = URLEncoder.encode(core, "UTF-8");
+
+    if (eni_desc == null || eni_desc.trim().length() == 0) {
+      return core;
+    } else {
+      return eni_desc + "                                                    " + core;
+    }
+    
+   
   }
   
 
-  protected Properties stringToProperties(String str) throws IOException {
+  protected Properties stringEniDescriptionToPropertiesCustody(String str) throws IOException {
     Properties prop = new Properties();
     if (str == null || str.trim().length() == 0) {
       log.warn("La propietat que conte informació de DocumentCustody, SignatureCustody"
           + " i Metadades val null o està buida", new Exception());
 
     } else {
+      // Cercar on comencen les propietats (al principi hi ha la descripció en clar
+      
+      int index = str.indexOf(NO_MODIFY_TEXT_URL_ENCODED);
+      
+      if (index == -1) {
+           str = str.substring(index);      }
+      
       String strOK = URLDecoder.decode(str, "UTF-8");
       prop.load(new StringReader(strOK));
     }
@@ -2218,10 +2285,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
       nodos = expedient.getElementoDevuelto().getChilds();
     } else {
-      // log.info("XYZ Llegim Carpeta amb uuid " + ec.carpetaID);
       Resultado<Directorio> dir = apiArxiu.obtenerDirectorio(ec.carpetaID);
-      // log.info("XYZ Llegim Carpeta : codi resultat " +
-      // dir.getCodigoResultado());
       if (hiHaError(dir.getCodigoResultado())) {
         throw new CustodyException(
             "Error intentant obtenir informació de la carpeta amb uuid " + ec.carpetaID + ": "
@@ -2295,7 +2359,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
     if (infoAndMetasStr != null) {
       // Incloure Informació
-      prop = stringToProperties(infoAndMetasStr);
+      prop = stringEniDescriptionToPropertiesCustody(infoAndMetasStr);
     }
 
     return new FullInfoDocumentElectronic(prop, doc);

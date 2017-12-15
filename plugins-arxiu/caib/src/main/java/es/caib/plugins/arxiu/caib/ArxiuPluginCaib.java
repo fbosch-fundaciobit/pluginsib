@@ -130,6 +130,9 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	private static final String JERSEY_TIMEOUT_CONNECT = "10000";
 	private static final String JERSEY_TIMEOUT_READ = "60000";
 
+	private static final String QUERY_TYPE_EXPEDIENTE = "\"eni:expediente\"";
+	private static final String QUERY_TYPE_DOCUMENTO = "\"eni:documento\"";
+
 	private ArxiuCaibClient arxiuClient;
 	private Client versioImprimibleClient;
 
@@ -332,8 +335,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 							@Override
 							public ParamSearch generar() {
 								ParamSearch param = new ParamSearch();
-								String query = ArxiuConsultaHelper.generarConsulta(
-										"\"eni:expediente\" ",
+								String query = generarConsulta(
+										QUERY_TYPE_EXPEDIENTE,
 										filtres);
 								param.setQuery(query);
 								param.setPageNumber(pagina);
@@ -768,8 +771,8 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 							@Override
 							public ParamSearch generar() {
 								ParamSearch param = new ParamSearch();
-								String query = ArxiuConsultaHelper.generarConsulta(
-										"\"eni:documento\" ",
+								String query = generarConsulta(
+										QUERY_TYPE_DOCUMENTO,
 										filtres);
 								param.setQuery(query);
 								param.setPageNumber(pagina);
@@ -1525,6 +1528,57 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			webResource.queryParam("watermark", marcaAigua);
 		}
 		return webResource.get(InputStream.class);
+	}
+
+	public static String generarConsulta(
+			String queryType,
+			List<ConsultaFiltre> filtres) throws ArxiuException {
+		StringBuilder query = new StringBuilder();
+		query.append("+TYPE:");
+		query.append(queryType);
+		query.append(" ");
+		for (int i = 0; i < filtres.size(); i++) {
+			ConsultaFiltre filtre = filtres.get(i);
+			String metadada = filtre.getMetadada();
+			String valor1 = filtre.getValorOperacio1();
+			String valor2 = filtre.getValorOperacio2();
+			String metadadaPerFiltre = metadada.replace(":", "\\:");
+			if (filtre.getOperacio() != null) {
+				query.append("+@");
+				switch(filtre.getOperacio()) {
+					case IGUAL:
+						query.append(metadadaPerFiltre);
+						query.append(":\"" + valor1 + "\"");
+						break;
+					case CONTE:
+						query.append(metadadaPerFiltre);
+						query.append(":*" + valor1 + "*");
+						break;
+					case MAJOR:
+						query.append(metadadaPerFiltre);
+						query.append(":[" + valor1 + " TO *] -");
+						query.append(metadadaPerFiltre);
+						query.append(":\"" + valor1 + "\"");
+						break;
+					case MENOR:
+						query.append(metadadaPerFiltre);
+						query.append(":[* TO " + valor1 + "] -");
+						query.append(metadadaPerFiltre);
+						query.append(":\"" + valor1 + "\"");
+						break;
+					case ENTRE:
+						query.append(metadadaPerFiltre);
+						query.append(":[" + valor1 + " TO " + valor2 + "]");
+						break;
+				}
+				if (i < filtres.size()-1) {
+					query.append(" AND ");
+				}
+			} else {
+				throw new ArxiuException("No s'ha definit cap operació pel filtre de la metadada " + metadada);
+			}
+		}
+		return query.toString();
 	}
 
 	private ArxiuCaibClient getArxiuClient() {
