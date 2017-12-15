@@ -528,6 +528,7 @@ public class ArxiuConversioHelper {
 			if (TiposContenidosBinarios.CONTENT.equals(content.getBinaryType())) {
 				DocumentContingut contingut = new DocumentContingut();
 				contingut.setContingut(Base64.decode(content.getContent()));
+				contingut.setTamany(contingut.getContingut().length);
 				contingut.setTipusMime(content.getMimetype());
 				return contingut;
 			}
@@ -561,6 +562,7 @@ public class ArxiuConversioHelper {
 			Firma firma = new Firma();
 			firma.setTipus(FirmaTipus.CSV);
 			firma.setContingut(firmaCsv.getBytes());
+			firma.setTamany(firma.getContingut().length);
 			firma.setTipusMime("text/plain");
 			firma.setCsvRegulacio(firmaCsvRegulacio);
 			if (firmes == null) {
@@ -576,6 +578,7 @@ public class ArxiuConversioHelper {
 					firma.setTipus(firmaTipusEnum);
 					firma.setPerfil(FirmaPerfil.toEnum(firmaPerfil));
 					firma.setContingut(Base64.decode(content.getContent()));
+					firma.setTamany(firma.getContingut().length);
 					firma.setTipusMime(content.getMimetype());
 					if (firmes == null) {
 						firmes = new ArrayList<Firma>();
@@ -586,6 +589,7 @@ public class ArxiuConversioHelper {
 					firma.setTipus(firmaTipusEnum);
 					firma.setPerfil(FirmaPerfil.toEnum(firmaPerfil));
 					firma.setContingut(Base64.decode(content.getContent()));
+					firma.setTamany(firma.getContingut().length);
 					firma.setTipusMime(content.getMimetype());
 					if (firmes == null) {
 						firmes = new ArrayList<Firma>();

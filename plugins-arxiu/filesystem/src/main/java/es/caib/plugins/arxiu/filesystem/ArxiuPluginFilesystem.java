@@ -371,6 +371,8 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 				String path = getLuceneHelper().getPath(identificador);
 				document.getContingut().setContingut(
 						getFilesystemHelper().documentContingut(path));
+				document.getContingut().setTamany(
+						document.getContingut().getContingut().length);
 			}
 			if (document.getFirmes() != null) {
 				String path = getLuceneHelper().getPath(identificador);
@@ -380,6 +382,7 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 							getFilesystemHelper().documentFirma(
 									path,
 									i));
+					firma.setTamany(firma.getContingut().length);
 				}
 			}
 			return document;

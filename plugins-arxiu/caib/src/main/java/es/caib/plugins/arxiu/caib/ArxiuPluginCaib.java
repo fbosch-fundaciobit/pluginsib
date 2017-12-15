@@ -940,6 +940,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 			contingut.setArxiuNom("versio_imprimible.pdf");
 			contingut.setTipusMime("application/pdf");
 			contingut.setContingut(IOUtils.toByteArray(is));
+			contingut.setTamany(contingut.getContingut().length);
 			return contingut;
 		} catch (Exception ex) {
 			throw new ArxiuException(

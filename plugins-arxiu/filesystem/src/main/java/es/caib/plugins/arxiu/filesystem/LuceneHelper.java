@@ -305,6 +305,7 @@ public class LuceneHelper {
 					String defcsv = firmaDefCsvs[csvIndex];
 					csvIndex++;
 					firma.setContingut(csv.getBytes());
+					firma.setTamany(firma.getContingut().length);
 					firma.setCsvRegulacio(defcsv);
 				}
 				firmes.add(firma);
