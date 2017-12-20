@@ -928,6 +928,7 @@ public class FilesystemArxiuDAOImpl implements FilesystemArxiuDAO {
 	        reader.close();
 	        Firma firma = new Firma();
 	        firma.setContingut(d.getBinaryValue(Fields.FIR_CONTINGUT).bytes);
+	        firma.setTamany(firma.getContingut().length);
 	        firma.setTipus(FirmaTipus.toEnum(Fields.FIR_TIPUS));
 	        firma.setTipusMime(Fields.FIR_MIME);
 	        firma.setFitxerNom(Fields.NOM);

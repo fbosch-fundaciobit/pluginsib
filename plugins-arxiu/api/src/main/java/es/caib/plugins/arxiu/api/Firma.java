@@ -14,6 +14,7 @@ public class Firma {
 	private FirmaPerfil perfil;
 	private String fitxerNom;
 	private byte[] contingut;
+	private long tamany = -1;
 	private String tipusMime;
 	private String csvRegulacio;
 
@@ -40,6 +41,12 @@ public class Firma {
 	}
 	public void setContingut(byte[] contingut) {
 		this.contingut = contingut;
+	}
+	public long getTamany() {
+		return tamany;
+	}
+	public void setTamany(long tamany) {
+		this.tamany = tamany;
 	}
 	public String getTipusMime() {
 		return tipusMime;
