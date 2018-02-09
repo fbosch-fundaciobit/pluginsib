@@ -762,10 +762,12 @@ public class LuceneHelper {
 							pareUuid,
 							Store.YES));
 			Document expedientPareDoc;
+			String auxPareUuid = pareUuid;
 			do {
 				expedientPareDoc = findByUuid(
 						tipus,
-						pareUuid);
+						auxPareUuid);
+				auxPareUuid = getPareUuidPerLuceneDocument(expedientPareDoc);
 			} while (!ContingutTipus.EXPEDIENT.equals(getTipusPerLuceneDocument(expedientPareDoc)));
 			String expedientPareUuid = expedientPareDoc.get(LUCENE_FIELD_UUID);
 			document.add(
@@ -785,6 +787,11 @@ public class LuceneHelper {
 	private ContingutTipus getTipusPerLuceneDocument(
 			Document doc) {
 		return ContingutTipus.valueOf(doc.get(LUCENE_FIELD_TIPUS));
+	}
+	
+	private String getPareUuidPerLuceneDocument(
+			Document doc) {
+		return doc.get(LUCENE_FIELD_PARE_UUID);
 	}
 
 	private Document findByUuid(
