@@ -51,30 +51,41 @@ public class FileSystemDocumentCustodyPlugin extends AbstractDocumentCustodyPlug
   }
 
   
-  private String getBaseDir() {
-    return getProperty(FILESYSTEM_PROPERTY_BASEDIR );
+  private String getBaseDir() throws Exception  {
+    return getPropertyRequired(FILESYSTEM_PROPERTY_BASEDIR );
   }
 
 
   @Override
   protected boolean existsFile(String custodyID, String relativePath) {
-    File f = new File(getBaseDir(), relativePath);
-    return f.exists();
-    
+    try {
+      File f = new File(getBaseDir(), relativePath);
+      return f.exists();
+    } catch (Exception e) {
+      String msg = "Error descobrint si un fitxer existeix: " + e.getMessage(); 
+      log.error(msg ,e);
+      throw new RuntimeException(msg, e);
+    }
+
   }
 
 
   @Override
   protected void deleteFile(String custodyID, String... relativePaths) {
     for (String path : relativePaths) {
-      
-      deleteFile(path);
+      try {
+        deleteFile(path);
+      } catch (Exception e) {
+        String msg = "Error intentant esborrar el fitxer " + path + ": " + e.getMessage(); 
+        log.error(msg ,e);
+        throw new RuntimeException(msg, e);
+      }
     }
   }
   
   
 
-  private void deleteFile(String relativePath) {
+  private void deleteFile(String relativePath) throws Exception {
     File f = new File(getBaseDir(), relativePath);
     if (f.exists()) {
       if (!f.delete()) {
