@@ -40,7 +40,10 @@ public enum DocumentExtensio {
 	OGA(".oga"),
 	MPEG(".mpeg"),
 	MP4(".mp4"),
-	WEBM(".webm");
+	WEBM(".webm"),
+	CSIG(".csig"),
+	XSIG(".xsig"),
+	XML(".xml");
 
 	private String str;
 

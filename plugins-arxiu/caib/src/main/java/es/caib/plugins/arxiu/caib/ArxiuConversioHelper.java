@@ -586,7 +586,7 @@ public class ArxiuConversioHelper {
 						firmes = new ArrayList<Firma>();
 					}
 					firmes.add(firma);
-				} else if (FirmaTipus.PADES.equals(firmaTipusEnum) && TiposContenidosBinarios.CONTENT.equals(content.getBinaryType())) {
+				} else if ((FirmaTipus.PADES.equals(firmaTipusEnum) || FirmaTipus.CADES_ATT.equals(firmaTipusEnum)) && TiposContenidosBinarios.CONTENT.equals(content.getBinaryType())) {
 					Firma firma = new Firma();
 					firma.setTipus(firmaTipusEnum);
 					firma.setPerfil(FirmaPerfil.toEnum(firmaPerfil));
