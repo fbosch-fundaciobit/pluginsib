@@ -62,7 +62,10 @@ public enum DocumentFormat {
 	MP3("MP3. MPEG-1 Audio Layer 3"),
 	OGG("OGG-Vorbis"),
 	MP4V("MPEG-4 MP4 vídeo"),
-	WEBM("WebM");
+	WEBM("WebM"),
+	CSIG("csig"),
+	XSIG("xsig"),
+	XML("xml");
 
 	private String str;
 
