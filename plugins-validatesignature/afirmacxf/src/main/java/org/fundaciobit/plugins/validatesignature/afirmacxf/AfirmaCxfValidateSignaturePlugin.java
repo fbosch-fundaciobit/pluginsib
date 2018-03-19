@@ -1,5 +1,6 @@
 package org.fundaciobit.plugins.validatesignature.afirmacxf;
 
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import javax.net.ssl.X509TrustManager;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.Reference;
 import javax.xml.crypto.dsig.XMLSignature;
@@ -30,6 +32,7 @@ import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.util.encoders.Base64;
+import org.fundaciobit.plugins.utils.XTrustProvider;
 import org.fundaciobit.plugins.utils.cxf.CXFUtils;
 import org.fundaciobit.plugins.utils.cxf.ClientHandler;
 import org.fundaciobit.plugins.utils.cxf.ClientHandlerCertificate;
@@ -1034,9 +1037,17 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
 
   public synchronized String cridadaWs(String inputXml) throws Exception {
 
+    
 
     String endPoint = getPropertyRequired(ENDPOINT);
     checkNullProperty(ENDPOINT, endPoint);
+    
+    if (endPoint.toLowerCase().startsWith("https")) {
+      if ("true".equalsIgnoreCase(getProperty(AFIRMACXF_BASE_PROPERTIES + "ignoreservercertificates"))) {
+        XTrustProvider.install();
+      }
+    }
+    
 
     final ClientHandler clientHandler;
 
@@ -1068,23 +1079,51 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
     }
 
     if (api == null) {
-
-      DSSSignatureService service = new DSSSignatureService(new java.net.URL(endPoint
-          + "?wsdl"));
+      DSSSignatureService service = new DSSSignatureService(new java.net.URL(endPoint + "?wsdl"));
       api = service.getDSSAfirmaVerify();
-
     }
+    
+    // ---------------
+    /*
+    Client proxy = ClientProxy.getClient( api );
+    HTTPConduit conduit = (HTTPConduit) proxy.getConduit();
+    TLSClientParameters tcp = new TLSClientParameters();
+    tcp.setTrustManagers( new TrustManager[] { new TrustAllX509TrustManager() } );
+    conduit.setTlsClientParameters( tcp );
+    */
+    // ----------------
+    
 
     Map<String, Object> reqContext = ((BindingProvider) api).getRequestContext();
     reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endPoint);
 
     clientHandler.addSecureHeader(api);
 
+
     String xmlResposta = api.verify(inputXml);
    
     return xmlResposta;
 
   }
+
+  
+  public class TrustAllX509TrustManager implements X509TrustManager {
+
+    @Override
+    public X509Certificate[] getAcceptedIssuers() {
+      return null;
+    }
+
+    @Override
+    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+    }
+
+    @Override
+    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+    }
+
+  }
+  
 
   // ----------------------------------------------------------------------------
   // ----------------------------------------------------------------------------
