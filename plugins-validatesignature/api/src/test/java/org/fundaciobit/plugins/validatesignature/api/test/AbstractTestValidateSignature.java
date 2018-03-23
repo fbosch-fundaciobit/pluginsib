@@ -164,9 +164,19 @@ public abstract class AbstractTestValidateSignature implements ValidateSignature
       
       ValidateSignatureResponse response = result.getValidateSignatureResponse();
       
+      if (response == null) {
+        return "REsponse Val Null"; // ERROR
+      }
+      
+      if (response.getValidationStatus() == null) {
+        return "No s'ah definit getValidationStatus"; // ERROR
+      }
+      
+      
       int status = response.getValidationStatus().getStatus();
       
       if (result.isExpectedError()) {
+        
         
       
         if(status == ValidationStatus.SIGNATURE_VALID) {
