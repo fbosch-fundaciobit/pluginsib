@@ -60,6 +60,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
   protected final Logger log = Logger.getLogger(getClass());
 
+  public static final long SLEEP_SEND_TIMEOUT = 5000;
 
   public static final String FORMATO_UTF8 = "UTF-8";
   
@@ -426,8 +427,6 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
   
         ResultadoBusqueda<Expediente> res = api.busquedaFacilExpedientes(filtrosRequeridos,
             null, 1);
-        
-  
         if (hiHaErrorEnCerca(res.getCodigoResultado())) {
           throw new CustodyException("Error Consultant si Expedient " + nomExpedient
               + " existeix: " + res.getCodigoResultado() + "-" + res.getMsjResultado());
@@ -982,7 +981,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       }
 
 
-      // ============================= 
+      
 
       if (documentElectronicID == null) {
 
@@ -1004,22 +1003,82 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
 
         } else {
-         
-          ResultadoSimple rd = apiArxiu.actualizarDocumento(doc);
           
-          final String errorCodi = rd.getCodigoResultado();
-          if (hiHaError(errorCodi)) {
-            String msg = rd.getMsjResultado();
-            checkErrorsConeguts(errorCodi, msg, ecd);
-            throw new CustodyException("Error creant Document Final amb id " + custodyID + "("
-                + errorCodi + " - " + msg + ")");
+          // =========== REVISAR SI DOCUMENT NOM-DESTI EXISTEIX ========
+
+          if (log.isDebugEnabled()) {
+            log.info("custodyID = " + custodyID);
+            log.info("ecd.expedientID = " + ecd.expedientID);
+            log.info("ecd.carpetaID = " + ecd.carpetaID);
+            log.info("doc.getName() = " + doc.getName());
+          }
+          
+          Map<String, Nodo> nodos = getNodosByExpedientCarpeta(apiArxiu, ecd.expedientID, ecd.carpetaID);
+          
+          Nodo nodo = nodos.get(doc.getName());
+          if (nodo != null) {
+            if (log.isDebugEnabled()) {
+              log.info(" =========================== ");
+              log.info(" Eliminant document " + nodo.getName() + " (" + nodo.getId() + ")");
+              log.info(" =========================== ");
+            }
+            ResultadoSimple rs = apiArxiu.eliminarDocumento(nodo.getId());
+            final String errorCodi = rs.getCodigoResultado();
+            if (hiHaError(errorCodi)) {
+              String msg = rs.getMsjResultado();
+              throw new CustodyException("Error intentant eliminar Document Definiti DUPLICAT amb id "
+                + nodo.getName() + " (" + nodo.getId() + "):" + errorCodi + " => " + msg 
+                + ". S'ha de posar en contacte amb l'Administrador per a que l'esborri de l'arxiu");
+            }
+            
           }
 
-          rd = apiArxiu.finalizarDocumento(doc);
-          if (hiHaError(errorCodi)) {
-            throw new CustodyException("Error cridant a finalizarDocumento() a l'hora de crearDocumentFinal amb id "
-                + custodyID + "(" + errorCodi + " - " + rd.getMsjResultado() + ")");
+          // =========== FINAL REVISAR SI DOCUMENT NOM-DESTI EXISTEIX ========
+
+          ResultadoSimple rd = apiArxiu.actualizarDocumento(doc);
+          final String errorCodiActDoc = rd.getCodigoResultado();
+          if (hiHaError(errorCodiActDoc)) {
+            String msg = rd.getMsjResultado();
+
+            apiArxiu.eliminarDocumento(doc.getId());
+            
+            checkErrorsConeguts(errorCodiActDoc, msg, ecd);
+            throw new CustodyException("Error creant Document Final amb id " + custodyID + "("
+                + errorCodiActDoc + " - " + msg + ")");
           }
+
+          // Reintentam cada 5 segons durant 1 minut
+          int reintents = (int)(60000/SLEEP_SEND_TIMEOUT);
+          do {
+            rd = apiArxiu.finalizarDocumento(doc); 
+            String errorCodi = rd.getCodigoResultado(); 
+            if (hiHaError(errorCodi)) {
+              String msg = rd.getMsjResultado();
+              // Reintentam si COD_020-Send timeout
+              if ("COD_020".equals(errorCodi) && msg.startsWith("Send timeout")) {
+                log.warn("Gestió de reintents de apiArxiu.finalizarDocumento():"
+                    + " reintent compte enrera " + reintents + ". Esperam " + SLEEP_SEND_TIMEOUT + " ms");
+                Thread.sleep(SLEEP_SEND_TIMEOUT);
+              } else if ("COD_021".equals(errorCodi) && msg.startsWith("Can not add the draft aspect to the node because is a final document")) {
+                // COD_021 - Can not add the draft aspect to the node because is a final document)
+                log.info("S'ha intentat finalitzarDocument però aquest ja és definitiu. Es dóna per bó.");
+                break;
+              } else {
+                throw new CustodyException("Error cridant a finalizarDocumento() a "
+                    + "l'hora de crearDocumentFinal amb id "
+                  + custodyID + "(" + errorCodi + " - " + msg + ")");
+              }
+            } else {
+              break;
+            }
+            reintents --;
+            if (reintents <= 0) {
+              throw new CustodyException("S'han esgotat els reintents i no s'ha pogut "
+                  + "tancar (finalitzar) el document amb uuid " + doc.getId() + "(" 
+                  + doc.getName() + "): " + rd.getCodigoResultado() + " - " + rd.getMsjResultado());
+            }
+          } while(reintents > 0);
+          
           
         }
 
@@ -1060,12 +1119,41 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
       }
       
       if (isPropertyTancarExpedient_EL(custodyParameters)) {
-         Resultado<String> res = apiArxiu.cerrarExpediente(ecd.expedientID);
-         if (hiHaError(res.getCodigoResultado())) {
-           // TODO que feim, llaçam excepció o warning
-           log.error("No s'ha pogut tancar l'expedient amb uuid " + ecd.expedientID + ": " 
-             + res.getCodigoResultado() + " - " + res.getMsjResultado(), new Exception());
-         }
+
+        // Reintentam cada 5 segons durant 1 minut
+        int reintents = (int)(60000/SLEEP_SEND_TIMEOUT);
+        do {
+          Resultado<String> res = apiArxiu.cerrarExpediente(ecd.expedientID);
+
+          String errorCodi = res.getCodigoResultado();
+
+          if (hiHaError(errorCodi)) {
+            String msg = res.getMsjResultado();
+            // Reintentam si COD_020-Send timeout
+            if ("COD_020".equals(errorCodi) && msg.startsWith("Send timeout")) {
+              log.warn("Gestió de reintents de apiArxiu.cerrarExpediente():"
+                  + " reintent compte enrera " + reintents + ". Esperam " + SLEEP_SEND_TIMEOUT + " ms");
+              Thread.sleep(SLEEP_SEND_TIMEOUT);
+            } else if ("COD_021".equals(errorCodi) && msg.startsWith("Could not have the permission of Delete to perfom the operation")) {
+              // Aquest error el dóna quan l'expedient ja s'ha mogut a RM
+              // COD_021 - Could not have the permission of Delete to perfom the operation
+              log.info("S'ha intentat cerrarExpediente() però aquest ja esta a RM. Es dóna per bó.");
+              break;              
+            } else {
+              // Llaçam excepció
+              throw new CustodyException("No s'ha pogut tancar l'expedient amb uuid " + ecd.expedientID + ": " 
+                + res.getCodigoResultado() + " - " + res.getMsjResultado());
+            }
+          } else {
+            break;
+          }
+          reintents --;
+          if (reintents <= 0) {
+            throw new CustodyException("S'han esgotat els reintents i no s'ha pogut tancar l'expedient amb uuid " + ecd.expedientID + ": " 
+                + res.getCodigoResultado() + " - " + res.getMsjResultado());
+          }
+        } while(reintents > 0);
+
       }
       
 
@@ -2228,7 +2316,6 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
     documento.setMetadataCollection(llistaMetadades);
 
-
     String uuidParent = (carpetaID == null) ? expedientID : carpetaID;
     CreateDraftDocumentResult result = api.crearDraftDocument(uuidParent, documento, false);
     String codi = result.getCreateDraftDocumentResult().getResult().getCode();
@@ -2272,23 +2359,31 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
     ExpedientCarpetaDocument ec = ExpedientCarpetaDocument.decodeCustodyID(custodyID);
 
+    return getNodosByExpedientCarpeta(apiArxiu, ec.expedientID, ec.carpetaID);
+
+  }
+
+  protected Map<String, Nodo> getNodosByExpedientCarpeta(ApiArchivoDigital apiArxiu,
+      //ExpedientCarpetaDocument ec
+      String expedientID, String carpetaID
+      ) throws IOException, CustodyException {
     // Cercam si hi ha un document
     List<Nodo> nodos;
-    if (ec.carpetaID == null) {
-      Resultado<Expediente> expedient = apiArxiu.obtenerExpediente(ec.expedientID);
+    if (carpetaID == null) {
+      Resultado<Expediente> expedient = apiArxiu.obtenerExpediente(expedientID);
 
       if (hiHaError(expedient.getCodigoResultado())) {
         throw new CustodyException(
-            "Error intentant obtenir informació de l'expedient amb uuid " + ec.expedientID
+            "Error intentant obtenir informació de l'expedient amb uuid " + expedientID
                 + ": " + expedient.getCodigoResultado() + "-" + expedient.getMsjResultado());
       }
 
       nodos = expedient.getElementoDevuelto().getChilds();
     } else {
-      Resultado<Directorio> dir = apiArxiu.obtenerDirectorio(ec.carpetaID);
+      Resultado<Directorio> dir = apiArxiu.obtenerDirectorio(carpetaID);
       if (hiHaError(dir.getCodigoResultado())) {
         throw new CustodyException(
-            "Error intentant obtenir informació de la carpeta amb uuid " + ec.carpetaID + ": "
+            "Error intentant obtenir informació de la carpeta amb uuid " + carpetaID + ": "
                 + dir.getCodigoResultado() + "-" + dir.getMsjResultado());
       }
 
@@ -2303,7 +2398,6 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     }
 
     return nodosByName;
-
   }
 
   
