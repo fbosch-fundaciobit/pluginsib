@@ -697,6 +697,13 @@ public class CertificateUtils {
       return null;
     }
     
+    int posGuio = nif.indexOf('-');
+    
+    if (posGuio != -1) {
+      nif = nif.substring(posGuio + 1);      
+    }
+    
+    
     return new String[] { nif, map.get("OID.1.3.6.1.4.1.5734.1.6") };
   }
     
