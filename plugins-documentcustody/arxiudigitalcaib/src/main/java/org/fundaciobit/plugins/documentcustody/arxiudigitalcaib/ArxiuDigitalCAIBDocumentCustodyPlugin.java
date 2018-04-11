@@ -1111,10 +1111,14 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
 
       if (debug) {
-        Thread.sleep(1500);
-        Map<String, Nodo> nodosByName2 = getNodosByCustodyID2(apiArxiu, custodyID);
-        for (String key : nodosByName2.keySet()) {
-          log.info("FITXERS A LA CARPETA[" + key + "] = " + nodosByName2.get(key).getId());
+        try {
+          Thread.sleep(1500);
+          Map<String, Nodo> nodosByName2 = getNodosByCustodyID2(apiArxiu, custodyID);
+          for (String key : nodosByName2.keySet()) {
+            log.info("FITXERS A LA CARPETA[" + key + "] = " + nodosByName2.get(key).getId());
+          }
+        } catch(Throwable th) {
+          log.error("Error llistant nodos de custodyID = " + custodyID + ":" + th.getMessage());
         }
       }
       
