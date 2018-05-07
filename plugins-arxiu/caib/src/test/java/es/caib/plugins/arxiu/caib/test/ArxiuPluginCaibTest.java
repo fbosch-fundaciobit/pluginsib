@@ -6,6 +6,7 @@ package es.caib.plugins.arxiu.caib.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -886,6 +887,21 @@ public class ArxiuPluginCaibTest {
 		assertEquals(new Integer(1), resultat.getNumPagines());
 		assertEquals(new Integer(1), resultat.getNumRegistres());
 		assertEquals(1, resultat.getResultats().size());
+	}
+
+	@Test
+	public void documentVersioImprimible() throws Exception {
+		System.out.println("TEST: DOCUMENT VERSIO IMPRIMIBLE");
+		String uuid = "d742c85f-9acb-4a5c-9add-f8518a284f86";
+		System.out.println(
+				"1.- Generant versió imprimible (" +
+						"id=" + uuid + ")... ");
+		DocumentContingut contingut = arxiuPlugin.documentImprimible(uuid);
+		assertTrue(contingut.getTamany() > 0);
+		/*System.out.println(">>>    arxiuNom: " + contingut.getArxiuNom());
+		System.out.println(">>>    tipusMime: " + contingut.getTipusMime());
+		System.out.println(">>>    tamany: " + contingut.getTamany());*/
+		System.out.println("Ok");
 	}
 
 	@Test
