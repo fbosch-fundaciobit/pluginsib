@@ -214,6 +214,9 @@ public interface IArxiuPlugin extends IPlugin {
 	 *            Número de la pàgina de resultats que s'ha de retornar.
 	 * @param itemsPerPagina
 	 *            Nombre d'elements per pàgina.
+	 * @param repositori
+	 *            Repositori a on consultar els documents. Si no s'especifica
+	 *            (valor null) s'agafarà com a repositori eni:documento. 
 	 * @return El resultat de la consulta.
 	 * @throws ArxiuException
 	 *             Si es produeix algun problema al realitzar l’operació amb l’arxiu.
@@ -221,7 +224,8 @@ public interface IArxiuPlugin extends IPlugin {
 	public ConsultaResultat documentConsulta(
 			List<ConsultaFiltre> filtres,
 			Integer pagina,
-			Integer itemsPerPagina) throws ArxiuException;
+			Integer itemsPerPagina,
+			final DocumentRepositori repositori) throws ArxiuException;
 
 	/**
 	 * Retorna les versions disponibles d'un document.

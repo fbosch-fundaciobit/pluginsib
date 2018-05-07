@@ -22,6 +22,7 @@ import es.caib.plugins.arxiu.api.ContingutTipus;
 import es.caib.plugins.arxiu.api.Document;
 import es.caib.plugins.arxiu.api.DocumentContingut;
 import es.caib.plugins.arxiu.api.DocumentEstat;
+import es.caib.plugins.arxiu.api.DocumentRepositori;
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.ExpedientEstat;
 import es.caib.plugins.arxiu.api.Firma;
@@ -399,7 +400,8 @@ public class ArxiuPluginFilesystem extends AbstractPluginProperties implements I
 	public ConsultaResultat documentConsulta(
 			List<ConsultaFiltre> filtres,
 			Integer pagina,
-			Integer itemsPerPagina) throws ArxiuException {
+			Integer itemsPerPagina,
+			final DocumentRepositori repositori) throws ArxiuException {
 		try {
 			return getLuceneHelper().contingutCercar(
 					ContingutTipus.DOCUMENT,
