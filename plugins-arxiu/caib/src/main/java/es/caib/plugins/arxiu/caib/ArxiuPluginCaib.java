@@ -21,6 +21,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.DocumentId;
 import es.caib.arxiudigital.apirest.CSGD.entidades.comunes.DocumentNode;
@@ -924,10 +925,12 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	public DocumentContingut documentImprimible(
 			final String identificador) throws ArxiuException {
 		/*
-		 * La URL de consulta es la següent:
-		 * https://intranet.caib.es/concsv/rest/printable/IDENTIFICADOR?metadata1=METADADA_1&metadata2=METADADA_2&watermark=MARCA_AIGUA
+		 * Les URLs de consulta son les següents:
+		 *   https://intranet.caib.es/concsv/rest/printable/uuid/IDENTIFICADOR?metadata1=METADADA_1&metadata2=METADADA_2&watermark=MARCA_AIGUA
+		 *   https://intranet.caib.es/concsv/rest/printable/CSV?metadata1=METADADA_1&metadata2=METADADA_2&watermark=MARCA_AIGUA
 		 * A on:
-		 *   - IDENTIFICADOR és el CSV del document a consultar [OBLIGATORI]
+		 *   - CSV és el CSV del document a consultar [OBLIGATORI]
+		 *   - IDENTIFICADOR és el UUID del document a consultar [OBLIGATORI]
 		 *   - METADADA_1 és la primera metadada [OPCIONAL]
 		 *   - METADADA_2 és la segona metadada [OPCIONAL]
 		 *   - MARCA_AIGUA és el text de la marca d'aigua que apareixerà impresa a cada fulla [OPCIONAL]
@@ -1595,11 +1598,17 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	}
 	private Client getVersioImprimibleClient() {
 		if (versioImprimibleClient == null) {
-			versioImprimibleClient = new Client();
+			versioImprimibleClient = Client.create();
 			versioImprimibleClient.setConnectTimeout(
 					getPropertyTimeoutConnect());
 			versioImprimibleClient.setReadTimeout(
 					getPropertyTimeoutRead());
+			String usuari = getPropertyConversioImprimibleUsuari();
+			String contrasenya = getPropertyConversioImprimibleContrasenya();
+			if (usuari != null) {
+				versioImprimibleClient.addFilter(
+						new HTTPBasicAuthFilter(usuari, contrasenya));
+			}
 		}
 		return versioImprimibleClient;
 	}
@@ -1621,6 +1630,12 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	}
 	private String getPropertyConversioImprimibleUrl() {
 		return getProperty(ARXIUCAIB_BASE_PROPERTY + "conversio.imprimible.url");
+	}
+	private String getPropertyConversioImprimibleUsuari() {
+		return getProperty(ARXIUCAIB_BASE_PROPERTY + "conversio.imprimible.usuari");
+	}
+	private String getPropertyConversioImprimibleContrasenya() {
+		return getProperty(ARXIUCAIB_BASE_PROPERTY + "conversio.imprimible.contrasenya");
 	}
 	private int getPropertyTimeoutConnect() {
 		String timeout = getProperty(
