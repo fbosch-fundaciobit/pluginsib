@@ -423,39 +423,59 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           log.info(" CERCA[AppName] => " + filtrosRequeridos.getAppName() );
           log.info(" CERCA[serieDocumental] => " + filtrosRequeridos.getDocSeries());
         }
-        
-  
-        ResultadoBusqueda<Expediente> res = api.busquedaFacilExpedientes(filtrosRequeridos,
-            null, 1);
+
+        ResultadoBusqueda<Expediente> res;
+        res = api.busquedaFacilExpedientes(filtrosRequeridos, null, 0);
         if (hiHaErrorEnCerca(res.getCodigoResultado())) {
           throw new CustodyException("Error Consultant si Expedient " + nomExpedient
               + " existeix: " + res.getCodigoResultado() + "-" + res.getMsjResultado());
         }
   
         List<Expediente> llista2 = res.getListaResultado();
-        
-        log.info(" CERCA[].size() = " + llista2.size());
 
-        if (llista2.size() == 0) {
+        if (llista2 == null || llista2.size() == 0) {
+          log.info(" CERCA[].size() = Llista null o buida (" + llista2.size() + ")");
           expedientCercat = null;
         } else {
-          // TODO la cerca es fa del nom parescut al fitper, per exemple
-          // si cerques
-          // "Registre_20" et pot trobar Registre_20, Registre_200, Registre_202,
-          // ...
+          log.info(" CERCA[].size() = " + llista2.size());
+          // TODO la cerca es fa del nom parescut al fitxer, per exemple
+          // si cerques "Registre_20" et pot trobar Registre_20,
+          // Registre_200, Registre_202, ...
           int countTrobats = 0;
-          for (Expediente expediente : llista2) {
-            if (nomExpedient.equals(expediente.getName())) {
-              countTrobats++;
-              if (countTrobats > 1) {
-                log.error(" S'ha trobat coincidencia multiple " + expediente.getName() + " ("
-                    + expediente.getId() + ") per la cerca de nomExpedient " + nomExpedient
-                    + ")");
-              } else {
-                expedientCercat = expediente;
+          final int total = res.getNumeroTotalResultados();
+          int parcial = 0;
+          int pagina = 0;
+          do {
+            for (Expediente expediente : llista2) {
+              parcial++;
+              if (nomExpedient.equals(expediente.getName())) {
+                countTrobats++;
+                if (countTrobats > 1) {
+                  log.error(" S'ha trobat coincidencia multiple " + expediente.getName() + " ("
+                      + expediente.getId() + ") per la cerca de nomExpedient " + nomExpedient
+                      + ")");
+                } else {
+                  expedientCercat = expediente;
+                }
               }
             }
-          }
+            
+            if (countTrobats != 0) {
+              break;
+            }
+            
+            if (parcial <= total) {
+              break;
+            }
+            pagina++;
+            res = api.busquedaFacilExpedientes(filtrosRequeridos, null, pagina);
+            if (hiHaErrorEnCerca(res.getCodigoResultado())) {
+              throw new CustodyException("Error Consultant si Expedient " + nomExpedient
+                  + " existeix: " + res.getCodigoResultado() + "-" + res.getMsjResultado());
+            }
+            
+            llista2 = res.getListaResultado();
+          } while(true);
   
           if (countTrobats == 0) {
             expedientCercat = null;
