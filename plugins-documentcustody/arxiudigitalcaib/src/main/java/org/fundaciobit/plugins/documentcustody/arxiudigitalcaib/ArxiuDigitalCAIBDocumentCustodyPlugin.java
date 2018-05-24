@@ -1070,7 +1070,25 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           // Reintentam cada 5 segons durant 1 minut
           int reintents = (int)(60000/SLEEP_SEND_TIMEOUT);
           do {
-            rd = apiArxiu.finalizarDocumento(doc); 
+            reintents --;
+            try {
+              rd = apiArxiu.finalizarDocumento(doc);
+            } catch(Exception e) {
+              // https://github.com/GovernIB/pluginsib/issues/52
+              log.error("Error no controlat al finalizarDocumento()[Miram si podem reintentar...]: "
+                + e.getMessage(), e);
+              String msg = e.getMessage();
+              if (reintents > 0 && msg != null && msg.contains("Proxy Error") 
+                  && msg.contains("/services/setFinalDocument")) {
+                // forçam el reintent
+                rd = new ResultadoSimple();
+                rd.setCodigoResultado("COD_020");
+                rd.setMsjResultado("Send timeout");
+              } else {
+                throw e; 
+              }
+            }
+
             String errorCodi = rd.getCodigoResultado(); 
             if (hiHaError(errorCodi)) {
               String msg = rd.getMsjResultado();
@@ -1091,7 +1109,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
             } else {
               break;
             }
-            reintents --;
+            
             if (reintents <= 0) {
               throw new CustodyException("S'han esgotat els reintents i no s'ha pogut "
                   + "tancar (finalitzar) el document amb uuid " + doc.getId() + "(" 
@@ -1147,7 +1165,26 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         // Reintentam cada 5 segons durant 1 minut
         int reintents = (int)(60000/SLEEP_SEND_TIMEOUT);
         do {
-          Resultado<String> res = apiArxiu.cerrarExpediente(ecd.expedientID);
+          Resultado<String>  res;
+          
+          reintents --;
+          try {
+            res = apiArxiu.cerrarExpediente(ecd.expedientID);
+          } catch(Exception e) {
+            // https://github.com/GovernIB/pluginsib/issues/52
+            log.error("Error no controlat al cerrarExpediente()[Miram si podem reintentar...]: "
+               + e.getMessage(), e);
+            String msg = e.getMessage();
+            if (reintents > 0 && msg != null && msg.contains("Proxy Error") 
+                && msg.contains("/services/closeFile")) {
+              // forçam el reintent
+              res = new Resultado<String>();
+              res.setCodigoResultado("COD_020");
+              res.setMsjResultado("Send timeout");
+            } else {
+              throw e; 
+            }
+          }
 
           String errorCodi = res.getCodigoResultado();
 
@@ -1171,7 +1208,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           } else {
             break;
           }
-          reintents --;
+
           if (reintents <= 0) {
             throw new CustodyException("S'han esgotat els reintents i no s'ha pogut tancar l'expedient amb uuid " + ecd.expedientID + ": " 
                 + res.getCodigoResultado() + " - " + res.getMsjResultado());
