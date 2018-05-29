@@ -266,7 +266,14 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     }
   }
   
-  
+  public boolean isIgnoreErrorWhenTancarExpedient() {
+    String valueStr = getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "ignoreerrorwhentancarexpedient");
+    if ("true".equals(valueStr)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   
 
   /**
@@ -1190,6 +1197,15 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
 
           if (hiHaError(errorCodi)) {
             String msg = res.getMsjResultado();
+            if (isIgnoreErrorWhenTancarExpedient()) {
+              log.warn("S'ha produit un error [" + errorCodi + ": " + msg + "] durant el"
+                  + " tancament de l'expedient però la propietat {<<PACKAGE>>." 
+                  + ARXIUDIGITALCAIB_PROPERTY_BASE + "ignoreerrorwhentancarexpedient = true}."
+                  + "Ignoram l'error i presuposam que l'expedient-document " + custodyID
+                  + " s'ha tancat correctament");
+              break;
+            }
+
             // Reintentam si COD_020-Send timeout
             if ("COD_020".equals(errorCodi) && msg.startsWith("Send timeout")) {
               log.warn("Gestió de reintents de apiArxiu.cerrarExpediente():"

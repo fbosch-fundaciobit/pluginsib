@@ -2,6 +2,14 @@
 CANVIS EN PLUGIN DE DOC: CUSTODY DE ARXIU CAIB
 ==============================================
 
+
+2018-05-29 Nova propietat [PACKAGE].plugins.documentcustody.arxiudigitalcaib.ignoreerrorwhentancarexpedient 
+            (Si val true ignora errors a l'hora de tancar l'expedient) ver. 3.0.13
+
+2018-05-24 Errors no controlats a causa de errors en la TSA. Capturar excepcions durant 
+           finalizarDoc() i cerrarExpediente().  (ver 3.0.12)
+            
+
 2017-12-13 Nova propietat [BASE].plugins.documentcustody.arxiudigitalcaib.searchifexpedientexistsinreserve
            (Si val false cerca si existeixen Expedients amb el mateix nom) 
 
