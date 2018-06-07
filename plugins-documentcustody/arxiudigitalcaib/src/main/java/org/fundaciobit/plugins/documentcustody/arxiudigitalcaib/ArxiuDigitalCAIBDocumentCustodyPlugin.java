@@ -266,7 +266,14 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
     }
   }
   
-  
+  public boolean isIgnoreErrorWhenTancarExpedient() {
+    String valueStr = getProperty(ARXIUDIGITALCAIB_PROPERTY_BASE + "ignoreerrorwhentancarexpedient");
+    if ("true".equals(valueStr)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   
 
   /**
@@ -423,39 +430,59 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           log.info(" CERCA[AppName] => " + filtrosRequeridos.getAppName() );
           log.info(" CERCA[serieDocumental] => " + filtrosRequeridos.getDocSeries());
         }
-        
-  
-        ResultadoBusqueda<Expediente> res = api.busquedaFacilExpedientes(filtrosRequeridos,
-            null, 1);
+
+        ResultadoBusqueda<Expediente> res;
+        res = api.busquedaFacilExpedientes(filtrosRequeridos, null, 0);
         if (hiHaErrorEnCerca(res.getCodigoResultado())) {
           throw new CustodyException("Error Consultant si Expedient " + nomExpedient
               + " existeix: " + res.getCodigoResultado() + "-" + res.getMsjResultado());
         }
   
         List<Expediente> llista2 = res.getListaResultado();
-        
-        log.info(" CERCA[].size() = " + llista2.size());
 
-        if (llista2.size() == 0) {
+        if (llista2 == null || llista2.size() == 0) {
+          log.info(" CERCA[].size() = Llista null o buida (" + llista2.size() + ")");
           expedientCercat = null;
         } else {
-          // TODO la cerca es fa del nom parescut al fitper, per exemple
-          // si cerques
-          // "Registre_20" et pot trobar Registre_20, Registre_200, Registre_202,
-          // ...
+          log.info(" CERCA[].size() = " + llista2.size());
+          // TODO la cerca es fa del nom parescut al fitxer, per exemple
+          // si cerques "Registre_20" et pot trobar Registre_20,
+          // Registre_200, Registre_202, ...
           int countTrobats = 0;
-          for (Expediente expediente : llista2) {
-            if (nomExpedient.equals(expediente.getName())) {
-              countTrobats++;
-              if (countTrobats > 1) {
-                log.error(" S'ha trobat coincidencia multiple " + expediente.getName() + " ("
-                    + expediente.getId() + ") per la cerca de nomExpedient " + nomExpedient
-                    + ")");
-              } else {
-                expedientCercat = expediente;
+          final int total = res.getNumeroTotalResultados();
+          int parcial = 0;
+          int pagina = 0;
+          do {
+            for (Expediente expediente : llista2) {
+              parcial++;
+              if (nomExpedient.equals(expediente.getName())) {
+                countTrobats++;
+                if (countTrobats > 1) {
+                  log.error(" S'ha trobat coincidencia multiple " + expediente.getName() + " ("
+                      + expediente.getId() + ") per la cerca de nomExpedient " + nomExpedient
+                      + ")");
+                } else {
+                  expedientCercat = expediente;
+                }
               }
             }
-          }
+            
+            if (countTrobats != 0) {
+              break;
+            }
+            
+            if (parcial <= total) {
+              break;
+            }
+            pagina++;
+            res = api.busquedaFacilExpedientes(filtrosRequeridos, null, pagina);
+            if (hiHaErrorEnCerca(res.getCodigoResultado())) {
+              throw new CustodyException("Error Consultant si Expedient " + nomExpedient
+                  + " existeix: " + res.getCodigoResultado() + "-" + res.getMsjResultado());
+            }
+            
+            llista2 = res.getListaResultado();
+          } while(true);
   
           if (countTrobats == 0) {
             expedientCercat = null;
@@ -1050,7 +1077,25 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           // Reintentam cada 5 segons durant 1 minut
           int reintents = (int)(60000/SLEEP_SEND_TIMEOUT);
           do {
-            rd = apiArxiu.finalizarDocumento(doc); 
+            reintents --;
+            try {
+              rd = apiArxiu.finalizarDocumento(doc);
+            } catch(Exception e) {
+              // https://github.com/GovernIB/pluginsib/issues/52
+              log.error("Error no controlat al finalizarDocumento()[Miram si podem reintentar...]: "
+                + e.getMessage(), e);
+              String msg = e.getMessage();
+              if (reintents > 0 && msg != null && msg.contains("Proxy Error") 
+                  && msg.contains("/services/setFinalDocument")) {
+                // forçam el reintent
+                rd = new ResultadoSimple();
+                rd.setCodigoResultado("COD_020");
+                rd.setMsjResultado("Send timeout");
+              } else {
+                throw e; 
+              }
+            }
+
             String errorCodi = rd.getCodigoResultado(); 
             if (hiHaError(errorCodi)) {
               String msg = rd.getMsjResultado();
@@ -1071,7 +1116,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
             } else {
               break;
             }
-            reintents --;
+            
             if (reintents <= 0) {
               throw new CustodyException("S'han esgotat els reintents i no s'ha pogut "
                   + "tancar (finalitzar) el document amb uuid " + doc.getId() + "(" 
@@ -1127,12 +1172,40 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
         // Reintentam cada 5 segons durant 1 minut
         int reintents = (int)(60000/SLEEP_SEND_TIMEOUT);
         do {
-          Resultado<String> res = apiArxiu.cerrarExpediente(ecd.expedientID);
+          Resultado<String>  res;
+          
+          reintents --;
+          try {
+            res = apiArxiu.cerrarExpediente(ecd.expedientID);
+          } catch(Exception e) {
+            // https://github.com/GovernIB/pluginsib/issues/52
+            log.error("Error no controlat al cerrarExpediente()[Miram si podem reintentar...]: "
+               + e.getMessage(), e);
+            String msg = e.getMessage();
+            if (reintents > 0 && msg != null && msg.contains("Proxy Error") 
+                && msg.contains("/services/closeFile")) {
+              // forçam el reintent
+              res = new Resultado<String>();
+              res.setCodigoResultado("COD_020");
+              res.setMsjResultado("Send timeout");
+            } else {
+              throw e; 
+            }
+          }
 
           String errorCodi = res.getCodigoResultado();
 
           if (hiHaError(errorCodi)) {
             String msg = res.getMsjResultado();
+            if (isIgnoreErrorWhenTancarExpedient()) {
+              log.warn("S'ha produit un error [" + errorCodi + ": " + msg + "] durant el"
+                  + " tancament de l'expedient però la propietat {<<PACKAGE>>." 
+                  + ARXIUDIGITALCAIB_PROPERTY_BASE + "ignoreerrorwhentancarexpedient = true}."
+                  + "Ignoram l'error i presuposam que l'expedient-document " + custodyID
+                  + " s'ha tancat correctament");
+              break;
+            }
+
             // Reintentam si COD_020-Send timeout
             if ("COD_020".equals(errorCodi) && msg.startsWith("Send timeout")) {
               log.warn("Gestió de reintents de apiArxiu.cerrarExpediente():"
@@ -1151,7 +1224,7 @@ public class ArxiuDigitalCAIBDocumentCustodyPlugin extends AbstractPluginPropert
           } else {
             break;
           }
-          reintents --;
+
           if (reintents <= 0) {
             throw new CustodyException("S'han esgotat els reintents i no s'ha pogut tancar l'expedient amb uuid " + ecd.expedientID + ": " 
                 + res.getCodigoResultado() + " - " + res.getMsjResultado());
