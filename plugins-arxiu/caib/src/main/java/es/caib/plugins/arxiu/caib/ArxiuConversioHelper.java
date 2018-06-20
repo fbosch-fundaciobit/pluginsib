@@ -194,6 +194,20 @@ public class ArxiuConversioHelper {
 		return carpeta;
 	}
 
+	public static ContingutArxiu crearContingutArxiu(
+			String identificador,
+			String nom,
+			ContingutTipus tipus,
+			String versio) {
+		ContingutArxiu informacioItem = new ContingutArxiu(tipus);
+		informacioItem.setIdentificador(identificador);
+		informacioItem.setNom(nom);
+		informacioItem.setVersio(versio);
+		return informacioItem;
+	}
+
+
+
 	private static List<Metadata> toMetadataExpedient(
 			ExpedientMetadades expedientMetadades,
 			String aplicacioCodi,
@@ -541,9 +555,6 @@ public class ArxiuConversioHelper {
 	private static List<Firma> toDocumentFirmes(
 			List<Content> contents,
 			List<Metadata> metadades) {
-		if (contents == null) {
-			return null;
-		}
 		List<Firma> firmes = null;
 		String firmaTipus = null;
 		String firmaPerfil = null;
@@ -574,31 +585,26 @@ public class ArxiuConversioHelper {
 		}
 		if (firmaTipus != null) {
 			FirmaTipus firmaTipusEnum = FirmaTipus.toEnum(firmaTipus);
-			for (Content content: contents) {
-				if (TiposContenidosBinarios.SIGNATURE.equals(content.getBinaryType())) {
-					Firma firma = new Firma();
-					firma.setTipus(firmaTipusEnum);
-					firma.setPerfil(FirmaPerfil.toEnum(firmaPerfil));
-					firma.setContingut(Base64.decode(content.getContent()));
-					firma.setTamany(firma.getContingut().length);
-					firma.setTipusMime(content.getMimetype());
-					if (firmes == null) {
-						firmes = new ArrayList<Firma>();
+			Firma firma = new Firma();
+			firma.setTipus(firmaTipusEnum);
+			firma.setPerfil(FirmaPerfil.toEnum(firmaPerfil));
+			if (contents != null) {
+				for (Content content: contents) {
+					if (TiposContenidosBinarios.SIGNATURE.equals(content.getBinaryType())) {
+						firma.setContingut(Base64.decode(content.getContent()));
+						firma.setTamany(firma.getContingut().length);
+						firma.setTipusMime(content.getMimetype());
+					} else if ((FirmaTipus.PADES.equals(firmaTipusEnum) || FirmaTipus.CADES_ATT.equals(firmaTipusEnum)) && TiposContenidosBinarios.CONTENT.equals(content.getBinaryType())) {
+						firma.setContingut(Base64.decode(content.getContent()));
+						firma.setTamany(firma.getContingut().length);
+						firma.setTipusMime(content.getMimetype());
 					}
-					firmes.add(firma);
-				} else if ((FirmaTipus.PADES.equals(firmaTipusEnum) || FirmaTipus.CADES_ATT.equals(firmaTipusEnum)) && TiposContenidosBinarios.CONTENT.equals(content.getBinaryType())) {
-					Firma firma = new Firma();
-					firma.setTipus(firmaTipusEnum);
-					firma.setPerfil(FirmaPerfil.toEnum(firmaPerfil));
-					firma.setContingut(Base64.decode(content.getContent()));
-					firma.setTamany(firma.getContingut().length);
-					firma.setTipusMime(content.getMimetype());
-					if (firmes == null) {
-						firmes = new ArrayList<Firma>();
-					}
-					firmes.add(firma);
 				}
 			}
+			if (firmes == null) {
+				firmes = new ArrayList<Firma>();
+			}
+			firmes.add(firma);
 		}
 		return firmes;
 	}
@@ -815,18 +821,6 @@ public class ArxiuConversioHelper {
 		if (nom == null)
 			return null;
 		return nom.replaceAll("[\\\\/:*?\"<>|]", "_");
-	}
-
-	public static ContingutArxiu crearContingutArxiu(
-			String identificador,
-			String nom,
-			ContingutTipus tipus,
-			String versio) {
-		ContingutArxiu informacioItem = new ContingutArxiu(tipus);
-		informacioItem.setIdentificador(identificador);
-		informacioItem.setNom(nom);
-		informacioItem.setVersio(versio);
-		return informacioItem;
 	}
 
 }
