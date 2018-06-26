@@ -528,7 +528,10 @@ public final class RFC3161Connection {
 
       SSLSocket secureSocket = (SSLSocket) ssl;
 
+      // Support JDk 1.7 i JDK 1.8:  "TLS_RSA_WITH_AES_256_CBC_SHA"
+     
       secureSocket.setEnabledCipherSuites(new String[] { "SSL_RSA_WITH_RC4_128_MD5" });
+      
       secureSocket.setEnabledProtocols(new String[] { "TLSv1" });
 
       return secureSocket;
