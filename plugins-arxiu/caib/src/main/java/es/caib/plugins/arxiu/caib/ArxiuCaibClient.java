@@ -254,7 +254,7 @@ public class ArxiuCaibClient {
 			Object peticio) throws UniformInterfaceException, ClientHandlerException, JsonProcessingException {
 		String urlAmbMetode = url + metode;
 		String body = mapper.writeValueAsString(peticio);
-		logger.debug("Enviant petició HTTP a l'arxiu (" +
+		logger.info("Enviant petició HTTP a l'arxiu (" +
 				"url=" + urlAmbMetode + ", " +
 				"tipus=application/json, " +
 				"body=" + body + ")");
@@ -263,7 +263,7 @@ public class ArxiuCaibClient {
 				type("application/json").
 				post(ClientResponse.class, body);
 		String json = response.getEntity(String.class);
-		logger.debug("Rebuda resposta HTTP de l'arxiu (" +
+		logger.info("Rebuda resposta HTTP de l'arxiu (" +
 				"status=" + response.getStatus() + ", " +
 				"body=" + json + ")");
 		return new JerseyResponse(

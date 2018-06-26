@@ -3,6 +3,8 @@
  */
 package es.caib.plugins.arxiu.api;
 
+import java.util.List;
+
 /**
  * Informació sobre un contingut genèric de l’arxiu.
  * Aquest contingut pot ser de tipus document, expedient
@@ -16,6 +18,7 @@ public class ContingutArxiu {
 	protected String nom;
 	protected ContingutTipus tipus;
 	protected String versio;
+	private List<Firma> firmes;
 
 	public ContingutArxiu(ContingutTipus tipus) {
 		super();
@@ -42,6 +45,12 @@ public class ContingutArxiu {
 	}
 	public void setVersio(String versio) {
 		this.versio = versio;
+	}
+	public List<Firma> getFirmes() {
+		return firmes;
+	}
+	public void setFirmes(List<Firma> firmes) {
+		this.firmes = firmes;
 	}
 
 }

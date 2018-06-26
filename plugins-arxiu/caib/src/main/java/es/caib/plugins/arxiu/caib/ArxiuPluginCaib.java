@@ -111,6 +111,7 @@ import es.caib.plugins.arxiu.api.DocumentContingut;
 import es.caib.plugins.arxiu.api.DocumentEstat;
 import es.caib.plugins.arxiu.api.DocumentFormat;
 import es.caib.plugins.arxiu.api.DocumentMetadades;
+import es.caib.plugins.arxiu.api.DocumentRepositori;
 import es.caib.plugins.arxiu.api.Expedient;
 import es.caib.plugins.arxiu.api.Firma;
 import es.caib.plugins.arxiu.api.FirmaTipus;
@@ -131,8 +132,9 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	private static final String JERSEY_TIMEOUT_CONNECT = "10000";
 	private static final String JERSEY_TIMEOUT_READ = "60000";
 
-	private static final String QUERY_TYPE_EXPEDIENTE = "\"eni:expediente\"";
-	private static final String QUERY_TYPE_DOCUMENTO = "\"eni:documento\"";
+	private static final String QUERY_TYPE_ENI_EXPEDIENTE = "\"eni:expediente\"";
+	private static final String QUERY_TYPE_ENI_DOCUMENTO = "\"eni:documento\"";
+	private static final String QUERY_TYPE_GDIB_DOCUMENTO_MIGRADO = "\"gdib:documentoMigrado\"";
 
 	private ArxiuCaibClient arxiuClient;
 	private Client versioImprimibleClient;
@@ -337,7 +339,7 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 							public ParamSearch generar() {
 								ParamSearch param = new ParamSearch();
 								String query = generarConsulta(
-										QUERY_TYPE_EXPEDIENTE,
+										QUERY_TYPE_ENI_EXPEDIENTE,
 										filtres);
 								param.setQuery(query);
 								param.setPageNumber(pagina);
@@ -759,12 +761,27 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 	public ConsultaResultat documentConsulta(
 			final List<ConsultaFiltre> filtres,
 			final Integer pagina,
-			final Integer itemsPerPagina) throws ArxiuException {
+			final Integer itemsPerPagina,
+			final DocumentRepositori repositori) throws ArxiuException {
 		String metode = Servicios.SEARCH_DOC;
 		try {
 			List<ContingutArxiu> resultatConsulta = new ArrayList<ContingutArxiu>();
 			List<ContingutArxiu> continguts = null;
 			while (continguts == null || continguts.size() == NUM_PAGINES_RESULTAT_CERCA) {
+				final String query;
+				if (repositori == null || DocumentRepositori.ENI_DOCUMENTO.equals(repositori)) {
+					query = generarConsulta(
+							QUERY_TYPE_ENI_DOCUMENTO,
+							filtres);
+				} else if (DocumentRepositori.GDIB_DOCUMENTO_MIGRADO.equals(repositori)) {
+					query = generarConsulta(
+							QUERY_TYPE_GDIB_DOCUMENTO_MIGRADO,
+							filtres);
+				} else {
+					throw new ArxiuException(
+							"S'ha produit un error cridant el mètode " + metode + ":" +
+							"Repositori de documents desconegut (" + repositori + ")");
+				}
 				SearchDocsResult resposta = getArxiuClient().generarEnviarPeticio(
 						metode,
 						SearchDocs.class,
@@ -772,9 +789,6 @@ public class ArxiuPluginCaib extends AbstractPluginProperties implements IArxiuP
 							@Override
 							public ParamSearch generar() {
 								ParamSearch param = new ParamSearch();
-								String query = generarConsulta(
-										QUERY_TYPE_DOCUMENTO,
-										filtres);
 								param.setQuery(query);
 								param.setPageNumber(pagina);
 								return param;

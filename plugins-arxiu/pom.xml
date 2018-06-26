@@ -7,13 +7,17 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>plugins-arxiu</artifactId>
+	<version>1.0.2</version>
 	<packaging>pom</packaging>
 	<name>FundacioBit Plugins - Arxiu Plugins</name>
 	<properties>
-		<plugin.arxiu.version>1.0.0</plugin.arxiu.version>
+		<plugin.arxiu.version>1.0.2</plugin.arxiu.version>
+		<plugins.api.version>1.0.0</plugins.api.version>
 		<slf4j.version>1.5.11</slf4j.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
 		<java.version>1.7</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<skip.tests>true</skip.tests>
 	</properties>
 	<modules>

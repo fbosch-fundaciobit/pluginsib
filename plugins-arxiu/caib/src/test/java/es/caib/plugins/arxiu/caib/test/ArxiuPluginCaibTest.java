@@ -878,7 +878,8 @@ public class ArxiuPluginCaibTest {
 		ConsultaResultat resultat = arxiuPlugin.documentConsulta(
 				Arrays.asList(filtreCsv),
 				0,
-				1);
+				1,
+				null);
 		assertNotNull(resultat);
 		assertNotNull(resultat.getNumRetornat());
 		assertNotNull(resultat.getResultats());

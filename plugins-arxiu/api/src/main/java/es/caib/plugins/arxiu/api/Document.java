@@ -3,8 +3,6 @@
  */
 package es.caib.plugins.arxiu.api;
 
-import java.util.List;
-
 /**
  * Informació d'un contingut de l'arxiu de tipus document.
  *
@@ -14,7 +12,6 @@ public class Document extends ContingutArxiu {
 
 	private DocumentEstat estat;
 	private DocumentMetadades metadades;
-	private List<Firma> firmes;
 	private DocumentContingut contingut;
 
 	public Document() {
@@ -32,12 +29,6 @@ public class Document extends ContingutArxiu {
 	}
 	public void setMetadades(DocumentMetadades metadades) {
 		this.metadades = metadades;
-	}
-	public List<Firma> getFirmes() {
-		return firmes;
-	}
-	public void setFirmes(List<Firma> firmes) {
-		this.firmes = firmes;
 	}
 	public DocumentContingut getContingut() {
 		return contingut;

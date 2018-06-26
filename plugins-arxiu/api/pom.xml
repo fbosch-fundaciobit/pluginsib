@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.fundaciobit.plugins</groupId>
 		<artifactId>plugins-arxiu</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.2</version>
 	</parent>
 	<artifactId>plugin-arxiu-api</artifactId>
 	<packaging>jar</packaging>
@@ -14,7 +14,7 @@
 		<dependency>
 			<groupId>org.fundaciobit.plugins</groupId>
 			<artifactId>plugins-api</artifactId>
-			<version>1.0.0</version>
+			<version>${plugins.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
