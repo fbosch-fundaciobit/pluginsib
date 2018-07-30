@@ -5,6 +5,9 @@ org.fundaciobit.exemple.base.plugins.validatesignature.afirmacxf.applicationID=g
 #gobbal.fbit.portafib
 #appPrueba
 
+org.fundaciobit.exemple.base.plugins.validatesignature.afirmacxf.debug=true
+org.fundaciobit.exemple.base.plugins.validatesignature.afirmacxf.printxml=true
+
 org.fundaciobit.exemple.base.plugins.validatesignature.afirmacxf.ignoreservercertificates=true
 
 org.fundaciobit.exemple.base.plugins.validatesignature.afirmacxf.TransformersTemplatesPath=D:/dades/dades/CarpetesPersonals/Programacio/pluginsib-1.0/plugins-validatesignature/afirmacxf/config/transformersTemplates

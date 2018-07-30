@@ -1,11 +1,11 @@
 
 
-Per usar en JBOSS 5.x s'ha d'usar la següent despendència:
+Per usar en JBOSS 5.x s'ha d'usar la segÃ¼ent despendÃ¨ncia:
 
 <dependency>
   <groupId>org.fundaciobit.plugins</groupId>
   <artifactId>plugin-validatesignature-afirmacxf</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.x</version>
 
   <exclusions> 
     <exclusion>  

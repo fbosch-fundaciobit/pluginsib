@@ -608,11 +608,30 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
     }
     
     TransformersFacade transformersFacade = getTransformersFacade();
+    
+
+
+    if (debug) {
+      log.info(" ========== IN PARAMS =========== ");
+
+      for (String b : inParams.keySet()) {
+        log.info(b + " => " + inParams.get(b));
+      }
+      log.info(" ================================= ");
+    }
+
+    
+    
 
     // Construimos el XML que constituye la petici�n
     String xmlInput = transformersFacade.generateXml(inParams,
         GeneralConstants.DSS_AFIRMA_VERIFY_REQUEST, GeneralConstants.DSS_AFIRMA_VERIFY_METHOD,
         TransformersConstants.VERSION_10);
+    
+    if (debug || "true".equals(getProperty(PRINT_XML))) {
+      log.info("IN_XML = \n" + xmlInput);
+    }
+    
 
     // Invocamos el servicio y obtenemos un XML de respuesta
     String xmlOutput = cridadaWs(xmlInput);
@@ -625,8 +644,6 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
 
 
     if (debug || "true".equals(getProperty(PRINT_XML))) {
-      System.out.println("PRINT_XML: " + xmlOutput);
-      
       log.info("OUT_XML = \n" + xmlOutput);
     }
 

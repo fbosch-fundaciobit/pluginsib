@@ -17,6 +17,7 @@
     <module>api</module>
     <module>afirmacxf</module>
     <module>fake</module>
+    <module>validatetester</module>
   </modules>
 
   <profiles>

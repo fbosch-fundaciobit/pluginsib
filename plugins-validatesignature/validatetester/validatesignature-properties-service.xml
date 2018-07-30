@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server>
+  <mbean code="org.jboss.varia.property.SystemPropertiesService" name="jboss:type=Service,name=ValidateSignatureSystemProperties">
+    <attribute name="Properties">
+validatesignatureplugins.path=D:/dades/dades/CarpetesPersonals/Programacio/portafib-1.1-jboss-5.1.0.GA/server/default/deployvalidatesignature/plugins_validatesignature.properties
+    </attribute>
+  </mbean>
+</server>
+
