@@ -14,7 +14,7 @@
     <name>FundacioBit Plugins - Scan Web - IECISA - Applet</name>
     <groupId>org.fundaciobit.plugins</groupId>
     <artifactId>plugin-scanweb-iecisascanweb-applet</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     
     <properties>
