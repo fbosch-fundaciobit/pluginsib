@@ -37,10 +37,11 @@ Per usar en JBOSS 5.x s'ha d'usar la següent despendència:
       <groupId>org.apache.ws.security</groupId>
       <artifactId>wss4j</artifactId>
     </exclusion>
-        
+    <!--    
     <exclusion>  
       <groupId>org.apache.santuario</groupId>
       <artifactId>xmlsec</artifactId>
     </exclusion>
+    -->
   </exclusions> 
 </dependency>
