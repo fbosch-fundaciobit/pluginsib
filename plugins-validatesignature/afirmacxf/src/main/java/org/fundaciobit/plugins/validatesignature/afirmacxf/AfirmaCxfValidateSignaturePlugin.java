@@ -14,9 +14,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
 
 import javax.net.ssl.X509TrustManager;
 import javax.xml.crypto.MarshalException;
@@ -32,6 +37,7 @@ import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.util.encoders.Base64;
+import org.fundaciobit.plugins.utils.FileUtils;
 import org.fundaciobit.plugins.utils.XTrustProvider;
 import org.fundaciobit.plugins.utils.cxf.CXFUtils;
 import org.fundaciobit.plugins.utils.cxf.ClientHandler;
@@ -69,6 +75,8 @@ import es.gob.afirma.utils.DSSConstants;
 import es.gob.afirma.utils.GeneralConstants;
 import es.gob.afirma.utils.DSSConstants.DSSTagsRequest;
 import es.gob.afirma.utils.DSSConstants.ReportDetailLevel;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 
 
 /**
@@ -244,7 +252,6 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
 
   // CRIDADA CXF
   public static final String ENDPOINT = AFIRMACXF_BASE_PROPERTIES + "endpoint";
-  public static final String APPLICATION_ID = AFIRMACXF_BASE_PROPERTIES + "applicationid";
 
   // UsernameToken
   public static final String AUTH_UP_USERNAME = AFIRMACXF_BASE_PROPERTIES
@@ -571,9 +578,21 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
     // Indicamos la firma a validar
     // NOTA XYZ ZZZ Si es XML revisar mètode incorporateSignatureImplicit
     final byte[] signData = validationRequest.getSignatureData();
+    if (signData == null) {
+      // 
+      throw new Exception("El valor de la signatura és null.");
+    }
+    
+    
     String xadesFormat = null;
-    if (CXFUtils.isXMLFormat(signData)) {
+    boolean isXAdES;
+    
+    isXAdES = CXFUtils.isXMLFormat(signData);
+    log.debug("\n\n ES XADES ?? " + isXAdES + " \n\n");
+    if (isXAdES) {
       
+      //XadesSigner xs;
+      //xs.getOriginalDoc(arg0)
       
       //inParams.put("dss:SignatureObject",  new String(signData));
       xadesFormat = getXAdESFormat(signData);
@@ -583,6 +602,8 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
       inParams.put("dss:InputDocuments/dss:Document/dss:Base64XML",
           new String(Base64.encode(signData)));
       */
+
+      
     } else {
       inParams.put(DSSTagsRequest.SIGNATURE_BASE64, new String(Base64.encode(signData)));
     }
@@ -600,6 +621,8 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
       String encodedDoc = new String(Base64Coder.encodeBase64(docData));
 
       if (CXFUtils.isXMLFormat(docData)) {
+        //dss_InputDocuments_dss_Document_dss_Base64Data
+        //dss_InputDocuments_dss_Document_dss_Base64XML
         inParams.put(DSSTagsRequest.BASE64XML, encodedDoc);
       } else {
         inParams.put(DSSTagsRequest.BASE64DATA, encodedDoc);
@@ -624,9 +647,88 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
     
 
     // Construimos el XML que constituye la petici�n
-    String xmlInput = transformersFacade.generateXml(inParams,
-        GeneralConstants.DSS_AFIRMA_VERIFY_REQUEST, GeneralConstants.DSS_AFIRMA_VERIFY_METHOD,
-        TransformersConstants.VERSION_10);
+    String xmlInput;
+
+    if (!isXAdES) {
+      xmlInput = transformersFacade.generateXml(inParams,
+          GeneralConstants.DSS_AFIRMA_VERIFY_REQUEST, GeneralConstants.DSS_AFIRMA_VERIFY_METHOD,
+          TransformersConstants.VERSION_10);
+     
+//      {  // XYZ ZZZ
+//        //    File file2 = new File("D:\\dades\\dades\\CarpetesPersonals\\Programacio\\pluginsib-1.0\\plugins-validatesignature\\afirmacxf\\foto_xades_attached-XML_AFIRMA_MADRID.xml");
+//            File file = new File("D:\\dades\\dades\\CarpetesPersonals\\Programacio\\pluginsib-1.0\\plugins-validatesignature\\afirmacxf\\ORVE_firma0.xsig-XML_AFIRMA.xml");
+//            FileOutputStream fos = new FileOutputStream(file);
+//            fos.write(xmlInput.getBytes());
+//            fos.close();
+//            System.err.println("\n\nXXXX GUARDAT FITXER !!!!! \n\n");
+//          }
+    
+    
+    } else  {
+       // Generar XML XADES MANUALMENT
+      /* EN JBOSS Es produeix un error al crear l'XML en XADES des de INTEGRA, 
+       * per la qual cosa, es que es fa es generar el XMl manualment a partir 
+       * d'una plantilla FreeMarker:
+       * 
+       * org.apache.cxf.binding.soap.SoapFault: java.lang.Exception: Error en los parßmetros de entrada.
+       * 
+       */
+      if (log.isDebugEnabled()) {
+        log.debug("Generant XML INput Manualment per XAdES.");
+      }
+
+      
+      InputStream is = FileUtils.readResource(this.getClass(), "template_afirma_validation/xades_input_template.xml");
+      String templateStr = new String(FileUtils.toByteArray(is));
+      
+      
+      Map<String,Object> keys = new HashMap<String, Object>();
+      
+      for(String key : inParams.keySet()) {
+
+        String value = (String)inParams.get(key);
+        
+        if (key.equals("dss:SignatureObject")) {
+          
+          final String xmlUtf = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+          
+          if (value.trim().startsWith(xmlUtf)) {
+            value = "\t" + value.trim().substring(xmlUtf.length());
+          }
+
+          if (value.startsWith("\r") || value.startsWith("\n")) {
+             value = value.substring(1); 
+          }
+          
+          if (value.startsWith("\r") || value.startsWith("\n")) {
+            value = value.substring(1); 
+         }
+          
+        }
+        
+        keys.put(key.replace(":", "_").replace("/", "_"), value);
+      }
+      
+      
+      
+
+      //validationRequest.signatureRequestedInformation.returnCertificateInfo
+      //validationRequest.getSignatureRequestedInformation().returnCertificateInfo
+      keys.put("validationRequest",validationRequest);
+
+      String result = processExpressionLanguage(templateStr, keys);
+
+      // XYZ ZZZ
+//      File fileGen = new File("D:\\dades\\dades\\CarpetesPersonals\\Programacio\\pluginsib-1.0\\plugins-validatesignature\\afirmacxf\\ORVE_firma0.xsig-XML_GENERATED.xml");
+//      FileOutputStream fos = new FileOutputStream(fileGen);
+//      fos.write(result.getBytes());
+//      fos.close();
+      
+      xmlInput = result;
+      
+    }
+
+   // String xmlInput = new String(FileUtils.readFromFile(file2));
     
     if (debug || "true".equals(getProperty(PRINT_XML))) {
       log.info("IN_XML = \n" + xmlInput);
@@ -937,7 +1039,7 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
       List<IndividualSignatureReport> reports = verSigRes.getVerificationReport();
       int r = 0;
       for (IndividualSignatureReport report : reports) {
-        log.info(" ---- REPORT[" + r++ + "] ---- ");
+        log.info(" ---- REPORT SIGNATURE[" + r++ + "] ---- ");
 
         if (report.getDetailedReport() != null) {
           log.info("  report.getDetailedReport(): " + report.getDetailedReport());
@@ -963,18 +1065,18 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
         // DSSConstants.ResultProcessIds.VALID_SIGNATURE
         // DSSConstants.ResultProcessIds.REQUESTER_ERROR
         // DSSConstants.ResultProcessIds.RESPONDER_ERROR
-        log.info("  report.getResult().getResultMajor(): "
+        log.info("  SIGN report.getResult().getResultMajor(): "
             + report.getResult().getResultMajor());
-        log.info("  report.getResult().getResultMinor(): "
+        log.info("  SIGN report.getResult().getResultMinor(): "
             + report.getResult().getResultMinor());
-        log.info("  report.getResult().getResultMessage(): "
+        log.info("  SIGN report.getResult().getResultMessage(): "
             + report.getResult().getResultMessage());
 
-        log.info("  report.getSignaturePolicyIdentifier(): "
+        log.info("  SIGN report.getSignaturePolicyIdentifier(): "
             + report.getSignaturePolicyIdentifier());
 
         if (report.getSigPolicyDocument() != null) {
-          log.info("  report.getSigPolicyDocument()" + report.getSigPolicyDocument());
+          log.info("  SING report.getSigPolicyDocument()" + report.getSigPolicyDocument());
         }
 
       }
@@ -1179,12 +1281,14 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
     return transformersFacade;
   }
 
+  
+  public static final Charset UTF_8 = Charset.forName("UTF-8");
  
   public void incorporateXMLSignature(Map<String, Object> inputParameters, byte[] signature, String xadesFormat)
       throws Exception {
 
     if (SIGNFORMAT_IMPLICIT_ENVELOPING_ATTACHED.equals(xadesFormat)) { // "XAdES Enveloping"
-      inputParameters.put("dss:SignatureObject", new String(signature));
+      inputParameters.put("dss:SignatureObject", new String(signature, UTF_8));
     } else if ((SIGNFORMAT_IMPLICIT_ENVELOPED_ATTACHED.equals(xadesFormat)) // "XAdES Enveloped"
         || (SIGNFORMAT_EXPLICIT_DETACHED.equals(xadesFormat))) { // "XAdES Detached"
 
@@ -1354,6 +1458,41 @@ public class AfirmaCxfValidateSignaturePlugin extends AbstractValidateSignatureP
   }
 
 
+  public static String processExpressionLanguage(String plantilla,
+      Map<String, Object> custodyParameters) throws Exception {
+    return processExpressionLanguage(plantilla, custodyParameters, null);
+  }
+  
+  public static String processExpressionLanguage(String plantilla,
+      Map<String, Object> custodyParameters,  Locale locale) throws Exception {
+    try {
+    if (custodyParameters == null) {
+      custodyParameters = new  HashMap<String, Object>();
+    }
+    
+    Configuration configuration;
+
+    configuration = new Configuration(Configuration.VERSION_2_3_23);
+    configuration.setDefaultEncoding("UTF-8");
+    if (locale!= null) {
+      configuration.setLocale(locale);
+    }
+    Template template;
+    template = new Template("exampleTemplate", new StringReader(plantilla),
+        configuration);
+
+    Writer out = new StringWriter();
+    template.process(custodyParameters, out);
+    
+    String res = out.toString();
+    return res;
+    } catch(Exception e) {
+      final String msg = "No s'ha pogut processar l'Expression Language " + plantilla 
+        + ":" + e.getMessage();
+      throw new Exception(msg, e);
+    }
+  }
+  
   
   
 

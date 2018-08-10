@@ -93,6 +93,18 @@ public class ValidateSignatureController {
   @RequestMapping(value = "/form", method = RequestMethod.POST)
   public ModelAndView validateSignaturePost(HttpServletRequest request, HttpServletResponse response,
       @ModelAttribute ValidateSignatureForm form, BindingResult result) throws Exception {
+    
+    
+    if (request.getParameter("esborrarcache") != null){
+      validateSignatureEjb.esborrarCachePlugins();
+      log.info("XXXXX   ===>   ");
+      org.fundaciobit.pluginsib.validatesignature.testerwebapp.utils.HtmlUtils.saveMessageSuccess(request, "Netejada Cache de Plugins");
+      
+      ModelAndView mav = new ModelAndView("validateSignatureForm");
+      mav.addObject(form);
+      return mav;
+    }
+    
 
     validateSignatureValidator.validate(form, result);
 

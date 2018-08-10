@@ -23,6 +23,9 @@ public interface ValidateSignatureLocal {
       long pluginID) throws Exception;
   
   public List<Plugin> getPlugins() throws Exception;
+  
+  
+  public void esborrarCachePlugins() throws Exception;
 
   /* XYZ ZZZ
   public List<Plugin> getAllPluginsFiltered(String signaturesSetID) throws Exception;

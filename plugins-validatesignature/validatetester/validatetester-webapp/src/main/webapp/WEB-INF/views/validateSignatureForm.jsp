@@ -109,11 +109,11 @@
                 </table>
 
                 <div style="text-align:center; width:100%">
-<%-- 
-                    <input id="submitbutton2" name="firmarviaweb"
-                        type="submit" class="btn btn-primary"
-                        value="<fmt:message key="firmaweb"/>">
-                    &nbsp;&nbsp;&nbsp;  --%> 
+
+                    <input id="submitbutton2" name="esborrarcache"
+                        type="submit" class="btn btn-warn"
+                        value="Esborrar Cache de Plugins">
+                    &nbsp;&nbsp;&nbsp;  
                     <input id="submitbutton" name="validar" type="submit"
                         class="btn btn-primary"
                         value="<fmt:message key="validar"/>"> 

@@ -77,6 +77,12 @@ public class ValidateSignatureEjb implements ValidateSignatureLocal {
     return  plugins;
 
   }
+
+
+  @Override
+  public void esborrarCachePlugins() throws Exception {
+    ValidateSignaturePluginManager.getInstance().clearCache();   
+  }
   
   
 /* XYZ ZZZ

@@ -47,9 +47,9 @@
     <dependency>
       <groupId>org.fundaciobit.plugins</groupId>
       <artifactId>plugin-validatesignature-afirmacxf</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.3</version>
     </dependency>
-
+<!--
     <dependency>
       <groupId>org.fundaciobit.plugins</groupId>
       <artifactId>plugins-api</artifactId>
@@ -67,7 +67,7 @@
       <artifactId>plugins-utils-cxf</artifactId>
       <version>1.0.0</version>
     </dependency>
-
+-->
 
     <dependency>
       <groupId>org.apache.cxf</groupId>
