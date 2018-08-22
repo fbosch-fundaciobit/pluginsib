@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>org.fundaciobit.pluginsib.tester</groupId>
+  <artifactId>pluginsib-tester-builder</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+  
+  <modules>
+    <module>..\..\pluginsib-core</module>
+    <module>..\..\pluginsib-utils</module>
+	<module>..\..\pluginsib-userinformation</module>
+	<module>..\..\pluginsib-barcode</module>
+	<module>..\..\pluginsib-exportdata</module>
+	<module>..\..\pluginsib-validatecertificate</module>
+	<module>..\..\pluginsib-csvgenerator</module>
+	<module>..\..\pluginsib-documentconverter</module>
+	<module>..\..\pluginsib-loginmodulejboss</module>
+	<module>..\..\pluginsib-validatesignature</module>
+	<module>..\..\pluginsib-paymentweb</module>
+	<module>..\..\pluginsib-timestamp</module>
+	<module>..\..\pluginsib-documentcustody</module>
+	<module>..\..\pluginsib-scanweb</module>
+	<module>..\..\pluginsib-arxiu</module>
+  </modules>  
+  </project>
