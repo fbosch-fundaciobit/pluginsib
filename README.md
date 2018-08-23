@@ -6,13 +6,13 @@
 
 Repositori de Plugins per les Aplicacions del KitAnibal i qualsevol aplicació que vulgui reutilitzar funcionalitats configurables emprant un plugin. En aquest repositori es poden trobar dues versions _pluginsib-1.0_ i _pluginsib-2.0_.
 
-**_Pluginsib-1.0_** 
+**_PluginsIB-1.0_** 
 En aquesta versió es poden trobar els plugins junts dintre de la mateixa branca que necessiten ser compilats un a un. 
 En aquest [enllaç](https://github.com/GovernIB/pluginsib/tree/pluginsib-1.0) es poden trobar tots els plugins de la versió 1.0.
 
 
 
-**_Pluginsib-2.0_**
+**_PluginsIB-2.0_**
 En canvi, aquí es poden trobar els plugins separats en diferents repositoris i en aquest mateix repositori, a 2.0, s'hi trobarà un script per comiplar-los tots junts així com està indicat en aquest [enllaç](https://github.com/GovernIB/pluginsib/tree/pluginsib-2.0). 
 
 
