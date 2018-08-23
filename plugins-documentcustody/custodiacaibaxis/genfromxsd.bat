@@ -1,1 +1,0 @@
-xjc -d src\main\java -nv  -p es.caib.signatura.api -verbose custodia-documentos-response-schema.xsd
