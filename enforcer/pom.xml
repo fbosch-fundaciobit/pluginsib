@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>org.fundaciobit.pluginsib.tester</groupId>
+  <artifactId>pluginsib-tester-enforcer</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.0.0-M2</version>
+        <executions>
+          <execution>
+            <id>enforce-files-exist</id>
+			<phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireFilesExist>				
+                  <files>
+                   <file>../../pluginsib-core</file>
+				   <file>../../pluginsib-utils</file>
+				   <file>../../pluginsib-userinformation</file>
+				   <file>../../pluginsib-barcode</file>
+				   <file>../../pluginsib-exportdata</file>
+				   <file>../../pluginsib-validatecertificate</file>
+				   <file>../../pluginsib-csvgenerator</file>
+				   <file>../../pluginsib-documentconverter</file>
+				   <file>../../pluginsib-loginmodulejboss</file>
+				   <file>../../pluginsib-validatesignature</file>
+				   <file>../../pluginsib-paymentweb</file>
+				   <file>../../pluginsib-timestamp</file>
+				   <file>../../pluginsib-documentcustody</file>
+				   <file>../../pluginsib-scanweb</file>
+				   <file>../../pluginsib-arxiu</file>
+                  </files>
+				  <message>
+******************************************************
+*                                                    *
+*       E T  F A L T A  D E S C A R R E G A R        *
+*      E L S  S E G Ü E N T S  P R O J E C T E S     *
+*         D E   http://github.com/GovernIB           *
+*                                                    *
+******************************************************
+				  </message>
+                </requireFilesExist>				
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  </project>
