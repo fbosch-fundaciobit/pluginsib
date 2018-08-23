@@ -16,6 +16,7 @@ pluginsib-utils | [pluginsib-utils-1.0](https://github.com/GovernIB/pluginsib/tr
 pluginsib-userinformation | [pluginsib-userinformation-1.0](https://github.com/GovernIB/pluginsib/tree/pluginsib-1.0/plugins-userinformation) | Informació d'usuaris | Informació de les dades d'un usuari a partir del seu username o identificador administratiu (NIF) i/o informació de Roles: BBDD o LDAP.
 pluginsib-barcode | [pluginsib-barcode-1.0](https://github.com/GovernIB/pluginsib/tree/pluginsib-1.0/plugins-barcode) |  Generació de Codi de barres | barcode128, pdf417 i qrcode
 pluginsib-exportdata | [pluginsib-exportdata-1.0](https://github.com/GovernIB/pluginsib/tree/pluginsib-1.0/plugins-exportdata) | Exportació de Dades | Exporta una matriu de dades a formats com csv, excel o ods.
+pluginsib-certificate | [pluginsib-certificate-1.0](https://github.com/GovernIB/pluginsib/tree/pluginsib-1.0/plugins-certificate) | Validació de Certificats Digitals | Sencill i @firma
 pluginsib-csvgenerator | [pluginsib-csvgenerator-1.0](https://github.com/GovernIB/pluginsib/tree/pluginsib-1.0/plugins-csvgenerator) | Generador de csv | Genera codis segurs de verificació en diferents formats.
 pluginsib-documentconverter | [pluginsib-documentconverter-1.0](https://github.com/GovernIB/pluginsib/tree/pluginsib-1.0/plugins-documentconverter) | Conversió de Format de Documents | OpenOffice en mode servei
 loginmodulejboss | [loginmodule-jboss-1.0](https://github.com/GovernIB/pluginsib/tree/pluginsib-1.0/loginmodule-jboss) | Mòduls de loggin per jboss | Mòduls de loggin per jboss.
