@@ -1,4 +1,4 @@
-# ![Logo](https://github.com/GovernIB/maven/raw/binaris/pluginsib/projectinfo_Attachments/icon.jpg) Repositori de Plugins per les Aplicacions del KitAnibal  (pluginsib-2.0)
+# ![Logo](https://github.com/GovernIB/maven/raw/binaris/pluginsib/projectinfo_Attachments/icon.jpg) Repositori de Plugins per les Aplicacions del KitAnibal  (pluginsib-1.0)
 
 
 
