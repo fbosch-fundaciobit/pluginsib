@@ -1,6 +1,9 @@
 # ![Logo](https://github.com/GovernIB/maven/raw/binaris/pluginsib/projectinfo_Attachments/icon.jpg) Repositori de Plugins per les Aplicacions del KitAnibal  (pluginsib-2.0)
 
+
+
 **Descripció**
+
 Repositori per compilar els Plugins per les aplicacions del KitAnibal i qualsevol aplicació que vulgui reutilitzar funcionalitats configurables emprant un plugin. Conté els plugins un a un per ser compilats per parts així com es mostra a continuació:
 
 
