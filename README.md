@@ -17,7 +17,7 @@ pluginsib-validatecertificate | [pluginsib-validatecertificate-2.0](https://gith
 pluginsib-csvgenerator | [pluginsib-csvgenerator-2.0](https://github.com/GovernIB/pluginsib-csvgenerator/tree/pluginsib-csvgenerator-2.0) | Generador de csv | Genera codis segurs de verificació en diferents formats.
 pluginsib-documentconverter | [pluginsib-documentconverter-2.0](https://github.com/GovernIB/pluginsib-documentconverter/tree/pluginsib-documentconverter-2.0) | Conversió de Format de Documents | OpenOffice en mode servei
 pluginsib-loginmodulejboss | [pluginsib-loginmodulejboss-2.0](https://github.com/GovernIB/pluginsib-loginmodulejboss/tree/pluginsib-loginmodulejboss-2.0) | Mòduls de loggin per jboss | Mòduls de loggin per jboss.
-pluginsib-validatesignature | [pluginsib-validatesignature-2.0](https://github.com/GovernIB/pluginsib-validatesignature/tree/pluginsib-validatesignature-2.0) |  Informacio i Validació de Firmes | Integr@ i @Firma
+pluginsib-validatesignature | [pluginsib-validatesignature-2.0](https://github.com/GovernIB/pluginsib-validatesignature/tree/pluginsib-validatesignature-2.0) |  Informacioó i Validació de Firmes | Integr@ i @Firma
 pluginsib-paymentweb | [pluginsib-paymentweb-2.0](https://github.com/GovernIB/pluginsib-paymentweb/tree/pluginsib-paymentweb-2.0) | Pagament web | Eina per fer pagants vía web.
 pluginsib-timestamp | [pluginsib-timestamp-2.0](https://github.com/GovernIB/pluginsib-timestamp/tree/pluginsib-timestamp-2.0) | Timestamp | Generadors de Segell de Temps.
 pluginsib-documentcustody | [pluginsib-documentcustody-2.0](https://github.com/GovernIB/pluginsib-documentcustody/tree/pluginsib-documentcustody-2.0) | Custòdia de Documents | sistema de fitxers, alfresco, Custòdia CAIB i Arxiu Digital CAIB.
