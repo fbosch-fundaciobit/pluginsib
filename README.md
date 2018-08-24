@@ -36,6 +36,12 @@ plugins-signatureweb | [plugins-signatureweb](https://github.com/GovernIB/portaf
 **Indicacions**
 
 Al repositori principal hi ha dos _scripts_ iguals un per a linux (_.sh_) i l'altra per a windows (_.bat_) que si s'executen, compilen l'_enforcer_ i el _builder_ que es poden trobar dins el mateix repositori. Primer s'executarà l'_enforcer_ que indica si es troben tots els plugins que toca, i en cas de que no sigui així, indica quins fan falta amb un missatge d'error i el _builder_ directament, no es compila. 
+
+En la següent imatge apareix el missatge d'error així com apareixeria si no es tinguessin tots els repositoris. Es pot observar també com indica quins són els plugins que fan falta. 
+
+![captura de pantalla](https://github.com/GovernIB/pluginsib/blob/pluginsib-2.0/resources/captura.png)
+
+
 En cas de tenir tots els plugins necessaris, seguit de l'_enforcer_ es compilarà el _builder_ i compilarà tot el projecte. 
 
 
