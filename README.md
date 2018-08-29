@@ -37,7 +37,7 @@ plugins-signatureweb | [plugins-signatureweb](https://github.com/GovernIB/portaf
 
 Primer de tot, dins un directori principal anomenat _PluginsIB_ s'hi ha de descarregar [pluginsib v2.0](https://github.com/GovernIB/pluginsib/tree/pluginsib-2.0) amb la següent comanda des de terminal:
 
-`git clone -b https://github.com/GovernIB/pluginsib.git pluginsib-v2.0`
+`git clone -b pluginsib-2.0  https://github.com/GovernIB/pluginsib.git pluginsib-v2.0`
 
 Al compilar-lo a través de l'script _compil.bat_ si s'està treballant amb Windows i _compil.sh_ si es treballa amb Linux, apareixerà un missatge que indicarà quins plugins falten. 
 
@@ -47,7 +47,7 @@ A la següent captura es veu el missatge que apareix que informa de quins plugin
 
 Els plugins (core, barcode, utils...) s'hauran d'anar descarregant al mateix directori on hi ha _pluginsibv2.0_. S'han de descarregar les branques 2.0 executant el següent (per exemple el _pluginib-core_):
 
-`git clone -b https://github.com/GovernIB/pluginsib-core.git pluginsib-core`
+`git clone -b pluginsib-core-2.0 https://github.com/GovernIB/pluginsib-core.git pluginsib-core`
 
 
 S'han de descarregar al directori principal _PluginsIB_ de la següent manera:
