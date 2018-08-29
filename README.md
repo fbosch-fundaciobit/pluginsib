@@ -35,7 +35,7 @@ plugins-signatureweb | [plugins-signatureweb](https://github.com/GovernIB/portaf
 
 **Indicacions**
 
-Primer de tot, dins un directori principal anomenat _PluginsIB_ s'hi ha de descarregar [pluginsib v2.0](https://github.com/GovernIB/pluginsib/tree/pluginsib-2.0) amb la següent comanda desde terminal:
+Primer de tot, dins un directori principal anomenat _PluginsIB_ s'hi ha de descarregar [pluginsib v2.0](https://github.com/GovernIB/pluginsib/tree/pluginsib-2.0) amb la següent comanda des de terminal:
 
 `git clone https://github.com/GovernIB/pluginsib.git`
 
@@ -54,7 +54,7 @@ S'han de descarregar al directori principal _PluginsIB_ de la següent manera:
 
 ![arbre](https://github.com/GovernIB/pluginsib/blob/pluginsib-2.0/resources/arbre.png)
 
-Una vegada descarregats tots els plugins, amb el mateix script, es tornarà a executar el _compil_ fins que ja no doni errors.. 
+Una vegada descarregats tots els plugins, amb el mateix script, es tornarà a executar el _compil_ fins que ja no doni errors. 
 
 
 
