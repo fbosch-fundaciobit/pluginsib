@@ -35,16 +35,18 @@ plugins-signatureweb | [plugins-signatureweb](https://github.com/GovernIB/portaf
 
 **Indicacions**
 
-S'ha de tenir un directori principal que allotgi el repositori de pluginsib v2.0 i també tota la resta de repositoris de tots els plugins restants (barcode, core, scanweb...). D'aquesta manera, els scripts funcionaran anant d'un directori a l'altra correctament. 
+Primer de tot, dins un directori principal anomenat _PluginsIB_ s'hi ha de descarregar [pluginsib v2.0](https://github.com/GovernIB/pluginsib/tree/pluginsib-2.0). Al compilar-lo a través de l'script _compil.bat_ si s'està treballant amb Windows i _compil.sh_ si es treballa amb Linux, apareixerà un missatge que indicarà quins plugins falten. 
 
-Al repositori de pluginsib (allotjat dins del principal) hi ha dos _scripts_ iguals un per a linux (_.sh_) i l'altra per a windows (_.bat_) que si s'executen, compilen l'_enforcer_ i el _builder_ que es poden trobar dins el mateix repositori. Primer s'executarà l'_enforcer_ que indica si es troben tots els plugins que toca, i en cas de que no sigui així, indica quins fan falta amb un missatge d'error i el _builder_ directament, no es compila. 
+A la següent captura es veu el missatge que apareix que informa de quins plugins fan falta descarregar en cas de no tenir-los tots. 
 
-En la següent imatge apareix el missatge d'error així com apareixeria si no es tinguessin tots els repositoris. Es pot observar també com indica quins són els plugins que fan falta. 
+![captura plugins](https://github.com/GovernIB/pluginsib/blob/pluginsib-2.0/resources/captura.png)
 
-![captura de pantalla](https://github.com/GovernIB/pluginsib/blob/pluginsib-2.0/resources/captura.png)
+Els plugins (core, barcode, utils...) s'hauran d'anar descarregant al mateix directori on hi ha _pluginsibv2.0_ és a dir, es descarregaran al directori principal _PluginsIB_ de la següent manera:
 
+![arbre](https://github.com/GovernIB/pluginsib/blob/pluginsib-2.0/resources/arbre.png)
 
-En cas de tenir tots els plugins necessaris, seguit de l'_enforcer_ es compilarà el _builder_ i compilarà tot el projecte. 
+Una vegada descarregats tots els plugins, amb el mateix script, es compilarà el _builder_ que compila tots els plugins alhora. 
+
 
 
 **Característiques**
