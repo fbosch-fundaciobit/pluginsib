@@ -57,6 +57,14 @@ S'han de descarregar al directori principal _PluginsIB_ de la següent manera:
 Una vegada descarregats tots els plugins, amb el mateix script, es tornarà a executar el _compil_ fins que ja no doni errors. 
 
 
+**Afegir nous plugins**
+
+Per afegir nous plugins al recull de pluginsib, s'hauran de modificar una sèrie d'arxius de _pluginsib-v2.0_. Aquests són:
+* pull.bat
+* pull.sh
+* /enforcer/pom.xml
+* /builder/pom.xml
+
 
 **Característiques**
 
