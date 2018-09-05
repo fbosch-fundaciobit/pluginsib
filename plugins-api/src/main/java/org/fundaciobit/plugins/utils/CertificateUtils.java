@@ -694,7 +694,42 @@ public class CertificateUtils {
     Map<String, String> map = getAlternativeNamesOfExtension(cert, SUBJECT_ALT_NAME_OID);
     String nif = map.get("OID.1.3.6.1.4.1.5734.1.7");
     if (nif == null) {
-      return null;
+
+      // for(String key : map.keySet()) {
+      // System.err.println(" KEY[" + key + "] => " + map.get(key));
+      // }
+
+      final String subjectDNStr = cert.getSubjectDN().toString();
+      // System.err.println("SUBJECT => " + subjectDNStr);
+
+      String org = getRDNvalue("O", subjectDNStr);
+      // System.err.println("ORG => " + org);
+
+      String admin_id_orgorg = getRDNvalue("OID.2.5.4.97", subjectDNStr); // 2.5.4.97 =
+                                                                          // VATES-Q0100000I
+      // System.err.println("ORG ADMIN ID => " + admin_id_orgorg);
+
+      if (admin_id_orgorg == null) {
+
+        admin_id_orgorg = getRDNvalue("OID.1.3.6.1.4.1.18838.1.1", subjectDNStr);
+        if (admin_id_orgorg != null) {
+          // Obtenir Serial Number
+          admin_id_orgorg = getRDNvalue("SERIALNUMBER", subjectDNStr);
+          // System.err.println("SERIALNUMBER => " + admin_id_orgorg);
+        }
+
+        if (admin_id_orgorg == null) {
+          return null;
+        }
+
+      } else {
+        int index = admin_id_orgorg.indexOf('-');
+        if (index != -1) {
+          admin_id_orgorg = admin_id_orgorg.substring(index + 1);
+        }
+      }
+
+      return new String[] { admin_id_orgorg, org };
     }
     
     int posGuio = nif.indexOf('-');
