@@ -1,11 +1,11 @@
 #!/bin/bash
 cd enforcer
-mvn clean install -DskipTests
-if [ $? -eq 0 ]; then
+sudo mvn clean install -DskipTests
+if [ $? neq 0 ]; then
 cd ..
 else
 cd ..
 cd builder
-mvn clean install -DskipTests
+sudo mvn clean install -DskipTests
 cd ..
 fi
