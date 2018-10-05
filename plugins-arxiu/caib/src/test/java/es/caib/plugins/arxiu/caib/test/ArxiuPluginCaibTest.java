@@ -684,6 +684,133 @@ public class ArxiuPluginCaibTest {
 				},
 				expedientPerCrear);
 	}
+	
+	@Test
+	public void tancarExpedientObtenirDocument() throws Exception {
+		System.out.println("TEST: DOCUMENT DEFINITIU DE BON COMENÇAMENT");
+		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
+		final Expedient expedientPerCrear = new Expedient();
+		expedientPerCrear.setNom(nomExp);
+		final ExpedientMetadades metadades = new ExpedientMetadades();
+		metadades.setOrgans(organsTest);
+		metadades.setDataObertura(new Date());
+		metadades.setClassificacio("organo1_PRO_123456789");
+		metadades.setEstat(ExpedientEstat.OBERT);
+		metadades.setInteressats(interessatsTest);
+		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
+		expedientPerCrear.setMetadades(metadades);
+		testCreantElements(
+				new TestAmbElementsCreats() {
+					@Override
+					public void executar(List<ContingutArxiu> elementsCreats) throws IOException {
+						ContingutArxiu expedientCreat = elementsCreats.get(0);
+						String expedientCreatId = expedientCreat.getIdentificador();
+						final Document documentPerCrear = new Document();
+						String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
+						documentPerCrear.setNom(nomDoc);
+						final DocumentMetadades documentMetadades = new DocumentMetadades();
+						documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
+						documentMetadades.setOrgans(organsTest);
+						documentMetadades.setDataCaptura(new Date());
+						documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+						documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+						
+//						documentMetadades.setFormat(DocumentFormat.PDF);
+//						documentMetadades.setExtensio(DocumentExtensio.PDF);
+//						documentPerCrear.setMetadades(documentMetadades);
+//						documentPerCrear.setEstat(DocumentEstat.DEFINITIU);
+						
+						documentMetadades.setFormat(DocumentFormat.JPEG);
+						documentMetadades.setExtensio(DocumentExtensio.JPG);
+						documentPerCrear.setMetadades(documentMetadades);
+						documentPerCrear.setEstat(DocumentEstat.DEFINITIU);
+						DocumentContingut documentContingut = new DocumentContingut();
+						documentContingut.setContingut(
+								IOUtils.toByteArray(
+										getDocumentContingutEsborranyJpg()));
+						documentContingut.setTipusMime("image/jpeg");
+						documentPerCrear.setContingut(documentContingut);
+						
+						System.out.println(
+								"1.- Comprovant que la creació del document definitiu a l'expedient sense informació de firma dona error (" +
+								"id=" + expedientCreatId + ")... ");
+						try {
+							arxiuPlugin.documentCrear(
+									documentPerCrear,
+									expedientCreatId);
+							fail("No s'hauria de poder crear un document definitiu sense informació de firma");
+						} catch (ArxiuException ex) {
+							System.out.println("Ok");
+						}
+						System.out.println(
+								"2.- Creant document definitiu amb informació de firma (" +
+								"id=" + expedientCreatId + ")... ");
+						
+//						Firma firmaPades = new Firma();
+//						firmaPades.setTipus(FirmaTipus.PADES); //TF06
+//						firmaPades.setPerfil(FirmaPerfil.EPES);
+//						firmaPades.setTipusMime("application/pdf");
+//						firmaPades.setContingut(
+//								IOUtils.toByteArray(
+//										getDocumentFirmaPdfMod()));
+						
+						Firma firmaPades = new Firma();
+						firmaPades.setTipus(FirmaTipus.CADES_DET); //TF04
+						firmaPades.setPerfil(FirmaPerfil.BES);
+						firmaPades.setTipusMime("csig");
+						firmaPades.setContingut(
+								IOUtils.toByteArray(
+										getDocumentFirmaCsig()));
+						
+						documentPerCrear.setFirmes(
+								Arrays.asList(firmaPades));
+						ContingutArxiu documentCreat = arxiuPlugin.documentCrear(
+								documentPerCrear,
+								expedientCreatId);
+						assertNotNull(documentCreat);
+						String documentCreatId = documentCreat.getIdentificador();
+						System.out.println("Ok");
+						elementsCreats.remove(documentCreat);
+						elementsCreats.remove(expedientCreat);
+						System.out.println(
+								"3.- Comprovant que no es pot esborrar un document definitiu (" +
+								"id=" + documentCreatId + ")... ");
+						try {
+							arxiuPlugin.documentEsborrar(documentCreatId);
+							fail("No s'hauria de poder esborrar el document creat (id=" + documentCreatId + ")");
+						} catch (ArxiuException ex) {
+							System.out.println("Ok");
+						}
+						System.out.println(
+								"4.- Comprovant que no es pot esborrar un expedient amb documents definitius (" +
+								"id=" + expedientCreatId + ")... ");
+						try {
+							arxiuPlugin.expedientEsborrar(expedientCreatId);
+							fail("No s'hauria de poder esborrar l'expedient amb documents definitius (id=" + expedientCreatId + ")");
+						} catch (ArxiuException ex) {
+							System.out.println("Ok");
+						}
+						
+						System.out.println(
+								"5.- Tancant expedient amb documents definitius (" +
+								"id=" + expedientCreatId + ")... ");
+						arxiuPlugin.expedientTancar(expedientCreatId);
+						System.out.println("Ok");
+						
+						System.out.println(
+								"6.- Obtenint document de l'expedient tancat recentment (" +
+								"id=" + documentCreatId + ")... ");
+						try {
+							Document documentRecuperat = arxiuPlugin.documentDetalls(documentCreatId, null, true);
+							assertNotNull(documentRecuperat);
+							System.out.println("Ok");
+						} catch (ArxiuException ex) {
+							fail("S'hauria de poder obtenir el document de l'expedient tancat (id=" + documentCreatId + ")");
+						}
+					}
+				},
+				expedientPerCrear);
+	}
 
 	/*
 	 * Encara no està clar com guardar a l'arxiu aquest tipus de documents
@@ -1364,9 +1491,24 @@ public class ArxiuPluginCaibTest {
         		"/es/caib/plugins/arxiu/caib/document_test.pdf");
 		return is;
 	}
+	private InputStream getDocumentContingutEsborranyJpg() {
+		InputStream is = getClass().getResourceAsStream(
+        		"/es/caib/plugins/arxiu/caib/foto.jpg");
+		return is;
+	}
 	private InputStream getDocumentFirmaPdf() {
 		InputStream is = getClass().getResourceAsStream(
         		"/es/caib/plugins/arxiu/caib/firma_test_epes.pdf");
+		return is;
+	}
+	private InputStream getDocumentFirmaPdfMod() {
+		InputStream is = getClass().getResourceAsStream(
+        		"/es/caib/plugins/arxiu/caib/pades_epes.pdf");
+		return is;
+	}
+	private InputStream getDocumentFirmaCsig() {
+		InputStream is = getClass().getResourceAsStream(
+        		"/es/caib/plugins/arxiu/caib/2018-01-24_CAdES_Detached_foto_jpg.csig");
 		return is;
 	}
 	private InputStream getDocumentContingutFisic() {
