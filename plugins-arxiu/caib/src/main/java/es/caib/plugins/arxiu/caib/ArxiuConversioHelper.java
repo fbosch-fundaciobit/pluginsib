@@ -818,9 +818,10 @@ public class ArxiuConversioHelper {
 	}
 
 	private static String revisarContingutNom(String nom) {
-		if (nom == null)
+		if (nom == null) {
 			return null;
-		return nom.replaceAll("[\\\\/:*?\"<>|]", "_");
+		}
+		return nom.replace("&", "&amp;").replaceAll("[\\\\/:*?\"<>|]", "_");
 	}
 
 }
