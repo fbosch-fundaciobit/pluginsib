@@ -82,7 +82,7 @@ public class ArxiuPluginCaibTest {
 		interessatsTest.add("00000000T");
 	}
 
-	@Test
+	// @Test
 	public void expedientCicleDeVida() throws Exception {
 		System.out.println("TEST: CICLE DE VIDA DELS EXPEDIENTS");
 		final String nom = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -156,7 +156,7 @@ public class ArxiuPluginCaibTest {
 				expedientPerCrear);
 	}
 
-	@Test
+	// @Test
 	public void expedientVersionat() throws Exception {
 		System.out.println("TEST: VERSIONAT DELS EXPEDIENTS");
 		final String nom = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -246,7 +246,7 @@ public class ArxiuPluginCaibTest {
 				expedientPerCrear);
 	}
 
-	@Test
+	// @Test
 	public void documentCicleDeVida() throws Exception {
 		System.out.println("TEST: CICLE DE VIDA DELS DOCUMENTS");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -380,7 +380,7 @@ public class ArxiuPluginCaibTest {
 				documentPerCrear);
 	}
 
-	@Test
+	// @Test
 	public void documentEsborranyDefinitiu() throws Exception {
 		System.out.println("TEST: DOCUMENT ESBORRANY I DEFINITIU");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -494,7 +494,7 @@ public class ArxiuPluginCaibTest {
 				documentPerCrear);
 	}
 
-	@Test
+	// @Test
 	public void documentModificarFinal() throws Exception {
 		System.out.println("TEST: DOCUMENT ESBORRANY I DEFINITIU");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -598,6 +598,107 @@ public class ArxiuPluginCaibTest {
 				documentPerCrear);
 	}
 
+	//@Test
+	public void documentEsborranyDefinitiuCades() throws Exception {
+		System.out.println("TEST: DOCUMENT ESBORRANY I DEFINITIU AMB CADES");
+		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
+		final Expedient expedientPerCrear = new Expedient();
+		expedientPerCrear.setNom(nomExp);
+		final ExpedientMetadades metadades = new ExpedientMetadades();
+		metadades.setOrgans(organsTest);
+		metadades.setDataObertura(new Date());
+		metadades.setClassificacio("organo1_PRO_123456789");
+		metadades.setEstat(ExpedientEstat.OBERT);
+		metadades.setInteressats(interessatsTest);
+		metadades.setSerieDocumental(SERIE_DOCUMENTAL);
+		expedientPerCrear.setMetadades(metadades);
+		String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
+		final Document documentPerCrear = new Document();
+		documentPerCrear.setNom(nomDoc);
+		documentPerCrear.setEstat(DocumentEstat.ESBORRANY);
+		final DocumentMetadades documentMetadades = new DocumentMetadades();
+		documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
+		documentMetadades.setOrgans(organsTest);
+		documentMetadades.setDataCaptura(new Date());
+		documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+		documentMetadades.setFormat(DocumentFormat.PNG);
+		documentMetadades.setExtensio(DocumentExtensio.PNG);
+		documentPerCrear.setMetadades(documentMetadades);
+		DocumentContingut documentContingut = new DocumentContingut();
+		documentContingut.setContingut(
+				IOUtils.toByteArray(
+						getDocumentContingutEsborranyImatge()));
+		documentContingut.setTipusMime("image/png");
+		documentPerCrear.setContingut(documentContingut);
+		testCreantElements(
+				new TestAmbElementsCreats() {
+					@Override
+					public void executar(List<ContingutArxiu> elementsCreats) throws IOException {
+						ContingutArxiu expedientCreat = elementsCreats.get(0);
+						String expedientCreatId = expedientCreat.getIdentificador();
+						ContingutArxiu documentCreat = elementsCreats.get(1);
+						String documentCreatId = documentCreat.getIdentificador();
+						System.out.println(
+								"2.- Guardant firma de document i marcant com a definitiu (" +
+								"id=" + documentCreatId + ")... ");
+						Document documentPerModificar = new Document();
+						documentPerModificar.setIdentificador(documentCreatId);
+						Firma firmaPades = new Firma();
+						firmaPades.setTipus(FirmaTipus.CADES_DET);
+						firmaPades.setPerfil(FirmaPerfil.BES);
+						firmaPades.setTipusMime("application/octet-stream");
+						firmaPades.setContingut(
+								IOUtils.toByteArray(
+										getImatgeFirmaCadesDetached()));
+						documentPerModificar.setFirmes(Arrays.asList(firmaPades));
+						documentPerModificar.setEstat(DocumentEstat.DEFINITIU);
+						ContingutArxiu contingutModificat = arxiuPlugin.documentModificar(
+								documentPerModificar);
+						assertNotNull(contingutModificat);
+						System.out.println("Ok");
+						elementsCreats.remove(documentCreat);
+						elementsCreats.remove(expedientCreat);
+						System.out.println(
+								"4.- Comprovant firmes del document (" +
+								"id=" + documentCreatId + ")... ");
+						Document documentFirmat = arxiuPlugin.documentDetalls(
+								documentCreatId,
+								null,
+								true);
+						documentPerModificar.setNom(documentPerCrear.getNom());
+						documentPerModificar.setMetadades(null);
+						documentFirmat.setMetadades(null);
+						documentFirmat.setContingut(null);
+						documentComprovar(
+								documentPerModificar,
+								documentFirmat,
+								false);
+						System.out.println("Ok");
+						System.out.println(
+								"5.- Comprovant que no es pot esborrar un document definitiu (" +
+								"id=" + documentCreatId + ")... ");
+						try {
+							arxiuPlugin.documentEsborrar(documentCreatId);
+							fail("No s'hauria de poder esborrar el document creat (id=" + documentCreatId + ")");
+						} catch (ArxiuException ex) {
+							System.out.println("Ok");
+						}
+						System.out.println(
+								"6.- Comprovant que no es pot esborrar un expedient amb documents definitius (" +
+								"id=" + expedientCreatId + ")... ");
+						try {
+							arxiuPlugin.expedientEsborrar(expedientCreatId);
+							fail("No s'hauria de poder esborrar l'expedient amb documents definitius (id=" + expedientCreatId + ")");
+						} catch (ArxiuException ex) {
+							System.out.println("Ok");
+						}
+					}
+				},
+				expedientPerCrear,
+				documentPerCrear);
+	}
+
 	@Test
 	public void documentFinalCrear() throws Exception {
 		System.out.println("TEST: DOCUMENT DEFINITIU DE BON COMENÇAMENT");
@@ -651,7 +752,7 @@ public class ArxiuPluginCaibTest {
 						firmaPades.setTipusMime("application/pdf");
 						firmaPades.setContingut(
 								IOUtils.toByteArray(
-										getDocumentFirmaPdf()));
+										getDocumentFirmaPdf2()));
 						documentPerCrear.setFirmes(
 								Arrays.asList(firmaPades));
 						ContingutArxiu documentCreat = arxiuPlugin.documentCrear(
@@ -660,10 +761,26 @@ public class ArxiuPluginCaibTest {
 						assertNotNull(documentCreat);
 						String documentCreatId = documentCreat.getIdentificador();
 						System.out.println("Ok");
+						System.out.println(
+								"3.- Comprovant firmes del document (" +
+								"id=" + documentCreatId + ")... ");
+						Document documentFirmat = arxiuPlugin.documentDetalls(
+								documentCreatId,
+								null,
+								true);
+						documentPerCrear.setNom(documentPerCrear.getNom());
+						documentPerCrear.setMetadades(null);
+						documentFirmat.setMetadades(null);
+						documentFirmat.setContingut(null);
+						documentComprovar(
+								documentPerCrear,
+								documentFirmat,
+								false);
+						System.out.println("Ok");
 						elementsCreats.remove(documentCreat);
 						elementsCreats.remove(expedientCreat);
 						System.out.println(
-								"3.- Comprovant que no es pot esborrar un document definitiu (" +
+								"4.- Comprovant que no es pot esborrar un document definitiu (" +
 								"id=" + documentCreatId + ")... ");
 						try {
 							arxiuPlugin.documentEsborrar(documentCreatId);
@@ -672,7 +789,7 @@ public class ArxiuPluginCaibTest {
 							System.out.println("Ok");
 						}
 						System.out.println(
-								"4.- Comprovant que no es pot esborrar un expedient amb documents definitius (" +
+								"5.- Comprovant que no es pot esborrar un expedient amb documents definitius (" +
 								"id=" + expedientCreatId + ")... ");
 						try {
 							arxiuPlugin.expedientEsborrar(expedientCreatId);
@@ -683,6 +800,98 @@ public class ArxiuPluginCaibTest {
 					}
 				},
 				expedientPerCrear);
+	}
+
+	//@Test
+	public void documentMoureEntreExpedients() throws Exception {
+		System.out.println("TEST: DOCUMENT DEFINITIU MOURE ENTRE EXPEDIENTS");
+		final Expedient expedientOrigenPerCrear = nouExpedientPerTest(
+				SERIE_DOCUMENTAL);
+		testCreantElements(
+				new TestAmbElementsCreats() {
+					@Override
+					public void executar(List<ContingutArxiu> elementsCreats) throws IOException {
+						ContingutArxiu expedientOrigenCreat = elementsCreats.get(0);
+						String expedientOrigenCreatId = expedientOrigenCreat.getIdentificador();
+						System.out.println(
+								"1.- Creant document definitiu amb informació de firma (" +
+								"id=" + expedientOrigenCreatId + ")... ");
+						final Document documentPerCrear = nouDocument(
+								DocumentEstat.DEFINITIU,
+								DocumentFormat.PDF,
+								DocumentExtensio.PDF,
+								novaFirmaPades());
+						ContingutArxiu documentCreat = arxiuPlugin.documentCrear(
+								documentPerCrear,
+								expedientOrigenCreatId);
+						assertNotNull(documentCreat);
+						String documentCreatId = documentCreat.getIdentificador();
+						assertNotNull(documentCreatId);
+						arxiuPlugin.documentDetalls(documentCreatId, null, true);
+						System.out.println("Ok");
+						System.out.println(
+								"2.- Creant expedient destí... ");
+						Expedient expedientDestiPerCrear = nouExpedientPerTest(
+								"S0002");
+						ContingutArxiu expedientDestiCreat = arxiuPlugin.expedientCrear(
+								expedientDestiPerCrear);
+						assertNotNull(expedientDestiCreat);
+						String expedientDestiCreatId = expedientDestiCreat.getIdentificador();
+						assertNotNull(expedientDestiCreatId);
+						System.out.println("Ok");
+						System.out.println(
+								"3.- Movent document a expedient destí (" +
+								"id=" + expedientDestiCreatId + ")... ");
+						arxiuPlugin.documentMoure(
+								documentCreatId,
+								expedientDestiCreatId);
+						System.out.println("Ok");
+						System.out.println(
+								"4.- Comprovant que el document és a l'expedient destí (" +
+								"id=" + expedientDestiCreatId + ")... ");
+						Expedient expedientOrigenDetall = arxiuPlugin.expedientDetalls(
+								expedientOrigenCreatId,
+								null);
+						assertNull(expedientOrigenDetall.getContinguts());
+						Expedient expedientDestiDetall = arxiuPlugin.expedientDetalls(
+								expedientDestiCreatId,
+								null);
+						assertTrue(expedientDestiDetall.getContinguts().size() == 1);
+						assertEquals(
+								documentCreatId,
+								expedientDestiDetall.getContinguts().get(0).getIdentificador());
+						System.out.println("Ok");
+					}
+				},
+				expedientOrigenPerCrear);
+	}
+
+	// @Test
+	public void expedientCrearSubexpedient() throws Exception {
+		System.out.println("TEST: DOCUMENT DEFINITIU MOURE ENTRE EXPEDIENTS");
+		final Expedient expedientParePerCrear = nouExpedientPerTest(
+				SERIE_DOCUMENTAL);
+		testCreantElements(
+				new TestAmbElementsCreats() {
+					@Override
+					public void executar(List<ContingutArxiu> elementsCreats) throws IOException {
+						ContingutArxiu expedientPareCreat = elementsCreats.get(0);
+						String expedientPareCreatId = expedientPareCreat.getIdentificador();
+						System.out.println(
+								"1.- Creant expedient fill... ");
+						Expedient expedientFillPerCrear = nouExpedientPerTest(
+								SERIE_DOCUMENTAL/*"S0002"*/);
+						ContingutArxiu expedientFillCreat = arxiuPlugin.expedientCrearSubExpedient(
+								expedientFillPerCrear,
+								expedientPareCreatId);
+						assertNotNull(expedientFillCreat);
+						String expedientFillCreatId = expedientFillCreat.getIdentificador();
+						assertNotNull(expedientFillCreatId);
+						System.out.println("Ok");
+						arxiuPlugin.carpetaDetalls(expedientFillCreatId);
+					}
+				},
+				expedientParePerCrear);
 	}
 
 	/*
@@ -746,7 +955,7 @@ public class ArxiuPluginCaibTest {
 				expedientPerCrear);
 	}
 
-	/*@Test
+	/*// @Test
 	public void documentSerieDocumentalDiferent() throws Exception {
 		System.out.println("TEST: DOCUMENT SÈRIE DOCUMENTAL DIFERENT");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -805,7 +1014,7 @@ public class ArxiuPluginCaibTest {
 				expedientPerCrear);
 	}*/
 
-	@Test
+	// @Test
 	public void documentSerieDocumentalBuida() throws Exception {
 		System.out.println("TEST: DOCUMENT SÈRIE DOCUMENTAL DIFERENT");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -868,7 +1077,7 @@ public class ArxiuPluginCaibTest {
 				expedientPerCrear);
 	}
 
-	@Test
+	// @Test
 	public void documentConsultaAmbCsv() throws Exception {
 		String csv = "5dbd524a1bb90bde8e98c105f3aa480f7ba1784dda504e7b119d7d0394f75d65";
 		ConsultaFiltre filtreCsv = new ConsultaFiltre();
@@ -890,10 +1099,10 @@ public class ArxiuPluginCaibTest {
 		assertEquals(1, resultat.getResultats().size());
 	}
 
-	@Test
+	// @Test
 	public void documentVersioImprimible() throws Exception {
 		System.out.println("TEST: DOCUMENT VERSIO IMPRIMIBLE");
-		String uuid = "d742c85f-9acb-4a5c-9add-f8518a284f86";
+		String uuid = "6eb10a66-3673-4c70-b551-2b1b3cb41950";
 		System.out.println(
 				"1.- Generant versió imprimible (" +
 						"id=" + uuid + ")... ");
@@ -905,7 +1114,7 @@ public class ArxiuPluginCaibTest {
 		System.out.println("Ok");
 	}
 
-	@Test
+	// @Test
 	public void carpetaCicleDeVida() throws Exception {
 		System.out.println("TEST: CICLE DE VIDA DE LES CARPETES");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -999,7 +1208,7 @@ public class ArxiuPluginCaibTest {
 				carpetaPerCrear);
 	}
 
-	@Test
+	// @Test
 	public void carpetaEsborrarAmbContingut() throws Exception {
 		System.out.println("TEST: ESBORRAR CARPETA AMB CONTINGUTS");
 		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
@@ -1186,6 +1395,58 @@ public class ArxiuPluginCaibTest {
 		}
 	}
 
+	private Expedient nouExpedientPerTest(
+			String serie) {
+		String nomExp = "ARXIUAPI_prova_exp_" + System.currentTimeMillis();
+		final Expedient expedient = new Expedient();
+		expedient.setNom(nomExp);
+		final ExpedientMetadades metadades = new ExpedientMetadades();
+		metadades.setOrgans(organsTest);
+		metadades.setDataObertura(new Date());
+		metadades.setClassificacio("organo1_PRO_123456789");
+		metadades.setEstat(ExpedientEstat.OBERT);
+		metadades.setInteressats(interessatsTest);
+		metadades.setSerieDocumental(serie);
+		expedient.setMetadades(metadades);
+		return expedient;
+	}
+
+	private Document nouDocument(
+			DocumentEstat estat,
+			DocumentFormat format,
+			DocumentExtensio extensio,
+			Firma firma) {
+		Document document = new Document();
+		String nomDoc = "ARXIUAPI_prova_doc_" + System.currentTimeMillis();
+		document.setNom(nomDoc);
+		final DocumentMetadades documentMetadades = new DocumentMetadades();
+		documentMetadades.setOrigen(ContingutOrigen.CIUTADA);
+		documentMetadades.setOrgans(organsTest);
+		documentMetadades.setDataCaptura(new Date());
+		documentMetadades.setEstatElaboracio(DocumentEstatElaboracio.ORIGINAL);
+		documentMetadades.setTipusDocumental(DocumentTipus.ALTRES);
+		documentMetadades.setFormat(format);
+		documentMetadades.setExtensio(extensio);
+		document.setMetadades(documentMetadades);
+		document.setEstat(estat);
+		if (firma != null) {
+			document.setFirmes(
+					Arrays.asList(firma));
+		}
+		return document;
+	}
+
+	private Firma novaFirmaPades() throws IOException {
+		Firma firma = new Firma();
+		firma.setTipus(FirmaTipus.PADES);
+		firma.setPerfil(FirmaPerfil.EPES);
+		firma.setTipusMime("application/pdf");
+		firma.setContingut(
+				IOUtils.toByteArray(
+						getDocumentFirmaPdf2()));
+		return firma;
+	}
+
 	private void expedientComprovar(
 			Expedient expedientEsperat,
 			Expedient expedientPerComprovar,
@@ -1294,30 +1555,38 @@ public class ArxiuPluginCaibTest {
 		if (documentEsperat.getFirmes() != null) {
 			assertNotNull(documentPerComprovar.getFirmes());
 			List<Firma> firmes = documentEsperat.getFirmes();
-			assertEquals(
-					firmes.size(),
-					documentPerComprovar.getFirmes().size());
+			assertTrue(documentPerComprovar.getFirmes().size() >= firmes.size());
 			for (int i = 0; i < firmes.size(); i++) {
 				Firma firmaEsperada = firmes.get(i);
-				Firma firmaPerComprovar = documentPerComprovar.getFirmes().get(i);
-				assertEquals(
-						firmaEsperada.getTipus(),
-						firmaPerComprovar.getTipus());
-				/*assertEquals(
-						firmaEsperada.getPerfil(),
-						firmaPerComprovar.getPerfil());
-				assertEquals(
-						firmaEsperada.getFitxerNom(),
-						firmaPerComprovar.getFitxerNom());
-				assertEquals(
-						DigestUtils.sha1Hex(firmaEsperada.getContingut()),
-						DigestUtils.sha1Hex(firmaPerComprovar.getContingut()));*/
-				assertEquals(
-						firmaEsperada.getTipusMime(),
-						firmaPerComprovar.getTipusMime());
-				assertEquals(
-						firmaEsperada.getCsvRegulacio(),
-						firmaPerComprovar.getCsvRegulacio());
+				Firma firmaPerComprovar = null;
+				for (Firma f: documentPerComprovar.getFirmes()) {
+					if (f.getTipus().equals(firmaEsperada.getTipus())) {
+						firmaPerComprovar = f;
+						break;
+					}
+				}
+				if (firmaPerComprovar != null) {
+					assertEquals(
+							firmaEsperada.getTipus(),
+							firmaPerComprovar.getTipus());
+					assertEquals(
+							firmaEsperada.getPerfil(),
+							firmaPerComprovar.getPerfil());
+					assertEquals(
+							DigestUtils.sha1Hex(firmaEsperada.getContingut()),
+							DigestUtils.sha1Hex(firmaPerComprovar.getContingut()));
+					/*assertEquals(
+							firmaEsperada.getTipusMime(),
+							firmaPerComprovar.getTipusMime());
+					assertEquals(
+							firmaEsperada.getFitxerNom(),
+							firmaPerComprovar.getFitxerNom());*/
+					assertEquals(
+							firmaEsperada.getCsvRegulacio(),
+							firmaPerComprovar.getCsvRegulacio());
+				} else {
+					fail("El document per comprovar (id=" + documentPerComprovar.getIdentificador() + ") no te cap firma del tipus " + firmaEsperada.getTipus());
+				}
 			}
 		} else {
 			assertNull(documentPerComprovar.getFirmes());
@@ -1364,9 +1633,19 @@ public class ArxiuPluginCaibTest {
         		"/es/caib/plugins/arxiu/caib/document_test.pdf");
 		return is;
 	}
+	private InputStream getDocumentContingutEsborranyImatge() {
+		InputStream is = getClass().getResourceAsStream(
+        		"/es/caib/plugins/arxiu/caib/gat.png");
+		return is;
+	}
 	private InputStream getDocumentFirmaPdf() {
 		InputStream is = getClass().getResourceAsStream(
         		"/es/caib/plugins/arxiu/caib/firma_test_epes.pdf");
+		return is;
+	}
+	private InputStream getDocumentFirmaPdf2() {
+		InputStream is = getClass().getResourceAsStream(
+        		"/es/caib/plugins/arxiu/caib/firmapades.pdf");
 		return is;
 	}
 	private InputStream getDocumentContingutFisic() {
@@ -1377,6 +1656,11 @@ public class ArxiuPluginCaibTest {
 	private InputStream getDocumentFirmaFisic() {
 		InputStream is = getClass().getResourceAsStream(
         		"/es/caib/plugins/arxiu/caib/firma_test_cades.csig");
+		return is;
+	}
+	private InputStream getImatgeFirmaCadesDetached() {
+		InputStream is = getClass().getResourceAsStream(
+        		"/es/caib/plugins/arxiu/caib/gat.png_signed.csig");
 		return is;
 	}
 
